@@ -52,3 +52,12 @@ openclaw-handoff.md
 # Editor + OS
 .DS_Store
 *.log
+*.swp
+*.swo
+*~
+
+# Coverage
+coverage/
+
+# Testing
+.vitest/

@@ -45,3 +45,13 @@
 - Schema/migrations:   none
 - Errors encountered:  none
 - Errors resolved:     IMPLEMENTATION_MAP.md was stale (showed Bootstrap in progress, all phases Not Started despite Phase 3 being complete). Rewritten to reflect current state.
+
+## 2026-05-03 — Phase 4 Part 1 — Root Config Files
+- Agent:               CLAUDE_CODE
+- Why:                 Generate all root configuration files for the pnpm monorepo scaffold (Part 1 of 8)
+- Files added:         pnpm-workspace.yaml, turbo.json, tsconfig.base.json, .editorconfig, .prettierrc, .eslintrc.js
+- Files modified:      package.json (root scripts + devDependencies added), .gitignore (coverage, .vitest, swap files added), .cline/STATE.md (Phase 4 Part 1 complete)
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  none
+- Errors resolved:     none
