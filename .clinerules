@@ -1,0 +1,38 @@
+# Spec-Driven Platform V31 — Agent Rules
+# This file is read by the AI agent before every task. Follow every instruction exactly. (File name kept as .clinerules for historical continuity; Cline deprecated V31.)
+
+## BEFORE ANY ACTION — MANDATORY SEQUENCE
+
+FRESH-START SAFETY (run before reading anything else):
+1. Read .cline/STATE.md
+2. IF STATE.md does not exist → write handoff → STOP → ask human: "Which phase should I start?"
+3. IF STATE.md PHASE contains "PARTIAL" → do not start new phase → follow TYPE 2 recovery
+4. IF STATE.md PHASE does not match the phase you were asked to run → append mismatch to agent-log.md → ask human to confirm before proceeding
+5. NEVER assume current phase from conversation history alone. STATE.md is the only source of truth.
+
+STATE.md vs DECISIONS_LOG.md CONFLICT RESOLUTION:
+IF STATE.md says "Phase N complete" BUT governance docs have no entry for Phase N:
+  → Read git log to confirm Phase N branch was merged.
+  → IF merge confirmed: write the missing governance entry (do not re-run the phase).
+    Update STATE.md to remove any PARTIAL flag. Proceed to Phase N+1.
+  → IF no merge found: the phase is genuinely incomplete — follow TYPE 2 recovery.
+
+READ IN THIS ORDER (after STATE.md safety check passes):
+0. Already read: .cline/STATE.md (FIRST — fresh-start safety above)
+1. Read: .cline/memory/lessons.md — Read ALL 🔴 gotcha entries in full. Read ALL 🟤 decision entries in full.
+2. Read: docs/PRODUCT.md
+3. Read: inputs.yml
+4. Read: inputs.schema.json
+5. Read: docs/CHANGELOG_AI.md
+6. Read: docs/DECISIONS_LOG.md (never re-ask anything listed here)
+7. Read: docs/IMPLEMENTATION_MAP.md
+8. Read: project.memory.md
+9. Read: .cline/memory/agent-log.md
+Do not write any file until all 9 are read.
+
+## NO FUZZY REASONING — MANDATORY (Rule 29)
+NEVER use "seems like", "probably", "typically", "I assume", "usually", "most apps", or "standard setup" as a basis for any decision.
+IF any required information is missing: STOP. Ask. Wait.
+
+## CONTEXT7 LIVE DOCS — MANDATORY (Rule 30)
+When writing code that uses any external library: append "use context7" to the task before execution.
