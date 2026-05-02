@@ -429,6 +429,27 @@ Dev:     http://localhost:[port assigned by Phase 3 — do not specify a number 
 Stage:   https://staging-frms.powerbyteitsolutions.app
 Prod:    https://frms.powerbyteitsolutions.app
 
+## Background Jobs (BullMQ + Valkey)
+Queue provider: BullMQ (MIT) on Valkey
+Retry policy: 3 retries, exponential backoff (1s, 4s, 16s), dead-letter queue after final failure
+
+| Queue Name                  | Trigger                                  | Notes                                                                 |
+|-----------------------------|------------------------------------------|-----------------------------------------------------------------------|
+| `bulk-import`               | Admin starts Data Import wizard (Step 5) | Processes thousands of rows + photo/signature matching. **Resumable**: saves progress (row index) so it can resume from where it left off on failure rather than restarting from scratch. |
+| `yearly-status-reset`       | Admin triggers "Start New Year"          | Bulk status update: Active/Renewed → Inactive for thousands of records |
+| `email-notification-digest` | Scheduled / event-driven                 | Pending edit request reminders, daily summary digests                 |
+
+Inline processing (NOT queued — runs during request):
+- Image compression (sharp): fast enough per-upload, no queue needed
+- QR code generation: fast enough per-record, no queue needed
+
+## Bot Protection (Cloudflare Turnstile)
+Turnstile enabled: yes
+Widget mode: Managed
+Protected pages: Login page only (/login) — no open registration exists (Admins create accounts), so login is the only public-facing form needing bot protection
+Dev + staging: Cloudflare test keys (always pass, no hostname needed)
+Prod: real keys from dash.cloudflare.com → Turnstile widget (1 hostname: frms.powerbyteitsolutions.app)
+
 ## Infrastructure Notes
 Default: all services run in Docker Compose — mono-server Komodo for dev/staging/prod.
 Docker Hub publishing: enabled — hub_repo: bonitobonita24/frms

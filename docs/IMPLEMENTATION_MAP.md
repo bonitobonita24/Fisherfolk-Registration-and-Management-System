@@ -8,56 +8,76 @@
 
 | Phase | Status | Last Updated |
 |-------|--------|--------------|
-| Phase 0 — Bootstrap | In Progress | 2026-05-02 |
-| Phase 1 — Dev Environment | Not Started | — |
-| Phase 2 — Discovery Interview | Not Started | — |
-| Phase 3 — Generate Spec Files | Not Started | — |
+| Phase 0 — Bootstrap | ✅ Complete | 2026-05-02 |
+| Phase 1 — Dev Environment | ⏭ Skipped (already set up) | — |
+| Phase 2 — Discovery Interview | ✅ Complete | 2026-05-02 |
+| Phase 2.5 — Spec Summary | ✅ Complete | 2026-05-02 |
+| Phase 2.6 — Design System | ⏭ Skipped (UI UX Pro Max not installed) | 2026-05-02 |
+| Phase 2.7 — Spec Stress-Test | ✅ Passed (0 gaps) | 2026-05-02 |
+| Phase 3 — Generate Spec Files | ✅ Complete | 2026-05-02 |
 | Phase 4 — Full Scaffold | Not Started | — |
 | Phase 5 — Validation | Not Started | — |
 | Phase 6 — Docker + Visual QA | Not Started | — |
 | Phase 7 — Feature Updates | Not Started | — |
 | Phase 8 — Iterative Buildout | Not Started | — |
 
+## Spec Files (Phase 3 Output)
+
+| File | Status |
+|------|--------|
+| inputs.yml | ✅ Generated (~490 lines) |
+| inputs.schema.json | ✅ Generated (~321 lines) |
+| .env.dev | ✅ Generated (gitignored) |
+| .env.staging | ✅ Generated (gitignored) |
+| .env.prod | ✅ Generated (gitignored) |
+| .env.example | ✅ Generated (committed template) |
+| CREDENTIALS.md | ✅ Generated (gitignored) |
+| scripts/sync-credentials-to-env.sh | ✅ Generated |
+
 ## Apps
 
 | App | Framework | Status |
 |-----|-----------|--------|
-| web | Next.js (App Router) | Not scaffolded |
+| web | Next.js (App Router) | Not scaffolded (Phase 4 Part 5) |
 
 ## Packages
 
 | Package | Status |
 |---------|--------|
-| packages/shared | Not scaffolded |
-| packages/api-client | Not scaffolded |
-| packages/db | Not scaffolded |
-| packages/ui | Not scaffolded |
-| packages/jobs | Not scaffolded |
-| packages/storage | Not scaffolded |
+| packages/shared | Not scaffolded (Phase 4 Part 2) |
+| packages/api-client | Not scaffolded (Phase 4 Part 2) |
+| packages/db | Not scaffolded (Phase 4 Part 3) |
+| packages/ui | Not scaffolded (Phase 4 Part 4) |
+| packages/jobs | Not scaffolded (Phase 4 Part 4) |
+| packages/storage | Not scaffolded (Phase 4 Part 4) |
 
 ## Infrastructure
 
 | Service | Status |
 |---------|--------|
-| PostgreSQL + PgBouncer | Not configured |
-| Valkey (cache + jobs) | Not configured |
-| MinIO (file storage) | Not configured |
-| MailHog (dev email) | Not configured |
-| pgAdmin | Not configured |
+| PostgreSQL + PgBouncer | Not configured (Phase 4 Part 7) |
+| Valkey (cache + jobs) | Not configured (Phase 4 Part 7) |
+| MinIO (file storage) | Not configured (Phase 4 Part 7) |
+| MailHog (dev email) | Not configured (Phase 4 Part 7) |
+| pgAdmin | Not configured (Phase 4 Part 7) |
 
 ## Governance Docs
 
 | Document | Status |
 |----------|--------|
-| PRODUCT.md | Pre-existing (complete) |
-| DESIGN.md | Pre-existing (complete) |
-| CHANGELOG_AI.md | Created (Bootstrap) |
-| DECISIONS_LOG.md | Created (Bootstrap) |
-| IMPLEMENTATION_MAP.md | Created (Bootstrap) |
-| inputs.yml | Not generated |
-| inputs.schema.json | Not generated |
-| CREDENTIALS.md | Not generated |
-| lessons.md | Created (Bootstrap) |
-| agent-log.md | Created (Bootstrap) |
-| project.memory.md | Created (Bootstrap) |
-| STATE.md | Not created |
+| PRODUCT.md | ✅ Complete (505 lines) |
+| DESIGN.md | ✅ Complete (pre-existing) |
+| CHANGELOG_AI.md | ✅ Active (3 entries) |
+| DECISIONS_LOG.md | ✅ Active (11 locked decisions) |
+| IMPLEMENTATION_MAP.md | ✅ Active (this file) |
+| inputs.yml | ✅ Generated |
+| inputs.schema.json | ✅ Generated |
+| CREDENTIALS.md | ✅ Generated (gitignored) |
+| lessons.md | ✅ Active (1 entry) |
+| agent-log.md | ✅ Active (14 entries) |
+| project.memory.md | ✅ Active |
+| STATE.md | ✅ Active |
+
+## Locked Decisions (from DECISIONS_LOG.md)
+
+11 decisions locked: Dev Environment (WSL2 native), Git Branching, Model Routing, Port Strategy (base 44377), Docker Image Publishing (bonitobonita24/frms), Tenancy Model (multi-tenant, subdirectory, L1-L6), Auth Strategy (Auth.js v5 + JWT), Cloudflare Turnstile (login only), SMTP Configuration (per-tenant + fallback), Komodo Deployment (V27 auto-update), Spec Stress-Test (enabled, passed).
