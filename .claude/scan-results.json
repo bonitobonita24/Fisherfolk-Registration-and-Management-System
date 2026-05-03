@@ -1,0 +1,93 @@
+{
+  "scannedAt": "2026-05-03",
+  "techStack": [
+    "TypeScript",
+    "Next.js (App Router)",
+    "React",
+    "Prisma ORM",
+    "tRPC",
+    "Auth.js v5",
+    "PostgreSQL",
+    "PgBouncer",
+    "Valkey (Redis fork)",
+    "BullMQ",
+    "MinIO (S3-compatible)",
+    "shadcn/ui",
+    "Tailwind CSS",
+    "Turborepo",
+    "pnpm workspaces",
+    "Docker Compose",
+    "Cloudflare Turnstile"
+  ],
+  "projectType": "full-stack",
+  "installedSkills": [
+    {
+      "name": "vercel-agent-skills",
+      "category": "Development & DevOps",
+      "tier": "T1",
+      "reason": "Next.js App Router + React best practices (67 rules) — matches apps/web scaffold"
+    },
+    {
+      "name": "test-driven-development",
+      "category": "Development & DevOps",
+      "tier": "T1",
+      "reason": "TDD workflow matches Rule 25 enforcement (RED→GREEN→refactor)"
+    },
+    {
+      "name": "frontend-design",
+      "category": "Design & UI",
+      "tier": "T1",
+      "reason": "Production-grade frontend interfaces — matches shadcn/ui + .tsx components"
+    },
+    {
+      "name": "awesome-design-md",
+      "category": "Design & UI",
+      "tier": "T1",
+      "reason": "DESIGN.md generation — matches Scenario 33 in CLAUDE.md"
+    },
+    {
+      "name": "postgres",
+      "category": "Data & Analytics",
+      "tier": "T2",
+      "reason": "PostgreSQL query patterns — matches primary DB with Prisma + PgBouncer + RLS"
+    },
+    {
+      "name": "varlock-claude-skill",
+      "category": "Security & Testing",
+      "tier": "T2",
+      "reason": "Secure env variable management — matches .env.dev/.staging/.prod + CREDENTIALS.md"
+    },
+    {
+      "name": "defense-in-depth",
+      "category": "Security & Testing",
+      "tier": "T2",
+      "reason": "Multi-layered security — matches 6 security layers (L1-L6), multi-tenant isolation"
+    },
+    {
+      "name": "systematic-debugging",
+      "category": "Development & DevOps",
+      "tier": "T4",
+      "reason": "Structured debugging for multi-service Docker stack (PostgreSQL + Valkey + MinIO + Next.js)"
+    },
+    {
+      "name": "webapp-testing",
+      "category": "Security & Testing",
+      "tier": "T4",
+      "reason": "Playwright testing against localhost:44387, Visual QA checks (Rule 16)"
+    }
+  ],
+  "excludedGlobals": [
+    { "name": "article-extractor", "reason": "No content extraction in fisherfolk registration app" },
+    { "name": "content-research-writer", "reason": "No content marketing features" },
+    { "name": "csv-data-summarizer-claude-skill", "reason": "No CSV analysis workflows" },
+    { "name": "deep-research", "reason": "No autonomous research tasks" },
+    { "name": "google-workspace-skills", "reason": "No Google Workspace integration" },
+    { "name": "image-enhancer", "reason": "No image processing features" },
+    { "name": "imagen", "reason": "No image generation features" },
+    { "name": "youtube-transcript", "reason": "No video content features" },
+    { "name": "automate", "reason": "Project uses framework-specific Phase 7 workflow" },
+    { "name": "accesslint-contrast-checker", "reason": "design-auditor global covers broader visual audit" }
+  ],
+  "recommendedPlugins": [],
+  "skippedOptional": []
+}
