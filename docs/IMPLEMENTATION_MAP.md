@@ -15,7 +15,7 @@
 | Phase 2.6 — Design System | ⏭ Skipped (UI UX Pro Max not installed) | 2026-05-02 |
 | Phase 2.7 — Spec Stress-Test | ✅ Passed (0 gaps) | 2026-05-02 |
 | Phase 3 — Generate Spec Files | ✅ Complete | 2026-05-02 |
-| Phase 4 — Full Scaffold | ⏳ In Progress (Part 4 of 8 complete — PAUSED) | 2026-05-03 |
+| Phase 4 — Full Scaffold | ⏳ In Progress (Part 5 of 8 complete) | 2026-05-03 |
 | Phase 5 — Validation | Not Started | — |
 | Phase 6 — Docker + Visual QA | Not Started | — |
 | Phase 7 — Feature Updates | Not Started | — |
@@ -136,17 +136,42 @@
 | packages/storage/src/upload.ts | ✅ Generated (upload, download URL, delete, exists — tenant verified) |
 | packages/storage/src/index.ts | ✅ Generated (barrel export) |
 
+## Web App (Phase 4 Part 5 Output)
+
+| File | Status |
+|------|--------|
+| apps/web/package.json | ✅ Generated |
+| apps/web/tsconfig.json | ✅ Generated (declaration: false override for runtime app) |
+| apps/web/next.config.ts | ✅ Generated (7 security headers + standalone output) |
+| apps/web/Dockerfile + .dockerignore | ✅ Generated (multi-stage Node 22) |
+| apps/web/components.json + tailwind.config.ts + postcss.config.js | ✅ Generated (shadcn/ui init) |
+| apps/web/src/env.ts | ✅ Generated (Zod-validated env vars) |
+| apps/web/src/middleware.ts | ✅ Generated (tenant slug resolution + auth gate) |
+| apps/web/src/app/layout.tsx + page.tsx + globals.css | ✅ Generated (root layout + redirect + theme tokens) |
+| apps/web/src/app/login/page.tsx | ✅ Generated (Credentials sign-in + Turnstile) |
+| apps/web/src/app/[tenant]/layout.tsx + 15 module pages | ✅ Generated (dashboard, fisherfolk, vessels, violations, edit-requests, ayuda, kanban, id-generator, audit-log, notifications, reports, settings, user-management, map, analytics) |
+| apps/web/src/app/platform/layout.tsx + tenants/page.tsx | ✅ Generated (super_admin platform routes) |
+| apps/web/src/app/api/{trpc,auth,health}/* | ✅ Generated (tRPC handler + NextAuth + health endpoint) |
+| apps/web/src/components/{header,sidebar}.tsx | ✅ Generated (signOut header + tenant nav sidebar) |
+| apps/web/src/lib/{utils,trpc/{client,provider}}.tsx | ✅ Generated (cn helper + tRPC client + React Query provider) |
+| apps/web/src/server/auth/{config,index}.ts | ✅ Generated (Auth.js v5 Credentials + Prisma adapter + JWT + securityVersion invalidation) |
+| apps/web/src/server/lib/rate-limit.ts | ✅ Generated (LRU, 4 tiers: public/auth/api/upload) |
+| apps/web/src/server/lib/sanitize.ts | ✅ Generated (DOMPurify wrappers) |
+| apps/web/src/server/lib/prisma-input.ts | ✅ Generated (typed omitUndefined<T> helper for exactOptionalPropertyTypes) |
+| apps/web/src/server/trpc/{trpc,context,root}.ts | ✅ Generated (init + ctx + router barrel) |
+| apps/web/src/server/trpc/routers/*.ts (×14) | ✅ Generated (auditLog, ayuda, category, comment, dashboard, editRequest, fisherfolk, idTemplate, kanbanTask, notification, tenant, user, vessel, violation) |
+
 ## Apps
 
 | App | Framework | Status |
 |-----|-----------|--------|
-| web | Next.js (App Router) | Not scaffolded (Phase 4 Part 5) |
+| web | Next.js (App Router) | ✅ Scaffolded (Phase 4 Part 5 — typecheck + lint clean) |
 
 ## Packages
 
 | Package | Status |
 |---------|--------|
-| packages/shared | ✅ Generated (36 files — types, Zod schemas, constants for 15 entities) |
+| packages/shared | ✅ Generated (36 files — types, Zod schemas, constants for 15 entities; extended in Part 5 with new enums: ViolationTargetType, UserStatus, TenantStatus, AyudaUploadType, CategoryIconType, CategoryStatus, IDTemplateType, IDTemplateStatus, CommentTicketStatus + 8 new AuditAction values) |
 | packages/api-client | ✅ Generated (typed tRPC v11 wrapper — accepts pre-built TRPCLink[] array) |
 | packages/db | ✅ Generated (Prisma schema — 15 entities, multi-tenant RLS, seed, audit L5, tenant-guard L6, RLS L2) |
 | packages/ui | ✅ Generated (shadcn/ui shared library — cn() utility, CSS custom properties, globals.css) |
