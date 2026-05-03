@@ -55,3 +55,13 @@
 - Schema/migrations:   none
 - Errors encountered:  none
 - Errors resolved:     none
+
+## 2026-05-03 — Phase 4 Part 2 — packages/shared + packages/api-client
+- Agent:               CLAUDE_CODE
+- Why:                 Generate shared TypeScript types, Zod validation schemas, constants, and typed tRPC api-client (Part 2 of 8)
+- Files added:         packages/shared/package.json, packages/shared/tsconfig.json, packages/shared/src/types/enums.ts, packages/shared/src/types/tenant.ts, packages/shared/src/types/user.ts, packages/shared/src/types/fisherfolk.ts, packages/shared/src/types/vessel.ts, packages/shared/src/types/violation.ts, packages/shared/src/types/edit-request.ts, packages/shared/src/types/comment.ts, packages/shared/src/types/audit-log.ts, packages/shared/src/types/category.ts, packages/shared/src/types/kanban-task.ts, packages/shared/src/types/notification.ts, packages/shared/src/types/ayuda.ts, packages/shared/src/types/id-template.ts, packages/shared/src/types/index.ts, packages/shared/src/schemas/enums.ts, packages/shared/src/schemas/tenant.ts, packages/shared/src/schemas/user.ts, packages/shared/src/schemas/fisherfolk.ts, packages/shared/src/schemas/vessel.ts, packages/shared/src/schemas/violation.ts, packages/shared/src/schemas/edit-request.ts, packages/shared/src/schemas/comment.ts, packages/shared/src/schemas/audit-log.ts, packages/shared/src/schemas/category.ts, packages/shared/src/schemas/kanban-task.ts, packages/shared/src/schemas/notification.ts, packages/shared/src/schemas/ayuda.ts, packages/shared/src/schemas/id-template.ts, packages/shared/src/schemas/index.ts, packages/shared/src/constants/index.ts, packages/api-client/package.json, packages/api-client/tsconfig.json, packages/api-client/src/index.ts
+- Files modified:      pnpm-lock.yaml, .cline/STATE.md, docs/CHANGELOG_AI.md
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  tRPC v11 TransformerOptions conditional type incompatible with exactOptionalPropertyTypes when calling httpBatchLink inside generic function
+- Errors resolved:     Restructured createApiClient to accept pre-built TRPCLink[] array — consumers call httpBatchLink directly outside generic context where TypeScript can resolve the conditional type
