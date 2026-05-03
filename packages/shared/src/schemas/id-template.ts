@@ -1,24 +1,26 @@
 import { z } from "zod";
-
-export const idTemplateSchema = z.object({
-  id: z.string(),
-  tenantId: z.string(),
-  name: z.string().min(1),
-  templateData: z.record(z.string(), z.unknown()),
-  isDefault: z.boolean(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-});
+import {
+  idTemplateTypeSchema,
+  idTemplateStatusSchema,
+} from "./enums.js";
 
 export const idTemplateCreateSchema = z.object({
-  tenantId: z.string().min(1),
   name: z.string().min(1),
-  templateData: z.record(z.string(), z.unknown()),
-  isDefault: z.boolean().optional(),
+  templateType: idTemplateTypeSchema,
+  frontBackgroundUrl: z.string().optional(),
+  backBackgroundUrl: z.string().optional(),
+  frontElements: z.array(z.record(z.string(), z.unknown())),
+  backElements: z.array(z.record(z.string(), z.unknown())),
+  status: idTemplateStatusSchema.optional(),
 });
 
 export const idTemplateUpdateSchema = z.object({
+  id: z.string().cuid(),
   name: z.string().min(1).optional(),
-  templateData: z.record(z.string(), z.unknown()).optional(),
-  isDefault: z.boolean().optional(),
+  templateType: idTemplateTypeSchema.optional(),
+  frontBackgroundUrl: z.string().nullable().optional(),
+  backBackgroundUrl: z.string().nullable().optional(),
+  frontElements: z.array(z.record(z.string(), z.unknown())).optional(),
+  backElements: z.array(z.record(z.string(), z.unknown())).optional(),
+  status: idTemplateStatusSchema.optional(),
 });

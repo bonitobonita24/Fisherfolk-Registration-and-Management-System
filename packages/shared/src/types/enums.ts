@@ -23,6 +23,14 @@ export const ViolationStatus = {
 export type ViolationStatus =
   (typeof ViolationStatus)[keyof typeof ViolationStatus];
 
+export const ViolationTargetType = {
+  FISHERFOLK: "FISHERFOLK",
+  VESSEL: "VESSEL",
+  BOTH: "BOTH",
+} as const;
+export type ViolationTargetType =
+  (typeof ViolationTargetType)[keyof typeof ViolationTargetType];
+
 export const EditRequestStatus = {
   PENDING: "PENDING",
   APPROVED: "APPROVED",
@@ -35,6 +43,14 @@ export const AuditAction = {
   CREATE: "CREATE",
   UPDATE: "UPDATE",
   DELETE: "DELETE",
+  REQUEST: "REQUEST",
+  APPROVE: "APPROVE",
+  REJECT: "REJECT",
+  RENEW: "RENEW",
+  VIOLATION_FILED: "VIOLATION_FILED",
+  VIOLATION_LIFTED: "VIOLATION_LIFTED",
+  LOGIN: "LOGIN",
+  EXPORT: "EXPORT",
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 
@@ -46,6 +62,18 @@ export const UserRole = {
   BANTAY_DAGAT: "bantay_dagat",
 } as const;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export const UserStatus = {
+  ACTIVE: "ACTIVE",
+  DEACTIVATED: "DEACTIVATED",
+} as const;
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus];
+
+export const TenantStatus = {
+  ACTIVE: "ACTIVE",
+  SUSPENDED: "SUSPENDED",
+} as const;
+export type TenantStatus = (typeof TenantStatus)[keyof typeof TenantStatus];
 
 export const KanbanTaskStatus = {
   TODO: "TODO",
@@ -90,6 +118,13 @@ export const AyudaBeneficiaryStatus = {
 export type AyudaBeneficiaryStatus =
   (typeof AyudaBeneficiaryStatus)[keyof typeof AyudaBeneficiaryStatus];
 
+export const AyudaUploadType = {
+  SIGNED_SHEET: "SIGNED_SHEET",
+  EVENT_PHOTO: "EVENT_PHOTO",
+} as const;
+export type AyudaUploadType =
+  (typeof AyudaUploadType)[keyof typeof AyudaUploadType];
+
 export const Gender = {
   MALE: "MALE",
   FEMALE: "FEMALE",
@@ -104,6 +139,41 @@ export const CivilStatus = {
   DIVORCED: "DIVORCED",
 } as const;
 export type CivilStatus = (typeof CivilStatus)[keyof typeof CivilStatus];
+
+export const CategoryIconType = {
+  EMOJI: "EMOJI",
+  IMAGE: "IMAGE",
+} as const;
+export type CategoryIconType =
+  (typeof CategoryIconType)[keyof typeof CategoryIconType];
+
+export const CategoryStatus = {
+  ACTIVE: "ACTIVE",
+  DISABLED: "DISABLED",
+} as const;
+export type CategoryStatus =
+  (typeof CategoryStatus)[keyof typeof CategoryStatus];
+
+export const IDTemplateType = {
+  FISHERFOLK: "FISHERFOLK",
+  VESSEL: "VESSEL",
+} as const;
+export type IDTemplateType =
+  (typeof IDTemplateType)[keyof typeof IDTemplateType];
+
+export const IDTemplateStatus = {
+  ACTIVE: "ACTIVE",
+  ARCHIVED: "ARCHIVED",
+} as const;
+export type IDTemplateStatus =
+  (typeof IDTemplateStatus)[keyof typeof IDTemplateStatus];
+
+export const CommentTicketStatus = {
+  OPEN: "OPEN",
+  RESOLVED: "RESOLVED",
+} as const;
+export type CommentTicketStatus =
+  (typeof CommentTicketStatus)[keyof typeof CommentTicketStatus];
 
 export const EntityType = {
   FISHERFOLK: "FISHERFOLK",

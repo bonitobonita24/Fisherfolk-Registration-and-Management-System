@@ -1,39 +1,25 @@
 import { z } from "zod";
-import { userRoleSchema } from "./enums.js";
-
-export const userSchema = z.object({
-  id: z.string(),
-  tenantId: z.string(),
-  username: z.string().min(1).max(100),
-  email: z.string().email(),
-  passwordHash: z.string(),
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
-  role: userRoleSchema,
-  isActive: z.boolean(),
-  securityVersion: z.number().int(),
-  lastLoginAt: z.coerce.date().nullable(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date(),
-});
+import { userRoleSchema, userStatusSchema } from "./enums.js";
 
 export const userCreateSchema = z.object({
-  tenantId: z.string().min(1),
-  username: z.string().min(1).max(100),
   email: z.string().email(),
+  username: z.string().min(1),
   passwordHash: z.string().min(1),
-  firstName: z.string().min(1).max(100),
-  lastName: z.string().min(1).max(100),
-  role: userRoleSchema,
-  isActive: z.boolean().optional(),
+  name: z.string().min(1),
+  role: userRoleSchema.optional(),
+  status: userStatusSchema.optional(),
+  avatarUrl: z.string().optional(),
+  securityVersion: z.number().int().optional(),
 });
 
 export const userUpdateSchema = z.object({
-  username: z.string().min(1).max(100).optional(),
+  id: z.string().cuid(),
   email: z.string().email().optional(),
+  username: z.string().min(1).optional(),
   passwordHash: z.string().min(1).optional(),
-  firstName: z.string().min(1).max(100).optional(),
-  lastName: z.string().min(1).max(100).optional(),
+  name: z.string().min(1).optional(),
   role: userRoleSchema.optional(),
-  isActive: z.boolean().optional(),
+  status: userStatusSchema.optional(),
+  avatarUrl: z.string().nullable().optional(),
+  securityVersion: z.number().int().optional(),
 });

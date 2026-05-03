@@ -3,16 +3,25 @@ import {
   FisherfolkStatus,
   VesselStatus,
   ViolationStatus,
+  ViolationTargetType,
   EditRequestStatus,
   AuditAction,
   UserRole,
+  UserStatus,
+  TenantStatus,
   KanbanTaskStatus,
   KanbanTaskPriority,
   NotificationType,
   AyudaProgramStatus,
   AyudaBeneficiaryStatus,
+  AyudaUploadType,
   Gender,
   CivilStatus,
+  CategoryIconType,
+  CategoryStatus,
+  IDTemplateType,
+  IDTemplateStatus,
+  CommentTicketStatus,
   EntityType,
 } from "../types/enums.js";
 
@@ -36,6 +45,12 @@ export const violationStatusSchema = z.enum([
   ViolationStatus.ARCHIVED,
 ]);
 
+export const violationTargetTypeSchema = z.enum([
+  ViolationTargetType.FISHERFOLK,
+  ViolationTargetType.VESSEL,
+  ViolationTargetType.BOTH,
+]);
+
 export const editRequestStatusSchema = z.enum([
   EditRequestStatus.PENDING,
   EditRequestStatus.APPROVED,
@@ -46,6 +61,14 @@ export const auditActionSchema = z.enum([
   AuditAction.CREATE,
   AuditAction.UPDATE,
   AuditAction.DELETE,
+  AuditAction.REQUEST,
+  AuditAction.APPROVE,
+  AuditAction.REJECT,
+  AuditAction.RENEW,
+  AuditAction.VIOLATION_FILED,
+  AuditAction.VIOLATION_LIFTED,
+  AuditAction.LOGIN,
+  AuditAction.EXPORT,
 ]);
 
 export const userRoleSchema = z.enum([
@@ -54,6 +77,16 @@ export const userRoleSchema = z.enum([
   UserRole.ENCODER,
   UserRole.VIEWER,
   UserRole.BANTAY_DAGAT,
+]);
+
+export const userStatusSchema = z.enum([
+  UserStatus.ACTIVE,
+  UserStatus.DEACTIVATED,
+]);
+
+export const tenantStatusSchema = z.enum([
+  TenantStatus.ACTIVE,
+  TenantStatus.SUSPENDED,
 ]);
 
 export const kanbanTaskStatusSchema = z.enum([
@@ -89,6 +122,11 @@ export const ayudaBeneficiaryStatusSchema = z.enum([
   AyudaBeneficiaryStatus.CANCELLED,
 ]);
 
+export const ayudaUploadTypeSchema = z.enum([
+  AyudaUploadType.SIGNED_SHEET,
+  AyudaUploadType.EVENT_PHOTO,
+]);
+
 export const genderSchema = z.enum([Gender.MALE, Gender.FEMALE]);
 
 export const civilStatusSchema = z.enum([
@@ -97,6 +135,31 @@ export const civilStatusSchema = z.enum([
   CivilStatus.WIDOWED,
   CivilStatus.SEPARATED,
   CivilStatus.DIVORCED,
+]);
+
+export const categoryIconTypeSchema = z.enum([
+  CategoryIconType.EMOJI,
+  CategoryIconType.IMAGE,
+]);
+
+export const categoryStatusSchema = z.enum([
+  CategoryStatus.ACTIVE,
+  CategoryStatus.DISABLED,
+]);
+
+export const idTemplateTypeSchema = z.enum([
+  IDTemplateType.FISHERFOLK,
+  IDTemplateType.VESSEL,
+]);
+
+export const idTemplateStatusSchema = z.enum([
+  IDTemplateStatus.ACTIVE,
+  IDTemplateStatus.ARCHIVED,
+]);
+
+export const commentTicketStatusSchema = z.enum([
+  CommentTicketStatus.OPEN,
+  CommentTicketStatus.RESOLVED,
 ]);
 
 export const entityTypeSchema = z.enum([
