@@ -1,0 +1,563 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum FisherfolkStatus {
+  NEW
+  ACTIVE
+  RENEWED
+  INACTIVE
+  ARCHIVED
+}
+
+enum VesselStatus {
+  ACTIVE
+  IMPOUNDED
+  INACTIVE
+}
+
+enum ViolationStatus {
+  ACTIVE
+  LIFTED
+  ARCHIVED
+}
+
+enum EditRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  REQUEST
+  APPROVE
+  REJECT
+  RENEW
+  VIOLATION_FILED
+  VIOLATION_LIFTED
+  LOGIN
+  EXPORT
+}
+
+enum UserRole {
+  super_admin
+  admin
+  encoder
+  viewer
+  bantay_dagat
+}
+
+enum KanbanTaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum KanbanTaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
+
+enum AyudaProgramStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AyudaBeneficiaryStatus {
+  PENDING
+  RECEIVED
+  CANCELLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum CivilStatus {
+  SINGLE
+  MARRIED
+  WIDOWED
+  SEPARATED
+  DIVORCED
+}
+
+enum ViolationTargetType {
+  FISHERFOLK
+  VESSEL
+  BOTH
+}
+
+enum CategoryIconType {
+  EMOJI
+  IMAGE
+}
+
+enum CategoryStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum UserStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum IDTemplateType {
+  FISHERFOLK
+  VESSEL
+}
+
+enum IDTemplateStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AyudaUploadType {
+  SIGNED_SHEET
+  EVENT_PHOTO
+}
+
+enum CommentTicketStatus {
+  OPEN
+  RESOLVED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model Tenant {
+  id                      String       @id @default(cuid())
+  slug                    String       @unique
+  name                    String
+  logoUrl                 String?      @map("logo_url")
+  mayorName               String?      @map("mayor_name")
+  mayorSignatureUrl       String?      @map("mayor_signature_url")
+  accentColor             String       @default("#4F8EF7") @map("accent_color")
+  smtpHost                String?      @map("smtp_host")
+  smtpPort                Int?         @map("smtp_port")
+  smtpUser                String?      @map("smtp_user")
+  smtpPassword            String?      @map("smtp_password")
+  smtpFrom                String?      @map("smtp_from")
+  barangayList            String[]     @map("barangay_list")
+  violationSubjects       String[]     @map("violation_subjects")
+  currentRegistrationYear Int          @map("current_registration_year")
+  status                  TenantStatus @default(ACTIVE)
+  createdAt               DateTime     @default(now()) @map("created_at")
+  updatedAt               DateTime     @updatedAt @map("updated_at")
+
+  users              User[]
+  fisherfolk         Fisherfolk[]
+  vessels            Vessel[]
+  violations         Violation[]
+  editRequests       EditRequest[]
+  comments           Comment[]
+  auditLogs          AuditLog[]
+  categories         Category[]
+  kanbanTasks        KanbanTask[]
+  notifications      Notification[]
+  ayudaPrograms      AyudaProgram[]
+  ayudaBeneficiaries AyudaBeneficiary[]
+  idTemplates        IDTemplate[]
+
+  @@map("tenants")
+}
+
+model User {
+  id                String     @id @default(cuid())
+  tenantId          String     @map("tenant_id")
+  email             String
+  username          String
+  passwordHash      String     @map("password_hash")
+  name              String
+  role              UserRole   @default(encoder)
+  status            UserStatus @default(ACTIVE)
+  avatarUrl         String?    @map("avatar_url")
+  securityVersion   Int        @default(1) @map("security_version")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  tenant             Tenant         @relation(fields: [tenantId], references: [id])
+  auditLogs          AuditLog[]
+  comments           Comment[]
+  kanbanTasks        KanbanTask[]
+  notifications      Notification[]
+  filedViolations    Violation[]    @relation("ViolationFiledBy")
+  liftedViolations   Violation[]    @relation("ViolationLiftedBy")
+  reviewedRequests   EditRequest[]  @relation("EditRequestReviewedBy")
+  submittedRequests  EditRequest[]  @relation("EditRequestSubmittedBy")
+  createdFisherfolk  Fisherfolk[]   @relation("FisherfolkCreatedBy")
+  updatedFisherfolk  Fisherfolk[]   @relation("FisherfolkUpdatedBy")
+  createdVessels     Vessel[]       @relation("VesselCreatedBy")
+  updatedVessels     Vessel[]       @relation("VesselUpdatedBy")
+  createdPrograms    AyudaProgram[] @relation("AyudaProgramCreatedBy")
+  verifiedBeneficiaries AyudaBeneficiary[] @relation("BeneficiaryVerifiedBy")
+  uploadedFiles      AyudaUpload[]
+  createdTemplates   IDTemplate[]
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, username])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Fisherfolk {
+  id                String           @id @default(cuid())
+  tenantId          String           @map("tenant_id")
+  idNumber          String           @map("id_number")
+  fullName          String           @map("full_name")
+  lastName          String           @map("last_name")
+  firstName         String           @map("first_name")
+  middleName        String?          @map("middle_name")
+  suffix            String?
+  dateOfBirth       DateTime         @map("date_of_birth") @db.Date
+  sex               Gender
+  civilStatus       CivilStatus?     @map("civil_status")
+  address           String
+  barangay          String
+  contactNumber     String?          @map("contact_number")
+  rsbsaNumber       String?          @map("rsbsa_number")
+  categoryIds       String[]         @map("category_ids")
+  photo             String?
+  signature         String?
+  qrCode            String?          @map("qr_code")
+  status            FisherfolkStatus @default(NEW)
+  dateJoined        DateTime         @default(now()) @map("date_joined")
+  registrationYear  Int              @map("registration_year")
+  remarks           String?
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  createdById       String?          @map("created_by_id")
+  updatedById       String?          @map("updated_by_id")
+
+  tenant           Tenant             @relation(fields: [tenantId], references: [id])
+  createdBy        User?              @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
+  updatedBy        User?              @relation("FisherfolkUpdatedBy", fields: [updatedById], references: [id])
+  vessels          Vessel[]           @relation("FisherfolkVessels")
+  violations       Violation[]        @relation("FisherfolkViolations")
+  comments         Comment[]
+  editRequests     EditRequest[]
+  ayudaBeneficiaries AyudaBeneficiary[]
+
+  @@unique([tenantId, idNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, barangay])
+  @@index([tenantId, lastName, firstName])
+  @@map("fisherfolk")
+}
+
+model Vessel {
+  id                       String       @id @default(cuid())
+  tenantId                 String       @map("tenant_id")
+  mfvrNumber               String       @map("mfvr_number")
+  vesselName               String?      @map("vessel_name")
+  vesselType               String       @map("vessel_type")
+  hullMaterial             String?      @map("hull_material")
+  placeBuilt               String?      @map("place_built")
+  yearBuilt                Int?         @map("year_built")
+  registeredLength         Float?       @map("registered_length")
+  registeredBreadth        Float?       @map("registered_breadth")
+  registeredDepth          Float?       @map("registered_depth")
+  grossTonnage             Float?       @map("gross_tonnage")
+  netTonnage               Float?       @map("net_tonnage")
+  engineMake               String?      @map("engine_make")
+  engineSerialNumber       String?      @map("engine_serial_number")
+  horsepower               Float?
+  homeport                 String?
+  fishingGearClassification String[]    @map("fishing_gear_classification")
+  vesselPhoto              String?      @map("vessel_photo")
+  qrCode                   String?      @map("qr_code")
+  status                   VesselStatus @default(ACTIVE)
+  createdAt                DateTime     @default(now()) @map("created_at")
+  updatedAt                DateTime     @updatedAt @map("updated_at")
+  createdById              String?      @map("created_by_id")
+  updatedById              String?      @map("updated_by_id")
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  createdBy   User?        @relation("VesselCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User?        @relation("VesselUpdatedBy", fields: [updatedById], references: [id])
+  owners      Fisherfolk[] @relation("FisherfolkVessels")
+  violations  Violation[]  @relation("VesselViolations")
+
+  @@unique([tenantId, mfvrNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("vessels")
+}
+
+model Violation {
+  id              String              @id @default(cuid())
+  tenantId        String              @map("tenant_id")
+  targetType      ViolationTargetType @map("target_type")
+  fisherfolkId    String?             @map("fisherfolk_id")
+  vesselId        String?             @map("vessel_id")
+  subject         String
+  details         String?
+  evidenceImages  String[]            @map("evidence_images")
+  notes           String?
+  status          ViolationStatus     @default(ACTIVE)
+  filedById       String              @map("filed_by_id")
+  liftedById      String?             @map("lifted_by_id")
+  liftedAt        DateTime?           @map("lifted_at")
+  resolutionNotes String?             @map("resolution_notes")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  fisherfolk Fisherfolk? @relation("FisherfolkViolations", fields: [fisherfolkId], references: [id])
+  vessel     Vessel?     @relation("VesselViolations", fields: [vesselId], references: [id])
+  filedBy    User        @relation("ViolationFiledBy", fields: [filedById], references: [id])
+  liftedBy   User?       @relation("ViolationLiftedBy", fields: [liftedById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, fisherfolkId])
+  @@index([tenantId, vesselId])
+  @@index([tenantId, filedById])
+  @@map("violations")
+}
+
+model EditRequest {
+  id              String            @id @default(cuid())
+  tenantId        String            @map("tenant_id")
+  fisherfolkId    String            @map("fisherfolk_id")
+  requestedById   String            @map("requested_by_id")
+  fieldChanges    Json              @map("field_changes")
+  status          EditRequestStatus @default(PENDING)
+  reviewedById    String?           @map("reviewed_by_id")
+  reviewedAt      DateTime?         @map("reviewed_at")
+  rejectionReason String?           @map("rejection_reason")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  fisherfolk  Fisherfolk @relation(fields: [fisherfolkId], references: [id])
+  requestedBy User       @relation("EditRequestSubmittedBy", fields: [requestedById], references: [id])
+  reviewedBy  User?      @relation("EditRequestReviewedBy", fields: [reviewedById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, fisherfolkId])
+  @@map("edit_requests")
+}
+
+model Comment {
+  id               String              @id @default(cuid())
+  tenantId         String              @map("tenant_id")
+  fisherfolkId     String              @map("fisherfolk_id")
+  authorId         String              @map("author_id")
+  content          String
+  mentionedUserIds String[]            @map("mentioned_user_ids")
+  isTicket         Boolean             @default(false) @map("is_ticket")
+  ticketStatus     CommentTicketStatus? @map("ticket_status")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  fisherfolk Fisherfolk @relation(fields: [fisherfolkId], references: [id])
+  author     User       @relation(fields: [authorId], references: [id])
+  kanbanTask KanbanTask?
+
+  @@index([tenantId])
+  @@index([tenantId, fisherfolkId])
+  @@map("comments")
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  tenantId  String?     @map("tenant_id")
+  userId    String      @map("user_id")
+  action    AuditAction
+  entityType String    @map("entity_type")
+  entityId  String      @map("entity_id")
+  before    Json?
+  after     Json?
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Category {
+  id           String         @id @default(cuid())
+  tenantId     String         @map("tenant_id")
+  name         String
+  description  String?
+  slug         String
+  displayColor String         @map("display_color")
+  iconType     CategoryIconType @map("icon_type") @default(EMOJI)
+  iconEmoji    String?        @map("icon_emoji")
+  iconImageUrl String?        @map("icon_image_url")
+  displayOrder Int            @default(0) @map("display_order")
+  status       CategoryStatus @default(ACTIVE)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("categories")
+}
+
+model KanbanTask {
+  id              String           @id @default(cuid())
+  tenantId        String           @map("tenant_id")
+  assignedToId    String           @map("assigned_to_id")
+  title           String
+  description     String?
+  status          KanbanTaskStatus @default(TODO)
+  priority        KanbanTaskPriority @default(MEDIUM)
+  sourceCommentId String?          @unique @map("source_comment_id")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  tenant        Tenant   @relation(fields: [tenantId], references: [id])
+  assignedTo    User     @relation(fields: [assignedToId], references: [id])
+  sourceComment Comment? @relation(fields: [sourceCommentId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, status])
+  @@map("kanban_tasks")
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  tenantId   String           @map("tenant_id")
+  userId     String           @map("user_id")
+  type       NotificationType
+  title      String
+  message    String
+  entityType String?          @map("entity_type")
+  entityId   String?          @map("entity_id")
+  isRead     Boolean          @default(false) @map("is_read")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([userId, isRead])
+  @@index([tenantId, userId])
+  @@map("notifications")
+}
+
+model AyudaProgram {
+  id               String             @id @default(cuid())
+  tenantId         String             @map("tenant_id")
+  title            String
+  description      String?
+  filters          Json
+  beneficiaryCount Int                @default(0) @map("beneficiary_count")
+  status           AyudaProgramStatus @default(DRAFT)
+  verifiedCount    Int                @default(0) @map("verified_count")
+  notReceivedCount Int                @default(0) @map("not_received_count")
+  createdById      String             @map("created_by_id")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  tenant        Tenant             @relation(fields: [tenantId], references: [id])
+  createdBy     User               @relation("AyudaProgramCreatedBy", fields: [createdById], references: [id])
+  beneficiaries AyudaBeneficiary[]
+  uploads       AyudaUpload[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("ayuda_programs")
+}
+
+model AyudaBeneficiary {
+  id                 String                 @id @default(cuid())
+  tenantId           String                 @map("tenant_id")
+  programId          String                 @map("program_id")
+  fisherfolkId       String                 @map("fisherfolk_id")
+  verificationStatus AyudaBeneficiaryStatus @default(PENDING)
+  verifiedById       String?                @map("verified_by_id")
+  verifiedAt         DateTime?              @map("verified_at")
+  createdAt          DateTime               @default(now()) @map("created_at")
+
+  tenant     Tenant       @relation(fields: [tenantId], references: [id])
+  program    AyudaProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  fisherfolk Fisherfolk   @relation(fields: [fisherfolkId], references: [id])
+  verifiedBy User?        @relation("BeneficiaryVerifiedBy", fields: [verifiedById], references: [id])
+
+  @@unique([programId, fisherfolkId])
+  @@index([tenantId])
+  @@index([programId])
+  @@index([fisherfolkId])
+  @@map("ayuda_beneficiaries")
+}
+
+model AyudaUpload {
+  id               String          @id @default(cuid())
+  programId        String          @map("program_id")
+  uploadType       AyudaUploadType @map("upload_type")
+  filePath         String          @map("file_path")
+  originalFilename String          @map("original_filename")
+  fileSize         Int             @map("file_size")
+  uploadedById     String          @map("uploaded_by_id")
+  uploadedAt       DateTime        @default(now()) @map("uploaded_at")
+
+  program    AyudaProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  uploadedBy User         @relation(fields: [uploadedById], references: [id])
+
+  @@index([programId])
+  @@map("ayuda_uploads")
+}
+
+model IDTemplate {
+  id                 String           @id @default(cuid())
+  tenantId           String           @map("tenant_id")
+  name               String
+  templateType       IDTemplateType   @map("template_type")
+  frontBackgroundUrl String?          @map("front_background_url")
+  backBackgroundUrl  String?          @map("back_background_url")
+  frontElements      Json             @map("front_elements")
+  backElements       Json             @map("back_elements")
+  status             IDTemplateStatus @default(ACTIVE)
+  createdById        String           @map("created_by_id")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  createdBy User   @relation(fields: [createdById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, templateType, status])
+  @@map("id_templates")
+}
