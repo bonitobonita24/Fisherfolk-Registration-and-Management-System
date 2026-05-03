@@ -19,3 +19,19 @@
   (6) WSL2 file permissions: always develop inside WSL2 filesystem (/home/user/) not /mnt/c/.
       Working in /mnt/c/ causes severe pnpm and docker performance issues.
 # ---
+
+## 2026-05-03 — 🔴 tRPC v11 TransformerOptions + exactOptionalPropertyTypes incompatibility
+- Type:      🔴 gotcha
+- Phase:     Phase 4 Part 2 — packages/api-client
+- Files:     packages/api-client/src/index.ts
+- Concepts:  trpc, v11, TransformerOptions, exactOptionalPropertyTypes, conditional-types, generics
+- Narrative: When `exactOptionalPropertyTypes: true` is set in tsconfig.base.json, calling
+  `httpBatchLink({ url })` inside a generic function `createApiClient<TRouter extends AnyRouter>()`
+  fails because `TransformerOptions<TRoot>` is a conditional type (`TRoot['transformer'] extends true ? ... : ...`).
+  TypeScript cannot resolve which branch the conditional takes when `TRouter` is still generic,
+  making it impossible to construct a compatible object literal. Five attempts were needed.
+  FIX: Do NOT call httpBatchLink inside the generic function. Instead, accept a pre-built
+  `links: TRPCLink<TRouter>[]` array. Consumers call `httpBatchLink({ url })` directly outside
+  the generic context where TypeScript can resolve the conditional type. Re-export httpBatchLink
+  for consumer convenience.
+# ---
