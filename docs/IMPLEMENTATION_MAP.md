@@ -15,11 +15,26 @@
 | Phase 2.6 — Design System | ⏭ Skipped (UI UX Pro Max not installed) | 2026-05-02 |
 | Phase 2.7 — Spec Stress-Test | ✅ Passed (0 gaps) | 2026-05-02 |
 | Phase 3 — Generate Spec Files | ✅ Complete | 2026-05-02 |
-| Phase 4 — Full Scaffold | Not Started | — |
+| Phase 4 — Full Scaffold | ⏳ In Progress (Part 1 of 8 complete) | 2026-05-03 |
 | Phase 5 — Validation | Not Started | — |
 | Phase 6 — Docker + Visual QA | Not Started | — |
 | Phase 7 — Feature Updates | Not Started | — |
 | Phase 8 — Iterative Buildout | Not Started | — |
+
+## Root Config Files (Phase 4 Part 1 Output)
+
+| File | Status |
+|------|--------|
+| pnpm-workspace.yaml | ✅ Generated |
+| turbo.json | ✅ Generated |
+| tsconfig.base.json | ✅ Generated |
+| .editorconfig | ✅ Generated |
+| .prettierrc | ✅ Generated |
+| .eslintrc.js | ✅ Generated |
+| .gitignore | ✅ Updated (coverage, .vitest, swap files) |
+| .nvmrc | ✅ Pre-existing (22) |
+| package.json | ✅ Rewritten (root scripts + devDependencies) |
+| pnpm-lock.yaml | ✅ Generated (124 packages) |
 
 ## Spec Files (Phase 3 Output)
 
@@ -67,7 +82,7 @@
 |----------|--------|
 | PRODUCT.md | ✅ Complete (505 lines) |
 | DESIGN.md | ✅ Complete (pre-existing) |
-| CHANGELOG_AI.md | ✅ Active (3 entries) |
+| CHANGELOG_AI.md | ✅ Active (5 entries) |
 | DECISIONS_LOG.md | ✅ Active (11 locked decisions) |
 | IMPLEMENTATION_MAP.md | ✅ Active (this file) |
 | inputs.yml | ✅ Generated |
