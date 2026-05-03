@@ -88,3 +88,44 @@ Locked: yes — do not re-ask.
 Decision: Enabled (vibe_test.enabled: true).
 Phase 2.7 ran and PASSED with 0 gaps on 2026-05-02.
 Locked: yes — re-run only via "Re-run Phase 2.7" trigger.
+
+## App-level tsconfig — declaration off
+Decision: Every `apps/[app]/tsconfig.json` overrides the base with
+`"declaration": false, "declarationMap": false`.
+Rationale: tsconfig.base.json keeps `declaration: true` so shared packages can
+emit .d.ts for monorepo consumers. Apps in apps/* are runtime leaf consumers —
+they never publish types. Inherited declaration: true makes TS validate
+declaration portability and fire TS2742 "inferred type cannot be named without
+a reference to ..." on tRPC + next-auth re-exports. Override fixes typecheck
+without weakening type strictness elsewhere.
+Locked: yes — applies to apps/web, future apps/mobile, apps/admin, etc.
+Do not modify tsconfig.base.json — packages still need declarations.
+
+## ESLint — type-aware config + strict-boolean-expressions options
+Decision: Root `.eslintrc.js` uses
+`parserOptions: { project: true, tsconfigRootDir: __dirname }` to enable
+type-aware rules (typescript-eslint v8 auto-discovery picks the right tsconfig
+per file). `@typescript-eslint/strict-boolean-expressions` is configured as
+`['error', { allowString: true, allowNullableObject: true, allowNullableString: true }]`.
+Rationale: Type-aware lint catches real bugs (no-unsafe-assignment,
+no-unnecessary-type-assertion) but the default strict-boolean-expressions fires
+on every idiomatic tRPC null-guard (`if (!ctx.tenantId)`,
+`...(value && { value })`). The relaxed options permit nullable string/object
+patterns while still catching numbers, any-typed, and falsy-coercion bugs.
+Locked: yes — do not disable these rules; tune the options if a new false
+positive is found, document the change, and add a 🟤 lessons.md entry.
+
+## omitUndefined<T> — pattern for exactOptionalPropertyTypes + Prisma payloads
+Decision: All apps/web tRPC routers that build Prisma create/update payloads
+from Zod-parsed input use `omitUndefined()` from
+`apps/web/src/server/lib/prisma-input.ts` to strip undefined keys before
+passing to Prisma.
+Rationale: tsconfig.base.json sets `exactOptionalPropertyTypes: true`. Prisma
+input types use `field?:` (allow missing) not `field?: T | undefined`, while
+Zod `.optional()` produces `T | undefined` after parse — direct spread fails
+typecheck. The runtime helper filters undefined values and casts the result
+type to drop `| undefined` from each property, returning a Prisma-compatible
+input. Applied across category, ayuda, tenant, vessel, violation, fisherfolk,
+idTemplate, kanbanTask, and future routers.
+Locked: yes — do NOT cast Prisma input types with `as` (hides bugs); always
+use omitUndefined for partial payloads.
