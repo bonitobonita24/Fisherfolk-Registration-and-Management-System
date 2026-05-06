@@ -1,13 +1,13 @@
 {
-  "scannedAt": "2026-05-03",
+  "scannedAt": "2026-05-06",
   "techStack": [
     "TypeScript",
-    "Next.js (App Router)",
-    "React",
-    "Prisma ORM",
-    "tRPC",
+    "Next.js 15 (App Router)",
+    "React 19",
+    "Prisma ORM 6.2",
+    "tRPC 11",
     "Auth.js v5",
-    "PostgreSQL",
+    "PostgreSQL 16",
     "PgBouncer",
     "Valkey (Redis fork)",
     "BullMQ",
@@ -25,7 +25,7 @@
       "name": "vercel-agent-skills",
       "category": "Development & DevOps",
       "tier": "T1",
-      "reason": "Next.js App Router + React best practices (67 rules) — matches apps/web scaffold"
+      "reason": "Next.js 15 App Router + React 19 best practices (67 rules) — matches apps/web scaffold"
     },
     {
       "name": "test-driven-development",
@@ -64,6 +64,12 @@
       "reason": "Multi-layered security — matches 6 security layers (L1-L6), multi-tenant isolation"
     },
     {
+      "name": "owasp-security",
+      "category": "Security & Testing",
+      "tier": "T2",
+      "reason": "OWASP Top 10 web app review — complements defense-in-depth with specific vulnerability patterns"
+    },
+    {
       "name": "systematic-debugging",
       "category": "Development & DevOps",
       "tier": "T4",
@@ -74,20 +80,23 @@
       "category": "Security & Testing",
       "tier": "T4",
       "reason": "Playwright testing against localhost:44387, Visual QA checks (Rule 16)"
+    },
+    {
+      "name": "microcopy-writer",
+      "category": "Content & Copywriting",
+      "tier": "T4",
+      "reason": "UX copy for forms-heavy registration workflows (fisherfolk registration, compliance forms)"
     }
   ],
-  "excludedGlobals": [
-    { "name": "article-extractor", "reason": "No content extraction in fisherfolk registration app" },
-    { "name": "content-research-writer", "reason": "No content marketing features" },
-    { "name": "csv-data-summarizer-claude-skill", "reason": "No CSV analysis workflows" },
-    { "name": "deep-research", "reason": "No autonomous research tasks" },
-    { "name": "google-workspace-skills", "reason": "No Google Workspace integration" },
-    { "name": "image-enhancer", "reason": "No image processing features" },
-    { "name": "imagen", "reason": "No image generation features" },
-    { "name": "youtube-transcript", "reason": "No video content features" },
-    { "name": "automate", "reason": "Project uses framework-specific Phase 7 workflow" },
-    { "name": "accesslint-contrast-checker", "reason": "design-auditor global covers broader visual audit" }
-  ],
+  "excludedGlobals": [],
+  "resolvedConflicts": [],
   "recommendedPlugins": [],
-  "skippedOptional": []
+  "skippedOptional": [
+    {
+      "name": "a11y-skill",
+      "category": "Design & UI",
+      "reason": "MEDIUM confidence — not in local skills library. Install externally: npx skills add airowe/claude-a11y-skill"
+    }
+  ],
+  "globalCleanupAdvised": true
 }
