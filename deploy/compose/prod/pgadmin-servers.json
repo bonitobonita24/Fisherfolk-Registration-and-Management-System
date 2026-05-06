@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "FRMS prod",
+      "Group": "Spec-Driven",
+      "Host": "frms_prod_postgres",
+      "Port": 5432,
+      "MaintenanceDB": "frms_prod",
+      "Username": "frms_prod",
+      "SSLMode": "prefer"
+    }
+  }
+}

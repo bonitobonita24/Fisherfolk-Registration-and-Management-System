@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "FRMS staging",
+      "Group": "Spec-Driven",
+      "Host": "frms_staging_postgres",
+      "Port": 5432,
+      "MaintenanceDB": "frms_staging",
+      "Username": "frms_staging",
+      "SSLMode": "prefer"
+    }
+  }
+}
