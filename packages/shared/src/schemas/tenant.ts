@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { tenantStatusSchema } from "./enums.js";
+import { tenantStatusSchema } from "./enums";
 
 export const tenantCreateSchema = z.object({
   slug: z.string().min(1),

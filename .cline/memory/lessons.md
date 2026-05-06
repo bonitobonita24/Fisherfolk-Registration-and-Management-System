@@ -67,3 +67,24 @@
 - Concepts:  eslint, typescript-eslint, type-aware-rules, strict-boolean-expressions, lint
 - Narrative: To make `@typescript-eslint/strict-boolean-expressions` and `no-unsafe-assignment` work across the monorepo, the root .eslintrc.js sets `parserOptions: { project: true, tsconfigRootDir: __dirname }` (typescript-eslint v8 auto-discovery — finds the right tsconfig per file). The default strict-boolean-expressions rule is too strict for idiomatic tRPC code (`if (!ctx.tenantId)`, `...(value && { value })` — fires on every nullable string check). Configure with `{ allowString: true, allowNullableObject: true, allowNullableString: true }` to permit these patterns. Don't disable the rule entirely — it still catches genuine bugs on numbers and any-typed conditions. Also: `ctx.userId!` post-`enforceAuth` middleware is unnecessary because enforceAuth narrows ctx.userId from `string | null` to `string` via the explicit return shape — the lint rule no-unnecessary-type-assertion correctly flags these.
 # ---
+
+## 2026-05-07 — 🔴 .js extensions in relative barrel imports break Next.js webpack under bundler resolution
+- Type:      🔴 gotcha
+- Phase:     Phase 4 Part 8 (build verification)
+- Files:     packages/{shared,db,jobs,storage}/src/**/*.ts (32 files)
+- Concepts:  typescript, nodenext, bundler-resolution, webpack, barrel-exports, transpilePackages
+- Narrative: Barrel files in packages/{shared,db,jobs,storage} were authored with NodeNext-style `.js` extensions on relative imports (e.g. `export * from "./enums.js"`). tsconfig.base.json uses `moduleResolution: "bundler"`, which TOLERATES `.js` extensions but does not require them. tsc passed because bundler resolution accepts both forms. Next.js webpack — invoked via `transpilePackages: ["@frms/shared", "@frms/db", "@frms/ui"]` — consumed the source `.ts` files but tried to resolve `./enums.js` literally, found no such file, and emitted "Module not found". Fix: strip `.js` extensions across all relative barrel imports. Single sed pass: `sed -i -E 's|(from "\.\.?/[^"]+)\.js"|\1"|g'`. Standard for any monorepo using bundler resolution + transpilePackages.
+
+## 2026-05-07 — 🟡 isomorphic-dompurify needs serverExternalPackages in Next.js 15
+- Type:      🟡 fix
+- Phase:     Phase 4 Part 8 (build verification)
+- Files:     apps/web/next.config.ts
+- Concepts:  nextjs-15, jsdom, isomorphic-dompurify, server-bundling, prisma, bcryptjs
+- Narrative: pnpm build compiled successfully but failed at page-data collection with `ENOENT: no such file or directory, open '.next/server/app/api/browser/default-stylesheet.css'`. Root cause: jsdom (transitive dep of isomorphic-dompurify) ships a default stylesheet at a virtual path that webpack tries to bundle. Fix: add `serverExternalPackages: ["isomorphic-dompurify", "@prisma/client", "bcryptjs"]` to next.config.ts. Per Next.js 15 bundling reference: this directive is for native-binding packages (bcrypt), packages with bundling issues (jsdom-based), and ORMs (Prisma) — exactly our three. Loaded via Node.js runtime instead of bundled.
+
+## 2026-05-07 — 🟡 useSearchParams requires Suspense boundary in Next.js 15 static prerender
+- Type:      🟡 fix
+- Phase:     Phase 4 Part 8 (build verification)
+- Files:     apps/web/src/app/login/page.tsx
+- Concepts:  nextjs-15, suspense, useSearchParams, csr-bailout, static-export
+- Narrative: /login uses useSearchParams() to read ?callbackUrl=. Build failed: "useSearchParams() should be wrapped in a suspense boundary at page /login. Read more: missing-suspense-with-csr-bailout". Next.js 15 enforces this for any client component using useSearchParams when the page can be statically prerendered. Fix: split the inner JSX using useSearchParams into its own component (LoginForm), keep the default export as a thin wrapper (LoginPage) returning `<Suspense fallback={null}><LoginForm /></Suspense>`. After fix /login prerenders as static (○) and the rest of the app routes are server-rendered on demand (ƒ). Apply same pattern to any future page using useSearchParams or usePathname at module scope.

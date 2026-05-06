@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { commentTicketStatusSchema } from "./enums.js";
+import { commentTicketStatusSchema } from "./enums";
 
 export const commentCreateSchema = z.object({
   fisherfolkId: z.string().cuid(),

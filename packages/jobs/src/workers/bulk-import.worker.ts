@@ -1,7 +1,7 @@
 import { Worker, type Job } from "bullmq";
-import { getConnection } from "../connection.js";
-import { BULK_IMPORT_QUEUE } from "../queues/bulk-import.js";
-import type { BulkImportPayload } from "../types.js";
+import { getConnection } from "../connection";
+import { BULK_IMPORT_QUEUE } from "../queues/bulk-import";
+import type { BulkImportPayload } from "../types";
 
 async function processBulkImport(job: Job<BulkImportPayload>): Promise<void> {
   const { tenantId, userId, fileKey, entityType, resumeFromRow } = job.data;

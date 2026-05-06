@@ -1,4 +1,4 @@
-import type { AuditAction } from "./enums.js";
+import type { AuditAction } from "./enums";
 
 export interface AuditLog {
   id: string;

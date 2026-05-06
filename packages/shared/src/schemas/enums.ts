@@ -23,7 +23,7 @@ import {
   IDTemplateStatus,
   CommentTicketStatus,
   EntityType,
-} from "../types/enums.js";
+} from "../types/enums";
 
 export const fisherfolkStatusSchema = z.enum([
   FisherfolkStatus.NEW,

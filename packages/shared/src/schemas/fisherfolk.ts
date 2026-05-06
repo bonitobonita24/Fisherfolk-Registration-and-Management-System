@@ -3,7 +3,7 @@ import {
   fisherfolkStatusSchema,
   genderSchema,
   civilStatusSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const fisherfolkCreateSchema = z.object({
   idNumber: z.string().min(1),

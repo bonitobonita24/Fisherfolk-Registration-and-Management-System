@@ -1,7 +1,7 @@
 import { Worker, type Job } from "bullmq";
-import { getConnection } from "../connection.js";
-import { EMAIL_NOTIFICATION_DIGEST_QUEUE } from "../queues/email-notification-digest.js";
-import type { EmailNotificationDigestPayload } from "../types.js";
+import { getConnection } from "../connection";
+import { EMAIL_NOTIFICATION_DIGEST_QUEUE } from "../queues/email-notification-digest";
+import type { EmailNotificationDigestPayload } from "../types";
 
 async function processEmailDigest(job: Job<EmailNotificationDigestPayload>): Promise<void> {
   const { tenantId, userId, recipientEmail, pendingEditRequests } = job.data;

@@ -3,7 +3,7 @@ import {
   ayudaBeneficiaryStatusSchema,
   ayudaProgramStatusSchema,
   ayudaUploadTypeSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const ayudaProgramCreateSchema = z.object({
   title: z.string().min(1),

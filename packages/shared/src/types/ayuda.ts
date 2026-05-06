@@ -1,7 +1,7 @@
 import type {
   AyudaBeneficiaryStatus,
   AyudaProgramStatus,
-} from "./enums.js";
+} from "./enums";
 
 export interface AyudaProgram {
   id: string;

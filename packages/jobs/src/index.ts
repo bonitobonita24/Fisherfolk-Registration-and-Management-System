@@ -1,11 +1,11 @@
-export { getConnection } from "./connection.js";
+export { getConnection } from "./connection";
 
 export type {
   BaseJobPayload,
   BulkImportPayload,
   YearlyStatusResetPayload,
   EmailNotificationDigestPayload,
-} from "./types.js";
+} from "./types";
 
 export {
   getBulkImportQueue,
@@ -14,10 +14,10 @@ export {
   YEARLY_STATUS_RESET_QUEUE,
   getEmailNotificationDigestQueue,
   EMAIL_NOTIFICATION_DIGEST_QUEUE,
-} from "./queues/index.js";
+} from "./queues/index";
 
 export {
   startBulkImportWorker,
   startYearlyStatusResetWorker,
   startEmailNotificationDigestWorker,
-} from "./workers/index.js";
+} from "./workers/index";

@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { getConnection } from "../connection.js";
-import type { EmailNotificationDigestPayload } from "../types.js";
+import { getConnection } from "../connection";
+import type { EmailNotificationDigestPayload } from "../types";
 
 export const EMAIL_NOTIFICATION_DIGEST_QUEUE = "email-notification-digest" as const;
 

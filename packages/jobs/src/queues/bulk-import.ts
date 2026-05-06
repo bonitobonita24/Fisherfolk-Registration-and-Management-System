@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { getConnection } from "../connection.js";
-import type { BulkImportPayload } from "../types.js";
+import { getConnection } from "../connection";
+import type { BulkImportPayload } from "../types";
 
 export const BULK_IMPORT_QUEUE = "bulk-import" as const;
 

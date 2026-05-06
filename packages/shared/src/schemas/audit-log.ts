@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { auditActionSchema } from "./enums.js";
+import { auditActionSchema } from "./enums";
 
 export const auditLogCreateSchema = z.object({
   userId: z.string().cuid(),

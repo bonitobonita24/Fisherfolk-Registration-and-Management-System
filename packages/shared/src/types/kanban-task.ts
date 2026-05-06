@@ -2,7 +2,7 @@ import type {
   EntityType,
   KanbanTaskPriority,
   KanbanTaskStatus,
-} from "./enums.js";
+} from "./enums";
 
 export interface KanbanTask {
   id: string;

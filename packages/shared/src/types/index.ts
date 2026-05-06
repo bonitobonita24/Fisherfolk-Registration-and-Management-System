@@ -2,59 +2,59 @@ export type {
   Tenant,
   TenantCreateInput,
   TenantUpdateInput,
-} from "./tenant.js";
+} from "./tenant";
 
 export type {
   User,
   UserCreateInput,
   UserUpdateInput,
-} from "./user.js";
+} from "./user";
 
 export type {
   Fisherfolk,
   FisherfolkCreateInput,
   FisherfolkUpdateInput,
-} from "./fisherfolk.js";
+} from "./fisherfolk";
 
 export type {
   Vessel,
   VesselCreateInput,
   VesselUpdateInput,
-} from "./vessel.js";
+} from "./vessel";
 
 export type {
   Violation,
   ViolationCreateInput,
   ViolationUpdateInput,
-} from "./violation.js";
+} from "./violation";
 
 export type {
   EditRequest,
   EditRequestCreateInput,
   EditRequestUpdateInput,
-} from "./edit-request.js";
+} from "./edit-request";
 
-export type { Comment, CommentCreateInput } from "./comment.js";
+export type { Comment, CommentCreateInput } from "./comment";
 
-export type { AuditLog, AuditLogCreateInput } from "./audit-log.js";
+export type { AuditLog, AuditLogCreateInput } from "./audit-log";
 
 export type {
   Category,
   CategoryCreateInput,
   CategoryUpdateInput,
-} from "./category.js";
+} from "./category";
 
 export type {
   KanbanTask,
   KanbanTaskCreateInput,
   KanbanTaskUpdateInput,
-} from "./kanban-task.js";
+} from "./kanban-task";
 
 export type {
   Notification,
   NotificationCreateInput,
   NotificationUpdateInput,
-} from "./notification.js";
+} from "./notification";
 
 export type {
   AyudaProgram,
@@ -65,12 +65,12 @@ export type {
   AyudaBeneficiaryUpdateInput,
   AyudaUpload,
   AyudaUploadCreateInput,
-} from "./ayuda.js";
+} from "./ayuda";
 
 export type {
   IDTemplate,
   IDTemplateCreateInput,
   IDTemplateUpdateInput,
-} from "./id-template.js";
+} from "./id-template";
 
-export * from "./enums.js";
+export * from "./enums";

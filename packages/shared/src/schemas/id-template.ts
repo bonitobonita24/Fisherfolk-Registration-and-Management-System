@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   idTemplateTypeSchema,
   idTemplateStatusSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const idTemplateCreateSchema = z.object({
   name: z.string().min(1),

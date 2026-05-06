@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   kanbanTaskPrioritySchema,
   kanbanTaskStatusSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const kanbanTaskCreateSchema = z.object({
   assignedToId: z.string().cuid(),

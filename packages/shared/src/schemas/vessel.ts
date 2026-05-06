@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { vesselStatusSchema } from "./enums.js";
+import { vesselStatusSchema } from "./enums";
 
 export const vesselCreateSchema = z.object({
   mfvrNumber: z.string().min(1),

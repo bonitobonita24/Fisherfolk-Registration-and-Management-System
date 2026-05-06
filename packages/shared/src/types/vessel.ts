@@ -1,4 +1,4 @@
-import type { VesselStatus } from "./enums.js";
+import type { VesselStatus } from "./enums";
 
 export interface Vessel {
   id: string;

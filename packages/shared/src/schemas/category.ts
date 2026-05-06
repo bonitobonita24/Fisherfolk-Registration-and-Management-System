@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   categoryIconTypeSchema,
   categoryStatusSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const categoryCreateSchema = z.object({
   name: z.string().min(1),

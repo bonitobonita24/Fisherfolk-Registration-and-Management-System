@@ -1,4 +1,4 @@
-import type { EntityType, NotificationType } from "./enums.js";
+import type { EntityType, NotificationType } from "./enums";
 
 export interface Notification {
   id: string;

@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   violationStatusSchema,
   violationTargetTypeSchema,
-} from "./enums.js";
+} from "./enums";
 
 export const violationCreateSchema = z.object({
   targetType: violationTargetTypeSchema,

@@ -31,6 +31,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   transpilePackages: ["@frms/shared", "@frms/db", "@frms/ui"],
+  serverExternalPackages: ["isomorphic-dompurify", "@prisma/client", "bcryptjs"],
   async headers() {
     return [
       {

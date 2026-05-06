@@ -1,4 +1,4 @@
-import type { ViolationStatus } from "./enums.js";
+import type { ViolationStatus } from "./enums";
 
 export interface Violation {
   id: string;

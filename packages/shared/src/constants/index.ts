@@ -13,7 +13,7 @@ import {
   Gender,
   CivilStatus,
   EntityType,
-} from "../types/enums.js";
+} from "../types/enums";
 
 export const USER_ROLES = Object.values(UserRole);
 export const FISHERFOLK_STATUSES = Object.values(FisherfolkStatus);

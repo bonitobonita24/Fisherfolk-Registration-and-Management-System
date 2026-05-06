@@ -1,4 +1,4 @@
-export { getStorageClient, getBucket } from "./client.js";
+export { getStorageClient, getBucket } from "./client";
 
 export {
   validateMimeType,
@@ -8,7 +8,7 @@ export {
   extractTenantFromKey,
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
-} from "./validation.js";
+} from "./validation";
 
 export {
   uploadFile,
@@ -17,4 +17,4 @@ export {
   fileExists,
   type UploadInput,
   type UploadResult,
-} from "./upload.js";
+} from "./upload";

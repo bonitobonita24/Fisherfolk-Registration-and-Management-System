@@ -2,7 +2,7 @@ import type {
   CivilStatus,
   FisherfolkStatus,
   Gender,
-} from "./enums.js";
+} from "./enums";
 
 export interface Fisherfolk {
   id: string;

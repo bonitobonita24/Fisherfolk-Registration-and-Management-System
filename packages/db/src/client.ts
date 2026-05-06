@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { tenantGuardExtension } from "./middleware/tenant-guard.js";
+import { tenantGuardExtension } from "./middleware/tenant-guard";
 
 function createPrismaClient() {
   const client = new PrismaClient({

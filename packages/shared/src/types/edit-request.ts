@@ -1,4 +1,4 @@
-import type { EditRequestStatus, EntityType } from "./enums.js";
+import type { EditRequestStatus, EntityType } from "./enums";
 
 export interface EditRequest {
   id: string;

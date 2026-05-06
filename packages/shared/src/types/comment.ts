@@ -1,4 +1,4 @@
-import type { EntityType } from "./enums.js";
+import type { EntityType } from "./enums";
 
 export interface Comment {
   id: string;

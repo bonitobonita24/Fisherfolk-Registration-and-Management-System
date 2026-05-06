@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
-import { getConnection } from "../connection.js";
-import type { YearlyStatusResetPayload } from "../types.js";
+import { getConnection } from "../connection";
+import type { YearlyStatusResetPayload } from "../types";
 
 export const YEARLY_STATUS_RESET_QUEUE = "yearly-status-reset" as const;
 

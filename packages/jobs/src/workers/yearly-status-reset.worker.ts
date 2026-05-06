@@ -1,7 +1,7 @@
 import { Worker, type Job } from "bullmq";
-import { getConnection } from "../connection.js";
-import { YEARLY_STATUS_RESET_QUEUE } from "../queues/yearly-status-reset.js";
-import type { YearlyStatusResetPayload } from "../types.js";
+import { getConnection } from "../connection";
+import { YEARLY_STATUS_RESET_QUEUE } from "../queues/yearly-status-reset";
+import type { YearlyStatusResetPayload } from "../types";
 
 async function processYearlyStatusReset(job: Job<YearlyStatusResetPayload>): Promise<void> {
   const { tenantId, userId, targetYear, dryRun } = job.data;

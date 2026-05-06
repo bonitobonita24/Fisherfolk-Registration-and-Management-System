@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { editRequestStatusSchema } from "./enums.js";
+import { editRequestStatusSchema } from "./enums";
 
 export const editRequestCreateSchema = z.object({
   fisherfolkId: z.string().cuid(),
