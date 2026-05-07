@@ -374,7 +374,6 @@ navigation:
 
 ports:
   dev:
-    base: 44377
     db: 44377
     pgbouncer: 44378
     redis: 44379

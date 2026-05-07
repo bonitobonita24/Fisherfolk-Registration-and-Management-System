@@ -45,21 +45,26 @@ function checkPrivateLeaks(privateWords, governanceDocs) {
 
 function extractRequiredSections(productMd) {
   const required = [
-    "App Name",
-    "Purpose",
-    "Target Users",
-    "Core Entities",
-    "User Roles",
-    "Main Workflows",
+    // Accept either the generic V31 template names OR the FRMS-specific headers
+    "App Identity|App Name",
+    "Problem Statement|Purpose",
+    "Core User Flows|Main Workflows",
+    "Data Entities|Core Entities",
+    "Roles|User Roles",
     "Data Sensitivity",
     "Tenancy Model",
     "Environments Needed",
   ];
   const missing = [];
   for (const section of required) {
-    const pattern = new RegExp(`##\\s+.*${section.replace(/\s+/g, "\\s+")}`, "i");
-    if (!pattern.test(productMd)) {
-      missing.push(section);
+    // Support alternation: "App Identity|App Name" means either header matches
+    const alts = section.split("|");
+    const matched = alts.some((alt) => {
+      const pattern = new RegExp(`##\\s+.*${alt.trim().replace(/\s+/g, "\\s+")}`, "i");
+      return pattern.test(productMd);
+    });
+    if (!matched) {
+      missing.push(alts[0]); // report the primary name on failure
     }
   }
   return missing;
