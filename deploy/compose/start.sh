@@ -5,17 +5,33 @@
 ENV=${1:-dev}
 CMD=${@:2}
 BASE=deploy/compose/$ENV
+ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 
-docker compose -f $BASE/docker-compose.db.yml $CMD
-docker compose -f $BASE/docker-compose.cache.yml $CMD
-docker compose -f $BASE/docker-compose.storage.yml $CMD
-docker compose -f $BASE/docker-compose.pgadmin.yml $CMD
+# Map env name to env file
+case "$ENV" in
+  dev)     ENV_FILE="$ROOT/.env.dev" ;;
+  stage)   ENV_FILE="$ROOT/.env.staging" ;;
+  prod)    ENV_FILE="$ROOT/.env.prod" ;;
+  *)       echo "Unknown environment: $ENV"; exit 1 ;;
+esac
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "❌ Env file not found: $ENV_FILE"
+  exit 1
+fi
+
+DC="docker compose --env-file $ENV_FILE"
+
+$DC -f $BASE/docker-compose.db.yml $CMD
+$DC -f $BASE/docker-compose.cache.yml $CMD
+$DC -f $BASE/docker-compose.storage.yml $CMD
+$DC -f $BASE/docker-compose.pgadmin.yml $CMD
 if [ "$ENV" = "dev" ]; then
-  docker compose -f $BASE/docker-compose.infra.yml $CMD
+  $DC -f $BASE/docker-compose.infra.yml $CMD
 fi
 # Dev: --build forces rebuild from source every time
 if [ "$ENV" = "dev" ] && [[ "$CMD" == *"up"* ]]; then
-  docker compose -f $BASE/docker-compose.app.yml up --build -d
+  $DC -f $BASE/docker-compose.app.yml up --build -d
 else
-  docker compose -f $BASE/docker-compose.app.yml $CMD
+  $DC -f $BASE/docker-compose.app.yml $CMD
 fi

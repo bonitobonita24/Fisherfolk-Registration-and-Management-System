@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-05-08 — Phase 6 Docker services + migration + seed + Visual QA (15 errors fixed)
+- Agent:               CLAUDE_CODE
+- Why:                 Start all dev Docker services, run Prisma migration and seed, verify app health via Visual QA. Phase 6 output contract fulfilled.
+- Files added:         none
+- Files modified:      apps/web/Dockerfile (5 iterations: added pnpm to builder stage, monorepo-aware COPY, Prisma generate step, dynamic engine discovery via find+xargs, public/ copy from correct monorepo path), deploy/compose/dev/docker-compose.app.yml (fixed PORT=3000, added AUTH_TRUST_HOST=true, healthcheck changed from localhost to 127.0.0.1), deploy/compose/dev/docker-compose.db.yml (pgBouncer: set DATABASE_URL="" override to prevent env_file collision, removed DB_HOST/DB_PORT/DB_NAME/DB_PASSWORD individual vars, set correct internal hostname), .env.dev (URL-encoded / as %2F in DATABASE_URL password, changed PGADMIN_EMAIL from .local TLD to .dev TLD, added DOCKERHUB_USERNAME and IMAGE_NAME, added PRISMA_STUDIO_PORT and WORKER_PORT), turbo.json (added env: ["DATABASE_URL"] to db:generate/migrate/seed/reset tasks), .cline/STATE.md, docs/CHANGELOG_AI.md (this entry)
+- Files deleted:       none
+- Schema/migrations:   Migration 00000000000000_init applied to frms_dev database. Seed: 1 tenant (City of Calapan FMO), 1 webmaster user (super_admin), 6 default categories.
+- Errors encountered:  15 total: (1) DOCKERHUB_USERNAME not in .env.dev — docker build tag failed. (2) pnpm not installed in builder stage. (3) Simple Dockerfile didn't handle monorepo workspace structure. (4) Prisma client not generated before build. (5) apps/web/public/ missing in standalone output. (6) pgBouncer crash — DATABASE_URL password contained / character. (7) pgAdmin crash — .local TLD rejected by email validator. (8) Prisma engine not found at hardcoded pnpm path. (9) pgBouncer still crash-looping — DATABASE_URL env_file override. (10) Prisma engine path mismatch with pnpm version. (11) App container PORT mismatch (44387 vs 3000). (12) Auth.js UntrustedHost error with Docker port mapping. (13) DATABASE_URL password / not URL-encoded. (14) Playwright MCP requires Google Chrome not Chromium. (15) Alpine resolves localhost to IPv6 ::1 — healthcheck wget failed.
+- Errors resolved:     (1-5) Iterative Dockerfile fixes culminating in dynamic Prisma engine discovery. (6) Set DATABASE_URL="" in pgBouncer compose environment to override env_file value. (7) Changed PGADMIN_EMAIL to dev-admin@frms.dev. (8-10) Dynamic find+xargs in Dockerfile to locate and copy Prisma engine regardless of pnpm store path. (11) Fixed PORT=3000 in compose environment. (12) Added AUTH_TRUST_HOST=true. (13) URL-encoded / as %2F in DATABASE_URL. (14) Fell back to curl-based Visual QA. (15) Changed healthcheck URL from localhost to 127.0.0.1.
+
 ## 2026-05-07 — Phase 5 validation (all 9 commands pass — 2 tool bugs self-healed)
 - Agent:               CLAUDE_CODE
 - Why:                 Run Phase 5 validation suite. Self-heal any failures before passing the output contract.
