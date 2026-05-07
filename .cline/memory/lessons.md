@@ -82,6 +82,22 @@
 - Concepts:  nextjs-15, jsdom, isomorphic-dompurify, server-bundling, prisma, bcryptjs
 - Narrative: pnpm build compiled successfully but failed at page-data collection with `ENOENT: no such file or directory, open '.next/server/app/api/browser/default-stylesheet.css'`. Root cause: jsdom (transitive dep of isomorphic-dompurify) ships a default stylesheet at a virtual path that webpack tries to bundle. Fix: add `serverExternalPackages: ["isomorphic-dompurify", "@prisma/client", "bcryptjs"]` to next.config.ts. Per Next.js 15 bundling reference: this directive is for native-binding packages (bcrypt), packages with bundling issues (jsdom-based), and ORMs (Prisma) — exactly our three. Loaded via Node.js runtime instead of bundled.
 
+## 2026-05-07 — 🔴 ports.dev.base meta-field causes validate-inputs false duplicate detection
+- Type:      🔴 gotcha
+- Phase:     Phase 5 validation
+- Files:     inputs.yml, tools/validate-inputs.mjs
+- Concepts:  inputs-yml, validate-inputs, ports-dev, duplicate-detection, meta-field
+- Narrative: inputs.yml had `ports.dev.base: 44377` as a documentation meta-field (the base number ports are derived from) AND `ports.dev.db: 44377` as the actual PostgreSQL port. The validator collects ALL numeric values from `ports.dev` and checks for duplicates. `base` was included in that set, creating a false positive: "Duplicate port values detected — each service must have a unique port." Fix: remove `base:` from `ports.dev` in inputs.yml entirely. The base value is implicit from the db port. Never add meta/documentation fields with numeric values to `ports.dev` — the validator treats every numeric value in that section as a service port assignment.
+# ---
+
+## 2026-05-07 — 🟡 check-product-sync required sections use generic V31 template names, not FRMS headers
+- Type:      🟡 fix
+- Phase:     Phase 5 validation
+- Files:     tools/check-product-sync.mjs
+- Concepts:  check-product-sync, product-md, required-sections, alternation, frms-specific-headers
+- Narrative: The generated `extractRequiredSections()` in check-product-sync.mjs checked for generic V31 interview template header names ("App Name", "Purpose", "Target Users") but FRMS PRODUCT.md uses descriptive project-specific headers ("App Identity", "Problem Statement", "Core User Flows", "Data Entities", "Roles + Permissions"). This caused 6 false "missing section" failures. Fix: update the required array to use pipe-separated alternation strings ("App Identity|App Name") and change the matching logic to `alts.some((alt) => pattern.test(productMd))`. Either the generic template name OR the project-specific name satisfies the check. Apply same alternation approach to all future projects where PRODUCT.md headers deviate from the V31 template.
+# ---
+
 ## 2026-05-07 — 🟡 useSearchParams requires Suspense boundary in Next.js 15 static prerender
 - Type:      🟡 fix
 - Phase:     Phase 4 Part 8 (build verification)
