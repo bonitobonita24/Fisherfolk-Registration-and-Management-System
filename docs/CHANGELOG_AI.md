@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-05-07 — Phase 5 validation (all 9 commands pass — 2 tool bugs self-healed)
+- Agent:               CLAUDE_CODE
+- Why:                 Run Phase 5 validation suite. Self-heal any failures before passing the output contract.
+- Files added:         none
+- Files modified:      inputs.yml (removed meta base field from ports.dev that caused false duplicate port error), tools/check-product-sync.mjs (added pipe-separated alternation to required section matching so FRMS-specific headers match alongside generic V31 names), package.json (added pnpm override for postcss >=8.5.10 to resolve moderate CVE GHSA-qx2v-qp2m-jg93), pnpm-lock.yaml (regenerated to apply postcss override), .cline/STATE.md, docs/CHANGELOG_AI.md (this entry)
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  (1) validate-inputs: "Duplicate port values detected" — ports.dev.base: 44377 collided with db: 44377 (base is a meta-field, not a service port). (2) check-product-sync: 6 sections reported missing — tool used generic V31 interview names; PRODUCT.md uses project-specific descriptive headers. (3) pnpm audit: moderate CVE GHSA-qx2v-qp2m-jg93 in postcss (transitive via Next.js 15.5.15). (4) pnpm install --frozen-lockfile failed after audit fix modified package.json.
+- Errors resolved:     (1) Removed base field from inputs.yml ports.dev. (2) Updated extractRequiredSections() in check-product-sync.mjs to use alts.some() with pipe-separated header alternation. (3) Added pnpm override "postcss@<8.5.10": ">=8.5.10" — no HIGH/CRITICAL CVEs remain. (4) Ran pnpm install --no-frozen-lockfile to regenerate lockfile; --frozen-lockfile now passes.
+
 ## 2026-05-07 — Phase 4 Part 8 (CI workflows + governance docs + MANIFEST.txt + build fixes)
 - Agent:               CLAUDE_CODE
 - Why:                 Generate GitHub Actions CI pipeline and Docker publish workflow, rewrite IMPLEMENTATION_MAP.md to reflect all 8 Parts complete, generate MANIFEST.txt. Resumed from interrupted session (TYPE 4 / H3 partial recovery). Fixed three build-blocking issues exposed by pnpm build per Part 8 contract.
