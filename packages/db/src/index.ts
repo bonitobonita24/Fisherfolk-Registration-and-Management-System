@@ -1,4 +1,4 @@
-export { prisma } from "./client";
+export { prisma, platformPrisma } from "./client";
 export type { ExtendedPrismaClient } from "./client";
 export { writeAuditLog } from "./audit";
 export type { AuditLogEntry } from "./audit";

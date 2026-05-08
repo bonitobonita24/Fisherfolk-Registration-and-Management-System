@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-05-08 — Fix webmaster login auth (4 errors resolved)
+- Agent:               CLAUDE_CODE
+- Why:                 Webmaster login returned "invalid credentials" after Phase 6 completion. Root cause: 3-layer failure (Docker container networking, L6 tenant guard blocking auth queries, TypeScript build errors from prior refactor).
+- Files added:         .cline/handoffs/2026-05-08-fix-webmaster-login.md
+- Files modified:      packages/db/src/client.ts (added platformPrisma unguarded client + fixed basePrismaLog variable reference), packages/db/src/index.ts (exported platformPrisma), apps/web/src/server/auth/config.ts (switched authorize() and session callback to platformPrisma, removed unnecessary `as string` type assertion), deploy/compose/dev/docker-compose.app.yml (added DATABASE_URL and REDIS_URL env overrides using Docker internal hostnames), .cline/STATE.md, docs/CHANGELOG_AI.md, docs/DECISIONS_LOG.md, docs/IMPLEMENTATION_MAP.md, .cline/memory/lessons.md
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  (1) L6 tenant guard throws "Tenant context not set for User.findFirst" in authorize() — no tenant context at login time. (2) DATABASE_URL uses localhost inside Docker container — cannot reach postgres. (3) basePrismaConfig variable renamed to basePrismaLog but function references not updated. (4) ESLint @typescript-eslint/no-unnecessary-type-assertion on token.userId already narrowed by typeof check.
+- Errors resolved:     (1) Created platformPrisma (unguarded PrismaClient without tenant extension) per security.md pattern for auth/platform operations. (2) Added DATABASE_URL and REDIS_URL overrides in docker-compose.app.yml using Docker internal hostnames (frms_dev_postgres:5432, frms_dev_valkey:6379). (3) Changed both `new PrismaClient(basePrismaConfig)` to `new PrismaClient({ log: basePrismaLog })`. (4) Removed `as string` from `token.userId` — typeof check already narrows.
+
 ## 2026-05-08 — Phase 6 Docker services + migration + seed + Visual QA (15 errors fixed)
 - Agent:               CLAUDE_CODE
 - Why:                 Start all dev Docker services, run Prisma migration and seed, verify app health via Visual QA. Phase 6 output contract fulfilled.

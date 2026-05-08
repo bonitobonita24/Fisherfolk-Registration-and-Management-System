@@ -16,8 +16,9 @@
 | Phase 2.7 — Spec Stress-Test | ✅ Passed (0 gaps) | 2026-05-02 |
 | Phase 3 — Generate Spec Files | ✅ Complete | 2026-05-02 |
 | Phase 4 — Full Scaffold | ✅ Complete (all 8 Parts) | 2026-05-07 |
-| Phase 5 — Validation | Not Started | — |
-| Phase 6 — Docker + Visual QA | Not Started | — |
+| Phase 5 — Validation | ✅ Complete (all 9 commands pass) | 2026-05-07 |
+| Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
+| Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
 | Phase 8 — Iterative Buildout | Not Started | — |
 
