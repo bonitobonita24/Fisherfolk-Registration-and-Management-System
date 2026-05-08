@@ -20,7 +20,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | Not Started | — |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1a complete) | 2026-05-08 |
 
 ---
 
@@ -272,13 +272,38 @@
 
 ---
 
+## Phase 8 — Iterative Buildout
+
+### Batch 1a — Shared UI Components (complete)
+
+| Component | File | Status |
+|-----------|------|--------|
+| DataTable + DataTableColumnHeader | apps/web/src/components/shared/data-table.tsx | ✅ Built |
+| StatusBadge | apps/web/src/components/shared/status-badge.tsx | ✅ Built |
+| SearchInput | apps/web/src/components/shared/search-input.tsx | ✅ Built |
+| ConfirmDialog | apps/web/src/components/shared/confirm-dialog.tsx | ✅ Built |
+| FileUpload | apps/web/src/components/shared/file-upload.tsx | ✅ Built |
+| Barrel index | apps/web/src/components/shared/index.ts | ✅ Built |
+
+21 shadcn/ui base components installed. Commit 28ad99e on feat/shared-ui-components.
+
+### Batch 1b — Fisherfolk List Page (pending)
+
+| Component | Status |
+|-----------|--------|
+| Fisherfolk list page | ⬜ Not started |
+| Column definitions | ⬜ Not started |
+| tRPC query integration | ⬜ Not started |
+
+---
+
 ## Governance Docs
 
 | Document | Status |
 |----------|--------|
 | PRODUCT.md | ✅ Complete (505 lines) |
 | DESIGN.md | ✅ Complete (pre-existing) |
-| CHANGELOG_AI.md | ✅ Active (7 entries) |
+| CHANGELOG_AI.md | ✅ Active (8 entries) |
 | DECISIONS_LOG.md | ✅ Active (12 locked decisions) |
 | IMPLEMENTATION_MAP.md | ✅ Active (this file — Phase 4 all 8 Parts complete) |
 | inputs.yml | ✅ Generated |
