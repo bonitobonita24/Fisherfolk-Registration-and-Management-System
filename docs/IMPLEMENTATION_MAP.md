@@ -20,7 +20,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1a + 1b complete) | 2026-05-08 |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1 squash-merged to main — Batch 2 pending) | 2026-05-08 |
 
 ---
 
@@ -296,7 +296,9 @@
 | Column definitions (FisherfolkListItem + 6 columns) | apps/web/src/app/[tenant]/fisherfolk/columns.tsx | ✅ Built |
 | DataTable showPagination prop | apps/web/src/components/shared/data-table.tsx | ✅ Extended |
 
-Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fisherfolk.list query with keepPreviousData. Client-rendered custom pager (first/prev/next/last). Pre-existing Batch 1a lint/typecheck errors remain on branch — must be fixed before squash-merge.
+Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fisherfolk.list query with keepPreviousData. Client-rendered custom pager (first/prev/next/last).
+
+**Batch 1 squash-merged → main as commit 79e79d6** (59 files, 30824 insertions). 6 TypeScript strict-mode/ESLint errors fixed before merge: 3x `strict-boolean-expressions` in dropdown-menu.tsx (`inset === true`), 1x `exactOptionalPropertyTypes` in sonner.tsx (`Exclude<T, undefined>`), plus form.tsx, toaster.tsx, use-toast.ts, confirm-dialog.tsx. feat/shared-ui-components branch deleted.
 
 ### Batch 2 — Fisherfolk Registration Form (pending)
 

@@ -148,3 +148,17 @@
 - Files:     packages/db/src/client.ts
 - Concepts:  typescript, refactor, variable-rename, basePrismaConfig, basePrismaLog
 - Narrative: A prior edit renamed `basePrismaConfig` to `basePrismaLog` (changing from a config object to just the log array) but did not update the two function bodies that referenced `basePrismaConfig`. Both `createPrismaClient()` and `createPlatformPrismaClient()` still passed the old variable name. Fix: changed `new PrismaClient(basePrismaConfig)` to `new PrismaClient({ log: basePrismaLog })` in both functions. Lesson: when renaming a variable, always search for ALL references in the same file — TypeScript would catch this at build time but it's better to fix during the same edit.
+
+## 2026-05-08 — 🟡 strict-boolean-expressions: nullable boolean props require explicit === true check
+- Type:      🟡 fix
+- Phase:     Phase 8 Batch 1 — TypeScript strict fixes
+- Files:     apps/web/src/components/ui/dropdown-menu.tsx
+- Concepts:  typescript-strict, eslint, strict-boolean-expressions, nullable-boolean, shadcn
+- Narrative: shadcn/ui dropdown-menu uses `inset?: boolean`. With strict-boolean-expressions enabled, `inset ? "pl-8" : undefined` is rejected because `inset` is `boolean | undefined` and the rule requires handling nullish explicitly. Fix: `inset === true ? "pl-8" : undefined`. Apply this pattern to any optional boolean prop used in a conditional expression.
+
+## 2026-05-08 — 🟡 exactOptionalPropertyTypes: indexed optional prop types include undefined — use Exclude<T, undefined>
+- Type:      🟡 fix
+- Phase:     Phase 8 Batch 1 — TypeScript strict fixes
+- Files:     apps/web/src/components/ui/sonner.tsx
+- Concepts:  typescript-strict, exactOptionalPropertyTypes, Exclude, indexed-type, sonner
+- Narrative: With exactOptionalPropertyTypes: true, accessing an optional prop via indexed type (e.g. `ToasterProps["theme"]`) yields the full union including `undefined`. Passing this to a required prop fails typecheck. Fix: cast with `Exclude<ToasterProps["theme"], undefined>` to strip undefined from the union. Required any time an optional prop's type is accessed via indexing and used where undefined is not acceptable.

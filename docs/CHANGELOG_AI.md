@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-05-08 — Phase 8 Batch 1 — TypeScript Strict Fixes + Squash Merge to Main
+- Agent:               CLAUDE_CODE
+- Why:                 Phase 4/8 OUTPUT CONTRACT requires 0 lint/typecheck errors before squash-merge. Fixed 6 pre-existing errors in shadcn/ui generated files and shared components that were gating the Batch 1 merge.
+- Files added:         none
+- Files modified:      apps/web/src/components/ui/dropdown-menu.tsx (3x strict-boolean-expressions: `inset ? "pl-8" : undefined` → `inset === true ? "pl-8" : undefined` in DropdownMenuSubTrigger, DropdownMenuItem, DropdownMenuLabel), apps/web/src/components/ui/sonner.tsx (exactOptionalPropertyTypes: `theme as ToasterProps["theme"]` → `theme as Exclude<ToasterProps["theme"], undefined>`), apps/web/src/components/ui/form.tsx (consistent-type-imports + strict-boolean-expressions — prior session), apps/web/src/components/ui/toaster.tsx (strict-boolean-expressions null checks — prior session), apps/web/src/hooks/use-toast.ts (unused var prefix + optional spread — prior session), apps/web/src/components/shared/confirm-dialog.tsx (no-misused-promises void wrapper — prior session)
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  (1) strict-boolean-expressions: `inset ? "pl-8" : undefined` rejected for nullable boolean — fix: `inset === true ? "pl-8" : undefined`. (2) exactOptionalPropertyTypes: `ToasterProps["theme"]` resolves to union including `undefined`, not assignable to required theme prop — fix: `Exclude<ToasterProps["theme"], undefined>`. (3) git branch -d rejected post-squash-merge (expected) — fix: git branch -D.
+- Errors resolved:     All 6 files pass `pnpm --filter @frms/web typecheck` (exit 0) and `pnpm --filter @frms/web lint` (0 warnings/errors).
+- Notes:               Squash-merged feat/shared-ui-components → main as commit 79e79d6 (59 files, 30824 insertions). Branch deleted. Batch 1a (6 shared UI components) + Batch 1b (fisherfolk list page) now on main. Prior entries for Batch 1a/1b noted "not yet merged" — both are now merged via this squash commit.
+
 ## 2026-05-08 — Phase 8 Batch 1b — Fisherfolk List Page
 - Agent:               CLAUDE_CODE
 - Why:                 Phase 8 Iterative Buildout — Batch 1b ships the first module list page, exercising the shared UI components (DataTable, DataTableColumnHeader, StatusBadge, SearchInput) introduced in Batch 1a against a real tRPC query.
