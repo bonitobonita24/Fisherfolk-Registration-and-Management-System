@@ -61,6 +61,12 @@ MFA: false (not required).
 Password hashing: bcrypt.
 Locked: yes — do not re-ask.
 
+## platformPrisma for Auth and Platform-Level Queries
+Decision: Auth queries (authorize, session callback) and superadmin cross-tenant queries use `platformPrisma` — an unguarded PrismaClient WITHOUT the L6 tenant-guard extension.
+Rationale: The L6 tenant guard (`tenantGuardExtension`) requires tenant context via `runWithTenant()`. Auth flows (login, session validation) run before any tenant context exists. Using the guarded `prisma` client causes "Tenant context not set" errors. Per `.claude/rules/security.md` superadmin section: "Superadmin queries that bypass tenant scoping MUST use a dedicated Prisma client instance WITHOUT the L6 tenant-guard extension."
+Implementation: `platformPrisma` is created in `packages/db/src/client.ts` and exported from `packages/db/src/index.ts`. Used ONLY in `apps/web/src/server/auth/config.ts` (authorize + session callback) and future platform-level routers.
+Locked: yes — never use guarded `prisma` for auth flows.
+
 ## Cloudflare Turnstile Bot Protection
 Decision: Enabled on login page only (no open registration in FRMS).
 Widget mode: managed (Cloudflare auto-decides checkbox visibility).

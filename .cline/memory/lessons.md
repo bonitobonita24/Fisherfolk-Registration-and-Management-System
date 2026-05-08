@@ -104,3 +104,27 @@
 - Files:     apps/web/src/app/login/page.tsx
 - Concepts:  nextjs-15, suspense, useSearchParams, csr-bailout, static-export
 - Narrative: /login uses useSearchParams() to read ?callbackUrl=. Build failed: "useSearchParams() should be wrapped in a suspense boundary at page /login. Read more: missing-suspense-with-csr-bailout". Next.js 15 enforces this for any client component using useSearchParams when the page can be statically prerendered. Fix: split the inner JSX using useSearchParams into its own component (LoginForm), keep the default export as a thin wrapper (LoginPage) returning `<Suspense fallback={null}><LoginForm /></Suspense>`. After fix /login prerenders as static (○) and the rest of the app routes are server-rendered on demand (ƒ). Apply same pattern to any future page using useSearchParams or usePathname at module scope.
+# ---
+
+## 2026-05-08 — 🔴 L6 tenant guard blocks auth queries — use platformPrisma
+- Type:      🔴 gotcha
+- Phase:     Post-Phase 6 (fix webmaster login)
+- Files:     packages/db/src/client.ts, packages/db/src/index.ts, apps/web/src/server/auth/config.ts
+- Concepts:  auth, tenant-guard, prisma, L6, platformPrisma, authorize, session-callback
+- Narrative: Auth.js authorize() runs BEFORE any tenant context exists — it IS the login flow. Using the guarded `prisma` client (which has the L6 tenantGuardExtension via $allOperations) causes "Tenant context not set for User.findFirst". The error surfaces as a generic Auth.js `?error=Configuration` redirect with no useful message in browser DevTools. Fix: create `platformPrisma` — a second PrismaClient WITHOUT the tenant extension — and use it exclusively for auth queries and platform-level operations. This follows the pattern in `.claude/rules/security.md`: "Superadmin queries that bypass tenant scoping MUST use a dedicated Prisma client instance WITHOUT the L6 tenant-guard extension." NEVER use guarded `prisma` for authorize(), session callbacks, or any query that runs before tenant context is established.
+# ---
+
+## 2026-05-08 — 🔴 Docker container DATABASE_URL must use internal hostname not localhost
+- Type:      🔴 gotcha
+- Phase:     Post-Phase 6 (fix webmaster login)
+- Files:     deploy/compose/dev/docker-compose.app.yml
+- Concepts:  docker, networking, localhost, container-hostname, DATABASE_URL, REDIS_URL
+- Narrative: `.env.dev` sets DATABASE_URL with `localhost:44377` — correct when running the app from the host (WSL2 terminal via `pnpm dev`) but WRONG inside a Docker container. Inside the container, `localhost` refers to the container itself, not the host or other containers. Fix: override DATABASE_URL and REDIS_URL in docker-compose.app.yml environment section using Docker internal hostnames (e.g. `frms_dev_postgres:5432` and `frms_dev_valkey:6379`). The internal hostname is the container_name from docker-compose.db.yml / docker-compose.cache.yml. Port is the CONTAINER port (5432/6379), not the host-mapped port (44377/44379). This override is needed for ALL backing services the app connects to when running inside Docker.
+# ---
+
+## 2026-05-08 — 🟡 Variable rename must update all references
+- Type:      🟡 fix
+- Phase:     Post-Phase 6 (fix webmaster login)
+- Files:     packages/db/src/client.ts
+- Concepts:  typescript, refactor, variable-rename, basePrismaConfig, basePrismaLog
+- Narrative: A prior edit renamed `basePrismaConfig` to `basePrismaLog` (changing from a config object to just the log array) but did not update the two function bodies that referenced `basePrismaConfig`. Both `createPrismaClient()` and `createPlatformPrismaClient()` still passed the old variable name. Fix: changed `new PrismaClient(basePrismaConfig)` to `new PrismaClient({ log: basePrismaLog })` in both functions. Lesson: when renaming a variable, always search for ALL references in the same file — TypeScript would catch this at build time but it's better to fix during the same edit.

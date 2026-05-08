@@ -4,7 +4,7 @@ import type { NextAuthConfig, Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 
-import { prisma } from "@frms/db";
+import { prisma, platformPrisma } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
 declare module "next-auth" {
@@ -60,7 +60,7 @@ export const authConfig = {
 
         const { username, password, tenantSlug } = parsed.data;
 
-        const user = await prisma.user.findFirst({
+        const user = await platformPrisma.user.findFirst({
           where: { username, status: "ACTIVE" },
           include: { tenant: true },
         });
@@ -104,7 +104,7 @@ export const authConfig = {
     async session({ session, token }): Promise<Session> {
       // Verify securityVersion is still valid (session invalidation on role/tenant change)
       if (typeof token.userId === "string" && token.userId.length > 0) {
-        const dbUser = await prisma.user.findUnique({
+        const dbUser = await platformPrisma.user.findUnique({
           where: { id: token.userId },
           select: { securityVersion: true, status: true },
         });

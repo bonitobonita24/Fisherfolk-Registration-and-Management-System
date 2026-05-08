@@ -19,6 +19,8 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - AUTH_TRUST_HOST=true
+      - DATABASE_URL=postgresql://frms_7041ec0ed8e0d0b610f826:ydd5BAU%2FEeQ36eLMXG9Uxg@frms_dev_postgres:5432/frms_dev?schema=public
+      - REDIS_URL=redis://:hTMUhH3HnsalCIjzrG3Vi1@frms_dev_valkey:6379
     ports:
       - "${APP_PORT}:3000"
     networks: [app_network]
