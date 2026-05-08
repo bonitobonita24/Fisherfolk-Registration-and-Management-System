@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-05-08 — Phase 8 Batch 1b — Fisherfolk List Page
+- Agent:               CLAUDE_CODE
+- Why:                 Phase 8 Iterative Buildout — Batch 1b ships the first module list page, exercising the shared UI components (DataTable, DataTableColumnHeader, StatusBadge, SearchInput) introduced in Batch 1a against a real tRPC query.
+- Files added:         apps/web/src/app/[tenant]/fisherfolk/columns.tsx (FisherfolkListItem type + 6 column defs: idNumber, fullName, barangay, contactNumber, status, createdAt — sortable headers via DataTableColumnHeader, StatusBadge for status, en-PH localized createdAt), apps/web/src/app/[tenant]/fisherfolk/fisherfolk-list-client.tsx (client component: tRPC fisherfolk.list query with keepPreviousData, search input, status filter, page-size selector, custom server-paginated pager — first/prev/next/last)
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/page.tsx (RSC page now wraps FisherfolkListClient with header), apps/web/src/components/shared/data-table.tsx (added showPagination?: boolean prop — default true; backward compatible. Server-paginated callers pass showPagination={false} and render their own pager. Dropped unused <TData> generic from DataTableColumnHeader signature.)
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  none in Batch 1b scope
+- Errors resolved:     none
+- Notes:               Commit 5c83d0c on feat/shared-ui-components branch (not yet merged). Pre-existing Batch 1a lint/typecheck errors (in ui/dropdown-menu.tsx, ui/sonner.tsx, ui/form.tsx, ui/toaster.tsx, hooks/use-toast.ts, shared/confirm-dialog.tsx) remain on the branch and must be resolved before squash-merge per Phase 4/8 OUTPUT CONTRACT — tracked separately.
+
+## 2026-05-08 — Phase 8 Batch 1a — Shared UI Components
+- Agent:               CLAUDE_CODE
+- Why:                 Phase 8 Iterative Buildout — Batch 1a creates 6 shared UI components used across all module pages. These must exist before any module page can be built (Batch 1b onward).
+- Files added:         apps/web/src/components/shared/data-table.tsx (DataTable + DataTableColumnHeader — TanStack Table wrapper with sortable columns and pagination), apps/web/src/components/shared/status-badge.tsx (StatusBadge — color-coded status indicator with variant mapping), apps/web/src/components/shared/search-input.tsx (SearchInput — debounced search with clear button), apps/web/src/components/shared/confirm-dialog.tsx (ConfirmDialog — destructive action confirmation with async loading state), apps/web/src/components/shared/file-upload.tsx (FileUpload — drag-and-drop with file list, size validation, keyboard accessible), apps/web/src/components/shared/index.ts (barrel re-export of all 6 components)
+- Files modified:      none
+- Files deleted:       none
+- Schema/migrations:   none
+- Errors encountered:  none
+- Errors resolved:     none
+- Notes:               21 shadcn/ui base components installed in apps/web. Commit 28ad99e on feat/shared-ui-components branch (not yet merged to main).
+
 ## 2026-05-08 — Fix webmaster login auth (4 errors resolved)
 - Agent:               CLAUDE_CODE
 - Why:                 Webmaster login returned "invalid credentials" after Phase 6 completion. Root cause: 3-layer failure (Docker container networking, L6 tenant guard blocking auth queries, TypeScript build errors from prior refactor).

@@ -4,6 +4,26 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-05-08 — 🟤 Phase 8 batch atomicity: pre-existing errors do not block new batches but block branch merge
+- Type:      🟤 decision
+- Phase:     Phase 8 Iterative Buildout — Batch 1b commit
+- Files:     apps/web/src/components/ui/{dropdown-menu,sonner,form,toaster}.tsx, apps/web/src/hooks/use-toast.ts, apps/web/src/components/shared/confirm-dialog.tsx
+- Concepts:  phase-8, atomicity, anti-thrashing, output-contract, squash-merge, scope-discipline
+- Narrative: Batch 1a (commit 28ad99e) was committed with 9 lint errors + 3 typecheck errors in shadcn-installed files (dropdown-menu, sonner, form, toaster, use-toast, confirm-dialog). These violate the Phase 4/8 OUTPUT CONTRACT (0 lint/typecheck before merge) but were not caught at the time of that batch's commit. When Batch 1b started, the choice was: (A) fold the Batch 1a fixes into Batch 1b's commit, or (B) commit Batch 1b cleanly and track the Batch 1a errors as a separate follow-up.
+  Decision: B. Reasons: (1) atomic commits per batch — Batch 1b's commit message and diff should reflect ONLY Batch 1b work; (2) anti-thrashing — folding two batches into one session inflates context and obscures the diff; (3) the pre-existing errors are a Batch 1a debt, not a Batch 1b regression — verified by checking that none of the failing files are in the Batch 1b WIP set. Constraint: feat/shared-ui-components CANNOT squash-merge to main until those 6 files are fixed (recorded as Task #5 + STATE.md "Outstanding follow-ups"). Future Phase 8 batches on the same branch can proceed; merge is gated on debt resolution.
+  How to apply: When discovering pre-existing lint/typecheck errors mid-batch, do NOT silently absorb them into the current commit. Verify they are pre-existing (git log on the affected files), record them as a follow-up task with concrete file list, document in STATE.md "Outstanding follow-ups", and proceed with the current batch's clean scope. The branch may accumulate debt across batches but every commit must be atomic to its declared scope.
+# ---
+
+## 2026-05-08 — 🟤 Anti-thrashing: per-task token estimates required before starting Phase 8 work
+- Type:      🟤 decision
+- Phase:     Phase 8 Iterative Buildout — session handoff
+- Files:     n/a (process)
+- Concepts:  anti-thrashing, claude-sonnet-4-6, context-budget, scope-assessment, batch-split, opus-vs-sonnet
+- Narrative: User explicitly requires concrete token estimates for each upcoming task before deciding whether to split. Pattern locked in this session: itemize CLAUDE.md+rules (~5K), STATE.md (~1K), lessons.md gotchas (~2-3K), PRODUCT.md relevant section ONLY (~3-5K), schema/router files needed (~2-3K each), output (~2-5K per file written), reasoning overhead (~10-15K). Sum and compare to 80K SAFE zone. If >70K, default to split.
+  Concrete handoff at end of this session: Batch 1a fixes ≈ 31-36K (SAFE single session), Batch 2 Registration Form ≈ 52-72K (EDGE — read fisherfolkCreateSchema and PRODUCT.md fisherfolk subsection FIRST, then re-estimate before writing code).
+  How to apply: Before any Phase 8 batch starts, output a token table broken down by category. If the table sum approaches 70K, propose a split immediately — do not start writing code "to see how far we get". Sonnet 4.6 has the same 200K window as Opus 4.7 but the SAFE zone is ≤80K input regardless of model. Cost of unnecessary split = one extra session boundary. Cost of underestimated single session = thrashing, partial code, broken state — orders of magnitude worse.
+# ---
+
 ## BOOTSTRAP — 🔴 WSL2 + Docker Desktop known pitfalls
 - Type:      🔴 gotcha
 - Phase:     Phase 0 Bootstrap / Phase 1 dev environment open

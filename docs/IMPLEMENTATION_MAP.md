@@ -20,7 +20,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | Not Started | — |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1a + 1b complete) | 2026-05-08 |
 
 ---
 
@@ -272,13 +272,57 @@
 
 ---
 
+## Phase 8 — Iterative Buildout
+
+### Batch 1a — Shared UI Components (complete)
+
+| Component | File | Status |
+|-----------|------|--------|
+| DataTable + DataTableColumnHeader | apps/web/src/components/shared/data-table.tsx | ✅ Built |
+| StatusBadge | apps/web/src/components/shared/status-badge.tsx | ✅ Built |
+| SearchInput | apps/web/src/components/shared/search-input.tsx | ✅ Built |
+| ConfirmDialog | apps/web/src/components/shared/confirm-dialog.tsx | ✅ Built |
+| FileUpload | apps/web/src/components/shared/file-upload.tsx | ✅ Built |
+| Barrel index | apps/web/src/components/shared/index.ts | ✅ Built |
+
+21 shadcn/ui base components installed. Commit 28ad99e on feat/shared-ui-components.
+
+### Batch 1b — Fisherfolk List Page (complete)
+
+| Component | File | Status |
+|-----------|------|--------|
+| Fisherfolk list RSC page | apps/web/src/app/[tenant]/fisherfolk/page.tsx | ✅ Built |
+| List client component (search, filter, paginate) | apps/web/src/app/[tenant]/fisherfolk/fisherfolk-list-client.tsx | ✅ Built |
+| Column definitions (FisherfolkListItem + 6 columns) | apps/web/src/app/[tenant]/fisherfolk/columns.tsx | ✅ Built |
+| DataTable showPagination prop | apps/web/src/components/shared/data-table.tsx | ✅ Extended |
+
+Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fisherfolk.list query with keepPreviousData. Client-rendered custom pager (first/prev/next/last). Pre-existing Batch 1a lint/typecheck errors remain on branch — must be fixed before squash-merge.
+
+### Batch 2 — Fisherfolk Registration Form (pending)
+
+| Component | Status |
+|-----------|--------|
+| Registration form page (/fisherfolk/register) | ⬜ Not started |
+| Multi-step form (personal, address, fishing details) | ⬜ Not started |
+| ID auto-generation via tRPC create mutation | ⬜ Not started |
+
+### Batch 3 — Fisherfolk Detail View + Vessel Registration (pending)
+
+| Component | Status |
+|-----------|--------|
+| Fisherfolk detail view (/fisherfolk/[id]) | ⬜ Not started |
+| Vessel registration sub-form | ⬜ Not started |
+| Recent violations panel | ⬜ Not started |
+
+---
+
 ## Governance Docs
 
 | Document | Status |
 |----------|--------|
 | PRODUCT.md | ✅ Complete (505 lines) |
 | DESIGN.md | ✅ Complete (pre-existing) |
-| CHANGELOG_AI.md | ✅ Active (7 entries) |
+| CHANGELOG_AI.md | ✅ Active (9 entries) |
 | DECISIONS_LOG.md | ✅ Active (12 locked decisions) |
 | IMPLEMENTATION_MAP.md | ✅ Active (this file — Phase 4 all 8 Parts complete) |
 | inputs.yml | ✅ Generated |
