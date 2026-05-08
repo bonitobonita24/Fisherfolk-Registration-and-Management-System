@@ -4,6 +4,29 @@
 
 ---
 
+## Anti-Thrashing Enforcement Mechanism
+Decision: UserPromptSubmit hook in .claude/settings.json (mechanical injection),
+NOT CLAUDE.md rule alone (advisory).
+Rationale: The locked anti-thrashing rule (lessons.md 2026-05-08 🟤 — "per-task
+token estimates required before starting Phase 8 work") was discoverable via
+memory but not auto-injected on phase/batch triggers. Manual paste of the
+scope-assessment preamble at the top of each session worked but was easy to
+forget. A hook auto-prepends the preamble whenever the user prompt contains
+"Start Phase", "Continue Phase", "Feature Update", "Batch", "Resume Session",
+or "Resume from handoff" (case-insensitive) — agent literally cannot bypass it.
+Implementation: single inline node -e command, preamble base64-encoded inside
+the JS to sidestep two-layer quote escaping. No jq dependency (jq not installed
+on this WSL2 env). 5-second timeout. Silent no-op on non-matching prompts.
+Trade-offs accepted: (1) editing the preamble requires base64 decode/encode
+round-trip — mitigated by ad-hoc decode helper documented in handoff. (2) Hook
+adds ~5ms latency to every UserPromptSubmit. (3) Settings watcher only picks up
+new hooks after /hooks reload or session restart — first-time activation gotcha.
+Locked: yes — anti-thrashing enforcement is mechanical via hook. CLAUDE.md
+"⚠ CONTEXT BUDGET" section remains as defence-in-depth (rule the agent reads)
+but is no longer the sole enforcement layer.
+File: .claude/settings.json hooks.UserPromptSubmit
+Commit: 7bf35bf
+
 ## Dev Environment Mode
 Decision: MODE A — WSL2 native (the only supported mode as of V25)
 Rationale: Devcontainer adds 4 virtualisation layers on WSL2 + Docker Desktop causing

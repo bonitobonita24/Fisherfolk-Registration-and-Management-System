@@ -4,6 +4,23 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-05-08 — 🔴 jq is not installed on this WSL2 system — use node or python3 in hooks
+- Type:      🔴 gotcha
+- Phase:     Hooks installation / governance tooling
+- Files:     .claude/settings.json hook commands; future shell tooling
+- Concepts:  jq, wsl2, hooks, json-parsing, node, python3, settings.json
+- Narrative: The framework's CLAUDE.md examples (and the update-config skill's example hooks) all assume `jq` is available for parsing JSON in hook command strings. On this WSL2 dev env, `which jq` returns "jq not found". Initial anti-thrashing hook command was built around `jq -r '.prompt'` — pipe-test failed silently (exit 127, command not found). Fix: switched the hook to `node -e '...'` (node 22.20.0 is already a project dependency via .nvmrc, always available). Python3 is also available as a fallback. NEVER write a hook command that depends on jq for this project unless `apt install jq` is added to the dev setup checklist. Standard pattern for hooks in this project: `node -e 'let i="";process.stdin.on("data",c=>i+=c);process.stdin.on("end",()=>{const x=JSON.parse(i);...})'`. Same applies to any future formatter/linter hook examples copied from external docs.
+# ---
+
+## 2026-05-08 — 🟤 Anti-thrashing enforcement: UserPromptSubmit hook (mechanical) over rule alone (advisory)
+- Type:      🟤 decision
+- Phase:     Hooks installation / governance tooling
+- Files:     .claude/settings.json
+- Concepts:  hooks, anti-thrashing, scope-assessment, UserPromptSubmit, mechanical-enforcement, governance
+- Narrative: The locked anti-thrashing rule (this lessons.md 2026-05-08 🟤 — "per-task token estimates required") was discoverable via memory and CLAUDE.md but not auto-injected on phase/batch triggers. Worked when the user manually pasted the scope-assessment preamble at session start but was easy to forget — a single missed paste = thrashing risk on the next batch. Decision: enforce via UserPromptSubmit hook in .claude/settings.json that auto-prepends the preamble whenever the prompt contains "Start Phase" | "Continue Phase" | "Feature Update" | "Batch" | "Resume Session" | "Resume from handoff" (case-insensitive). Single inline node -e command, preamble base64-encoded inside the JS to sidestep two-layer quote escaping (JSON string → shell single-quoted arg). 5-second timeout. Logged as locked decision in DECISIONS_LOG.md.
+  How to apply: any future "auto-inject context on prompt match" pattern in this project follows this template — node -e single-liner, base64-encoded payload inside the JS, regex test against prompt field, output `{hookSpecificOutput: {hookEventName, additionalContext}}` JSON via process.stdout.write. Do NOT use jq (not installed). Do NOT use a separate script file unless the payload exceeds ~3K chars (then maintenance gets awkward inline). Activation gotcha: settings watcher only watches .claude/ if a settings file existed at session start — first-time hook install requires /hooks reload or restart to fire in current session; fresh sessions auto-activate.
+# ---
+
 ## 2026-05-08 — 🟤 TDD (Rule 25) deferred until dedicated test-infra batch
 - Type:      🟤 decision
 - Phase:     Phase 8 Batch 2a — registration form

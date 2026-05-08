@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-05-08 — Anti-Thrashing UserPromptSubmit Hook
+- Agent:               CLAUDE_CODE
+- Why:                 Closed enforcement gap on the locked anti-thrashing rule (lessons.md 2026-05-08 🟤). Rule was previously discoverable via memory but not auto-injected on phase/batch triggers — relied on user pasting the scope-assessment preamble manually each session. Hook makes injection mechanical and unbypassable.
+- Files added:         none
+- Files modified:      .claude/settings.json (added hooks.UserPromptSubmit entry — single inline node -e command, preamble base64-encoded inside the JS to handle two-layer quoting, 5-second timeout; preserved existing contextFiles array)
+- Files deleted:       none
+- Schema/migrations:   none
+- Triggers (case-insensitive): "Start Phase" | "Continue Phase" | "Feature Update" | "Batch" | "Resume Session" | "Resume from handoff"
+- Hook output:         JSON with hookSpecificOutput.additionalContext = scope-assessment preamble (file list, token estimates by category, split threshold at 12 files OR 80K, per-module verify-and-stop checklist). Silent no-op for non-matching prompts; silent failure on malformed JSON.
+- Verification:        5 pipe-tests passed (matching prompt / non-matching chitchat / lowercase trigger / mid-prompt trigger / malformed JSON), JSON schema validated, command re-extracted from written file and re-tested.
+- Errors encountered:  jq not installed on this WSL2 system — initial command depended on it.
+- Errors resolved:     Switched from jq to node (already a project dependency, single-tool, no shell-escape gymnastics). Logged as 🟡 fix in lessons.md.
+- Activation note:     Settings watcher only watches .claude/ if a settings file existed at session start. Current session needs /hooks reload or restart to pick up the new hook. Fresh sessions activate automatically.
+- Decision logged:     DECISIONS_LOG.md "Anti-thrashing enforcement: UserPromptSubmit hook (mechanical) over CLAUDE.md rule (advisory)".
+
 ## 2026-05-08 — Phase 8 Batch 2a — Fisherfolk Registration Form (basic)
 - Agent:               CLAUDE_CODE
 - Why:                 First user-facing create flow. Closes the spec gap where fisherfolk.create used adminProcedure but PRODUCT.md grants Encoders the right to register. Delivers a working create→list round-trip; photo/signature/QR/categories/duplicate-search deferred to Batch 2b.
