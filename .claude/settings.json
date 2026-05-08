@@ -9,5 +9,18 @@
     "docs/IMPLEMENTATION_MAP.md",
     "project.memory.md",
     ".cline/memory/agent-log.md"
-  ]
+  ],
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'let i=\"\";process.stdin.on(\"data\",c=>i+=c);process.stdin.on(\"end\",()=>{try{const{prompt=\"\"}=JSON.parse(i);if(/Start Phase|Continue Phase|Feature Update|Batch|Resume Session|Resume from handoff/i.test(prompt)){const ctx=Buffer.from(\"QmVmb3JlIHlvdSBzdGFydCwgYXBwbHkgYW50aS10aHJhc2hpbmcgc2NvcGUgYXNzZXNzbWVudC4KCkNvbnRleHQgYnVkZ2V0OiBZb3UgYXJlIENsYXVkZSBTb25uZXQgNC42LiBQcmFjdGljYWwgd29ya2luZyBidWRnZXQgfjEyMEsgdG9rZW5zLiBTQUZFIHpvbmUgaXMg4omkODBLIHRva2VucyBvZiBpbnB1dCBjb250ZXh0LgoKMS4gTGlzdCBldmVyeSBmaWxlIHlvdSB3aWxsIGNyZWF0ZSBvciBtb2RpZnkgZm9yIHRoaXMgdGFzay4KMi4gRXN0aW1hdGUgdG9rZW4gY29zdDogQ0xBVURFLm1kK3J1bGVzIH41SywgZWFjaCBQUk9EVUNULm1kIHNlY3Rpb24gfjItNEssIGVhY2ggc291cmNlIGZpbGUgcmVhZCB+MS0zSywgZ292ZXJuYW5jZSBkb2NzIH4xMC0xNUsgdG90YWwsIG91dHB1dCB+Mi01SyBwZXIgZmlsZSB3cml0dGVuLiBJZiB0b3RhbCA+ODBLLCB5b3UgTVVTVCBzcGxpdC4KMy4gSWYgZmlsZSBsaXN0ID4xMiBPUiBlc3RpbWF0ZWQgY29udGV4dCA+ODBLOiBncm91cCBieSBtb2R1bGUsIHJlcG9ydCB0aGUgc3BsaXQgcGxhbiBiZWZvcmUgd3JpdGluZyBhbnkgY29kZSwgYnVpbGQgb25lIG1vZHVsZSBwZXIgc2Vzc2lvbiwgY29tbWl0IGFmdGVyIGVhY2ggdGhlbiBTVE9QLgo0LiBSZWFkIE9OTFkgdGhlIFBST0RVQ1QubWQgc2VjdGlvbnMgcmVsZXZhbnQgdG8gdGhlIGN1cnJlbnQgbW9kdWxlIOKAlCBuZXZlciB0aGUgZnVsbCBmaWxlIChpdCBjYW4gYmUgMjAtNDBLIHRva2VucyBhbG9uZSkuCjUuIFJlYWQgT05MWSB0aGUgY29kZWJhc2UgZmlsZXMgeW91IHdpbGwgYWN0dWFsbHkgbW9kaWZ5LiBVc2UgY29kZWJhc2Vfc2VhcmNoIChSdWxlIDE3KSBmb3Igc3ltYm9sIGxvb2t1cHMgaW5zdGVhZCBvZiBvcGVuaW5nIGZpbGVzIHNwZWN1bGF0aXZlbHkuCjYuIEJlZm9yZSBjb21taXR0aW5nIGVhY2ggbW9kdWxlLCByZS1yZWFkIGl0cyBQUk9EVUNULm1kIHNlY3Rpb24gYW5kIHZlcmlmeTogZXZlcnkgdXNlciBmbG93IGltcGxlbWVudGVkIChoYXBweSBwYXRoICsgZXJyb3Igc3RhdGVzKSwgZXZlcnkgZGF0YSBmaWVsZCBpbiBzY2hlbWErcm91dGVyK1VJLCBldmVyeSBwZXJtaXNzaW9uIGd1YXJkIG1hdGNoZXMgdGhlIFJvbGVzIHRhYmxlLCBldmVyeSB2YWxpZGF0aW9uIHJ1bGUgaGFzIGEgWm9kIHNjaGVtYSwgZXZlcnkgVUkgZWxlbWVudCBkZXNjcmliZWQgZXhpc3RzIGluIHRoZSBwYWdlLgo3LiBBZnRlciBlYWNoIG1vZHVsZTogY29tbWl0LCB1cGRhdGUgU1RBVEUubWQgd2l0aCBwcm9ncmVzcywgdGhlbiBTVE9QLiBPcGVuIGEgbmV3IHNlc3Npb24gZm9yIHRoZSBuZXh0IG1vZHVsZS4KCkNSSVRJQ0FMOiBUaGlzIHNwbGl0IGNoYW5nZXMgSE9XIE1BTlkgdGhpbmdzIHBlciBzZXNzaW9uLCBuZXZlciBXSEFUIGdldHMgYnVpbHQuIEV2ZXJ5IGZlYXR1cmUgaW4gUFJPRFVDVC5tZCBtdXN0IGJlIGZ1bGx5IGltcGxlbWVudGVkLiBEbyBub3Qgc2tpcCBvciBkZWZlciBhbnl0aGluZyB3aXRob3V0IGV4cGxpY2l0IHVzZXIgYXBwcm92YWwuCgpSZXBvcnQgdGhlIHNjb3BlIGFzc2Vzc21lbnQgbm93IOKAlCBmaWxlIGNvdW50LCBlc3RpbWF0ZWQgdG9rZW5zLCBkbyB3ZSBuZWVkIHRvIHNwbGl0Pwo=\",\"base64\").toString(\"utf8\");process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"UserPromptSubmit\",additionalContext:ctx}}))}}catch(e){}})'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }
