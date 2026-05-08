@@ -20,7 +20,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1 squash-merged to main — Batch 2 pending) | 2026-05-08 |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1 + 2a squash-merged to main — Batch 2b pending) | 2026-05-08 |
 
 ---
 
@@ -300,13 +300,29 @@ Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fis
 
 **Batch 1 squash-merged → main as commit 79e79d6** (59 files, 30824 insertions). 6 TypeScript strict-mode/ESLint errors fixed before merge: 3x `strict-boolean-expressions` in dropdown-menu.tsx (`inset === true`), 1x `exactOptionalPropertyTypes` in sonner.tsx (`Exclude<T, undefined>`), plus form.tsx, toaster.tsx, use-toast.ts, confirm-dialog.tsx. feat/shared-ui-components branch deleted.
 
-### Batch 2 — Fisherfolk Registration Form (pending)
+### Batch 2a — Fisherfolk Registration Form (basic) (complete)
+
+| Component | File | Status |
+|-----------|------|--------|
+| Registration RSC page + role gate | apps/web/src/app/[tenant]/fisherfolk/register/page.tsx | ✅ Built |
+| Multi-step form client (Personal → Address → Review) | apps/web/src/app/[tenant]/fisherfolk/register/registration-form-client.tsx | ✅ Built |
+| encoderProcedure tRPC role gate | apps/web/src/server/trpc/trpc.ts | ✅ Added |
+| generateNextIdNumber query (FF-YYYY-NNNN) | apps/web/src/server/trpc/routers/fisherfolk.ts | ✅ Added |
+| fisherfolk.create permission fix (adminProcedure → encoderProcedure) | apps/web/src/server/trpc/routers/fisherfolk.ts | ✅ Fixed |
+| Mount sonner Toaster in tenant layout | apps/web/src/app/[tenant]/layout.tsx | ✅ Mounted |
+
+5 files (3 modified, 2 new). Repo-wide typecheck + lint clean.
+
+### Batch 2b — Registration polish (pending)
 
 | Component | Status |
 |-----------|--------|
-| Registration form page (/fisherfolk/register) | ⬜ Not started |
-| Multi-step form (personal, address, fishing details) | ⬜ Not started |
-| ID auto-generation via tRPC create mutation | ⬜ Not started |
+| Pre-registration duplicate search (ID/name/RSBSA + create shortcut) | ⬜ Not started |
+| Photo upload (FileUpload + client compression) | ⬜ Not started |
+| Signature upload | ⬜ Not started |
+| QR code data string generation | ⬜ Not started |
+| Category multi-select picker | ⬜ Not started |
+| Barangay picker (replaces free-text input) | ⬜ Not started |
 
 ### Batch 3 — Fisherfolk Detail View + Vessel Registration (pending)
 

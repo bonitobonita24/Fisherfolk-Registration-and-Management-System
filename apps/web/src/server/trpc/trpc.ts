@@ -79,6 +79,10 @@ export const adminProcedure = protectedProcedure.use(
   requireRole("super_admin", "admin"),
 );
 
+export const encoderProcedure = protectedProcedure.use(
+  requireRole("super_admin", "admin", "encoder"),
+);
+
 export const superAdminProcedure = protectedProcedure.use(
   requireRole("super_admin"),
 );

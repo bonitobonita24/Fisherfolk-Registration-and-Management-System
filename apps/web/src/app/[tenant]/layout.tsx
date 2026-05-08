@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { Toaster } from "@/components/ui/sonner";
 
 interface TenantLayoutProps {
   children: React.ReactNode;
@@ -34,6 +35,7 @@ export default async function TenantLayout({
           {children}
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }

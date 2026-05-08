@@ -10,6 +10,7 @@ import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
   createTRPCRouter,
+  encoderProcedure,
   protectedProcedure,
 } from "../trpc";
 
@@ -102,7 +103,35 @@ export const fisherfolkRouter = createTRPCRouter({
       return record;
     }),
 
-  create: adminProcedure
+  generateNextIdNumber: encoderProcedure
+    .input(z.object({ year: z.number().int().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const year = input?.year ?? new Date().getFullYear();
+      const prefix = `FF-${year}-`;
+
+      const last = await ctx.db.fisherfolk.findFirst({
+        where: {
+          tenantId: ctx.tenantId,
+          idNumber: { startsWith: prefix },
+        },
+        orderBy: { idNumber: "desc" },
+        select: { idNumber: true },
+      });
+
+      let nextSeq = 1;
+      if (last) {
+        const tail = last.idNumber.slice(prefix.length);
+        const parsed = Number.parseInt(tail, 10);
+        if (Number.isFinite(parsed) && parsed > 0) nextSeq = parsed + 1;
+      }
+
+      const idNumber = `${prefix}${nextSeq.toString().padStart(4, "0")}`;
+      return { idNumber, year, sequence: nextSeq };
+    }),
+
+  create: encoderProcedure
     .input(fisherfolkCreateSchema)
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });

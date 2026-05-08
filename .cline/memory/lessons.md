@@ -4,6 +4,25 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-05-08 — 🟤 TDD (Rule 25) deferred until dedicated test-infra batch
+- Type:      🟤 decision
+- Phase:     Phase 8 Batch 2a — registration form
+- Files:     n/a (project-wide gap)
+- Concepts:  tdd, vitest, jest, rule-25, test-infrastructure, batch-atomicity
+- Narrative: Rule 25 requires writing a failing test before any implementation, with no exceptions. The project's package.json defines `test: turbo run test` but NO package has a test script, NO test runner is configured (no vitest, no jest, no jest.config or vitest.config files anywhere), and zero `*.test.*` or `*.spec.*` files exist in the repo. Applying Rule 25 to Batch 2a would require first building the entire test infra — that is its own batch (`Phase 8 Batch X — test infra setup`), not a sub-task of feature work.
+  Decision: continue feature batches without TDD until a dedicated test-infra batch lands. Each post-infra feature batch resumes Rule 25 strictly. The TDD gap is a project-wide debt, not a per-batch regression — same framing as the 🟤 batch atomicity decision below.
+  How to apply: when a new feature batch starts, check if vitest/jest config + at least one passing example test exists. If yes → enforce Rule 25. If no → declare the exception in the two-stage review output and proceed; track the missing infra as an outstanding follow-up. Do NOT silently violate Rule 25 — every batch that skips TDD must explicitly call it out in commit message + governance docs.
+# ---
+
+## 2026-05-08 — 🟤 encoderProcedure for tRPC role gating: super_admin + admin + encoder
+- Type:      🟤 decision
+- Phase:     Phase 8 Batch 2a — registration form
+- Files:     apps/web/src/server/trpc/trpc.ts
+- Concepts:  trpc, rbac, encoderProcedure, role-gating, fisherfolk, vessel, registration
+- Narrative: PRODUCT.md Roles + Permissions table grants Encoders "Register new fisherfolk and vessels" — meaning encoder must be allowed on `fisherfolk.create` and (eventually) `vessel.create`. Existing `adminProcedure` only permits super_admin + admin, which produced a spec-vs-code gap that would silently 403 every Encoder submission. Added `encoderProcedure = protectedProcedure.use(requireRole("super_admin", "admin", "encoder"))` next to adminProcedure in trpc.ts.
+  How to apply: any future tRPC mutation that PRODUCT.md grants to Encoder (register, renew, generate IDs from approved templates, post comments, manage own Kanban) MUST use encoderProcedure, NOT adminProcedure. Page-level role gating still applies to UI access — the procedure guard is defence-in-depth.
+# ---
+
 ## 2026-05-08 — 🟤 Phase 8 batch atomicity: pre-existing errors do not block new batches but block branch merge
 - Type:      🟤 decision
 - Phase:     Phase 8 Iterative Buildout — Batch 1b commit

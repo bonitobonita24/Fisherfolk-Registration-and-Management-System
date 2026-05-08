@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-05-08 — Phase 8 Batch 2a — Fisherfolk Registration Form (basic)
+- Agent:               CLAUDE_CODE
+- Why:                 First user-facing create flow. Closes the spec gap where fisherfolk.create used adminProcedure but PRODUCT.md grants Encoders the right to register. Delivers a working create→list round-trip; photo/signature/QR/categories/duplicate-search deferred to Batch 2b.
+- Files added:         apps/web/src/app/[tenant]/fisherfolk/register/page.tsx (RSC — role gate for super_admin+admin+encoder, redirects others to /[tenant]/fisherfolk), apps/web/src/app/[tenant]/fisherfolk/register/registration-form-client.tsx (multi-step form: Personal → Address → Review; react-hook-form + zod resolver; auto-fetches generateNextIdNumber on mount; sonner toasts on success/error; redirects to /[tenant]/fisherfolk on success)
+- Files modified:      apps/web/src/server/trpc/trpc.ts (added encoderProcedure = protectedProcedure.use(requireRole("super_admin", "admin", "encoder")) — defence-in-depth role gate for all "Register new fisherfolk and vessels" Encoder permissions per PRODUCT.md), apps/web/src/server/trpc/routers/fisherfolk.ts (changed `create` from adminProcedure to encoderProcedure — closes spec compliance gap; added `generateNextIdNumber` query — encoderProcedure, returns FF-{YYYY}-{seq:4} format, sequential per tenant per year using findFirst startsWith + orderBy idNumber desc), apps/web/src/app/[tenant]/layout.tsx (mounted sonner Toaster at tenant layout root — was previously unmounted, blocking all toast notifications)
+- Files deleted:       none
+- Schema/migrations:   none — fisherfolkCreateSchema unchanged
+- Errors encountered:  none — typecheck and lint clean repo-wide on first run
+- Errors resolved:     self-review caught 3 issues before lint: useMemo with stable [form] dep, useEffect anti-pattern with whole query as dep, awkward ReturnType<typeof useForm<T>>. Fixed: compute fullName inside ReviewStep, removed useEffect (query has built-in retry), used UseFormReturn<FormValues> from react-hook-form
+- Stage 1 (spec):      PASS — auto-ID, personal+address fields, NEW status default, Encoder permission fix all present. Photo/signature/QR/categories/duplicate-search/vessel-link explicitly deferred to 2b/3.
+- Stage 2 (quality):   PASS with declared exception — TDD (Rule 25) deferred: no test infra in repo (no vitest/jest config, zero *.test.* files anywhere). Logged 🟤 decision in lessons.md to track until a dedicated test-infra batch lands.
+
 ## 2026-05-08 — Phase 8 Batch 1 — TypeScript Strict Fixes + Squash Merge to Main
 - Agent:               CLAUDE_CODE
 - Why:                 Phase 4/8 OUTPUT CONTRACT requires 0 lint/typecheck errors before squash-merge. Fixed 6 pre-existing errors in shadcn/ui generated files and shared components that were gating the Batch 1 merge.
