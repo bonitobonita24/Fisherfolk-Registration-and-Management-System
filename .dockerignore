@@ -1,0 +1,16 @@
+node_modules
+.next
+.turbo
+.git
+.env*
+!.env.example
+*.md
+!pnpm-workspace.yaml
+coverage
+.code-review-graph
+.specstory
+.cline
+.claude
+.ai_prompt
+design-system
+docs
