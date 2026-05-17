@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-05-17 — Phase 8 Batch 2b-1b.2 — Frontend Duplicate Search Gate
+- Agent:               CLAUDE_CODE
+- Why:                 Closes the second half of Batch 2b-1b. Backend query landed in 2b-1b.1 (commit 30bf90e). This sub-batch wires the user-facing gate: encoder must search for existing records before the registration form appears. Prevents duplicate registrations from reaching the create mutation and converts ambiguous matches into informed encoder decisions.
+- Files added:         apps/web/src/app/[tenant]/fisherfolk/register/duplicate-search-client.tsx (new client component — search form mirroring backend fisherfolkSearchDuplicatesSchema with .refine() requiring at least one of idNumber/rsbsaNumber/firstName+lastName; imperative fetch via trpc.useUtils().fisherfolk.searchForDuplicates.fetch() so query only runs on submit; outcome state owns either match results or "no matches" CTA; on Proceed mounts <RegistrationFormClient initialValues={...}/> with name/DOB/RSBSA prefilled from the search query; match cards colour-coded by matchType — red destructive for EXACT_ID/EXACT_RSBSA, amber for STRONG_NAME_DOB, yellow for POSSIBLE_NAME; "View existing record" link to /[tenant]/fisherfolk/[id] — Batch 3 detail page placeholder, will resolve once detail view ships)
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/register/page.tsx (replaced <RegistrationFormClient /> with <DuplicateSearchClient />; updated header copy to mention the search-first flow; role gate unchanged — encoder/admin/super_admin only). apps/web/src/app/[tenant]/fisherfolk/register/registration-form-client.tsx (added optional initialValues?: Partial<FormValues> prop; merged into useForm defaultValues — purely additive, callers omitting the prop get the original empty defaults).
+- Files deleted:       none
+- Schema/migrations:   none — frontend-only change against the schema shipped in 2b-1b.1.
+- Errors encountered:  ESLint @typescript-eslint/no-unnecessary-type-assertion on initial draft — was defensively casting result.matches to MatchCandidate[] but tRPC already infers the same shape.
+- Errors resolved:     Removed the redundant assertion. Inferred type from trpc client flows through cleanly.
+- Verification:        pnpm --filter @frms/web typecheck → exit 0. pnpm --filter @frms/web lint → 0 warnings/errors. Visual QA deferred — no UI environment running this session; gate flow is mechanically straightforward (search → render → proceed), human will exercise after merge.
+- Stage 1 (spec):      PASS — gate renders before form, search calls searchForDuplicates with the spec'd identifiers, matches grouped/sorted by backend ranking (preserved in render order), "No matches" path proceeds to register, "Match found" path links to existing record + offers "Proceed anyway" escape hatch, initialValues passed to RegistrationFormClient as spec'd.
+- Stage 2 (quality):   PASS with declared exception — TDD (Rule 25) deferred under the standing test-infra debt logged 2026-05-08 (no vitest/jest in repo, zero *.test.* files). Otherwise: zero any types, only blast-radius files touched (page + form + new gate), conventional commit format used, no half-finished branches.
+- Notes:               Auto-suggested Vercel skills (next-cache-components, next-forge, nextjs, react-best-practices, Clerk auth) declined per documented STATE.md precedent — none apply to feature-level component work. next-forge isn't this project's framework, auth is Auth.js v5 not Clerk. Loading would have burned context with no relevance.
+
 ## 2026-05-08 — Anti-Thrashing UserPromptSubmit Hook
 - Agent:               CLAUDE_CODE
 - Why:                 Closed enforcement gap on the locked anti-thrashing rule (lessons.md 2026-05-08 🟤). Rule was previously discoverable via memory but not auto-injected on phase/batch triggers — relied on user pasting the scope-assessment preamble manually each session. Hook makes injection mechanical and unbypassable.

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   fisherfolkCreateSchema,
+  fisherfolkSearchDuplicatesSchema,
   fisherfolkUpdateSchema,
 } from "@frms/shared/schemas";
 
@@ -101,6 +102,114 @@ export const fisherfolkRouter = createTRPCRouter({
       });
       if (!record) throw new TRPCError({ code: "NOT_FOUND" });
       return record;
+    }),
+
+  searchForDuplicates: encoderProcedure
+    .input(fisherfolkSearchDuplicatesSchema)
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const orClauses: Array<Record<string, unknown>> = [];
+      if (input.idNumber) {
+        orClauses.push({
+          idNumber: { equals: input.idNumber, mode: "insensitive" as const },
+        });
+      }
+      if (input.rsbsaNumber) {
+        orClauses.push({
+          rsbsaNumber: {
+            equals: input.rsbsaNumber,
+            mode: "insensitive" as const,
+          },
+        });
+      }
+      if (input.firstName && input.lastName) {
+        orClauses.push({
+          AND: [
+            {
+              firstName: {
+                equals: input.firstName,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              lastName: {
+                equals: input.lastName,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        });
+      }
+
+      if (orClauses.length === 0) return { matches: [] };
+
+      const candidates = await ctx.db.fisherfolk.findMany({
+        where: {
+          tenantId: ctx.tenantId,
+          status: { not: "ARCHIVED" },
+          OR: orClauses,
+        },
+        take: 20,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          idNumber: true,
+          rsbsaNumber: true,
+          fullName: true,
+          firstName: true,
+          lastName: true,
+          middleName: true,
+          suffix: true,
+          dateOfBirth: true,
+          barangay: true,
+          contactNumber: true,
+          status: true,
+          createdAt: true,
+        },
+      });
+
+      const inputDobMs = input.dateOfBirth?.getTime();
+
+      const matches = candidates.map((c) => {
+        let matchType:
+          | "EXACT_ID"
+          | "EXACT_RSBSA"
+          | "STRONG_NAME_DOB"
+          | "POSSIBLE_NAME";
+
+        if (
+          input.idNumber &&
+          c.idNumber.toLowerCase() === input.idNumber.toLowerCase()
+        ) {
+          matchType = "EXACT_ID";
+        } else if (
+          input.rsbsaNumber &&
+          c.rsbsaNumber &&
+          c.rsbsaNumber.toLowerCase() === input.rsbsaNumber.toLowerCase()
+        ) {
+          matchType = "EXACT_RSBSA";
+        } else if (
+          inputDobMs !== undefined &&
+          c.dateOfBirth.getTime() === inputDobMs
+        ) {
+          matchType = "STRONG_NAME_DOB";
+        } else {
+          matchType = "POSSIBLE_NAME";
+        }
+
+        return { ...c, matchType };
+      });
+
+      const rank: Record<string, number> = {
+        EXACT_ID: 0,
+        EXACT_RSBSA: 1,
+        STRONG_NAME_DOB: 2,
+        POSSIBLE_NAME: 3,
+      };
+      matches.sort((a, b) => rank[a.matchType]! - rank[b.matchType]!);
+
+      return { matches };
     }),
 
   generateNextIdNumber: encoderProcedure

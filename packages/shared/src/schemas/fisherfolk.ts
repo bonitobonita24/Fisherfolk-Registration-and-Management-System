@@ -31,6 +31,26 @@ export const fisherfolkCreateSchema = z.object({
   updatedById: z.string().optional(),
 });
 
+export const fisherfolkSearchDuplicatesSchema = z
+  .object({
+    idNumber: z.string().trim().min(1).optional(),
+    rsbsaNumber: z.string().trim().min(1).optional(),
+    firstName: z.string().trim().min(1).optional(),
+    lastName: z.string().trim().min(1).optional(),
+    dateOfBirth: z.coerce.date().optional(),
+  })
+  .strict()
+  .refine(
+    (data) =>
+      Boolean(data.idNumber) ||
+      Boolean(data.rsbsaNumber) ||
+      (Boolean(data.firstName) && Boolean(data.lastName)),
+    {
+      message:
+        "Provide an ID number, RSBSA number, or both first and last name.",
+    },
+  );
+
 export const fisherfolkUpdateSchema = z.object({
   id: z.string().cuid(),
   idNumber: z.string().min(1).optional(),

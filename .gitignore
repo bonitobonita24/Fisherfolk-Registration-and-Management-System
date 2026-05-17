@@ -9,6 +9,9 @@ dist/
 build/
 *.tsbuildinfo
 
+# Framework upgrade snapshots (timestamped backups — never commit)
+*.bak
+
 # Environment files — NEVER commit real credentials
 .env
 .env.*

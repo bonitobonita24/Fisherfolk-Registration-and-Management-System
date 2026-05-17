@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 
 import { Gender, CivilStatus } from "@frms/shared/types";
+import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { BarangayPicker, CategoryPicker } from "@/components/shared";
 
 const STEP_FIELDS = {
   1: [
@@ -44,7 +46,7 @@ const STEP_FIELDS = {
     "contactNumber",
     "rsbsaNumber",
   ],
-  2: ["address", "barangay"],
+  2: ["address", "barangay", "categoryIds"],
 } as const;
 
 const formSchema = z.object({
@@ -73,13 +75,22 @@ const formSchema = z.object({
   rsbsaNumber: z.string(),
   address: z.string().min(1, "Address is required"),
   barangay: z.string().min(1, "Barangay is required"),
+  categoryIds: z
+    .array(z.string().cuid())
+    .min(1, "Select at least one category"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 const TOTAL_STEPS = 3;
 
-export function RegistrationFormClient() {
+interface RegistrationFormClientProps {
+  initialValues?: Partial<FormValues>;
+}
+
+export function RegistrationFormClient({
+  initialValues,
+}: RegistrationFormClientProps = {}) {
   const router = useRouter();
   const params = useParams<{ tenant: string }>();
   const tenantSlug = params.tenant;
@@ -99,6 +110,8 @@ export function RegistrationFormClient() {
       rsbsaNumber: "",
       address: "",
       barangay: "",
+      categoryIds: [],
+      ...initialValues,
     },
   });
 
@@ -181,7 +194,7 @@ export function RegistrationFormClient() {
       ...(values.rsbsaNumber.trim().length > 0 && {
         rsbsaNumber: values.rsbsaNumber.trim(),
       }),
-      categoryIds: [],
+      categoryIds: values.categoryIds,
       registrationYear,
     });
   }
@@ -472,11 +485,35 @@ function AddressStep({ form }: StepProps) {
           <FormItem>
             <FormLabel>Barangay *</FormLabel>
             <FormControl>
-              <Input placeholder="Barangay name" {...field} />
+              <BarangayPicker
+                barangays={CALAPAN_BARANGAYS}
+                value={field.value}
+                onValueChange={field.onChange}
+              />
             </FormControl>
             <FormDescription>
-              Free text for now — Batch 2b will replace with a tenant-managed
-              barangay picker.
+              {CALAPAN_BARANGAYS.length} Calapan City barangays. Future tenant
+              settings will let other LGUs manage their own list.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="categoryIds"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Categories *</FormLabel>
+            <FormControl>
+              <CategoryPicker
+                value={field.value}
+                onValueChange={field.onChange}
+              />
+            </FormControl>
+            <FormDescription>
+              Select one or more fisherfolk categories. Admins manage the list
+              in Settings → Categories.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -508,6 +545,14 @@ function ReviewStep({
     .filter((part) => part.trim().length > 0)
     .join(" ")
     .trim();
+
+  // Cache hit from CategoryPicker — same query key.
+  const categoriesQuery = trpc.category.list.useQuery({ status: "ACTIVE" });
+  const categoryNames = (categoriesQuery.data ?? [])
+    .filter((c) => values.categoryIds.includes(c.id))
+    .map((c) => c.name);
+  const categoriesLabel =
+    categoryNames.length > 0 ? categoryNames.join(", ") : "—";
 
   return (
     <div className="space-y-6">
@@ -556,6 +601,7 @@ function ReviewStep({
           ],
           ["Address", values.address],
           ["Barangay", values.barangay],
+          ["Categories", categoriesLabel],
         ]}
       />
     </div>

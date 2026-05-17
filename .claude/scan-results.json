@@ -1,102 +1,138 @@
 {
-  "scannedAt": "2026-05-06",
+  "scannedAt": "2026-05-17",
+  "scannerVersion": "scan-project/V31.1",
+  "projectName": "frms",
+  "projectFullName": "Fisherfolk Registration and Management System",
+  "projectType": "full-stack",
+  "specDriven": {
+    "detected": true,
+    "framework": "Spec-Driven Platform V31",
+    "memoryGovernanceInstalled": true,
+    "memoryGovernancePath": ".claude/rules/memory-governance.md",
+    "memoryGovernanceLines": 506,
+    "currentPhase": "Phase 8 — Iterative Buildout (Batch 2b)",
+    "midProjectAdoption": true,
+    "midProjectAdoptionNote": "Project is in Phase 8 with anti-thrashing UserPromptSubmit hook installed (commit 7bf35bf). Memory Governance was missing. On next session, run 'Run memory governance baseline (memory-governance.md §5 Step 2)' to create a Claude Code memory checkpoint."
+  },
   "techStack": [
-    "TypeScript",
+    "TypeScript (strict)",
     "Next.js 15 (App Router)",
     "React 19",
-    "Prisma ORM 6.2",
     "tRPC 11",
+    "Prisma ORM 6.2",
     "Auth.js v5",
     "PostgreSQL 16",
     "PgBouncer",
-    "Valkey (Redis fork)",
+    "Valkey (Redis-compatible)",
     "BullMQ",
     "MinIO (S3-compatible)",
     "shadcn/ui",
+    "Radix UI primitives",
+    "TanStack Query",
     "Tailwind CSS",
     "Turborepo",
     "pnpm workspaces",
     "Docker Compose",
-    "Cloudflare Turnstile"
+    "Cloudflare Turnstile",
+    "Leaflet (maps)"
   ],
-  "projectType": "full-stack",
+  "tenancy": "multi (subdirectory routing)",
+  "accessibility": "wcag_aa (active)",
   "installedSkills": [
+    { "name": "a11y-skill", "category": "Accessibility", "tier": "T1", "reason": "inputs.yml accessibility.level=wcag_aa requires axe-core + jsx-a11y audits" },
+    { "name": "awesome-design-md", "category": "Design", "tier": "T2", "reason": "docs/DESIGN.md visual reference workflow per Scenario 33" },
+    { "name": "microcopy-writer", "category": "UX", "tier": "T3", "reason": "Filipino LGU domain — buttons, tooltips, errors, empty states" },
+    { "name": "owasp-security", "category": "Security", "tier": "T1", "reason": "OWASP Top 10:2025 + ASVS 5.0 — multi-tenant SaaS with PII (fisherfolk personal data)" },
+    { "name": "postgres", "category": "Database", "tier": "T1", "reason": "Read-only queries to verify Prisma migrations + seed data; required Phase 4 Part 3 and Phase 6" },
+    { "name": "varlock-claude-skill", "category": "Security", "tier": "T1", "reason": "CREDENTIALS.md secrets never enter Claude context — framework hard rule" },
+    { "name": "vercel-agent-skills", "category": "Frontend", "tier": "T1", "reason": "Next.js 15 App Router + React 19 best practices (67 rules)" }
+  ],
+  "installedSkillsCount": 7,
+  "globalPlugins": [
+    "superpowers@claude-plugins-official 5.1.0",
+    "frontend-design@claude-plugins-official",
+    "planning-with-files@planning-with-files 2.23.0",
+    "context7@claude-plugins-official",
+    "context-mode@context-mode 1.0.111",
+    "claude-mem@thedotmack 13.0.1",
+    "ui-ux-pro-max@ui-ux-pro-max-skill 2.0.1",
+    "fullstack-dev-skills@fullstack-dev-skills 0.4.11",
+    "playwright@claude-plugins-official",
+    "vercel-plugin@vercel-vercel-plugin 0.30.0",
+    "code-review@claude-plugins-official",
+    "code-simplifier@claude-plugins-official 1.0.0",
+    "typescript-lsp@claude-plugins-official 1.0.0",
+    "security-guidance@claude-plugins-official",
+    "document-skills@anthropic-agent-skills",
+    "engineering-advanced-skills@claude-code-skills 2.2.0"
+  ],
+  "resolvedConflicts": [
     {
-      "name": "vercel-agent-skills",
-      "category": "Development & DevOps",
-      "tier": "T1",
-      "reason": "Next.js 15 App Router + React 19 best practices (67 rules) — matches apps/web scaffold"
+      "deletedSkill": "defense-in-depth",
+      "conflictsWith": "superpowers bundle",
+      "severity": "HIGH",
+      "resolution": "Deleted project copy — already inside superpowers@claude-plugins-official 5.1.0",
+      "deletedPath": ".claude/skills/defense-in-depth"
     },
     {
-      "name": "test-driven-development",
-      "category": "Development & DevOps",
-      "tier": "T1",
-      "reason": "TDD workflow matches Rule 25 enforcement (RED→GREEN→refactor)"
+      "deletedSkill": "systematic-debugging",
+      "conflictsWith": "superpowers bundle",
+      "severity": "HIGH",
+      "resolution": "Deleted project copy — already inside superpowers@claude-plugins-official 5.1.0",
+      "deletedPath": ".claude/skills/systematic-debugging"
     },
     {
-      "name": "frontend-design",
-      "category": "Design & UI",
-      "tier": "T1",
-      "reason": "Production-grade frontend interfaces — matches shadcn/ui + .tsx components"
+      "deletedSkill": "test-driven-development",
+      "conflictsWith": "superpowers bundle",
+      "severity": "HIGH",
+      "resolution": "Deleted project copy — already inside superpowers@claude-plugins-official 5.1.0",
+      "deletedPath": ".claude/skills/test-driven-development"
     },
     {
-      "name": "awesome-design-md",
-      "category": "Design & UI",
-      "tier": "T1",
-      "reason": "DESIGN.md generation — matches Scenario 33 in CLAUDE.md"
+      "deletedSkill": "frontend-design",
+      "conflictsWith": "frontend-design@claude-plugins-official",
+      "severity": "HIGH",
+      "resolution": "Deleted project copy — plugin is canonical",
+      "deletedPath": ".claude/skills/frontend-design"
     },
     {
-      "name": "postgres",
-      "category": "Data & Analytics",
-      "tier": "T2",
-      "reason": "PostgreSQL query patterns — matches primary DB with Prisma + PgBouncer + RLS"
-    },
-    {
-      "name": "varlock-claude-skill",
-      "category": "Security & Testing",
-      "tier": "T2",
-      "reason": "Secure env variable management — matches .env.dev/.staging/.prod + CREDENTIALS.md"
-    },
-    {
-      "name": "defense-in-depth",
-      "category": "Security & Testing",
-      "tier": "T2",
-      "reason": "Multi-layered security — matches 6 security layers (L1-L6), multi-tenant isolation"
-    },
-    {
-      "name": "owasp-security",
-      "category": "Security & Testing",
-      "tier": "T2",
-      "reason": "OWASP Top 10 web app review — complements defense-in-depth with specific vulnerability patterns"
-    },
-    {
-      "name": "systematic-debugging",
-      "category": "Development & DevOps",
-      "tier": "T4",
-      "reason": "Structured debugging for multi-service Docker stack (PostgreSQL + Valkey + MinIO + Next.js)"
-    },
-    {
-      "name": "webapp-testing",
-      "category": "Security & Testing",
-      "tier": "T4",
-      "reason": "Playwright testing against localhost:44387, Visual QA checks (Rule 16)"
-    },
-    {
-      "name": "microcopy-writer",
-      "category": "Content & Copywriting",
-      "tier": "T4",
-      "reason": "UX copy for forms-heavy registration workflows (fisherfolk registration, compliance forms)"
+      "deletedSkill": "webapp-testing",
+      "conflictsWith": "playwright@claude-plugins-official",
+      "severity": "HIGH",
+      "resolution": "Deleted project copy — playwright plugin covers E2E testing",
+      "deletedPath": ".claude/skills/webapp-testing"
     }
   ],
-  "excludedGlobals": [],
-  "resolvedConflicts": [],
-  "recommendedPlugins": [],
-  "skippedOptional": [
+  "auxiliaryToolsInstalled": [
     {
-      "name": "a11y-skill",
-      "category": "Design & UI",
-      "reason": "MEDIUM confidence — not in local skills library. Install externally: npx skills add airowe/claude-a11y-skill"
+      "tool": "code-review-graph",
+      "version": "2.3.3",
+      "installedVia": "uv tool install (already present)",
+      "indexBuilt": true,
+      "indexStats": {
+        "files": 159,
+        "nodes": 360,
+        "edges": 4358,
+        "ftsIndexed": 354,
+        "flows": 35,
+        "communities": 10
+      },
+      "purpose": "Phase 7 Step 3 — get_impact_radius_tool blast radius analysis before Feature Updates",
+      "scope": "dev/test machine only — never staging/production",
+      "graphPath": ".code-review-graph/ (gitignored)"
     }
   ],
-  "globalCleanupAdvised": true
+  "newSkillsInstalledThisScan": [],
+  "skippedOptional": [],
+  "previousScan": "2026-05-06",
+  "globalCleanupAdvised": false,
+  "globalCleanupReason": "Global ~/.claude/skills/ is empty — no advisory needed",
+  "notes": [
+    "Memory Governance auto-install was triggered because Phase 1.5 detected memory-governance.md was missing.",
+    "Project was already well configured — most foundation skills available via user-scope plugins.",
+    "5 stale project skill folders removed to eliminate competing directives with user-scope plugins.",
+    "Anti-thrashing UserPromptSubmit hook (commit 7bf35bf) and memory-governance.md (this scan) form complementary defense layers for Phase 8 Batch 2b.",
+    "code-review-graph index built fresh (159 files, 4358 edges) — ready for Phase 7 blast-radius analysis.",
+    "Next session activation: open /hooks once (activates UserPromptSubmit hook) OR start fresh session."
+  ]
 }

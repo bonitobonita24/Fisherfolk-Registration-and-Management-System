@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
-import { RegistrationFormClient } from "./registration-form-client";
+import { DuplicateSearchClient } from "./duplicate-search-client";
 
 interface RegisterPageProps {
   params: Promise<{ tenant: string }>;
@@ -25,12 +25,12 @@ export default async function FisherfolkRegisterPage({
           Register Fisherfolk
         </h1>
         <p className="text-muted-foreground">
-          Create a new fisherfolk record. The ID number is generated
-          automatically; photo, signature, and category assignment are added
-          after the basic record is saved.
+          Search for existing records first, then register a new one. The ID
+          number is generated automatically; photo, signature, and category
+          assignment are added after the basic record is saved.
         </p>
       </div>
-      <RegistrationFormClient />
+      <DuplicateSearchClient />
     </div>
   );
 }
