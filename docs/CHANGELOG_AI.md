@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-05-17 — Phase 8 Batch 3a — Fisherfolk Read-Only Detail View + List Navigation
+- Agent:               CLAUDE_CODE
+- Why:                 First half of original Batch 3 — gives encoders, admins, and viewers a way to inspect a registered fisherfolk's full record. Resolves the dead "View existing record" link from the Batch 2b-1b.2 duplicate-search gate (was 404 before this batch). Scope locked to read-only per user multi-select: no Edit button (EditRequest workflow extracted as future Batch 3c), no categories badges, no audit metadata, no empty placeholder sections for future relations.
+- Files added:         apps/web/src/app/[tenant]/fisherfolk/[id]/page.tsx (RSC route — minimal server wrapper that delegates to the client component; no auth check here — protected at higher tenant layout), apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx (client component — uses `useParams` to read id, `trpc.fisherfolk.getById.useQuery({ id })` for data, parallel queries via `trpc.upload.getDownloadUrl` for photo + signature signed URLs, `useMemo(() => renderQRDataUrl(payload))` for QR data URL; renders profile fields, photo preview, signature preview, QR code; placeholder text on null/missing media)
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/columns.tsx (idNumber column previously rendered raw `row.original.idNumber` — wrapped in new `IdNumberCell` sub-component that uses `useParams` to construct `<Link href={`/${tenant}/fisherfolk/${id}`}>`; cell renderers in data-table receive objects so IdNumberCell must be a component to access the params hook)
+- Files deleted:       none
+- Schema/migrations:   none — reused existing `fisherfolk.getById` query (already returns all relations including vessels + violations; UI ignores those per locked scope)
+- Errors encountered:  1 lint error — `@typescript-eslint/strict-boolean-expressions` on `formatDate(birthdate)` null-coalesce pattern in detail-client.
+- Errors resolved:     Replaced loose `||` with explicit `birthdate != null ? formatDate(birthdate) : "—"` pattern. Inline fix during 11b.
+- Verification:        pnpm --filter @frms/web typecheck → exit 0. pnpm --filter @frms/web lint → 0 warnings/errors. Visual QA deferred (git-only verify per user preference at merge time); end-to-end browser exercise scheduled before Batch 3b begins.
+- Stage 1 (spec):      PASS — route exists at `/[tenant]/fisherfolk/[id]`, profile fields render, photo signed URL resolves via existing upload procedure, signature renders same way, QR code generated from existing `renderQRDataUrl` utility, list page idNumber column now links to detail page. Locked deferrals (Edit button, categories, audit, future-relation placeholders) explicitly out of scope per user selection.
+- Stage 2 (quality):   PASS with standing exception — TDD (Rule 25) deferred under repo-wide test infra debt (no vitest/jest, zero *.test.* files — logged 2026-05-08 🟤 decision). Zero `any` types introduced, only blast-radius files modified (3 files), conventional commit format, no dead code.
+- Follow-up flagged:   `upload.getDownloadUrl` is `encoderProcedure` (pre-existing — not introduced here). Viewer + Bantay Dagat roles will see "No photo/No signature" placeholders on detail page. PRODUCT.md line 268 says Bantay Dagat needs photo for identity verification. Fix in a separate batch by either splitting into admin-write + protected-read procedures, or converting to `protectedProcedure` with role-aware tenant scoping. Logged in STATE.md outstanding follow-ups.
+- Merge:               Squash-merged to main on 2026-05-17 (2 commits on feat/batch-3a-fisherfolk-detail collapsed: 12c8b7d code + 2b32d90 STATE.md update). Feature branch deleted local + remote.
+
+---
+
 ## 2026-05-17 — Phase 8 Batch 2b-1b.2 — Frontend Duplicate Search Gate
 - Agent:               CLAUDE_CODE
 - Why:                 Closes the second half of Batch 2b-1b. Backend query landed in 2b-1b.1 (commit 30bf90e). This sub-batch wires the user-facing gate: encoder must search for existing records before the registration form appears. Prevents duplicate registrations from reaching the create mutation and converts ambiguous matches into informed encoder decisions.

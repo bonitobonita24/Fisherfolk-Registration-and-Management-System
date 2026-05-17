@@ -1,6 +1,8 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -14,12 +16,26 @@ export interface FisherfolkListItem {
   createdAt: Date;
 }
 
+function IdNumberCell({ row }: { row: Row<FisherfolkListItem> }) {
+  const params = useParams<{ tenant: string }>();
+  const item = row.original;
+  return (
+    <Link
+      href={`/${params.tenant}/fisherfolk/${item.id}`}
+      className="font-medium text-primary hover:underline"
+    >
+      {item.idNumber}
+    </Link>
+  );
+}
+
 export const columns: ColumnDef<FisherfolkListItem>[] = [
   {
     accessorKey: "idNumber",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="ID Number" />
     ),
+    cell: ({ row }) => <IdNumberCell row={row} />,
   },
   {
     accessorKey: "fullName",

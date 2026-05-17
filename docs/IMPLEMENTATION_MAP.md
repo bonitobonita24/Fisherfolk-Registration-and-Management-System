@@ -324,13 +324,19 @@ Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fis
 | Category multi-select picker | ⬜ Not started |
 | Barangay picker (replaces free-text input) | ⬜ Not started |
 
-### Batch 3 — Fisherfolk Detail View + Vessel Registration (pending)
+### Batch 3 — Fisherfolk Detail View + Vessel Registration (in progress)
+
+Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration), 3c (Edit Request workflow — extracted after PRODUCT.md flow #3 review revealed admin queue + diff viewer complexity).
 
 | Component | Status |
 |-----------|--------|
-| Fisherfolk detail view (/fisherfolk/[id]) | ⬜ Not started |
-| Vessel registration sub-form | ⬜ Not started |
-| Recent violations panel | ⬜ Not started |
+| Fisherfolk detail view (/[tenant]/fisherfolk/[id]) — read-only | ✅ Built (Batch 3a, squash on main) |
+| List page idNumber column → detail link | ✅ Built (Batch 3a) |
+| Vessel registration sub-form | ⬜ Batch 3b — pending |
+| Recent violations panel | ⬜ Batch 3b — pending |
+| Edit Request workflow (admin approval queue) | ⬜ Batch 3c — future |
+
+**Batch 3a shipped — read-only detail view** (3 files +267/-1). New route `/[tenant]/fisherfolk/[id]` = server page + client component rendering profile fields, photo (signed URL via `upload.getDownloadUrl`), signature (signed URL), QR code (data URL via `renderQRDataUrl`). Reused `fisherfolk.getById` — no router changes. List page `idNumber` column wrapped in `<Link>` via `IdNumberCell` sub-component (uses `useParams` for tenant slug). Locked scope: read-only only, core identity + media only, no future-relation placeholders. Follow-up flagged: `upload.getDownloadUrl` is `encoderProcedure` — Viewer + Bantay Dagat roles see "No photo/No signature" placeholders. Fix scheduled as separate batch (split role permissions or convert to protected with role-aware tenant scoping).
 
 ---
 
