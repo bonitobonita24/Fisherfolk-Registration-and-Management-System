@@ -7,6 +7,8 @@ import {
   fisherfolkUpdateSchema,
 } from "@frms/shared/schemas";
 
+import { buildQRPayload } from "@/lib/qr-code";
+
 import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
@@ -244,9 +246,11 @@ export const fisherfolkRouter = createTRPCRouter({
     .input(fisherfolkCreateSchema)
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+      const userId = ctx.userId!;
 
       const existing = await ctx.db.fisherfolk.findFirst({
-        where: { idNumber: input.idNumber, tenantId: ctx.tenantId },
+        where: { idNumber: input.idNumber, tenantId },
       });
       if (existing) {
         throw new TRPCError({
@@ -255,19 +259,32 @@ export const fisherfolkRouter = createTRPCRouter({
         });
       }
 
-      const record = await ctx.db.fisherfolk.create({
-        data: omitUndefined({
-          ...input,
-          tenantId: ctx.tenantId,
-          createdById: ctx.userId!,
-          updatedById: ctx.userId!,
-        }),
+      const record = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.fisherfolk.create({
+          data: omitUndefined({
+            ...input,
+            tenantId,
+            createdById: userId,
+            updatedById: userId,
+          }),
+        });
+
+        const qrPayload = buildQRPayload({
+          id: created.id,
+          regNo: created.idNumber,
+          tenantId,
+        });
+
+        return tx.fisherfolk.update({
+          where: { id: created.id },
+          data: { qrCode: qrPayload },
+        });
       });
 
       await ctx.db.auditLog.create({
         data: {
-          tenantId: ctx.tenantId,
-          userId: ctx.userId!,
+          tenantId,
+          userId,
           action: "CREATE",
           entityType: "Fisherfolk",
           entityId: record.id,

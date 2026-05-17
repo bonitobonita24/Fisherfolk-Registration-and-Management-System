@@ -33,6 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BarangayPicker, CategoryPicker } from "@/components/shared";
+import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
+import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
 const STEP_FIELDS = {
   1: [
@@ -47,6 +49,7 @@ const STEP_FIELDS = {
     "rsbsaNumber",
   ],
   2: ["address", "barangay", "categoryIds"],
+  3: ["photo", "signature"],
 } as const;
 
 const formSchema = z.object({
@@ -78,11 +81,14 @@ const formSchema = z.object({
   categoryIds: z
     .array(z.string().cuid())
     .min(1, "Select at least one category"),
+  photo: z.string().optional(),
+  signature: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
+type StepNumber = 1 | 2 | 3 | 4;
 
 interface RegistrationFormClientProps {
   initialValues?: Partial<FormValues>;
@@ -94,7 +100,7 @@ export function RegistrationFormClient({
   const router = useRouter();
   const params = useParams<{ tenant: string }>();
   const tenantSlug = params.tenant;
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<StepNumber>(1);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -111,6 +117,8 @@ export function RegistrationFormClient({
       address: "",
       barangay: "",
       categoryIds: [],
+      photo: undefined,
+      signature: undefined,
       ...initialValues,
     },
   });
@@ -146,15 +154,16 @@ export function RegistrationFormClient({
     idNumberQuery.data?.year ?? new Date().getFullYear();
 
   async function handleNext() {
-    const fields = STEP_FIELDS[step as 1 | 2];
+    if (step === 4) return;
+    const fields = STEP_FIELDS[step];
     const isValid = await form.trigger(fields, { shouldFocus: true });
     if (isValid) {
-      setStep((prev) => (prev === 1 ? 2 : 3));
+      setStep((prev) => (prev < TOTAL_STEPS ? ((prev + 1) as StepNumber) : prev));
     }
   }
 
   function handleBack() {
-    setStep((prev) => (prev === 3 ? 2 : 1));
+    setStep((prev) => (prev > 1 ? ((prev - 1) as StepNumber) : prev));
   }
 
   function handleSubmit(values: FormValues) {
@@ -195,6 +204,8 @@ export function RegistrationFormClient({
         rsbsaNumber: values.rsbsaNumber.trim(),
       }),
       categoryIds: values.categoryIds,
+      ...(values.photo && { photo: values.photo }),
+      ...(values.signature && { signature: values.signature }),
       registrationYear,
     });
   }
@@ -214,7 +225,8 @@ export function RegistrationFormClient({
         >
           {step === 1 && <PersonalStep form={form} />}
           {step === 2 && <AddressStep form={form} />}
-          {step === 3 && (
+          {step === 3 && <DocumentsStep form={form} />}
+          {step === 4 && (
             <ReviewStep
               values={form.getValues()}
               idNumber={idNumber}
@@ -271,12 +283,12 @@ export function RegistrationFormClient({
   );
 }
 
-function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
-  const labels = ["Personal", "Address", "Review"];
+function StepIndicator({ current }: { current: StepNumber }) {
+  const labels = ["Personal", "Address", "Documents", "Review"];
   return (
     <ol className="flex items-center gap-3 text-sm">
       {labels.map((label, idx) => {
-        const stepNumber = (idx + 1) as 1 | 2 | 3;
+        const stepNumber = (idx + 1) as StepNumber;
         const isActive = stepNumber === current;
         const isComplete = stepNumber < current;
         return (
@@ -523,6 +535,53 @@ function AddressStep({ form }: StepProps) {
   );
 }
 
+function DocumentsStep({ form }: StepProps) {
+  return (
+    <div className="space-y-6">
+      <FormField
+        control={form.control}
+        name="photo"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>ID photo</FormLabel>
+            <FormControl>
+              <PhotoUpload
+                value={field.value}
+                onChange={(key) => field.onChange(key)}
+              />
+            </FormControl>
+            <FormDescription>
+              Optional passport-style photo. JPEG, PNG, or WEBP up to 2MB.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="signature"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Signature</FormLabel>
+            <FormControl>
+              <SignaturePad
+                value={field.value}
+                onChange={(key) => field.onChange(key)}
+              />
+            </FormControl>
+            <FormDescription>
+              Optional. Sign with mouse, finger, or stylus, then click Save.
+              The QR code is generated automatically on submission.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+}
+
 interface ReviewStepProps {
   values: FormValues;
   idNumber: string | null;
@@ -571,8 +630,8 @@ function ReviewStep({
           )}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Registration year: {registrationYear}. Photo, signature, QR, and
-          category assignment are added after the basic record is saved.
+          Registration year: {registrationYear}. The QR code is generated
+          automatically on submission and stored with the record.
         </p>
       </section>
 
@@ -602,6 +661,9 @@ function ReviewStep({
           ["Address", values.address],
           ["Barangay", values.barangay],
           ["Categories", categoriesLabel],
+          ["Photo", values.photo ? "Uploaded" : "Not provided"],
+          ["Signature", values.signature ? "Captured" : "Not provided"],
+          ["QR code", "Auto-generated on submit"],
         ]}
       />
     </div>

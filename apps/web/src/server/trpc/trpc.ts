@@ -2,6 +2,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
+import { runWithTenant } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
 import { rateLimiters } from "../lib/rate-limit";
@@ -59,12 +60,22 @@ const enforceAuth = t.middleware(({ ctx, next }) => {
   });
 });
 
+/**
+ * Combined rate-limit + L6 tenant-context wrap. Kept in a single
+ * middleware step so the enforceAuth narrowing (userId/session non-null)
+ * propagates to downstream router code via tRPC's chained ctx inference.
+ * runWithTenant sets the AsyncLocalStorage that the Prisma tenant-guard
+ * extension reads; no-op when ctx.tenantId is null (e.g. super_admin
+ * pre-tenant routes — guarded queries from such a context will still
+ * throw, which is correct; those callers should use platformPrisma).
+ */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(enforceAuth)
   .use(async ({ ctx, next }) => {
     rateLimiters.api.check(ctx.userId);
-    return next({ ctx });
+    if (!ctx.tenantId) return next({ ctx });
+    return runWithTenant(ctx.tenantId, () => next({ ctx }));
   });
 
 export const requireRole = (...allowedRoles: UserRole[]) =>

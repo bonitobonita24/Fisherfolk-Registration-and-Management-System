@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { auth } from "@/server/auth";
+import { auth } from "@/server/auth/edge";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
 

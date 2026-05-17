@@ -1,10 +1,5 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcryptjs";
 import type { NextAuthConfig, Session } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { z } from "zod";
 
-import { prisma, platformPrisma } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
 declare module "next-auth" {
@@ -32,63 +27,27 @@ declare module "next-auth" {
   }
 }
 
-
-const loginSchema = z.object({
-  username: z.string().min(1),
-  password: z.string().min(1),
-  tenantSlug: z.string().optional(),
-});
-
+/**
+ * Edge-safe Auth.js config — NO Prisma, NO bcrypt, NO DB calls.
+ *
+ * The `providers` array is intentionally empty here; the real Credentials
+ * provider (with bcrypt + DB lookup) is added in `./index.ts` for the
+ * Node-runtime instance used by API routes + RSC. Middleware imports the
+ * Edge instance from `./edge.ts` so it can run on Edge runtime without
+ * pulling Prisma into the bundle.
+ *
+ * The session callback here is a pure JWT → session copy (no DB). The
+ * Node instance overrides it to also verify securityVersion against the
+ * DB for session invalidation on role/tenant change (V28 hardening).
+ */
 export const authConfig = {
-  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   secret: process.env.AUTH_SECRET ?? "",
   pages: {
     signIn: "/login",
     error: "/login",
   },
-  providers: [
-    Credentials({
-      credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
-        tenantSlug: { label: "Tenant", type: "text" },
-      },
-      async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-
-        const { username, password, tenantSlug } = parsed.data;
-
-        const user = await platformPrisma.user.findFirst({
-          where: { username, status: "ACTIVE" },
-          include: { tenant: true },
-        });
-
-        if (!user) return null;
-
-        const passwordValid = await bcrypt.compare(password, user.passwordHash);
-        if (!passwordValid) return null;
-
-        // For non-super_admin users, require tenant context
-        if (user.role !== "super_admin") {
-          if (!user.tenantId) return null;
-          if (tenantSlug && user.tenant?.slug !== tenantSlug) return null;
-        }
-
-        return {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          tenantId: user.tenantId,
-          tenantSlug: user.tenant?.slug ?? null,
-          securityVersion: user.securityVersion,
-        };
-      },
-    }),
-  ],
+  providers: [],
   callbacks: {
     jwt({ token, user }) {
       if (user !== undefined) {
@@ -101,23 +60,7 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, token }): Promise<Session> {
-      // Verify securityVersion is still valid (session invalidation on role/tenant change)
-      if (typeof token.userId === "string" && token.userId.length > 0) {
-        const dbUser = await platformPrisma.user.findUnique({
-          where: { id: token.userId },
-          select: { securityVersion: true, status: true },
-        });
-        if (
-          !dbUser ||
-          dbUser.status !== "ACTIVE" ||
-          dbUser.securityVersion !== token.securityVersion
-        ) {
-          // Force re-auth — return session with empty user to trigger signout
-          throw new Error("SESSION_INVALIDATED");
-        }
-      }
-
+    session({ session, token }): Session {
       return {
         ...session,
         user: {
