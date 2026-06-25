@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-06-25 — Phase 8 Batch 3b: Vessel Registration (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Next planned Phase-8 unit (vessel registration) on the V32.14 base. PRODUCT.md defines the Vessel entity (line 303), flows #10 (encoder registers vessel) + #1 (inline owner link), QR pattern (line 100), and Pages 7-9 (list/form/profile). Pre-scaffolded vessel.ts router + Prisma Vessel/FisherfolkVessels m2m + shared schema already existed; UI was entirely missing and the router had spec gaps.
+- Method:              Opus architect + 6 spec-executor (Sonnet) dispatches (R7 fan-out, R8 write-allow-list). Scouted spec + scaffolding via 2 Explore agents to keep main context lean. Mirrored the fisherfolk feature pattern throughout.
+- Files added:         apps/web/src/app/[tenant]/vessels/{vessels-list-client.tsx, columns.tsx, [id]/page.tsx, [id]/vessel-detail-client.tsx, register/page.tsx, register/registration-form-client.tsx}
+- Files modified:      apps/web/src/app/[tenant]/vessels/page.tsx (stub → list server page); apps/web/src/server/trpc/routers/vessel.ts (create: auto-generate+store QR via buildQRPayload regNo=mfvrNumber in a transaction, mirroring fisherfolk; ownerIds OPTIONAL default [] per PRODUCT.md "optionally link owner", owners.connect omitted when empty; clearer duplicate-MFVR CONFLICT message; accept optional vesselPhoto); apps/web/src/server/trpc/routers/upload.ts (ENTITY_TYPES += "vessel-photo"); apps/web/src/components/fisherfolk/photo-upload.tsx (optional entityType prop, default fisherfolk-photo — backward-compatible reuse for vessels)
+- Spec compliance:     owners optional (flow #10); QR auto-generated on creation (line 91/100); vessel photo wired end-to-end (NOT deferred); all MFVR fields present in form+detail; multi-tenant L1/L3/L4 guards inherited from procedures. Sidebar "Vessels" nav link already present from prior scaffold.
+- Schema/migrations:   none — Prisma Vessel/FisherfolkVessels + VesselStatus enum already existed.
+- Verification:        apps/web `tsc --noEmit` EXIT=0; `next lint --dir src` clean across whole web src (confirmed NO fisherfolk regression from shared photo-upload/upload edits); packages/shared tsc EXIT=0. Browser/visual QA deferred to Phase 6 per Rule 16 (no dev server run this session).
+- Git:                 feat/batch-3b-vessel-registration → squash-merged to main (c52a1ab) → pushed to origin → branch deleted (Rule 23).
+- Known debt carried:  upload.getDownloadUrl is encoderProcedure → Viewer/Bantay Dagat see photo placeholder on vessel detail (same documented gap as fisherfolk; fix in Batch 3d / Bantay Dagat batch). TDD infra still absent (Rule 25 not strictly enforced).
+- HARD HOLD:           respected — local dev only, no staging/prod deploy.
+
+---
+
 ## 2026-06-25 — Adopt data-management patterns from production FMO reporting tool into PRODUCT.md (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Owner directed adoption of the live FMO Calapan reporting tool (fmo.powerbyte.app — PHP/SQLite, 3,003 real fisherfolk) into FRMS spec, prioritizing DATA MANAGEMENT patterns. The tool is a foreign stack (not adopted as code) — mined for production-proven data rules FRMS's generic spec lacked.

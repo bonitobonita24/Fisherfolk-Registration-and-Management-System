@@ -28,7 +28,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | ⏳ In Progress (Batches 1, 2a, 2b-1, 2b-2, 3a merged to main — Batch 3b Vessel Registration next) | 2026-05-17 |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batches 1, 2a, 2b-1, 2b-2, 3a, 3b merged to main — Batch 3c Edit Request Workflow next) | 2026-06-25 |
 
 ---
 
@@ -344,9 +344,13 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 |-----------|--------|
 | Fisherfolk detail view (/[tenant]/fisherfolk/[id]) — read-only | ✅ Built (Batch 3a, squash on main) |
 | List page idNumber column → detail link | ✅ Built (Batch 3a) |
-| Vessel registration sub-form | ⬜ Batch 3b — pending |
-| Recent violations panel | ⬜ Batch 3b — pending |
-| Edit Request workflow (admin approval queue) | ⬜ Batch 3c — future |
+| Vessel registration form (/[tenant]/vessels/register) | ✅ Built (Batch 3b, squash c52a1ab on main) |
+| Vessel list (/[tenant]/vessels) + detail (/[tenant]/vessels/[id]) | ✅ Built (Batch 3b) |
+| Vessel QR auto-generation on create + render on detail | ✅ Built (Batch 3b) |
+| Recent violations panel (on vessel detail) | ✅ Built (Batch 3b — active violations list on vessel detail) |
+| Edit Request workflow (admin approval queue) | ⬜ Batch 3c — next |
+
+**Batch 3b shipped — Vessel Registration** (10 files: 6 new + 4 modified, squash c52a1ab on main). Full vessel feature mirroring the fisherfolk pattern: list (`/[tenant]/vessels` + columns + client, MFVR linked to detail, status filter), read-only detail (`/[tenant]/vessels/[id]` — all MFVR fields grouped, linked owners → fisherfolk profiles, active violations panel, QR render, role-gated photo), single-page register form (`/[tenant]/vessels/register` — all fields, fishing-gear chips, optional fisherfolk owner picker via `fisherfolk.list` search, optional photo). Router `vessel.create` hardened to spec: auto-generates+stores QR (`buildQRPayload`, regNo=mfvrNumber, in a transaction); `ownerIds` made OPTIONAL (default `[]`) per PRODUCT.md "optionally link owner"; clearer duplicate-MFVR message; accepts optional `vesselPhoto`. Shared: `upload` ENTITY_TYPES += `"vessel-photo"`; `PhotoUpload` given optional `entityType` prop (backward-compatible). Verified: apps/web tsc EXIT=0, next lint clean across src (no fisherfolk regression), shared tsc EXIT=0. Carried debt: `upload.getDownloadUrl` `encoderProcedure` → Viewer/Bantay Dagat see photo placeholder (same gap as fisherfolk; Batch 3d). Browser/visual QA deferred to Phase 6 (Rule 16).
 
 **Batch 3a shipped — read-only detail view** (3 files +267/-1). New route `/[tenant]/fisherfolk/[id]` = server page + client component rendering profile fields, photo (signed URL via `upload.getDownloadUrl`), signature (signed URL), QR code (data URL via `renderQRDataUrl`). Reused `fisherfolk.getById` — no router changes. List page `idNumber` column wrapped in `<Link>` via `IdNumberCell` sub-component (uses `useParams` for tenant slug). Locked scope: read-only only, core identity + media only, no future-relation placeholders. Follow-up flagged: `upload.getDownloadUrl` is `encoderProcedure` — Viewer + Bantay Dagat roles see "No photo/No signature" placeholders. Fix scheduled as separate batch (split role permissions or convert to protected with role-aware tenant scoping).
 
