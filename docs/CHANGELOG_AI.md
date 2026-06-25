@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-06-25 — Phase 8 Batch 3d: signed-URL role fix (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Carried 🔴 follow-up + directly affects Batch 3b: upload.getDownloadUrl was encoderProcedure, so Viewer + Bantay Dagat saw "No photo/No signature" placeholders on BOTH fisherfolk and vessel detail pages. PRODUCT.md line 268 requires Bantay Dagat to see photos for field identity verification — a hard functional requirement, not cosmetic.
+- Method:              [HOW] decision (mine as architect): chose option (b) — make getDownloadUrl protectedProcedure (any authenticated same-tenant user) rather than splitting procedures, because the storage layer already enforces tenant isolation. Verified the safety invariant BEFORE widening access.
+- Files modified:      apps/web/src/server/trpc/routers/upload.ts (getDownloadUrl: encoderProcedure → protectedProcedure; explanatory comment added). uploadFile (write path) UNCHANGED — stays encoderProcedure.
+- Security rationale:  getFileDownloadUrl(key, ctx.tenantId) calls extractTenantFromKey(key) and throws "Access denied" when it !== ctx.tenantId (packages/storage/src/upload.ts:68-71) — so a client-supplied key can never resolve another tenant's file regardless of caller role. All authenticated same-tenant roles are permitted media view per the PRODUCT.md roles table. No new cross-tenant surface.
+- Schema/migrations:   none.
+- Verification:        apps/web tsc --noEmit EXIT=0; next lint clean; encoderProcedure import still used by uploadFile (no unused-import).
+- Git:                 fix/batch-3d-signed-url-role → squash-merged main (28ca431) → pushed → branch deleted.
+- Resolves:            the long-standing STATE.md follow-up "upload.getDownloadUrl is encoderProcedure → Viewer + Bantay Dagat cannot fetch signed URLs". Now resolved for both fisherfolk and vessel detail.
+- HARD HOLD:           respected — local dev only.
+
+---
+
 ## 2026-06-25 — Phase 8 Batch 3b: Vessel Registration (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Next planned Phase-8 unit (vessel registration) on the V32.14 base. PRODUCT.md defines the Vessel entity (line 303), flows #10 (encoder registers vessel) + #1 (inline owner link), QR pattern (line 100), and Pages 7-9 (list/form/profile). Pre-scaffolded vessel.ts router + Prisma Vessel/FisherfolkVessels m2m + shared schema already existed; UI was entirely missing and the router had spec gaps.
