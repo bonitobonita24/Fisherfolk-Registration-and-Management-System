@@ -12,7 +12,7 @@ import { createTRPCRouter, encoderProcedure } from "../trpc";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
-const ENTITY_TYPES = ["fisherfolk-photo", "fisherfolk-signature"] as const;
+const ENTITY_TYPES = ["fisherfolk-photo", "fisherfolk-signature", "vessel-photo"] as const;
 
 export const uploadRouter = createTRPCRouter({
   uploadFile: encoderProcedure

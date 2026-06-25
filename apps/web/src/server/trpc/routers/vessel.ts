@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { buildQRPayload } from "@/lib/qr-code";
+
 import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
@@ -103,34 +105,52 @@ export const vesselRouter = createTRPCRouter({
           horsepower: z.number().positive().optional(),
           homeport: z.string().optional(),
           fishingGearClassification: z.array(z.string()).default([]),
-          ownerIds: z.array(z.string().cuid()).min(1),
+          vesselPhoto: z.string().optional(),
+          ownerIds: z.array(z.string().cuid()).default([]),
         })
         .strict(),
     )
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+      const userId = ctx.userId!;
       const { ownerIds, ...data } = input;
 
       const existing = await ctx.db.vessel.findFirst({
-        where: { mfvrNumber: input.mfvrNumber, tenantId: ctx.tenantId },
+        where: { mfvrNumber: input.mfvrNumber, tenantId },
       });
       if (existing) {
-        throw new TRPCError({ code: "CONFLICT", message: "Invalid input." });
+        throw new TRPCError({ code: "CONFLICT", message: "A vessel with this MFVR number already exists." });
       }
 
-      const record = await ctx.db.vessel.create({
-        data: {
-          ...omitUndefined(data),
-          tenantId: ctx.tenantId,
-          createdById: ctx.userId!,
-          owners: { connect: ownerIds.map((id) => ({ id })) },
-        },
+      const record = await ctx.db.$transaction(async (tx) => {
+        const created = await tx.vessel.create({
+          data: {
+            ...omitUndefined(data),
+            tenantId,
+            createdById: userId,
+            ...(ownerIds.length > 0 && {
+              owners: { connect: ownerIds.map((id) => ({ id })) },
+            }),
+          },
+        });
+
+        const qrPayload = buildQRPayload({
+          id: created.id,
+          regNo: created.mfvrNumber,
+          tenantId,
+        });
+
+        return tx.vessel.update({
+          where: { id: created.id },
+          data: { qrCode: qrPayload },
+        });
       });
 
       await ctx.db.auditLog.create({
         data: {
-          tenantId: ctx.tenantId,
-          userId: ctx.userId!,
+          tenantId,
+          userId,
           action: "CREATE",
           entityType: "Vessel",
           entityId: record.id,

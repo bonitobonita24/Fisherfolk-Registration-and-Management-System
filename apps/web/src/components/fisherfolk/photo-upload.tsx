@@ -17,6 +17,7 @@ interface PhotoUploadProps {
   onChange: (key: string | undefined) => void;
   className?: string;
   disabled?: boolean;
+  entityType?: "fisherfolk-photo" | "vessel-photo";
 }
 
 export function PhotoUpload({
@@ -24,6 +25,7 @@ export function PhotoUpload({
   onChange,
   className,
   disabled,
+  entityType = "fisherfolk-photo",
 }: PhotoUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function PhotoUpload({
         base64: result,
         mimeType: file.type,
         originalFilename: file.name,
-        entityType: "fisherfolk-photo",
+        entityType,
       });
     };
     reader.onerror = () => setLocalError("Could not read file.");
