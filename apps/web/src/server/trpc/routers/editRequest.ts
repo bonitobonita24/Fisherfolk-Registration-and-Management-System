@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { fisherfolkUpdateSchema } from "@frms/shared/schemas";
 
+import { getTenantAdminUserIds, notifyUsers } from "../../lib/notify";
 import {
   adminProcedure,
   createTRPCRouter,
@@ -142,6 +143,25 @@ export const editRequestRouter = createTRPCRouter({
         },
       });
 
+      // Best-effort: notify all tenant admins of the new edit request.
+      void (async () => {
+        try {
+          const adminIds = await getTenantAdminUserIds(ctx.db, ctx.tenantId!);
+          await notifyUsers(ctx.db, {
+            tenantId: ctx.tenantId!,
+            userIds: adminIds,
+            type: "INFO",
+            title: "New edit request",
+            message: `A new edit request was submitted for ${fisherfolk.fullName} (${fisherfolk.idNumber}) by requester ID ${ctx.userId}.`,
+            entityType: "EditRequest",
+            entityId: record.id,
+            email: true,
+          });
+        } catch (err) {
+          console.error("[editRequest.create] notify failed:", err);
+        }
+      })();
+
       return record;
     }),
 
@@ -187,6 +207,24 @@ export const editRequestRouter = createTRPCRouter({
         },
       });
 
+      // Best-effort: notify the requester that their request was approved.
+      void (async () => {
+        try {
+          await notifyUsers(ctx.db, {
+            tenantId: ctx.tenantId!,
+            userIds: [existing.requestedById],
+            type: "SUCCESS",
+            title: "Edit request approved",
+            message: `Your edit request (ID: ${input.id}) has been approved.`,
+            entityType: "EditRequest",
+            entityId: input.id,
+            email: true,
+          });
+        } catch (err) {
+          console.error("[editRequest.approve] notify failed:", err);
+        }
+      })();
+
       return updated;
     }),
 
@@ -231,6 +269,24 @@ export const editRequestRouter = createTRPCRouter({
           after: updated as unknown as Record<string, unknown>,
         },
       });
+
+      // Best-effort: notify the requester that their request was rejected.
+      void (async () => {
+        try {
+          await notifyUsers(ctx.db, {
+            tenantId: ctx.tenantId!,
+            userIds: [existing.requestedById],
+            type: "WARNING",
+            title: "Edit request rejected",
+            message: `Your edit request (ID: ${input.id}) was rejected. Reason: ${input.rejectionReason}`,
+            entityType: "EditRequest",
+            entityId: input.id,
+            email: true,
+          });
+        } catch (err) {
+          console.error("[editRequest.reject] notify failed:", err);
+        }
+      })();
 
       return updated;
     }),
