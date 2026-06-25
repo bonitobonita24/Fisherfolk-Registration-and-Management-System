@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-06-26 — Security fix: email-HTML XSS in notify.ts (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Automated background security review flagged MEDIUM XSS in the Batch 3c-2 mailer path: notify.ts built the email HTML body as `<p>${message}</p>` with no escaping, and `message` carries user-controlled text (fisherfolk names, edit-request rejection reasons) → stored XSS in the recipient's email client.
+- Fix:                 apps/web/src/server/lib/notify.ts — added escapeHtml() (& < > " ') applied to message before the \n→<br> conversion. Plain-text subject/text channels were never affected.
+- Verification:        apps/web tsc EXIT=0; next lint clean.
+- Git:                 fix/notify-email-xss → main (37417d4) → pushed.
+
+---
+
 ## 2026-06-26 — Phase 8 Batch 3f: format-agnostic fisherfolk ID (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Owner decision PD-001 (DECISIONS_LOG 2026-06-26) — "no ID format, just make it ready for mixed of any ID format."
