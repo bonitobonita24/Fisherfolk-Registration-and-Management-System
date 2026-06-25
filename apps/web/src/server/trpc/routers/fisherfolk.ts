@@ -326,6 +326,66 @@ export const fisherfolkRouter = createTRPCRouter({
       return updated;
     }),
 
+  completeRecord: encoderProcedure
+    .input(
+      z
+        .object({
+          id: z.string().cuid(),
+          changes: fisherfolkUpdateSchema.omit({ id: true }).strict(),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const userId = ctx.userId!;
+
+      const existing = await ctx.db.fisherfolk.findFirst({
+        where: { id: input.id, tenantId: ctx.tenantId },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Server-side guard: each targeted field must currently be empty
+      // (null / undefined / "" / empty array).  A populated field requires
+      // admin approval via the edit-request workflow (PD-004).
+      const isEmpty = (v: unknown): boolean => {
+        if (v === null || v === undefined) return true;
+        if (typeof v === "string") return v.trim() === "";
+        if (Array.isArray(v)) return v.length === 0;
+        return false;
+      };
+
+      for (const key of Object.keys(input.changes) as Array<
+        keyof typeof input.changes
+      >) {
+        const existingValue = (existing as Record<string, unknown>)[key as string];
+        if (!isEmpty(existingValue)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Field already set — requires admin approval.",
+          });
+        }
+      }
+
+      const updated = await ctx.db.fisherfolk.update({
+        where: { id: input.id },
+        data: omitUndefined({ ...input.changes, updatedById: userId }),
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId,
+          action: "UPDATE",
+          entityType: "Fisherfolk",
+          entityId: input.id,
+          before: existing as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        },
+      });
+
+      return updated;
+    }),
+
   archive: adminProcedure
     .input(z.object({ id: z.string().cuid() }).strict())
     .mutation(async ({ ctx, input }) => {

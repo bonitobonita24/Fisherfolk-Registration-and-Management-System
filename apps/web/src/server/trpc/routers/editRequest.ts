@@ -1,11 +1,18 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { fisherfolkUpdateSchema } from "@frms/shared/schemas";
+
 import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
 } from "../trpc";
+
+// Derive allowed editable-field keys from fisherfolkUpdateSchema (excludes "id").
+const ALLOWED_FISHERFOLK_CHANGE_KEYS = new Set(
+  Object.keys(fisherfolkUpdateSchema.shape).filter((k) => k !== "id"),
+);
 
 export const editRequestRouter = createTRPCRouter({
   list: protectedProcedure
@@ -88,6 +95,21 @@ export const editRequestRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
       if (!ctx.userId) throw new TRPCError({ code: "UNAUTHORIZED" });
+
+      // Validate fieldChanges keys against the allowed editable-field set.
+      const changeKeys = Object.keys(input.fieldChanges);
+      if (changeKeys.length === 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "No valid changes." });
+      }
+      const invalidKey = changeKeys.find(
+        (k) => !ALLOWED_FISHERFOLK_CHANGE_KEYS.has(k),
+      );
+      if (invalidKey !== undefined) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid field in changes.",
+        });
+      }
 
       const fisherfolk = await ctx.db.fisherfolk.findFirst({
         where: { id: input.fisherfolkId, tenantId: ctx.tenantId },
@@ -211,5 +233,28 @@ export const editRequestRouter = createTRPCRouter({
       });
 
       return updated;
+    }),
+
+  history: protectedProcedure
+    .input(z.object({ fisherfolkId: z.string().cuid() }).strict())
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const items = await ctx.db.editRequest.findMany({
+        where: { fisherfolkId: input.fisherfolkId, tenantId: ctx.tenantId },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          fieldChanges: true,
+          status: true,
+          createdAt: true,
+          reviewedAt: true,
+          rejectionReason: true,
+          requestedBy: { select: { id: true, name: true } },
+          reviewedBy: { select: { id: true, name: true } },
+        },
+      });
+
+      return { items };
     }),
 });
