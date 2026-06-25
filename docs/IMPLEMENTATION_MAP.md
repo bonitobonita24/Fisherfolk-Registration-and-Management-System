@@ -20,7 +20,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | ⏳ In Progress (Batch 1 + 2a squash-merged to main — Batch 2b pending) | 2026-05-08 |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batches 1, 2a, 2b-1, 2b-2, 3a merged to main — Batch 3b Vessel Registration next) | 2026-05-17 |
 
 ---
 
@@ -313,16 +313,20 @@ Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fis
 
 5 files (3 modified, 2 new). Repo-wide typecheck + lint clean.
 
-### Batch 2b — Registration polish (pending)
+### Batch 2b — Registration polish (complete — merged to main)
+
+Split into 2b-1 (pickers + duplicate search gate + memory governance, squash `77efa8c`) and 2b-2 (photo + signature + QR + Auth/L6 fix, squash `9ab5039`).
 
 | Component | Status |
 |-----------|--------|
-| Pre-registration duplicate search (ID/name/RSBSA + create shortcut) | ⬜ Not started |
-| Photo upload (FileUpload + client compression) | ⬜ Not started |
-| Signature upload | ⬜ Not started |
-| QR code data string generation | ⬜ Not started |
-| Category multi-select picker | ⬜ Not started |
-| Barangay picker (replaces free-text input) | ⬜ Not started |
+| Pre-registration duplicate search (ID/name/RSBSA + create shortcut) | ✅ Built (2b-1, `77efa8c`) — searchForDuplicates 4-level matchType taxonomy |
+| Barangay picker (replaces free-text input) | ✅ Built (2b-1) — PSA PSGC source, admin verify before go-live |
+| Category multi-select picker | ✅ Built (2b-1) |
+| Memory governance layer (.claude/rules/memory-governance.md) | ✅ Added (2b-1) |
+| Photo upload (tRPC + S3) | ✅ Built (2b-2, `9ab5039`) |
+| Signature capture (signature-pad) | ✅ Built (2b-2) — ts-expect-error workaround for react-signature-canvas v1.1.0-alpha.2 |
+| QR code data string generation | ✅ Built (2b-2) — wired into create mutation |
+| Auth.js v5 Edge runtime + L6 tenant-context fix | ✅ Fixed (2b-2) — unblocked dev login |
 
 ### Batch 3 — Fisherfolk Detail View + Vessel Registration (in progress)
 
@@ -346,8 +350,8 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 |----------|--------|
 | PRODUCT.md | ✅ Complete (505 lines) |
 | DESIGN.md | ✅ Complete (pre-existing) |
-| CHANGELOG_AI.md | ✅ Active (9 entries) |
-| DECISIONS_LOG.md | ✅ Active (12 locked decisions) |
+| CHANGELOG_AI.md | ✅ Active (reconciled 2026-06-25 — Batch 2b-1 + 2b-2 entries added) |
+| DECISIONS_LOG.md | ✅ Active (16 locked decisions) |
 | IMPLEMENTATION_MAP.md | ✅ Active (this file — Phase 4 all 8 Parts complete) |
 | inputs.yml | ✅ Generated |
 | inputs.schema.json | ✅ Generated |
@@ -362,7 +366,7 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 
 ## Locked Decisions (from DECISIONS_LOG.md)
 
-12 decisions locked: Dev Environment (WSL2 native), Git Branching, Model Routing, Port Strategy (base 44377), Docker Image Publishing (bonitobonita24/frms), Tenancy Model (multi-tenant, subdirectory, L1-L6), Auth Strategy (Auth.js v5 + JWT), Cloudflare Turnstile (login only), SMTP Configuration (per-tenant + fallback), Komodo Deployment (V27 auto-update), Spec Stress-Test (enabled, passed), TypeScript declaration: false (apps/web — runtime app, no .d.ts emission).
+16 decisions locked: Anti-Thrashing Enforcement (UserPromptSubmit hook), Dev Environment (WSL2 native), Git Branching, Model Routing, Port Strategy (base 44377), Docker Image Publishing (bonitobonita24/frms), Tenancy Model (multi-tenant, subdirectory, L1-L6), Auth Strategy (Auth.js v5 + JWT), platformPrisma (unguarded client for auth/platform queries), Cloudflare Turnstile (login only), SMTP Configuration (per-tenant + fallback), Komodo Deployment (V27 auto-update), Spec Stress-Test (enabled, passed), TypeScript declaration: false (apps/web), ESLint type-aware + strict-boolean-expressions options, omitUndefined&lt;T&gt; (exactOptionalPropertyTypes + Prisma payloads).
 
 ---
 

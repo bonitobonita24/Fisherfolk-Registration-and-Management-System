@@ -22,6 +22,37 @@
 
 ---
 
+## 2026-05-17 — Phase 8 Batch 2b-2 — Photo + Signature + QR + Auth/L6 Dev Fixes (Governance Sync reconciliation 2026-06-25)
+- Agent:               CLAUDE_CODE
+- Note:                This entry was written retroactively during a Governance Sync on 2026-06-25 — the original Batch 2b-2 session merged code (commit 9ab5039) but did not append a CHANGELOG entry. Reconciled against git history (`git show --stat 9ab5039`: 15 files, +1070/-109) and STATE.md.
+- Why:                 Completes the media + verification half of the registration flow (photo, signature, QR) and unblocks dev login by hardening the Auth.js v5 + L6 tenant-context plumbing surfaced during testing.
+- Files added:         apps/web/src/components/fisherfolk/photo-upload.tsx (tRPC + S3 photo upload with client-side handling), apps/web/src/components/fisherfolk/signature-pad.tsx (react-signature-canvas capture — ts-expect-error workaround for v1.1.0-alpha.2 React-19 type incompatibility), apps/web/src/lib/qr-code.ts (QR payload + data-URL render utility for fisherfolk verification), apps/web/src/server/trpc/routers/upload.ts (upload router — getUploadUrl / getDownloadUrl signed-URL procedures; getDownloadUrl currently encoderProcedure — see follow-up), apps/web/src/server/auth/edge.ts (Edge-runtime-safe Auth.js split)
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/register/registration-form-client.tsx (mounted PhotoUpload + SignaturePad in Documents step, wired QR status into Review step), apps/web/src/server/auth/config.ts + index.ts (Auth.js v5 Edge runtime compilation fix — split config/runtime; propagate L6 tenant context through session), apps/web/src/middleware.ts (tenant-context propagation), apps/web/src/server/trpc/{trpc,root}.ts (upload router registration + L6 tenant context through tRPC middleware), apps/web/src/server/trpc/routers/fisherfolk.ts (wire QR payload generation into create mutation), apps/web/package.json + pnpm-lock.yaml (react-signature-canvas, qrcode deps)
+- Files deleted:       none
+- Schema/migrations:   none — media stored via S3/MinIO; QR is a derived data string, not persisted as a column
+- Errors encountered:  (1) Auth.js v5 failed to compile under Edge runtime (middleware). (2) L6 tenant guard threw "Tenant context not set" inside tRPC procedures after auth. (3) react-signature-canvas v1.1.0-alpha.2 type incompatible with React 19. (4) photo upload returned HTTP 400 during dev testing.
+- Errors resolved:     (1) Split Auth.js into edge-safe config (edge.ts) + Node runtime (index.ts). (2) Propagated tenant context via runWithTenant through tRPC middleware. (3) Documented ts-expect-error workaround (revisit on lib React-19 update). (4) Fixed validation step in upload flow.
+- Stage 1 (spec):      PASS — photo upload, signature capture, QR generation all present in registration flow; login works in dev.
+- Stage 2 (quality):   PASS with standing exception — TDD (Rule 25) deferred under repo-wide test-infra debt (logged 2026-05-08 🟤).
+- Follow-up flagged:   upload.getDownloadUrl is encoderProcedure — Viewer + Bantay Dagat roles cannot fetch signed URLs (carried into Batch 3a; PRODUCT.md line 268 requires Bantay Dagat photo access). Schedule as a role-permission fix batch.
+- Merge:               Squash-merged to main as commit 9ab5039 (15 files, +1070/-109). Feature branch deleted.
+
+---
+
+## 2026-05-17 — Phase 8 Batch 2b-1 — Pickers + Duplicate Search Gate + Memory Governance (squash-merge reconciliation 2026-06-25)
+- Agent:               CLAUDE_CODE
+- Note:                Reconciliation entry written during Governance Sync 2026-06-25. The squash-merge commit (77efa8c, 28 files +2001/-191) bundled three sub-batches: 2b-1a pickers, 2b-1b backend duplicate query, 2b-1b.2 frontend gate. The frontend gate has its own entry below; this entry records the pickers + the memory-governance layer + the consolidated merge that were not otherwise logged.
+- Why:                 Replaces free-text barangay/category inputs with validated pickers and adds the V31 memory-governance discipline layer (.claude/rules/memory-governance.md) used to scope Phase 8 batches.
+- Files added:         apps/web/src/components/shared/barangay-picker.tsx (Calapan barangay select — PSA PSGC source, admin must verify before go-live), apps/web/src/components/shared/category-picker.tsx (multi-select category picker), apps/web/src/components/ui/checkbox.tsx (shadcn checkbox primitive), apps/web/src/app/[tenant]/fisherfolk/register/duplicate-search-client.tsx (see 2b-1b.2 entry), .claude/rules/memory-governance.md (§1 tiered decomposition, §2 smart checkpoint, §3 phase hooks, §4 architect-execute, §5 mid-project adoption)
+- Files modified:      apps/web/src/server/trpc/routers/fisherfolk.ts (searchForDuplicates query — 4-level matchType taxonomy: EXACT_ID/EXACT_RSBSA/STRONG_NAME_DOB/POSSIBLE_NAME), packages/shared/src/constants/index.ts (barangay list + picker constants), packages/shared/src/schemas/fisherfolk.ts (duplicate-search schema), registration-form-client.tsx + page.tsx (wire pickers + gate), CLAUDE.md / .ai_prompt/* / AI/* (framework v31 compact sync — additive)
+- Files deleted:       5 obsolete .claude/skills/*/SKILL.md stubs (defense-in-depth, frontend-design, systematic-debugging, test-driven-development, webapp-testing — superseded by plugin-provided skills)
+- Schema/migrations:   none — searchForDuplicates is a read query; matching is equality-based (case-insensitive). Future: pg_trgm fuzzy matching.
+- Stage 1 (spec):      PASS — pickers replace free-text, duplicate gate precedes form, memory-governance layer installed.
+- Stage 2 (quality):   PASS with standing TDD exception (test-infra debt).
+- Merge:               Squash-merged to main as commit 77efa8c (28 files, +2001/-191), then re-baseline commit 45dc32c. Feature branch deleted.
+
+---
+
 ## 2026-05-17 — Phase 8 Batch 2b-1b.2 — Frontend Duplicate Search Gate
 - Agent:               CLAUDE_CODE
 - Why:                 Closes the second half of Batch 2b-1b. Backend query landed in 2b-1b.1 (commit 30bf90e). This sub-batch wires the user-facing gate: encoder must search for existing records before the registration form appears. Prevents duplicate registrations from reaching the create mutation and converts ambiguous matches into informed encoder decisions.
