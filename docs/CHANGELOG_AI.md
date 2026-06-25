@@ -5,6 +5,32 @@
 
 ---
 
+## 2026-06-26 — Phase 8 Batch 3f: format-agnostic fisherfolk ID (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Owner decision PD-001 (DECISIONS_LOG 2026-06-26) — "no ID format, just make it ready for mixed of any ID format."
+- Finding:             idNumber was ALREADY a freeform per-tenant-unique String (Prisma + fisherfolkCreateSchema z.string().min(1), no regex). The gap was UX: the registration form auto-generated FF-YYYY-NNNN and never let the encoder enter a legacy/arbitrary ID.
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/register/registration-form-client.tsx (idNumber now an editable freeform Step-1 field + "Suggest" button calling generateNextIdNumber; removed always-on auto-generate + submit-gated-on-idNumber; review shows entered ID); apps/web/src/server/trpc/routers/fisherfolk.ts (clearer per-tenant duplicate message; generateNextIdNumber kept as optional helper).
+- Schema/migrations:   none — idNumber String + @@unique([tenantId, idNumber]) already correct; legacy IDs preserved.
+- Verification:        apps/web tsc EXIT=0; next lint clean; packages/shared tsc EXIT=0.
+- Git:                 part of branch feat/batch-3c2-3f → main (b6572cd) → pushed.
+- HARD HOLD:           respected — local only.
+
+---
+
+## 2026-06-26 — Phase 8 Batch 3c-2: Edit Request notifications (in-app + email) (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Owner decision PD-003 (DECISIONS_LOG 2026-06-26) — in-app + email ACTIVE, SMS PREPARED/inactive. Completes the Edit Request workflow (3c-1 had the core; this fires + surfaces notifications).
+- Method:              Opus architect + parallel spec-executor dispatches (notification backend + bell UI ran alongside Batch 3f on disjoint files).
+- Pre-existing infra:  Notification Prisma model + notification.ts router (listUnread/listAll/getUnreadCount/markRead/markAllRead) + tenant SMTP fields. No notification CREATE path and no in-app UI existed.
+- Files added:         apps/web/src/server/lib/mailer.ts (sendTenantEmail via nodemailer + tenant SMTP, silent no-op when unconfigured, never throws); apps/web/src/server/lib/sms.ts (PREPARED SmsSender interface + noop + SMS_ENABLED flag, inactive); apps/web/src/server/lib/notify.ts (notifyUsers — bulk in-app rows + best-effort email + sms via Promise.allSettled; getTenantAdminUserIds); apps/web/src/components/notification-bell.tsx (bell + unread badge polling getUnreadCount 30s, popover list, mark-read+navigate, mark-all-read).
+- Files modified:      apps/web/src/server/trpc/routers/editRequest.ts (create → notify tenant admins; approve/reject → notify requester incl. reason; all best-effort, non-blocking); apps/web/src/components/header.tsx (mounts <NotificationBell/>); apps/web/package.json + pnpm-lock.yaml (nodemailer + @types/nodemailer).
+- Design note:         email + SMS are best-effort — a channel failure never blocks the mutation or the in-app row. SMS is a real interface but disabled (flip SMS_ENABLED + implement a sender to activate). This is now the standard notification pattern for future features (renewals, violations).
+- Verification:        apps/web tsc EXIT=0; next lint clean; packages/shared tsc EXIT=0. Runtime email delivery depends on a tenant having SMTP configured — verify in Phase 6.
+- Git:                 part of branch feat/batch-3c2-3f → main (0a7a403) → pushed.
+- HARD HOLD:           respected — local only.
+
+---
+
 ## 2026-06-26 — Phase 8 Batch 3c-1: core Edit Request workflow (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Owner answered the gating decisions (PD-002/003/004 — see DECISIONS_LOG 2026-06-26), unblocking the Edit Request Workflow (PRODUCT.md flow #3). Backend (EditRequest model + editRequest.ts create/approve/reject) was already scaffolded; this batch adds validation, the no-approval bypass, and the full encoder + admin UI. Notifications split to 3c-2.
