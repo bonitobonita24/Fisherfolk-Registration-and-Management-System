@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Wand2 } from "lucide-react";
 
 import { Gender, CivilStatus } from "@frms/shared/types";
 import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
@@ -38,6 +38,7 @@ import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
 const STEP_FIELDS = {
   1: [
+    "idNumber",
     "firstName",
     "middleName",
     "lastName",
@@ -53,6 +54,7 @@ const STEP_FIELDS = {
 } as const;
 
 const formSchema = z.object({
+  idNumber: z.string().min(1, "ID number is required"),
   firstName: z.string().min(1, "First name is required"),
   middleName: z.string(),
   lastName: z.string().min(1, "Last name is required"),
@@ -105,6 +107,7 @@ export function RegistrationFormClient({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      idNumber: "",
       firstName: "",
       middleName: "",
       lastName: "",
@@ -123,10 +126,23 @@ export function RegistrationFormClient({
     },
   });
 
-  const idNumberQuery = trpc.fisherfolk.generateNextIdNumber.useQuery(
+  const suggestQuery = trpc.fisherfolk.generateNextIdNumber.useQuery(
     undefined,
-    { staleTime: 0, refetchOnWindowFocus: false },
+    { enabled: false, staleTime: 0, refetchOnWindowFocus: false },
   );
+  const [isSuggesting, setIsSuggesting] = useState(false);
+
+  async function handleSuggestId() {
+    setIsSuggesting(true);
+    try {
+      const result = await suggestQuery.refetch();
+      if (result.data?.idNumber) {
+        form.setValue("idNumber", result.data.idNumber, { shouldValidate: true });
+      }
+    } finally {
+      setIsSuggesting(false);
+    }
+  }
 
   const utils = trpc.useUtils();
   const createMutation = trpc.fisherfolk.create.useMutation({
@@ -139,19 +155,15 @@ export function RegistrationFormClient({
     onError: (error) => {
       if (error.data?.code === "CONFLICT") {
         toast.error(
-          "ID number already exists. Regenerating — please submit again.",
+          "ID number already exists. Please enter a different ID or click Suggest.",
         );
-        void idNumberQuery.refetch();
         return;
       }
       toast.error(error.message);
     },
   });
 
-  // Wait for ID number before showing review
-  const idNumber = idNumberQuery.data?.idNumber ?? null;
-  const registrationYear =
-    idNumberQuery.data?.year ?? new Date().getFullYear();
+  const registrationYear = new Date().getFullYear();
 
   async function handleNext() {
     if (step === 4) return;
@@ -167,11 +179,6 @@ export function RegistrationFormClient({
   }
 
   function handleSubmit(values: FormValues) {
-    if (idNumber == null) {
-      toast.error("ID number not yet generated. Please wait and try again.");
-      return;
-    }
-
     const fullName = [
       values.firstName,
       values.middleName,
@@ -183,7 +190,7 @@ export function RegistrationFormClient({
       .trim();
 
     createMutation.mutate({
-      idNumber,
+      idNumber: values.idNumber.trim(),
       fullName,
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
@@ -223,14 +230,18 @@ export function RegistrationFormClient({
           }}
           className="space-y-6"
         >
-          {step === 1 && <PersonalStep form={form} />}
+          {step === 1 && (
+            <PersonalStep
+              form={form}
+              onSuggestId={() => { void handleSuggestId(); }}
+              isSuggesting={isSuggesting}
+            />
+          )}
           {step === 2 && <AddressStep form={form} />}
           {step === 3 && <DocumentsStep form={form} />}
           {step === 4 && (
             <ReviewStep
               values={form.getValues()}
-              idNumber={idNumber}
-              idNumberLoading={idNumberQuery.isLoading}
               registrationYear={registrationYear}
             />
           )}
@@ -267,7 +278,7 @@ export function RegistrationFormClient({
               ) : (
                 <Button
                   type="submit"
-                  disabled={isSubmitting || idNumber == null}
+                  disabled={isSubmitting}
                 >
                   {isSubmitting && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -325,9 +336,51 @@ interface StepProps {
   form: UseFormReturn<FormValues>;
 }
 
-function PersonalStep({ form }: StepProps) {
+interface PersonalStepProps extends StepProps {
+  onSuggestId: () => void;
+  isSuggesting: boolean;
+}
+
+function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
+      <FormField
+        control={form.control}
+        name="idNumber"
+        render={({ field }) => (
+          <FormItem className="md:col-span-2">
+            <FormLabel>ID number *</FormLabel>
+            <div className="flex gap-2">
+              <FormControl>
+                <Input
+                  placeholder="e.g. MR-CL-000001-2024 or FF-2025-0001"
+                  {...field}
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onSuggestId}
+                disabled={isSuggesting}
+                className="shrink-0"
+              >
+                {isSuggesting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Wand2 className="h-4 w-4" />
+                )}
+                <span className="ml-1">Suggest</span>
+              </Button>
+            </div>
+            <FormDescription>
+              Enter the official ID in any format (legacy or new), or click
+              Suggest to auto-fill the next available FF-YYYY-NNNN number.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <FormField
         control={form.control}
         name="firstName"
@@ -584,17 +637,10 @@ function DocumentsStep({ form }: StepProps) {
 
 interface ReviewStepProps {
   values: FormValues;
-  idNumber: string | null;
-  idNumberLoading: boolean;
   registrationYear: number;
 }
 
-function ReviewStep({
-  values,
-  idNumber,
-  idNumberLoading,
-  registrationYear,
-}: ReviewStepProps) {
+function ReviewStep({ values, registrationYear }: ReviewStepProps) {
   const fullName = [
     values.firstName,
     values.middleName,
@@ -617,17 +663,10 @@ function ReviewStep({
     <div className="space-y-6">
       <section className="rounded-md border border-border bg-muted/30 p-4">
         <p className="text-sm font-medium text-muted-foreground">
-          Auto-generated ID
+          Fisherfolk ID
         </p>
         <p className="mt-1 font-mono text-lg text-foreground">
-          {idNumberLoading ? (
-            <span className="inline-flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating…
-            </span>
-          ) : (
-            (idNumber ?? "—")
-          )}
+          {values.idNumber.trim().length > 0 ? values.idNumber.trim() : "—"}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           Registration year: {registrationYear}. The QR code is generated
@@ -637,6 +676,7 @@ function ReviewStep({
 
       <ReviewGrid
         rows={[
+          ["ID number", values.idNumber.trim().length > 0 ? values.idNumber.trim() : "—"],
           ["Full name", fullName.length > 0 ? fullName : "—"],
           ["First name", values.firstName],
           ["Middle name", values.middleName.length > 0 ? values.middleName : "—"],

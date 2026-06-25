@@ -255,7 +255,7 @@ export const fisherfolkRouter = createTRPCRouter({
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Invalid input.",
+          message: "A record with this ID number already exists.",
         });
       }
 
