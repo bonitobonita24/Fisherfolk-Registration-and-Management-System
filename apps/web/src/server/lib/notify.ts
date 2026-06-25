@@ -10,6 +10,20 @@ import type { ExtendedPrismaClient, NotificationType } from "@frms/db";
 import { sendTenantEmail } from "./mailer";
 import { sendSms } from "./sms";
 
+/**
+ * Escape HTML special chars before interpolating user-controlled text (fisherfolk
+ * names, rejection reasons, etc.) into an email HTML body — prevents stored XSS in
+ * the recipient's email client.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export interface NotifyUsersInput {
   tenantId: string;
   userIds: string[];
@@ -75,7 +89,7 @@ export async function notifyUsers(
           to: user.email,
           subject: title,
           text: message,
-          html: `<p>${message.replace(/\n/g, "<br>")}</p>`,
+          html: `<p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
         });
       }
       // SMS always goes through (no-op while disabled).
