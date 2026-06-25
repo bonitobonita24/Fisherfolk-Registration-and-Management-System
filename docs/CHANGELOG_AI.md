@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-06-25 — Adopt data-management patterns from production FMO reporting tool into PRODUCT.md (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Owner directed adoption of the live FMO Calapan reporting tool (fmo.powerbyte.app — PHP/SQLite, 3,003 real fisherfolk) into FRMS spec, prioritizing DATA MANAGEMENT patterns. The tool is a foreign stack (not adopted as code) — mined for production-proven data rules FRMS's generic spec lacked.
+- Method:              Read AIEF-HANDOVER.md (owner-prepared); dispatched 3 parallel Explore agents (schema/ID/fields · import+normalization pipeline · reporting/export) to keep main context lean; synthesized findings into PRODUCT.md.
+- Files modified:      docs/PRODUCT.md (504→533 lines): NEW subsection "### Data Management & Normalization Standards" (after Data Import) capturing — canonical 6-activity category taxonomy (Boat Owner/Operator, Capture Fishing, Gleaning, Vendor, Fish Processing, Aquaculture) + free-text→flag keyword mapping; exact field normalization (DOB→YYYY-MM-DD w/ 2-digit-year heuristic + malformed→Unknown bucket; sex first-char; barangay before-first-comma + Title Case + Roman-numeral + tenant typo-map; contact 09xxxxxxxxx, supersedes +63 note); dedup/idempotency (insert-only, keep-most-data); ID-collision integrity (same ID/different person → flag for manual resolution, real case MR-CL-000534-2015); asset linking by ID + missing-asset/orphan CSV data-quality report; incremental import mode (only-new-IDs, backup-first); legacy-ID preservation (imported IDs kept as-is). Also seeded the 6 default categories into Tenant Settings → Categories.
+- Files added:         docs/PENDING_DECISIONS.md (PD-001: new-registration ID convention MR-CL-NNNNNN-YYYY vs FF-YYYY-NNNN — deferred to FMO/owner; NON-BLOCKING).
+- Schema/migrations:   none — SPEC-ONLY change. No source code, no inputs.yml, no Prisma changes this session.
+- Verification:        PRODUCT.md edits confirmed present (3 anchors grepped). Source tool NOT modified (read-only analysis).
+- Follow-up (Phase 7): Propagate spec → implementation in a future batch: (a) seed the 6 categories in packages/db seed, (b) build the import normalization service + incremental mode + data-quality report, (c) wire category flags. Rule 9 sync (PRODUCT.md→inputs.yml) is a Phase-7 step, not done here. Will run pnpm tools:check-product-sync at that time.
+- Deferred decision:   PD-001 logged in docs/PENDING_DECISIONS.md — re-surface each session until FMO answers. Imported legacy IDs preserved regardless, so import is unblocked.
+
+---
+
 ## 2026-06-25 — AIEF Framework Upgrade V31 → V32.14 (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 register-to-aief alignment check found FRMS stack fully aligned (0 true violations) but the governance/prompt layer 14 minor versions stale (V31 → source V32.14). Owner approved upgrade-first (over Batch 3b) so subsequent Phase-8 work lands on the V32 base — critical because FRMS is an LGU gov app and V32.9 adds a PH Data Privacy Act + WCAG 2.2 AA gov hard gate (Rule 33).

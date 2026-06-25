@@ -220,6 +220,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
   - ID card preview showing how icon + category renders on printed ID
   - Member count per category
   - Auto-generated slug per category
+  - **Default seed categories (the real FMO 6-activity taxonomy — see Data Management & Normalization Standards):** Boat Owner/Operator, Capture Fishing, Gleaning, Vendor, Fish Processing, Aquaculture. Seeded for every new tenant; tenants may add/disable but these are the canonical defaults proven against 3,003 production records.
 - **Violations**: Configurable predefined violation subjects list (add/remove tags)
 - **Email (SMTP)**: Per-tenant SMTP credentials (host, port, username, password, from address)
 - Barangay list management
@@ -256,6 +257,34 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
   - Import report + error log downloadable
 - Access: Admin only, located at /[tenant]/import under System menu
 - Use case: initial data migration from Excel-based systems, yearly batch uploads from other LGU offices
+
+### Data Management & Normalization Standards (adopted from the production FMO reporting tool)
+
+> Adopted 2026-06-25 from the live FMO Calapan reporting tool (fmo.powerbyte.app — PHP/SQLite, **3,003 real fisherfolk** across ~51 barangay labels). These are production-proven data-hygiene rules. They are the **single source of truth for data normalization** and apply to BOTH manual registration/renewal AND the bulk Data Import wizard (Step 1 validation + Step 4 preview enforce them).
+
+- **Canonical fisherfolk activity categories (default tenant seed — the real FMO 6-category taxonomy):** Boat Owner/Operator · Capture Fishing · Gleaning · Vendor · Fish Processing · Aquaculture. A fisherfolk may hold multiple (modeled as independent flags, not one exclusive value). Free-text source `CATEGORY` values map to these on import via keyword match: `boat owner`→Boat Owner/Operator, `capture fish`→Capture Fishing, `gleaning`/`gleaner`→Gleaning, `vend`→Vendor, `processing`→Fish Processing, `aquaculture`→Aquaculture. Tenants keep full category CRUD (add/disable), but these 6 seed every new tenant.
+
+- **Field normalization rules (applied on registration save AND on import):**
+  - **Date of birth** → canonical `YYYY-MM-DD`. Two-digit year heuristic: `yy > 30` → `19yy`, else `20yy`. Malformed / 3-digit-year values (real case: `990-11-19`) → store null + raise a data-quality **warning** (never silently drop); record falls into the "Unknown" age bucket.
+  - **Sex** → `Male` / `Female` derived from the first character (`m`→Male, `f`→Female); anything else → unspecified + flag.
+  - **Barangay** → extracted as the text **before the first comma** of a free-text address, Title Case, with Roman numerals upper-cased (`Nag-Iba 1, Calapan` → `Nag-Iba I`). A **tenant-editable typo-normalization map** reconciles known source variants (real cases: `Comunal`↔`Communal`, `Nag-Iba 1`↔`Nag-Iba I`, stray one-offs like `Svs`). Result is validated against the tenant barangay list.
+  - **Contact number** → Philippine mobile `09xxxxxxxxx`: strip all non-digits; a 10-digit value starting with `9` gets a leading `0`. Non-conforming numbers are stored but flagged. (Supersedes the earlier "+63 prefix" note — production canonical form is `09xxxxxxxxx`.)
+
+- **Deduplication & idempotency:**
+  - Dedup key = `idNumber` (per tenant). Detection runs **in-file** (within one upload) and **in-DB** (against existing records).
+  - Import is **insert-only and idempotent** — re-running the same file inserts zero new rows. On a duplicate `idNumber`, FRMS keeps the record with the most complete data; it never blind-overwrites.
+  - **ID-collision integrity (real production failure mode):** if the SAME `idNumber` maps to a DIFFERENT person (name/DOB/sex/barangay mismatch beyond tolerance), the row is **NOT auto-merged** — it is flagged in the validation report as an **ID conflict for manual FMO resolution** (issue a new ID or correct the source). This caught a real collision in production: `MR-CL-000534-2015` was held by two different people across two masterlist batches.
+
+- **Photo / signature asset linking:**
+  - Assets are matched to records by `idNumber` (filename = ID), case-insensitive, searched across multiple source locations in priority order (current upload batch → existing uploads → prior backup archive; first match wins).
+  - Unmatched/missing assets produce a downloadable **data-quality report (CSV)**: records with no photo, records with no signature, and **orphan asset files** that match no record. (Production reference: 22 photos + 11 signatures genuinely missing of 2,976; ~184 orphan images for people not in the list.)
+  - A shared placeholder image renders for any record lacking a photo or signature.
+
+- **Incremental import mode:** beyond the full 5-step wizard, an **incremental mode** adds ONLY new `idNumber`s from a partial masterlist (one barangay's batch, or another LGU office's list), links their assets, and skips any `idNumber` already present. The database is **backed up before** an incremental run. (Production reference: a 27-record "EditingPC" batch applied on top of 2,976.)
+
+- **Legacy ID preservation:** imported records **preserve their source `idNumber` exactly** as issued by FMO (production format `MR-CL-NNNNNN-YYYY`). FRMS does NOT regenerate IDs for imported records; newly registered fisherfolk receive an FRMS-generated `idNumber`. ⚠ **DEFERRED OWNER DECISION (PENDING):** whether *new* FRMS registrations should adopt the production `MR-CL-NNNNNN-YYYY` convention (LGU continuity) or keep the current generated `FF-YYYY-NNNN`. Recorded for FMO sign-off — does not block import (imported IDs are preserved either way).
+
+- **Dry-run / preview is non-destructive:** the import preview performs all parsing, normalization, dedup, and asset-matching with **zero DB writes and zero file copies**, then emits the full validation + data-quality summary before any commit (FRMS Step 4 = production `--dry-run`).
 
 ## Roles + Permissions
 
