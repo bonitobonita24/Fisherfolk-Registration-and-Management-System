@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-06-25 — AIEF Framework Upgrade V31 → V32.14 (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 register-to-aief alignment check found FRMS stack fully aligned (0 true violations) but the governance/prompt layer 14 minor versions stale (V31 → source V32.14). Owner approved upgrade-first (over Batch 3b) so subsequent Phase-8 work lands on the V32 base — critical because FRMS is an LGU gov app and V32.9 adds a PH Data Privacy Act + WCAG 2.2 AA gov hard gate (Rule 33).
+- Method:              bash $AIEF/sync-to-project.sh (copied 25-file V32.14 deliverable set → .ai_prompt/ + deploy.sh) → bash deploy.sh (relayout). AIEF=/home/me/UbuntuDevFiles/1_COMPANY_DEV/Powerbyte-AIEF.
+- Files added:         .ai_prompt/{CLAUDE_compact,Master_Prompt,Framework_Feature_Index,AI_Tools_Reference,Security_Checklist,Planning_Assistant,ChatGPT_Cross_Audit,LESSONS_REGISTRY,privacy,design-principles,motion,spec-executor,settings,lint-deploy,design-stop-hook}.* ; .claude/agents/spec-executor.md ; scripts/lint-deploy.sh ; scripts/design-stop-hook.sh ; deploy.sh ; tests/visual/.gitkeep
+- Files modified:      CLAUDE.md (V31 fat → V32.14 compact card — now the ONLY auto-load), .ai_prompt/{phases,security,ui-rules,bootstrap,scenarios,templates,memory-governance}.md (V32.14), .claude/settings.json (MERGE — custom anti-thrashing UserPromptSubmit hook 7bf35bf + contextFiles PRESERVED; added Stop hook design-stop-hook.sh + skill-budget keys), .gitignore (V32 entries merged), .ai_prompt/Prompt_References.{md,html}, project.memory.md (V31→V32.14, 30→33 rules)
+- Files deleted:       8 stale v31-suffixed framework dupes (.ai_prompt/*_v31.*, AI/Master_Prompt_v31.md, .ai_prompt/deploy-v31.sh) + 7 stale .claude/rules/*.md (V32.7: .claude/rules/ intentionally empty — detail files now in .ai_prompt/)
+- Schema/migrations:   none — framework/prompt layer only. ZERO source code, ZERO docs/PRODUCT.md, ZERO inputs.yml changes. Stack unchanged (Next 15.1, tRPC v11, Prisma 6.19, React 19, Valkey+BullMQ, shadcn).
+- Verification:        settings.json merge verified — jq confirmed hooks.UserPromptSubmit (custom anti-thrashing) intact + valid JSON + contextFiles preserved; CLAUDE.md header = V32.14; .claude/rules/ empty; spec-executor agent + scripts/ installed; 25/25 deliverable files present. deploy.sh backups (.bak, gitignored) created.
+- Fleet registry:      FRMS row in AIEF reference_project_locations.md — will update to V32.14 post-merge.
+- Follow-up:           ⚠ Claude Code must RESTART for the new compact-CLAUDE.md + hooks to load (hooks load at session-start only) — Batch 3b runs in that fresh V32 session. V32.9 privacy/Rule 33 + WCAG 2.2 AA gov gate now apply to FRMS — schedule a compliance pass (privacy.md) as a Phase-8 batch. Run memory-governance.md §5 mid-project adoption baseline in the fresh session.
+- HARD HOLD:           respected — this is a local framework-layer upgrade (owner-approved), NOT a staging/prod deploy.
+
+---
+
 ## 2026-05-17 — Phase 8 Batch 3a — Fisherfolk Read-Only Detail View + List Navigation
 - Agent:               CLAUDE_CODE
 - Why:                 First half of original Batch 3 — gives encoders, admins, and viewers a way to inspect a registered fisherfolk's full record. Resolves the dead "View existing record" link from the Batch 2b-1b.2 duplicate-search gate (was 404 before this batch). Scope locked to read-only per user multi-select: no Edit button (EditRequest workflow extracted as future Batch 3c), no categories badges, no audit metadata, no empty placeholder sections for future relations.

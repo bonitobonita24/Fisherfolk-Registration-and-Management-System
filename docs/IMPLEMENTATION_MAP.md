@@ -4,6 +4,14 @@
 
 ---
 
+> **Framework: V32.14** (upgraded from V31 on 2026-06-25 via sync-to-project.sh + deploy.sh).
+> 33 rules. CLAUDE.md is the compact auto-load; detail files in `.ai_prompt/` (load-on-demand);
+> `.claude/rules/` intentionally empty (V32.7). New gov-app gates: Rule 33 / `.ai_prompt/privacy.md`
+> (PH Data Privacy Act + WCAG 2.2 AA). Stack unchanged & fully aligned. ⚠ Requires Claude Code
+> restart for V32 layout to load — Batch 3b runs in that fresh session.
+
+---
+
 ## Phase Status
 
 | Phase | Status | Last Updated |
