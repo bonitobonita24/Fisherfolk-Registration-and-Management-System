@@ -28,7 +28,7 @@
 | Phase 6 — Docker + Visual QA | ✅ Complete (15 errors fixed) | 2026-05-08 |
 | Post-Phase 6 — Fix login auth | ✅ Complete (4 errors fixed, on fix branch) | 2026-05-08 |
 | Phase 7 — Feature Updates | Not Started | — |
-| Phase 8 — Iterative Buildout | ⏳ In Progress (Batches 1, 2a, 2b-1, 2b-2, 3a, 3b merged to main — Batch 3c Edit Request Workflow next) | 2026-06-25 |
+| Phase 8 — Iterative Buildout | ⏳ In Progress (Batches 1, 2a, 2b-1, 2b-2, 3a, 3b, 3d, 3c-1 merged to main — Batch 3c-2 notifications next) | 2026-06-26 |
 
 ---
 
@@ -348,7 +348,9 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 | Vessel list (/[tenant]/vessels) + detail (/[tenant]/vessels/[id]) | ✅ Built (Batch 3b) |
 | Vessel QR auto-generation on create + render on detail | ✅ Built (Batch 3b) |
 | Recent violations panel (on vessel detail) | ✅ Built (Batch 3b — active violations list on vessel detail) |
-| Edit Request workflow (admin approval queue) | ⬜ Batch 3c — next |
+| Edit Request workflow — encoder form + admin queue + diff viewer | ✅ Built (Batch 3c-1, d73a77c) |
+| Edit Request — in-app + email notifications | ⬜ Batch 3c-2 — next (PD-003) |
+| Fisherfolk ID format-agnostic / mixed IDs | ⬜ Batch 3f (PD-001) |
 
 **Batch 3b shipped — Vessel Registration** (10 files: 6 new + 4 modified, squash c52a1ab on main). Full vessel feature mirroring the fisherfolk pattern: list (`/[tenant]/vessels` + columns + client, MFVR linked to detail, status filter), read-only detail (`/[tenant]/vessels/[id]` — all MFVR fields grouped, linked owners → fisherfolk profiles, active violations panel, QR render, role-gated photo), single-page register form (`/[tenant]/vessels/register` — all fields, fishing-gear chips, optional fisherfolk owner picker via `fisherfolk.list` search, optional photo). Router `vessel.create` hardened to spec: auto-generates+stores QR (`buildQRPayload`, regNo=mfvrNumber, in a transaction); `ownerIds` made OPTIONAL (default `[]`) per PRODUCT.md "optionally link owner"; clearer duplicate-MFVR message; accepts optional `vesselPhoto`. Shared: `upload` ENTITY_TYPES += `"vessel-photo"`; `PhotoUpload` given optional `entityType` prop (backward-compatible). Verified: apps/web tsc EXIT=0, next lint clean across src (no fisherfolk regression), shared tsc EXIT=0. Carried debt: `upload.getDownloadUrl` `encoderProcedure` → Viewer/Bantay Dagat see photo placeholder (same gap as fisherfolk; Batch 3d). Browser/visual QA deferred to Phase 6 (Rule 16).
 

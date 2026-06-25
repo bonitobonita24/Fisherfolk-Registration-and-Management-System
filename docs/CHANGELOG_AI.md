@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-06-26 — Phase 8 Batch 3c-1: core Edit Request workflow (Full Auto)
+- Agent:               CLAUDE_CODE
+- Why:                 Owner answered the gating decisions (PD-002/003/004 — see DECISIONS_LOG 2026-06-26), unblocking the Edit Request Workflow (PRODUCT.md flow #3). Backend (EditRequest model + editRequest.ts create/approve/reject) was already scaffolded; this batch adds validation, the no-approval bypass, and the full encoder + admin UI. Notifications split to 3c-2.
+- Method:              Opus architect + 4 parallel spec-executor (Sonnet) dispatches on disjoint files (R7), contracts fixed up-front. Decisions locked in DECISIONS_LOG before building.
+- Files modified:      apps/web/src/server/trpc/routers/editRequest.ts (create validates fieldChanges keys ⊆ fisherfolkUpdateSchema.shape minus id — 24 keys — rejects unknown/empty; new history(fisherfolkId) query); apps/web/src/server/trpc/routers/fisherfolk.ts (new completeRecord encoderProcedure — PD-004 bypass: fills currently-EMPTY fields directly, throws FORBIDDEN if any targeted field already populated); apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx (Edit button); apps/web/src/app/[tenant]/edit-requests/page.tsx (stub → queue page)
+- Files added:         apps/web/src/app/[tenant]/fisherfolk/[id]/edit/{page.tsx, edit-form-client.tsx}; apps/web/src/app/[tenant]/edit-requests/{columns.tsx, edit-requests-list-client.tsx, [id]/page.tsx, [id]/edit-request-review-client.tsx}
+- Behavior:            Encoder edit form prefills all editable fields, computes the diff, and routes: changes that only FILL empty fields → fisherfolk.completeRecord (instant, no approval); any change to populated data → editRequest.create (admin approval). Admin queue defaults to PENDING. Diff viewer renders old (red strikethrough) → new (green) per flow #3, with Approve / Reject-with-reason (shadcn Dialog) + a rejection-history section (PD-004). Sidebar "Edit Requests" nav item was already scaffolded.
+- Schema/migrations:   none — EditRequest model + enum already existed.
+- Verification:        apps/web tsc --noEmit EXIT=0; next lint clean across src; packages/shared tsc EXIT=0. Browser/visual QA deferred to Phase 6 (Rule 16) — runtime fieldChanges-key compatibility between the edit form and the create-validation set relies on both deriving from fisherfolkUpdateSchema (verify in Phase 6).
+- Git:                 feat/batch-3c1-edit-request → squash-merged main (d73a77c) → pushed → branch deleted.
+- Next:                Batch 3c-2 notifications (PD-003: in-app + email active, SMS prepared); Batch 3f ID-format flexibility (PD-001).
+- HARD HOLD:           respected — local dev only.
+
+---
+
 ## 2026-06-25 — Phase 8 Batch 3d: signed-URL role fix (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Carried 🔴 follow-up + directly affects Batch 3b: upload.getDownloadUrl was encoderProcedure, so Viewer + Bantay Dagat saw "No photo/No signature" placeholders on BOTH fisherfolk and vessel detail pages. PRODUCT.md line 268 requires Bantay Dagat to see photos for field identity verification — a hard functional requirement, not cosmetic.
