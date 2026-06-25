@@ -22,7 +22,10 @@
 - **Recommendation (for owner):** Adopt `MR-CL-NNNNNN-YYYY` for LGU continuity unless FMO
   prefers a clean new sequence — confirm the segment meaning (MR=municipality? CL=Calapan?
   6-digit running number? trailing year = registration year vs issue year).
-- **Status:** ⏳ AWAITING FMO/owner answer.
+- **Status:** ✅ ANSWERED 2026-06-26 — "no ID format, just make it ready for mixed of any ID
+  format." Resolution: idNumber is a freeform per-tenant-unique string accepting ANY format;
+  no mandated pattern; manual entry on registration + optional generate-suggest; legacy IDs
+  preserved. Locked in DECISIONS_LOG. Implementation tracked as its own batch.
 
 ---
 
@@ -40,7 +43,9 @@
   whitelist). Does NOT block the admin-side review (the diff viewer is field-agnostic — renders
   whatever `fieldChanges` JSON contains).
 - **Recommendation:** (b) — identity/ID fields admin-direct-only, everything else via request.
-- **Status:** ⏳ AWAITING FMO/owner answer.
+- **Status:** ✅ ANSWERED 2026-06-26 — "all fields, just add to the history whatever field has
+  been changed." Resolution: whitelist = full `fisherfolkUpdateSchema` field set; fieldChanges
+  records only changed keys (= the history). Locked in DECISIONS_LOG.
 
 ---
 
@@ -55,7 +60,9 @@
   approve/reject actions themselves (those already apply changes + audit).
 - **Recommendation:** in-app notification center first (no external cost/dependency), email opt-in
   later via existing tenant SMTP.
-- **Status:** ⏳ AWAITING FMO/owner answer.
+- **Status:** ✅ ANSWERED 2026-06-26 — "in-app & email but SMS just prepare." Resolution: in-app
+  + email ACTIVE (email via tenant SMTP); SMS = prepared interface/stub + config flag, inactive.
+  Becomes the standard for all future system notifications. Locked in DECISIONS_LOG.
 
 ---
 
@@ -71,4 +78,7 @@
   approve/reject flow works without these.
 - **Recommendation:** (1) photo/signature + any empty required field; (2) new EditRequest per submit,
   history via query — simplest + fully auditable.
-- **Status:** ⏳ AWAITING FMO/owner answer.
+- **Status:** ✅ RESOLVED 2026-06-26 (owner delegated "how should I answer this?" → agent
+  recommendation adopted as provisional default; owner may flip): (1) bypass = missing photo/signature
+  + any currently-empty required field (changing populated fields always needs approval); (2) new
+  EditRequest per submit, rejection history via query. Locked (provisional) in DECISIONS_LOG.

@@ -158,3 +158,50 @@ input. Applied across category, ayuda, tenant, vessel, violation, fisherfolk,
 idTemplate, kanbanTask, and future routers.
 Locked: yes — do NOT cast Prisma input types with `as` (hides bugs); always
 use omitUndefined for partial payloads.
+
+## Edit Request Workflow — editable fields (PD-002)
+Decision: ALL editable Fisherfolk fields may be changed via an edit request — the
+whitelist is exactly the field set of `fisherfolkUpdateSchema`
+(packages/shared/src/schemas/fisherfolk.ts). System/identity/audit columns
+(id, tenantId, idNumber? , createdAt/updatedAt, createdById/updatedById, qrCode) are
+NOT user-editable and are excluded by virtue of not being in fisherfolkUpdateSchema.
+The edit request records "whatever field has been changed" — fieldChanges JSON holds
+only the keys the encoder actually modified (changed-fields-only), which IS the history.
+Rationale: Owner answer 2026-06-26 — "all fields, just add to the history whatever field
+has been changed." editRequest.create must validate fieldChanges keys ⊆ fisherfolkUpdateSchema
+shape (reject unknown keys) so approve()'s fisherfolk.update(fieldChanges) can never throw.
+Locked: yes. Owner-decided. Back-port to PRODUCT.md flow #3 pending (Rule 1 — human edits PRODUCT.md).
+
+## Edit Request Workflow — notification channels (PD-003)
+Decision: In-app notifications (Notification model + notification.ts router already exist)
++ EMAIL (build a mailer using existing tenant SMTP settings) are ACTIVE. SMS is PREPARED
+but inactive — define the channel interface / a no-op SMS sender stub + a config flag, so
+SMS can be switched on later without re-architecting. This channel set becomes the standard
+for ALL future system notifications (renewals, violations, etc.).
+Rationale: Owner answer 2026-06-26 — "in-app & email but SMS just prepare."
+Locked: yes. Owner-decided.
+
+## Edit Request Workflow — approval-bypass + resubmit/history (PD-004)
+Decision: (1) No-approval bypass covers a missing photo/signature AND any currently-EMPTY
+required field — filling a blank completes the record (encoder-direct), but CHANGING an
+already-populated field always routes through admin approval. (2) Resubmit creates a NEW
+EditRequest per submission; rejection history is shown by querying prior requests for that
+fisherfolk (and overlapping fields). Both are agent recommendations adopted as defaults —
+owner asked for guidance ("how should I answer this?") and may override.
+Rationale: Owner 2026-06-26 delegated; agent recommended. Filling blanks ≠ mutating data
+(low risk, fast record completion); new-record-per-submit is simplest + fully auditable and
+aligns with PD-002 changed-fields history.
+Locked: provisional (agent default) — flip on owner request.
+
+## Fisherfolk registration ID — format-agnostic / mixed IDs (PD-001)
+Decision: Do NOT enforce any single ID format. `idNumber` is a freeform per-tenant-unique
+string that must accept ANY format (legacy MR-CL-NNNNNN-YYYY, generated FF-YYYY-NNNN, or
+arbitrary). New registrations: encoder may ENTER the ID manually (any format); the existing
+generateNextIdNumber stays as an optional "suggest" helper, not a mandate. Remove rigid
+format validation; search/sort/dedup already operate on the string and must remain
+format-neutral. Imported legacy IDs are preserved exactly (already locked under Data
+Management & Normalization Standards).
+Rationale: Owner answer 2026-06-26 — "no ID format, just make it ready for mixed of any ID
+format." Supersedes the FF-YYYY-NNNN-vs-MR-CL question — neither is mandated.
+Locked: yes. Owner-decided. Scope: fisherfolk.create input + registration form idNumber
+field (manual freeform + uniqueness check) + drop any format regex. Tracked as its own batch.
