@@ -8,7 +8,11 @@ import {
 } from "@frms/storage";
 
 import { rateLimiters } from "../../lib/rate-limit";
-import { createTRPCRouter, encoderProcedure } from "../trpc";
+import {
+  createTRPCRouter,
+  encoderProcedure,
+  protectedProcedure,
+} from "../trpc";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -87,7 +91,12 @@ export const uploadRouter = createTRPCRouter({
       };
     }),
 
-  getDownloadUrl: encoderProcedure
+  // protectedProcedure (not encoderProcedure): all authenticated same-tenant roles
+  // — incl. Viewer + Bantay Dagat — may fetch media signed URLs. Cross-tenant access
+  // is still prevented inside getFileDownloadUrl, which throws "Access denied" when
+  // extractTenantFromKey(key) !== ctx.tenantId. PRODUCT.md (Bantay Dagat must see
+  // photos for field identity verification) requires this. Batch 3d fix.
+  getDownloadUrl: protectedProcedure
     .input(z.object({ key: z.string().min(1) }).strict())
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
