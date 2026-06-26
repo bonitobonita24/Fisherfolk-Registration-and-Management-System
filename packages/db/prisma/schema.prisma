@@ -238,8 +238,8 @@ model Fisherfolk {
   firstName        String           @map("first_name")
   middleName       String?          @map("middle_name")
   suffix           String?
-  dateOfBirth      DateTime         @map("date_of_birth") @db.Date
-  sex              Gender
+  dateOfBirth      DateTime?        @map("date_of_birth") @db.Date
+  sex              Gender?
   civilStatus      CivilStatus?     @map("civil_status")
   address          String
   barangay         String

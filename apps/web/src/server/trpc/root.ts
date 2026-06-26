@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "./trpc";
 import { auditLogRouter } from "./routers/auditLog";
+import { importRouter } from "./routers/import";
 import { ayudaRouter } from "./routers/ayuda";
 import { categoryRouter } from "./routers/category";
 import { commentRouter } from "./routers/comment";
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
   editRequest: editRequestRouter,
   fisherfolk: fisherfolkRouter,
+  import: importRouter,
   idTemplate: idTemplateRouter,
   kanbanTask: kanbanTaskRouter,
   notification: notificationRouter,

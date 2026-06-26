@@ -193,6 +193,7 @@ export const fisherfolkRouter = createTRPCRouter({
           matchType = "EXACT_RSBSA";
         } else if (
           inputDobMs !== undefined &&
+          c.dateOfBirth != null &&
           c.dateOfBirth.getTime() === inputDobMs
         ) {
           matchType = "STRONG_NAME_DOB";
