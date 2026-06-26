@@ -79,3 +79,4 @@ coverage/
 tokens/build/
 tests/visual/__snapshots__/
 tests/visual/diff/
+.playwright-mcp/
