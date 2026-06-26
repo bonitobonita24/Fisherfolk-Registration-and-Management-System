@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
+    "sharp": "^0.35.2",
     "@frms/db": "workspace:*",
     "@frms/shared": "workspace:*",
     "@frms/storage": "workspace:*",
