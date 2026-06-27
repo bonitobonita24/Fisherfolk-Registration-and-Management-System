@@ -24,6 +24,7 @@ export const importRouter = createTRPCRouter({
         .object({
           fileName: z.string().optional(),
           rows: z.array(rowSchema),
+          mode: z.enum(["FULL", "INCREMENTAL"]).optional().default("FULL"),
         })
         .strict(),
     )
@@ -60,7 +61,7 @@ export const importRouter = createTRPCRouter({
       const batch = await db.importBatch.create({
         data: omitUndefined({
           tenantId,
-          mode: "FULL" as const,
+          mode: input.mode,
           status: "READY" as const,
           fileName: input.fileName,
           totalRows: report.counts.total,
@@ -77,8 +78,10 @@ export const importRouter = createTRPCRouter({
 
   /**
    * commit — re-validate server-side (source of truth), then insert all
-   * importable rows.  Skips on unique-constraint violation (P2002) so the
-   * operation is idempotent and resumable.
+   * importable rows.
+   * FULL mode: skips on unique-constraint violation (P2002) — idempotent/resumable.
+   * INCREMENTAL mode: upserts by (tenantId, idNumber) — updates existing records,
+   * inserts new ones.  Returns `updated` count in addition to imported/skipped.
    */
   commit: adminProcedure
     .input(
@@ -86,6 +89,7 @@ export const importRouter = createTRPCRouter({
         .object({
           batchId: z.string(),
           rows: z.array(rowSchema),
+          mode: z.enum(["FULL", "INCREMENTAL"]).optional().default("FULL"),
         })
         .strict(),
     )
@@ -94,6 +98,7 @@ export const importRouter = createTRPCRouter({
       const tenantId = ctx.tenantId;
       const userId = ctx.userId!;
       const db = ctx.db;
+      const isIncremental = input.mode === "INCREMENTAL";
 
       // Re-validate server-side — never trust client
       const tenant = await db.tenant.findUniqueOrThrow({
@@ -138,38 +143,56 @@ export const importRouter = createTRPCRouter({
 
       let imported = 0;
       let skipped = 0;
+      let updated = 0;
 
-      const importableRows = report.rows.filter(
-        (r) => r.status !== "error" && r.action === "import",
-      );
+      const importableRows = report.rows.filter((r) => {
+        if (r.status === "error") return false;
+        if (r.action === "import") return true;
+        // INCREMENTAL: also process existing records so the upsert branch can update them.
+        // skip-duplicate and skip-collision remain excluded in all modes.
+        if (isIncremental && r.action === "skip-existing") return true;
+        return false;
+      });
 
       for (let i = 0; i < importableRows.length; i++) {
         const r = importableRows[i];
         if (!r) continue;
         const n = r.normalized;
 
-        try {
-          const data = omitUndefined({
+        const sexValue =
+          n.sex == null
+            ? null
+            : n.sex === "Male"
+              ? ("MALE" as const)
+              : ("FEMALE" as const);
+
+        const categoryIds = n.categories
+          .map((c) => catMap.get(c.toLowerCase()))
+          .filter((id): id is string => id != null);
+
+        if (isIncremental) {
+          // INCREMENTAL mode: upsert by tenant-scoped unique (tenantId + idNumber).
+          // Unique selector name: tenantId_idNumber (Prisma compound key convention).
+          const idNumber = r.idNumber;
+          if (!idNumber) {
+            skipped++;
+            continue;
+          }
+
+          const createData = omitUndefined({
             tenantId,
-            idNumber: r.idNumber,
+            idNumber,
             fullName: n.fullName,
             lastName: n.lastName,
             firstName: n.firstName,
             middleName: n.middleName ?? undefined,
             dateOfBirth: n.dateOfBirth ? new Date(n.dateOfBirth) : null,
-            sex:
-              n.sex == null
-                ? null
-                : n.sex === "Male"
-                  ? ("MALE" as const)
-                  : ("FEMALE" as const),
+            sex: sexValue,
             address: n.address || "",
             barangay: n.barangay ?? "",
             contactNumber: n.contactNumber ?? undefined,
             rsbsaNumber: n.rsbsaNumber ?? undefined,
-            categoryIds: n.categories
-              .map((c) => catMap.get(c.toLowerCase()))
-              .filter((id): id is string => id != null),
+            categoryIds,
             remarks: n.remarks ?? undefined,
             status: "ACTIVE" as const,
             registrationYear: tenant.currentRegistrationYear,
@@ -177,32 +200,100 @@ export const importRouter = createTRPCRouter({
             updatedById: userId,
           });
 
-          const created = await db.fisherfolk.create({ data });
+          // Update data excludes immutable fields (id, tenantId, idNumber, createdAt, createdById)
+          const updateData = omitUndefined({
+            fullName: n.fullName,
+            lastName: n.lastName,
+            firstName: n.firstName,
+            middleName: n.middleName ?? undefined,
+            dateOfBirth: n.dateOfBirth ? new Date(n.dateOfBirth) : null,
+            sex: sexValue,
+            address: n.address || "",
+            barangay: n.barangay ?? "",
+            contactNumber: n.contactNumber ?? undefined,
+            rsbsaNumber: n.rsbsaNumber ?? undefined,
+            categoryIds,
+            remarks: n.remarks ?? undefined,
+            status: "ACTIVE" as const,
+            registrationYear: tenant.currentRegistrationYear,
+            updatedById: userId,
+          });
+
+          const wasExisting = existingIdNumbers.has(idNumber);
+
+          const result = await db.fisherfolk.upsert({
+            where: { tenantId_idNumber: { tenantId, idNumber } },
+            create: createData,
+            update: updateData,
+          });
 
           await db.fisherfolk.update({
-            where: { id: created.id },
+            where: { id: result.id },
             data: {
               qrCode: buildQRPayload({
-                id: created.id,
-                regNo: created.idNumber,
+                id: result.id,
+                regNo: result.idNumber,
                 tenantId,
               }),
             },
           });
 
-          imported++;
-        } catch (err: unknown) {
-          // Idempotent: skip on unique-constraint violation (same idNumber)
-          if (
-            typeof err === "object" &&
-            err !== null &&
-            "code" in err &&
-            (err as { code: string }).code === "P2002"
-          ) {
-            skipped++;
-            continue;
+          if (wasExisting) {
+            updated++;
+          } else {
+            imported++;
           }
-          throw err;
+        } else {
+          // FULL mode: original behavior — create and skip on P2002
+          try {
+            const data = omitUndefined({
+              tenantId,
+              idNumber: r.idNumber,
+              fullName: n.fullName,
+              lastName: n.lastName,
+              firstName: n.firstName,
+              middleName: n.middleName ?? undefined,
+              dateOfBirth: n.dateOfBirth ? new Date(n.dateOfBirth) : null,
+              sex: sexValue,
+              address: n.address || "",
+              barangay: n.barangay ?? "",
+              contactNumber: n.contactNumber ?? undefined,
+              rsbsaNumber: n.rsbsaNumber ?? undefined,
+              categoryIds,
+              remarks: n.remarks ?? undefined,
+              status: "ACTIVE" as const,
+              registrationYear: tenant.currentRegistrationYear,
+              createdById: userId,
+              updatedById: userId,
+            });
+
+            const created = await db.fisherfolk.create({ data });
+
+            await db.fisherfolk.update({
+              where: { id: created.id },
+              data: {
+                qrCode: buildQRPayload({
+                  id: created.id,
+                  regNo: created.idNumber,
+                  tenantId,
+                }),
+              },
+            });
+
+            imported++;
+          } catch (err: unknown) {
+            // Idempotent: skip on unique-constraint violation (same idNumber)
+            if (
+              typeof err === "object" &&
+              err !== null &&
+              "code" in err &&
+              (err as { code: string }).code === "P2002"
+            ) {
+              skipped++;
+              continue;
+            }
+            throw err;
+          }
         }
 
         // Periodic progress checkpoint every 50 rows
@@ -218,13 +309,14 @@ export const importRouter = createTRPCRouter({
         }
       }
 
-      // Finalize batch
+      // Finalize batch — store updated count in report JSON (no DB column for it)
       await db.importBatch.update({
         where: { id: input.batchId },
         data: {
           status: "COMPLETED",
           importedRows: imported,
           skippedRows: skipped,
+          report: { updated } as Record<string, unknown>,
           completedAt: new Date(),
         },
       });
@@ -237,11 +329,11 @@ export const importRouter = createTRPCRouter({
           action: "CREATE",
           entityType: "ImportBatch",
           entityId: input.batchId,
-          after: { imported, skipped } as Record<string, unknown>,
+          after: { imported, skipped, updated } as Record<string, unknown>,
         },
       });
 
-      return { imported, skipped, batchId: input.batchId };
+      return { imported, skipped, updated, batchId: input.batchId };
     }),
 
   /** getBatch — fetch a single ImportBatch record scoped to this tenant. */

@@ -20,10 +20,12 @@ import type { ValidationReport } from "@/lib/import/validate";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type WizardStep = "upload" | "preview" | "done";
+type ImportMode = "FULL" | "INCREMENTAL";
 
 interface CommitResult {
   imported: number;
   skipped: number;
+  updated: number;
   batchId: string;
 }
 
@@ -41,6 +43,7 @@ export function ImportWizard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<WizardStep>("upload");
+  const [mode, setMode] = useState<ImportMode>("FULL");
   const [fileName, setFileName] = useState<string>("");
   const [rows, setRows] = useState<Array<Record<string, string>>>([]);
   const [report, setReport] = useState<ValidationReport | null>(null);
@@ -94,6 +97,7 @@ export function ImportWizard() {
         const previewResult = await preview.mutateAsync({
           fileName: parsedFileName,
           rows: parsedRows,
+          mode,
         });
 
         setFileName(parsedFileName);
@@ -118,12 +122,13 @@ export function ImportWizard() {
     if (!batchId) return;
 
     try {
-      const result = await commit.mutateAsync({ batchId, rows });
+      const result = await commit.mutateAsync({ batchId, rows, mode });
       setCommitResult(result);
       setStep("done");
-      toast.success(
-        `Import complete — ${result.imported.toLocaleString()} records imported.`,
-      );
+      const parts = [`${result.imported.toLocaleString()} imported`];
+      if (result.updated > 0) parts.push(`${result.updated.toLocaleString()} updated`);
+      if (result.skipped > 0) parts.push(`${result.skipped.toLocaleString()} skipped`);
+      toast.success(`Import complete — ${parts.join(" · ")}.`);
       void refetchBatches();
     } catch (err) {
       toast.error(
@@ -158,6 +163,36 @@ export function ImportWizard() {
             <CardTitle className="text-base">Upload Spreadsheet</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* ── Mode selector ─────────────────────────────────────────── */}
+            <div className="space-y-2">
+              <Label>Import mode</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={mode === "FULL" ? "default" : "outline"}
+                  size="sm"
+                  disabled={isProcessing}
+                  onClick={() => setMode("FULL")}
+                >
+                  Full import
+                </Button>
+                <Button
+                  type="button"
+                  variant={mode === "INCREMENTAL" ? "default" : "outline"}
+                  size="sm"
+                  disabled={isProcessing}
+                  onClick={() => setMode("INCREMENTAL")}
+                >
+                  Incremental update
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {mode === "FULL"
+                  ? "New records are added; existing records with the same ID are skipped."
+                  : "Existing records with the same ID are updated; new records are added."}
+              </p>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="import-file">
                 Select file (.xlsx, .xls, .csv)
@@ -221,9 +256,9 @@ export function ImportWizard() {
                   variant="default"
                 />
                 <StatCell
-                  label="To skip"
+                  label={mode === "INCREMENTAL" ? "Will update" : "To skip"}
                   value={report.counts.toSkip}
-                  variant="secondary"
+                  variant={mode === "INCREMENTAL" ? "default" : "secondary"}
                 />
                 <StatCell
                   label="Duplicates"
@@ -260,16 +295,24 @@ export function ImportWizard() {
                 <Button variant="outline" onClick={handleReset}>
                   Back
                 </Button>
-                <Button
-                  onClick={() => void handleCommit()}
-                  disabled={
-                    report.counts.toImport === 0 || commit.isPending
-                  }
-                >
-                  {commit.isPending
-                    ? "Importing…"
-                    : `Import ${report.counts.toImport.toLocaleString()} records`}
-                </Button>
+                {(() => {
+                  const committable =
+                    mode === "INCREMENTAL"
+                      ? report.counts.toImport + report.counts.toSkip
+                      : report.counts.toImport;
+                  return (
+                    <Button
+                      onClick={() => void handleCommit()}
+                      disabled={committable === 0 || commit.isPending}
+                    >
+                      {commit.isPending
+                        ? "Importing…"
+                        : mode === "INCREMENTAL"
+                          ? `Import / update ${committable.toLocaleString()} records`
+                          : `Import ${committable.toLocaleString()} records`}
+                    </Button>
+                  );
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -347,6 +390,13 @@ export function ImportWizard() {
                 value={commitResult.imported}
                 variant="default"
               />
+              {commitResult.updated > 0 && (
+                <StatCell
+                  label="Updated"
+                  value={commitResult.updated}
+                  variant="default"
+                />
+              )}
               <StatCell
                 label="Skipped"
                 value={commitResult.skipped}

@@ -15,6 +15,7 @@ import { reportRouter } from "./routers/report";
 import { tenantRouter } from "./routers/tenant";
 import { uploadRouter } from "./routers/upload";
 import { userRouter } from "./routers/user";
+import { settingsRouter } from "./routers/settings";
 import { vesselRouter } from "./routers/vessel";
 import { violationRouter } from "./routers/violation";
 
@@ -32,6 +33,7 @@ export const appRouter = createTRPCRouter({
   kanbanTask: kanbanTaskRouter,
   notification: notificationRouter,
   report: reportRouter,
+  settings: settingsRouter,
   tenant: tenantRouter,
   upload: uploadRouter,
   user: userRouter,
