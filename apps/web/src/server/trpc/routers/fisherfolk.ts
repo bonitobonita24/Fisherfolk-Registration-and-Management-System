@@ -29,18 +29,21 @@ export const fisherfolkRouter = createTRPCRouter({
             .enum(["NEW", "ACTIVE", "RENEWED", "INACTIVE", "ARCHIVED"])
             .optional(),
           barangay: z.string().optional(),
+          missing: z.enum(["photo", "signature"]).optional(),
         })
         .strict(),
     )
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-      const { page, limit, search, status, barangay } = input;
+      const { page, limit, search, status, barangay, missing } = input;
       const skip = (page - 1) * limit;
 
       const where = {
         tenantId: ctx.tenantId,
         ...(status && { status }),
         ...(barangay && { barangay }),
+        ...(missing === "photo" && { photo: null }),
+        ...(missing === "signature" && { signature: null }),
         ...(search && {
           OR: [
             { fullName: { contains: search, mode: "insensitive" as const } },
@@ -193,6 +196,7 @@ export const fisherfolkRouter = createTRPCRouter({
           matchType = "EXACT_RSBSA";
         } else if (
           inputDobMs !== undefined &&
+          c.dateOfBirth != null &&
           c.dateOfBirth.getTime() === inputDobMs
         ) {
           matchType = "STRONG_NAME_DOB";

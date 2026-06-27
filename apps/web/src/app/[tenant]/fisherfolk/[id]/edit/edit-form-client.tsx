@@ -98,8 +98,8 @@ interface EditFormProps {
     middleName: string | null;
     lastName: string;
     suffix: string | null;
-    dateOfBirth: Date | string;
-    sex: string;
+    dateOfBirth: Date | string | null;
+    sex: string | null;
     civilStatus: string | null;
     contactNumber: string | null;
     rsbsaNumber: string | null;
@@ -193,10 +193,13 @@ function EditForm({ id, record }: EditFormProps) {
       const oldDate =
         record.dateOfBirth instanceof Date
           ? record.dateOfBirth
-          : new Date(record.dateOfBirth);
+          : record.dateOfBirth != null
+            ? new Date(record.dateOfBirth)
+            : null;
       if (
         !Number.isNaN(newDate.getTime()) &&
-        newDate.toISOString().slice(0, 10) !== oldDate.toISOString().slice(0, 10)
+        newDate.toISOString().slice(0, 10) !==
+          (oldDate != null ? oldDate.toISOString().slice(0, 10) : null)
       ) {
         changes.dateOfBirth = newDate;
       }

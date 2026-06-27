@@ -159,6 +159,8 @@ model Tenant {
   mayorName               String?      @map("mayor_name")
   mayorSignatureUrl       String?      @map("mayor_signature_url")
   accentColor             String       @default("#4F8EF7") @map("accent_color")
+  primaryColor            String       @default("#E8843C") @map("primary_color")
+  secondaryColor          String       @default("#336F92") @map("secondary_color")
   smtpHost                String?      @map("smtp_host")
   smtpPort                Int?         @map("smtp_port")
   smtpUser                String?      @map("smtp_user")
@@ -184,41 +186,44 @@ model Tenant {
   ayudaPrograms      AyudaProgram[]
   ayudaBeneficiaries AyudaBeneficiary[]
   idTemplates        IDTemplate[]
+  barangayAliases    BarangayAlias[]
+  importBatches      ImportBatch[]
 
   @@map("tenants")
 }
 
 model User {
-  id                String     @id @default(cuid())
-  tenantId          String     @map("tenant_id")
-  email             String
-  username          String
-  passwordHash      String     @map("password_hash")
-  name              String
-  role              UserRole   @default(encoder)
-  status            UserStatus @default(ACTIVE)
-  avatarUrl         String?    @map("avatar_url")
-  securityVersion   Int        @default(1) @map("security_version")
-  createdAt         DateTime   @default(now()) @map("created_at")
-  updatedAt         DateTime   @updatedAt @map("updated_at")
+  id              String     @id @default(cuid())
+  tenantId        String     @map("tenant_id")
+  email           String
+  username        String
+  passwordHash    String     @map("password_hash")
+  name            String
+  role            UserRole   @default(encoder)
+  status          UserStatus @default(ACTIVE)
+  avatarUrl       String?    @map("avatar_url")
+  securityVersion Int        @default(1) @map("security_version")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
 
-  tenant             Tenant         @relation(fields: [tenantId], references: [id])
-  auditLogs          AuditLog[]
-  comments           Comment[]
-  kanbanTasks        KanbanTask[]
-  notifications      Notification[]
-  filedViolations    Violation[]    @relation("ViolationFiledBy")
-  liftedViolations   Violation[]    @relation("ViolationLiftedBy")
-  reviewedRequests   EditRequest[]  @relation("EditRequestReviewedBy")
-  submittedRequests  EditRequest[]  @relation("EditRequestSubmittedBy")
-  createdFisherfolk  Fisherfolk[]   @relation("FisherfolkCreatedBy")
-  updatedFisherfolk  Fisherfolk[]   @relation("FisherfolkUpdatedBy")
-  createdVessels     Vessel[]       @relation("VesselCreatedBy")
-  updatedVessels     Vessel[]       @relation("VesselUpdatedBy")
-  createdPrograms    AyudaProgram[] @relation("AyudaProgramCreatedBy")
+  tenant                Tenant             @relation(fields: [tenantId], references: [id])
+  auditLogs             AuditLog[]
+  comments              Comment[]
+  kanbanTasks           KanbanTask[]
+  notifications         Notification[]
+  filedViolations       Violation[]        @relation("ViolationFiledBy")
+  liftedViolations      Violation[]        @relation("ViolationLiftedBy")
+  reviewedRequests      EditRequest[]      @relation("EditRequestReviewedBy")
+  submittedRequests     EditRequest[]      @relation("EditRequestSubmittedBy")
+  createdFisherfolk     Fisherfolk[]       @relation("FisherfolkCreatedBy")
+  updatedFisherfolk     Fisherfolk[]       @relation("FisherfolkUpdatedBy")
+  createdVessels        Vessel[]           @relation("VesselCreatedBy")
+  updatedVessels        Vessel[]           @relation("VesselUpdatedBy")
+  createdPrograms       AyudaProgram[]     @relation("AyudaProgramCreatedBy")
   verifiedBeneficiaries AyudaBeneficiary[] @relation("BeneficiaryVerifiedBy")
-  uploadedFiles      AyudaUpload[]
-  createdTemplates   IDTemplate[]
+  uploadedFiles         AyudaUpload[]
+  createdTemplates      IDTemplate[]
+  importBatches         ImportBatch[]      @relation("ImportBatchCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -227,41 +232,41 @@ model User {
 }
 
 model Fisherfolk {
-  id                String           @id @default(cuid())
-  tenantId          String           @map("tenant_id")
-  idNumber          String           @map("id_number")
-  fullName          String           @map("full_name")
-  lastName          String           @map("last_name")
-  firstName         String           @map("first_name")
-  middleName        String?          @map("middle_name")
-  suffix            String?
-  dateOfBirth       DateTime         @map("date_of_birth") @db.Date
-  sex               Gender
-  civilStatus       CivilStatus?     @map("civil_status")
-  address           String
-  barangay          String
-  contactNumber     String?          @map("contact_number")
-  rsbsaNumber       String?          @map("rsbsa_number")
-  categoryIds       String[]         @map("category_ids")
-  photo             String?
-  signature         String?
-  qrCode            String?          @map("qr_code")
-  status            FisherfolkStatus @default(NEW)
-  dateJoined        DateTime         @default(now()) @map("date_joined")
-  registrationYear  Int              @map("registration_year")
-  remarks           String?
-  createdAt         DateTime         @default(now()) @map("created_at")
-  updatedAt         DateTime         @updatedAt @map("updated_at")
-  createdById       String?          @map("created_by_id")
-  updatedById       String?          @map("updated_by_id")
+  id               String           @id @default(cuid())
+  tenantId         String           @map("tenant_id")
+  idNumber         String           @map("id_number")
+  fullName         String           @map("full_name")
+  lastName         String           @map("last_name")
+  firstName        String           @map("first_name")
+  middleName       String?          @map("middle_name")
+  suffix           String?
+  dateOfBirth      DateTime?        @map("date_of_birth") @db.Date
+  sex              Gender?
+  civilStatus      CivilStatus?     @map("civil_status")
+  address          String
+  barangay         String
+  contactNumber    String?          @map("contact_number")
+  rsbsaNumber      String?          @map("rsbsa_number")
+  categoryIds      String[]         @map("category_ids")
+  photo            String?
+  signature        String?
+  qrCode           String?          @map("qr_code")
+  status           FisherfolkStatus @default(NEW)
+  dateJoined       DateTime         @default(now()) @map("date_joined")
+  registrationYear Int              @map("registration_year")
+  remarks          String?
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  createdById      String?          @map("created_by_id")
+  updatedById      String?          @map("updated_by_id")
 
-  tenant           Tenant             @relation(fields: [tenantId], references: [id])
-  createdBy        User?              @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
-  updatedBy        User?              @relation("FisherfolkUpdatedBy", fields: [updatedById], references: [id])
-  vessels          Vessel[]           @relation("FisherfolkVessels")
-  violations       Violation[]        @relation("FisherfolkViolations")
-  comments         Comment[]
-  editRequests     EditRequest[]
+  tenant             Tenant             @relation(fields: [tenantId], references: [id])
+  createdBy          User?              @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
+  updatedBy          User?              @relation("FisherfolkUpdatedBy", fields: [updatedById], references: [id])
+  vessels            Vessel[]           @relation("FisherfolkVessels")
+  violations         Violation[]        @relation("FisherfolkViolations")
+  comments           Comment[]
+  editRequests       EditRequest[]
   ayudaBeneficiaries AyudaBeneficiary[]
 
   @@unique([tenantId, idNumber])
@@ -273,37 +278,37 @@ model Fisherfolk {
 }
 
 model Vessel {
-  id                       String       @id @default(cuid())
-  tenantId                 String       @map("tenant_id")
-  mfvrNumber               String       @map("mfvr_number")
-  vesselName               String?      @map("vessel_name")
-  vesselType               String       @map("vessel_type")
-  hullMaterial             String?      @map("hull_material")
-  placeBuilt               String?      @map("place_built")
-  yearBuilt                Int?         @map("year_built")
-  registeredLength         Float?       @map("registered_length")
-  registeredBreadth        Float?       @map("registered_breadth")
-  registeredDepth          Float?       @map("registered_depth")
-  grossTonnage             Float?       @map("gross_tonnage")
-  netTonnage               Float?       @map("net_tonnage")
-  engineMake               String?      @map("engine_make")
-  engineSerialNumber       String?      @map("engine_serial_number")
-  horsepower               Float?
-  homeport                 String?
-  fishingGearClassification String[]    @map("fishing_gear_classification")
-  vesselPhoto              String?      @map("vessel_photo")
-  qrCode                   String?      @map("qr_code")
-  status                   VesselStatus @default(ACTIVE)
-  createdAt                DateTime     @default(now()) @map("created_at")
-  updatedAt                DateTime     @updatedAt @map("updated_at")
-  createdById              String?      @map("created_by_id")
-  updatedById              String?      @map("updated_by_id")
+  id                        String       @id @default(cuid())
+  tenantId                  String       @map("tenant_id")
+  mfvrNumber                String       @map("mfvr_number")
+  vesselName                String?      @map("vessel_name")
+  vesselType                String       @map("vessel_type")
+  hullMaterial              String?      @map("hull_material")
+  placeBuilt                String?      @map("place_built")
+  yearBuilt                 Int?         @map("year_built")
+  registeredLength          Float?       @map("registered_length")
+  registeredBreadth         Float?       @map("registered_breadth")
+  registeredDepth           Float?       @map("registered_depth")
+  grossTonnage              Float?       @map("gross_tonnage")
+  netTonnage                Float?       @map("net_tonnage")
+  engineMake                String?      @map("engine_make")
+  engineSerialNumber        String?      @map("engine_serial_number")
+  horsepower                Float?
+  homeport                  String?
+  fishingGearClassification String[]     @map("fishing_gear_classification")
+  vesselPhoto               String?      @map("vessel_photo")
+  qrCode                    String?      @map("qr_code")
+  status                    VesselStatus @default(ACTIVE)
+  createdAt                 DateTime     @default(now()) @map("created_at")
+  updatedAt                 DateTime     @updatedAt @map("updated_at")
+  createdById               String?      @map("created_by_id")
+  updatedById               String?      @map("updated_by_id")
 
-  tenant      Tenant       @relation(fields: [tenantId], references: [id])
-  createdBy   User?        @relation("VesselCreatedBy", fields: [createdById], references: [id])
-  updatedBy   User?        @relation("VesselUpdatedBy", fields: [updatedById], references: [id])
-  owners      Fisherfolk[] @relation("FisherfolkVessels")
-  violations  Violation[]  @relation("VesselViolations")
+  tenant     Tenant       @relation(fields: [tenantId], references: [id])
+  createdBy  User?        @relation("VesselCreatedBy", fields: [createdById], references: [id])
+  updatedBy  User?        @relation("VesselUpdatedBy", fields: [updatedById], references: [id])
+  owners     Fisherfolk[] @relation("FisherfolkVessels")
+  violations Violation[]  @relation("VesselViolations")
 
   @@unique([tenantId, mfvrNumber])
   @@index([tenantId])
@@ -367,20 +372,20 @@ model EditRequest {
 }
 
 model Comment {
-  id               String              @id @default(cuid())
-  tenantId         String              @map("tenant_id")
-  fisherfolkId     String              @map("fisherfolk_id")
-  authorId         String              @map("author_id")
+  id               String               @id @default(cuid())
+  tenantId         String               @map("tenant_id")
+  fisherfolkId     String               @map("fisherfolk_id")
+  authorId         String               @map("author_id")
   content          String
-  mentionedUserIds String[]            @map("mentioned_user_ids")
-  isTicket         Boolean             @default(false) @map("is_ticket")
+  mentionedUserIds String[]             @map("mentioned_user_ids")
+  isTicket         Boolean              @default(false) @map("is_ticket")
   ticketStatus     CommentTicketStatus? @map("ticket_status")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
+  createdAt        DateTime             @default(now()) @map("created_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
 
-  tenant     Tenant     @relation(fields: [tenantId], references: [id])
-  fisherfolk Fisherfolk @relation(fields: [fisherfolkId], references: [id])
-  author     User       @relation(fields: [authorId], references: [id])
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  fisherfolk Fisherfolk  @relation(fields: [fisherfolkId], references: [id])
+  author     User        @relation(fields: [authorId], references: [id])
   kanbanTask KanbanTask?
 
   @@index([tenantId])
@@ -389,17 +394,17 @@ model Comment {
 }
 
 model AuditLog {
-  id        String      @id @default(cuid())
-  tenantId  String?     @map("tenant_id")
-  userId    String      @map("user_id")
-  action    AuditAction
-  entityType String    @map("entity_type")
-  entityId  String      @map("entity_id")
-  before    Json?
-  after     Json?
-  ipAddress String?     @map("ip_address")
-  userAgent String?     @map("user_agent")
-  createdAt DateTime    @default(now()) @map("created_at")
+  id         String      @id @default(cuid())
+  tenantId   String?     @map("tenant_id")
+  userId     String      @map("user_id")
+  action     AuditAction
+  entityType String      @map("entity_type")
+  entityId   String      @map("entity_id")
+  before     Json?
+  after      Json?
+  ipAddress  String?     @map("ip_address")
+  userAgent  String?     @map("user_agent")
+  createdAt  DateTime    @default(now()) @map("created_at")
 
   tenant Tenant? @relation(fields: [tenantId], references: [id])
   user   User    @relation(fields: [userId], references: [id])
@@ -412,19 +417,19 @@ model AuditLog {
 }
 
 model Category {
-  id           String         @id @default(cuid())
-  tenantId     String         @map("tenant_id")
+  id           String           @id @default(cuid())
+  tenantId     String           @map("tenant_id")
   name         String
   description  String?
   slug         String
-  displayColor String         @map("display_color")
-  iconType     CategoryIconType @map("icon_type") @default(EMOJI)
-  iconEmoji    String?        @map("icon_emoji")
-  iconImageUrl String?        @map("icon_image_url")
-  displayOrder Int            @default(0) @map("display_order")
-  status       CategoryStatus @default(ACTIVE)
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  displayColor String           @map("display_color")
+  iconType     CategoryIconType @default(EMOJI) @map("icon_type")
+  iconEmoji    String?          @map("icon_emoji")
+  iconImageUrl String?          @map("icon_image_url")
+  displayOrder Int              @default(0) @map("display_order")
+  status       CategoryStatus   @default(ACTIVE)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -435,16 +440,16 @@ model Category {
 }
 
 model KanbanTask {
-  id              String           @id @default(cuid())
-  tenantId        String           @map("tenant_id")
-  assignedToId    String           @map("assigned_to_id")
+  id              String             @id @default(cuid())
+  tenantId        String             @map("tenant_id")
+  assignedToId    String             @map("assigned_to_id")
   title           String
   description     String?
-  status          KanbanTaskStatus @default(TODO)
+  status          KanbanTaskStatus   @default(TODO)
   priority        KanbanTaskPriority @default(MEDIUM)
-  sourceCommentId String?          @unique @map("source_comment_id")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  sourceCommentId String?            @unique @map("source_comment_id")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
 
   tenant        Tenant   @relation(fields: [tenantId], references: [id])
   assignedTo    User     @relation(fields: [assignedToId], references: [id])
@@ -560,4 +565,64 @@ model IDTemplate {
   @@index([tenantId])
   @@index([tenantId, templateType, status])
   @@map("id_templates")
+}
+
+enum ImportBatchMode {
+  FULL
+  INCREMENTAL
+}
+
+enum ImportBatchStatus {
+  PENDING
+  VALIDATING
+  READY
+  IMPORTING
+  COMPLETED
+  FAILED
+}
+
+model BarangayAlias {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  fromLabel String   @map("from_label")
+  toLabel   String   @map("to_label")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, fromLabel])
+  @@index([tenantId])
+  @@map("barangay_aliases")
+}
+
+model ImportBatch {
+  id                String            @id @default(cuid())
+  tenantId          String            @map("tenant_id")
+  mode              ImportBatchMode   @default(FULL)
+  status            ImportBatchStatus @default(PENDING)
+  fileName          String?           @map("file_name")
+  totalRows         Int               @default(0) @map("total_rows")
+  validRows         Int               @default(0) @map("valid_rows")
+  warningRows       Int               @default(0) @map("warning_rows")
+  errorRows         Int               @default(0) @map("error_rows")
+  importedRows      Int               @default(0) @map("imported_rows")
+  skippedRows       Int               @default(0) @map("skipped_rows")
+  photosMatched     Int               @default(0) @map("photos_matched")
+  signaturesMatched Int               @default(0) @map("signatures_matched")
+  lastProcessedRow  Int               @default(0) @map("last_processed_row")
+  report            Json?
+  errorLog          Json?             @map("error_log")
+  backupPath        String?           @map("backup_path")
+  createdById       String?           @map("created_by_id")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  completedAt       DateTime?         @map("completed_at")
+
+  tenant    Tenant @relation(fields: [tenantId], references: [id])
+  createdBy User?  @relation("ImportBatchCreatedBy", fields: [createdById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("import_batches")
 }

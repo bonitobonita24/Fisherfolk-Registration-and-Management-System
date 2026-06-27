@@ -1,8 +1,11 @@
+import type React from "react";
 import { redirect } from "next/navigation";
+import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
+import { hexToHslTriplet, readableForeground } from "@/lib/theme/color";
 
 interface TenantLayoutProps {
   children: React.ReactNode;
@@ -26,8 +29,23 @@ export default async function TenantLayout({
     redirect(`/${tenantSlug}/dashboard`);
   }
 
+  const t = await prisma.tenant.findUnique({
+    where: { slug: tenant },
+    select: { primaryColor: true, secondaryColor: true },
+  });
+
+  const themeVars = t
+    ? ({
+        "--primary": hexToHslTriplet(t.primaryColor),
+        "--primary-foreground": readableForeground(t.primaryColor),
+        "--ring": hexToHslTriplet(t.primaryColor),
+        "--secondary": hexToHslTriplet(t.secondaryColor),
+        "--secondary-foreground": readableForeground(t.secondaryColor),
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div id="tenant-theme-root" className="flex h-screen overflow-hidden" style={themeVars}>
       <Sidebar tenantSlug={tenant} role={role} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header userName={name ?? "User"} role={role} />

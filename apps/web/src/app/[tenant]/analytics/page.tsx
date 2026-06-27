@@ -1,3 +1,5 @@
+import { AnalyticsClient } from "./analytics-client";
+
 export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
@@ -5,6 +7,7 @@ export default function AnalyticsPage() {
       <p className="text-muted-foreground">
         Visual analytics and demographic intelligence dashboards.
       </p>
+      <AnalyticsClient />
     </div>
   );
 }

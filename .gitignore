@@ -79,3 +79,8 @@ coverage/
 tokens/build/
 tests/visual/__snapshots__/
 tests/visual/diff/
+.playwright-mcp/
+
+# QA screenshots (root, untracked artifacts)
+/analytics-qa.png
+/dm5-import-page.png

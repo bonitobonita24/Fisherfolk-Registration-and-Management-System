@@ -2,13 +2,22 @@
 
 import { useMemo } from "react";
 import Image from "next/image";
-import { Loader2, X } from "lucide-react";
+import {
+  Check,
+  Factory,
+  Fish,
+  Loader2,
+  Ship,
+  Shell,
+  Store,
+  Waves,
+  X,
+} from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Popover,
   PopoverContent,
@@ -128,12 +137,23 @@ export function CategoryPicker({
                     <li key={category.id}>
                       <button
                         type="button"
+                        aria-pressed={checked}
                         onClick={() => {
                           toggle(category.id);
                         }}
                         className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
                       >
-                        <Checkbox checked={checked} aria-hidden tabIndex={-1} />
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "grid h-4 w-4 shrink-0 place-content-center rounded-sm border",
+                            checked
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-input",
+                          )}
+                        >
+                          {checked && <Check className="h-3 w-3" />}
+                        </span>
                         <CategoryIcon category={category} />
                         <span className="flex-1 truncate">{category.name}</span>
                       </button>
@@ -182,6 +202,20 @@ export function CategoryPicker({
   );
 }
 
+// Lucide icon lookup keyed by normalized category name (lowercase).
+// No `slug` field on CategoryOption, so name is the identifier.
+const CATEGORY_ICON_MAP: Record<string, typeof Ship> = {
+  "boat owner/operator": Ship,
+  "boat-owner-operator": Ship,
+  "capture fishing": Fish,
+  "capture-fishing": Fish,
+  gleaning: Shell,
+  vendor: Store,
+  "fish processing": Factory,
+  "fish-processing": Factory,
+  aquaculture: Waves,
+};
+
 function CategoryIcon({
   category,
   size = 16,
@@ -189,6 +223,7 @@ function CategoryIcon({
   category: CategoryOption;
   size?: number;
 }) {
+  // 1. IMAGE branch — keep unchanged.
   if (
     category.iconType === "IMAGE" &&
     category.iconImageUrl != null &&
@@ -205,17 +240,22 @@ function CategoryIcon({
       />
     );
   }
-  if (
-    category.iconType === "EMOJI" &&
-    category.iconEmoji != null &&
-    category.iconEmoji !== ""
-  ) {
+
+  // 2. Lucide icon lookup by normalized name.
+  //    Covers all iconType values (EMOJI, null, or unknown future types)
+  //    so the emoji/tofu branch is intentionally gone.
+  const LucideIcon = CATEGORY_ICON_MAP[category.name.toLowerCase()];
+  if (LucideIcon != null) {
     return (
-      <span style={{ fontSize: size }} aria-hidden>
-        {category.iconEmoji}
-      </span>
+      <LucideIcon
+        size={size}
+        className="text-muted-foreground"
+        aria-hidden={true}
+      />
     );
   }
+
+  // 3. Unknown / custom category — colored dot fallback.
   return (
     <span
       aria-hidden

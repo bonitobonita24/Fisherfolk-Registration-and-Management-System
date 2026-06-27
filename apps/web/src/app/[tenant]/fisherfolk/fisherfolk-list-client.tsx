@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ImageOff, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
@@ -24,10 +24,23 @@ const PAGE_SIZES = [10, 20, 50] as const;
 
 export function FisherfolkListClient() {
   const params = useParams<{ tenant: string }>();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const missingParam = searchParams.get("missing");
+  const missing: "photo" | "signature" | undefined =
+    missingParam === "photo" || missingParam === "signature" ? missingParam : undefined;
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
+
+  // Reset to page 1 when the missing filter changes via URL
+  useEffect(() => {
+    setPage(1);
+  }, [missing]);
 
   const { data } = trpc.fisherfolk.list.useQuery(
     {
@@ -35,6 +48,7 @@ export function FisherfolkListClient() {
       limit,
       search: search || undefined,
       status: status as (typeof STATUSES)[number] | undefined,
+      ...(missing !== undefined ? { missing } : {}),
     },
     { placeholderData: keepPreviousData },
   );
@@ -87,6 +101,25 @@ export function FisherfolkListClient() {
           </Link>
         </Button>
       </div>
+
+      {missing !== undefined && (
+        <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+          <ImageOff className="h-4 w-4 shrink-0" />
+          <span className="flex-1">
+            Showing only records missing a{" "}
+            <span className="font-medium text-foreground">{missing}</span>
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2"
+            onClick={() => router.replace(pathname)}
+          >
+            <X className="h-3 w-3" />
+            <span className="sr-only">Clear filter</span>
+          </Button>
+        </div>
+      )}
 
       <DataTable
         columns={columns}

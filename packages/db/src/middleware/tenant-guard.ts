@@ -1,7 +1,12 @@
 import { Prisma } from "@prisma/client";
 import { AsyncLocalStorage } from "node:async_hooks";
 
-const tenantContext = new AsyncLocalStorage<string>();
+const globalForTenant = globalThis as unknown as {
+  __frmsTenantContext?: AsyncLocalStorage<string>;
+};
+const tenantContext =
+  globalForTenant.__frmsTenantContext ?? new AsyncLocalStorage<string>();
+globalForTenant.__frmsTenantContext = tenantContext;
 
 export function getCurrentTenantId(): string | undefined {
   return tenantContext.getStore();

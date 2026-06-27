@@ -1,3 +1,5 @@
+import { ReportsClient } from "./reports-client";
+
 export default function ReportsPage() {
   return (
     <div className="space-y-6">
@@ -5,6 +7,7 @@ export default function ReportsPage() {
       <p className="text-muted-foreground">
         Generate official government reports with standardized headers and formats.
       </p>
+      <ReportsClient />
     </div>
   );
 }

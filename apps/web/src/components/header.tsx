@@ -18,7 +18,7 @@ export function Header({ userName, role }: HeaderProps) {
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="text-foreground">{userName}</span>
-          <span className="rounded bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+          <span className="rounded bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
             {role.replace("_", " ")}
           </span>
         </div>

@@ -74,7 +74,7 @@ interface MatchCandidate {
   lastName: string;
   middleName: string | null;
   suffix: string | null;
-  dateOfBirth: Date;
+  dateOfBirth: Date | null;
   barangay: string;
   contactNumber: string | null;
   status: string;
@@ -396,7 +396,9 @@ function MatchCard({
   match: MatchCandidate;
   tenantSlug: string;
 }) {
-  const dob = new Date(match.dateOfBirth).toLocaleDateString();
+  const dob = match.dateOfBirth
+    ? new Date(match.dateOfBirth).toLocaleDateString()
+    : "—";
 
   return (
     <div className="rounded-md border border-border bg-card p-4">

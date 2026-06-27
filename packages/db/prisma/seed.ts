@@ -101,12 +101,12 @@ async function main() {
   console.log(`  ✅ Webmaster account created: ${webmaster.email}`);
 
   const defaultCategories = [
-    { name: "Municipal Fisher", slug: "municipal-fisher", description: "Fisherfolk operating within municipal waters", displayOrder: 1 },
-    { name: "Commercial Fisher", slug: "commercial-fisher", description: "Fisherfolk operating commercial fishing vessels", displayOrder: 2 },
-    { name: "Aquaculture", slug: "aquaculture", description: "Fisherfolk engaged in aquaculture/fish farming", displayOrder: 3 },
-    { name: "Fish Vendor", slug: "fish-vendor", description: "Individuals engaged in fish vending/trading", displayOrder: 4 },
-    { name: "Fish Processor", slug: "fish-processor", description: "Individuals engaged in fish processing", displayOrder: 5 },
-    { name: "Boat Owner", slug: "boat-owner", description: "Owners of registered fishing vessels", displayOrder: 6 },
+    { name: "Boat Owner/Operator", slug: "boat-owner-operator", description: "Owner or operator of a registered fishing vessel", displayOrder: 1 },
+    { name: "Capture Fishing", slug: "capture-fishing", description: "Engaged in municipal capture fishing", displayOrder: 2 },
+    { name: "Gleaning", slug: "gleaning", description: "Engaged in gleaning of shells/marine organisms", displayOrder: 3 },
+    { name: "Vendor", slug: "vendor", description: "Fish vendor or trader", displayOrder: 4 },
+    { name: "Fish Processing", slug: "fish-processing", description: "Engaged in fish processing", displayOrder: 5 },
+    { name: "Aquaculture", slug: "aquaculture", description: "Engaged in aquaculture/fish farming", displayOrder: 6 },
   ];
 
   for (const cat of defaultCategories) {

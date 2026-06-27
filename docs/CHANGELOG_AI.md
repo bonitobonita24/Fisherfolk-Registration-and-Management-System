@@ -5,6 +5,36 @@
 
 ---
 
+## 2026-06-27 — DM-5 Import Wizard UI (Full Auto)
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet)
+- Why:                 The import pipeline (import router: preview/commit/getBatch/listBatches) had NO UI — bulk import only ran via apps/web/scripts/import-fmo.ts. DM-5 gives admins a self-service Import Wizard.
+- What:
+  - apps/web/src/server/trpc/routers/import.ts — new `parseWorkbook` adminProcedure (base64 → Buffer → parseImportWorkbook). Keeps all Excel parsing server-side; avoids Node Buffer polyfill issues in client components. No existing procedure touched.
+  - apps/web/src/app/[tenant]/import/page.tsx — server shell, mirrors reports/page.tsx.
+  - apps/web/src/app/[tenant]/import/import-wizard.tsx — "use client" 3-step state machine: upload (FileReader→base64→parseWorkbook→chained preview) → preview (8-stat counts grid w/ Badges, collision callout, first-100-row status table) → done (imported/skipped). Always-visible "Recent Imports" list via listBatches, refetched after commit.
+  - apps/web/src/components/sidebar.tsx — "Data Import" nav (Upload icon), roles super_admin/admin.
+- HOW decision: server-side parse procedure (not client exceljs) — Buffer-only lib + avoids client bundle bloat. Wizard targets incremental/admin imports; the 3,002-row full FMO import stays on the script path (large base64/rows payloads can hit the ~4MB tRPC body limit — noted as carried caveat).
+- Verification:        tsc EXIT=0; next lint "No ESLint warnings or errors". Live Playwright QA vs calapan-city tenant (3,002 records): page renders + nav present; uploaded a 3-row test xlsx → preview classified 1 import / 1 skip-existing / 1 error (missing idNumber) correctly → commit wrote 1 record (verified count 3002→3003) → ALL test data deleted (fisherfolk + import_batch + audit_log), count restored to 3002.
+- Git:                 feat/data-management (e1a7280). UNMERGED.
+
+---
+
+## 2026-06-27 — Charts & Reports milestone (Full Auto)
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 3 waves)
+- Why:                 /analytics and /reports were 10-line stubs. PRODUCT.md puts charts on Dashboard/Analytics (Recharts) and Reports as a 9-type list generator with official gov header + PDF/Excel export.
+- What:
+  - apps/web/src/server/trpc/routers/report.ts — 9 report types (member_list, new_registrations, renewed, inactive, senior_citizens, voter_eligible, violations, vessels, family_clusters), shared buildReport() helper, barangay/year/date filters. getReport (Viewer+) + exportExcel (Admin+) with Republic/City/FMO header via exceljs (already installed).
+  - apps/web/src/server/trpc/routers/analytics.ts — getRegistrationTrends, getVoterAnalysis, getSeniorsByBarangay, getViolationHotspots, getAgePyramid (all tenant-guarded).
+  - apps/web/src/components/ui/chart.tsx — shadcn chart primitives; recharts@3.9.0 installed.
+  - apps/web/src/app/[tenant]/reports/{page.tsx,reports-client.tsx} — type selector + filters + preview table + print/PDF view (window.print + gov header, also serves Viewer on-screen-only) + role-gated Excel download.
+  - apps/web/src/app/[tenant]/analytics/{page.tsx,analytics-client.tsx} — 7 Recharts charts over live data + existing dashboard queries.
+  - root.ts registers both routers.
+- PDF decision (HOW): print-optimized view + window.print() rather than a heavy server PDF lib; Excel via exceljs.
+- Verification:        tsc EXIT=0; next lint clean; `pnpm build` succeeds (analytics 129kB/reports 6kB routes). Live QA: dev server restarted (prior build had clobbered its .next), login OK, /analytics loads authenticated with no console errors. Full chart-by-chart + Excel-download visual QA PENDING next session.
+- Git:                 feat/data-management (fb5bd43). UNMERGED.
+
+---
+
 ## 2026-06-26 — Security fix: email-HTML XSS in notify.ts (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Automated background security review flagged MEDIUM XSS in the Batch 3c-2 mailer path: notify.ts built the email HTML body as `<p>${message}</p>` with no escaping, and `message` carries user-controlled text (fisherfolk names, edit-request rejection reasons) → stored XSS in the recipient's email client.
@@ -394,3 +424,41 @@
 - Schema/migrations:   none
 - Errors encountered:  none — pause-only entry
 - Errors resolved:     none
+
+## 2026-06-27 — DM-6 Incremental Import + DM-7 Barangay Alias Settings
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 2 waves)
+- Why:                 Complete data-management buildout DM-6 (incremental import: update existing records by idNumber instead of skip) + DM-7 (barangay typo→canonical alias Settings UI feeding validate.ts typoMap).
+- Files added:         apps/web/src/server/trpc/routers/settings.ts (barangayAlias listAliases/createAlias(upsert)/deleteAlias + barangayList); apps/web/src/app/[tenant]/settings/barangay-aliases.tsx (admin CRUD client).
+- Files modified:      apps/web/src/server/trpc/routers/import.ts (preview/commit accept mode FULL|INCREMENTAL; INCREMENTAL branch upserts by tenantId_idNumber, returns `updated`; importableRows filter includes skip-existing in incremental); apps/web/src/server/trpc/root.ts (register settingsRouter); apps/web/src/app/[tenant]/import/import-wizard.tsx (mode toggle, skip-existing→"Will update" relabel, committable=toImport+toSkip, "Import / update N records", Updated stat); apps/web/src/app/[tenant]/settings/page.tsx (render BarangayAliases).
+- Schema/migrations:   none — ImportBatchMode enum + ImportBatch.mode + BarangayAlias model already existed (DM-2).
+- Errors encountered:  Live-QA caught two gaps the static checks missed: (1) incremental commit button disabled/"Import 0 records" because committable count ignored update-only rows; (2) backend importableRows filter excluded action="skip-existing" rows so upsert loop never ran (DB unchanged, updated=0). Both found only via end-to-end browser QA.
+- Errors resolved:     (1) committable = mode==INCREMENTAL ? toImport+toSkip : toImport; button gated + relabeled on it. (2) filter rewritten: error→excl, import→incl, isIncremental && skip-existing→incl, skip-duplicate/collision→excl.
+- Verification:        tsc 0, next lint clean, 133/133 vitest. Live QA (calapan-city): DM-7 create("Nag iba 2"→"Nag-iba II")→list→delete→empty; DM-6 incremental updated record 2025-175205000-08252 contact (Updated:1), total held at 3002. All test data (batches, audit logs, contact value, alias) reverted to pristine.
+
+## 2026-06-27 — Theming: tangerine/marine accents + admin color editor
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 3 waves)
+- Why:                 Owner requested eye-friendly tangerine (primary) + marine-blue (secondary) accents over the existing dark theme, set as default and admin-changeable.
+- Files added:         apps/web/src/lib/theme/color.ts (hex→HSL triplet + luminance-derived readable foreground); apps/web/src/app/[tenant]/settings/theme-settings.tsx (Accent Colors client editor); packages/db/prisma/migrations/20260627035633_tenant_accent_colors/.
+- Files modified:      packages/db/prisma/schema.prisma (Tenant.primaryColor #E8843C + secondaryColor #336F92); apps/web/src/app/globals.css (:root + .dark primary=hsl(25 79% 57%) tangerine, secondary=hsl(202 48% 39%) marine, primary-fg near-black, secondary-fg white, ring=primary; --accent DECOUPLED from --secondary to keep hover/menu surfaces neutral; background/foreground/card/border/muted UNCHANGED); apps/web/src/app/[tenant]/layout.tsx (fetch tenant colors via @frms/db, inject CSS vars on #tenant-theme-root); apps/web/src/server/trpc/routers/settings.ts (theme.get/update admin, hex-regex validated, DEFAULT_* consts); apps/web/src/app/[tenant]/settings/page.tsx (render ThemeSettings).
+- Schema/migrations:   1 additive migration (two NOT NULL columns w/ hex defaults; existing tenant backfilled).
+- Design/compliance:   Always-dark (next-themes) preserved. WCAG 2.2 AA (Rule 33): tangerine+near-black ~6.3:1, marine+white ~5.2:1; foreground auto-derived by relative luminance (threshold 0.179). Tailwind v3 hsl(var()) → runtime CSS-var override works without rebuild.
+- Errors encountered:  none — all three waves passed tsc/lint on first dispatch.
+- Verification:        tsc 0, lint OK, 133/133 vitest. Live QA (calapan-city): defaults render (tangerine active-nav/dashboard-bars/buttons, marine admin-badge/secondary-badge, dark bg intact, 3,002 dashboard data loads, 0 console errors); editor live-preview updates #tenant-theme-root vars, Save persists to DB (#C2410C round-trip verified in tenants table), Reset-to-default restores + Save; final DB state #E8843C/#336F92.
+
+## 2026-06-27 — FMO photo/signature asset import + CSP & badge-contrast fixes
+- Agent:               CLAUDE_CODE (Opus architect + spec-executor Sonnet for the linker)
+- Why:                 Link the 3,002 fisherfolk to their FMO photos (.JPG) + signatures (.PNG); fix two issues surfaced during verification (photos blocked by CSP; secondary-accent role badge unreadable).
+- Files added:         apps/web/scripts/link-fmo-assets.ts (one-off asset linker; reads id_number→image/signature map exported from the FMO SQLite, looks records up in the FRMS DB, compresses via sharp <200KB through storeImportedAsset → MinIO, sets Fisherfolk.photo/.signature; --dry + --limit; per-record try/catch).
+- Files modified:      apps/web/next.config.ts (CSP img-src now appends the object-storage origin derived from STORAGE_ENDPOINT — presigned MinIO/S3 image URLs are cross-origin and were blocked by img-src 'self'); apps/web/src/components/header.tsx (role badge text-muted-foreground→text-secondary-foreground + font-medium for contrast on a saturated --secondary).
+- Infra:               Created the MinIO `frms-dev` bucket (never provisioned in dev; no app-side ensureBucket exists) via `mc` in the frms_dev_minio container.
+- Approach note:       The existing import-fmo.ts --with-assets only links assets for records inserted in the SAME run (empty on a re-run against already-imported data) and splits photo/sig by a `_sig.` marker this dataset lacks → built a purpose-built DB-lookup linker instead. JPG=photo, PNG=signature confirmed from the FMO SQLite image/signature columns.
+- Verification:        Dry-run: 3,002/3,002 matched, 0 missing files. Real run: 2,979 photos + 2,991 signatures linked, 0 errors; DB with_photo=2979/with_sig=2991; MinIO holds 5,970 objects. Live QA: fisherfolk detail page renders photo + signature, 0 console errors; "admin" role badge readable (white on #143bad). tsc 0.
+- Owner action:        Owner set per-tenant accent colors to #fd7e14 (primary) / #143bad (secondary) via the Settings editor; verified applied + persisted.
+
+## 2026-06-27 — Missing-asset tracking + photo placeholders + category icon fix
+- Agent:               CLAUDE_CODE (Opus architect + spec-executor Sonnet, 2 waves + 1 follow-up)
+- Why:                 Owner asks: (1) double-check photo/signature coverage, (2) placeholders for records with no photo/signature, (3) dashboard counts of missing-photo/missing-signature records, clickable to a filtered list. Plus reported category-selection icons rendering as broken/corrupted glyphs.
+- Asset audit (req 1):  Reconciled FRMS DB photo/signature NULLs against the FMO uploads dir (exact + fuzzy/format-insensitive match). Result: 23 records truly have no photo, 11 truly have no signature — 0 are linkable (no file exists on disk under any variant). The asset import was complete; "few missing" confirmed.
+- Files modified:      apps/web/src/server/trpc/routers/dashboard.ts (getStats +missingPhoto +missingSignature counts, tenant-scoped photo/signature IS NULL); apps/web/src/server/trpc/routers/fisherfolk.ts (list +`missing: photo|signature` filter); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx ("Data Completeness" section — 2 clickable cards → /fisherfolk?missing=photo|signature, ImageOff/FileX2 icons, useParams for tenant slug); apps/web/src/app/[tenant]/fisherfolk/fisherfolk-list-client.tsx (reads ?missing= via useSearchParams, indicator banner + Clear via router.replace(pathname), page-reset on filter); apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx ("No Image"/"No Signature available" empty states w/ lucide icons); apps/web/src/components/shared/category-picker.tsx (CategoryIcon → lucide per category name [Ship/Fish/Shell/Store/Factory/Waves] replacing tofu emoji, colored-dot fallback; FIXED pre-existing hydration error — option <button> wrapped a radix Checkbox <button>; replaced with presentational checkbox + aria-pressed).
+- Root cause (icons):  All 6 categories seeded iconType=EMOJI iconEmoji="🐟"; emoji renders as a missing-glyph box on workstations without an emoji font. Switched to font-independent lucide SVG icons.
+- Verification:        tsc 0, lint clean, 133/133 vitest. Live QA (calapan-city): dashboard shows Missing Photo 23 / Missing Signature 11; clicking each opens the list filtered (23 / 11 records found) with a clearable banner; "No Image" placeholder renders on a photoless record; category icons render crisp; console 0 errors (hydration error resolved).

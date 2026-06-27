@@ -1,3 +1,6 @@
+import { ThemeSettings } from "./theme-settings";
+import { BarangayAliases } from "./barangay-aliases";
+
 export default function SettingsPage() {
   return (
     <div className="space-y-6">
@@ -5,6 +8,8 @@ export default function SettingsPage() {
       <p className="text-muted-foreground">
         Manage tenant settings including categories, violation types, and email configuration.
       </p>
+      <ThemeSettings />
+      <BarangayAliases />
     </div>
   );
 }
