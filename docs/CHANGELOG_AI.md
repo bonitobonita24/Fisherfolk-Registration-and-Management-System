@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-06-27 — Dashboard charts: replicate legacy FMO 5-chart set (shadcn charts)
+- Agent:               CLAUDE_CODE (Opus)
+- Why:                 Owner asked to bring the legacy fmo-fisherfolk-reporting-tool dashboard charts into the FRMS dashboard. Gap analysis: FRMS already had Barangay / Gender / Category equivalents; genuinely missing = an interactive Activity-Category-by-Barangay chart, and the dashboard's age chart was only 3 coarse buckets vs the legacy 6. Owner chose: replicate all 5 on the main Dashboard, styled with shadcn/studio Pro charts.
+- What:
+  - apps/web/src/server/trpc/routers/dashboard.ts — TWO new protectedProcedures: `getAgeGroups` (6 buckets Under 25 / 25-34 / 35-44 / 45-54 / 55-64 / 65+, unknown DOB excluded, JS-bucketed) and `getCategoryByBarangay({ barangay? })` (per-category counts, optionally scoped to one barangay; reuses the categoryIds-has pattern from getDemographics). Added zod import.
+  - apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx — replaced the CSS-bar / stat-row panels with 5 real shadcn charts (recharts via ChartContainer): (1) Barangay vertical bar (top 15), (2) Gender donut with centered total, (3) Age-group vertical bar (6 buckets), (4) Activity-category horizontal multicolor bar, (5) Activity-category-by-barangay vertical bar with a shadcn Select barangay filter (useState → reactive getCategoryByBarangay query). KPI cards, Registration Status, and Data Completeness sections preserved.
+- HOW decisions: sourced chart designs from the shadcn/studio Pro MCP (charts-component block) but implemented on the project's EXISTING @/components/ui/chart primitives (INHERIT-not-REPLACE) instead of running `shadcn add` — the studio registry names don't resolve on the default registry and a speculative install would pollute the repo. Charts placed on the main Dashboard per owner choice.
+- Gotcha fixed: `--chart-1..5` tokens in globals.css are HSL TRIPLETS ("217 71% 53%"), so chart config colors must be `hsl(var(--chart-N))`, not raw `var(--chart-N)` (raw → invalid fill → black bars). NOTE: apps/web/src/app/[tenant]/analytics/analytics-client.tsx has the SAME latent raw-var bug (pre-existing) — flagged, not fixed here.
+- Verification:        tsc EXIT=0; next lint "No ESLint warnings or errors". Live Playwright QA vs calapan-city (3,002 records, calapanadmin): all 5 charts render with real data; tooltips work; barangay filter All→Lazareto refetched scoped data (Capture Fishing 2019→294, Vendor 626→55); 0 console errors. Numbers cross-consistent between the two category charts.
+- Git:                 feat/dashboard-charts. UNMERGED. NOT pushed (deploy HARD HOLD).
+
+---
+
 ## 2026-06-27 — DM-5 Import Wizard UI (Full Auto)
 - Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet)
 - Why:                 The import pipeline (import router: preview/commit/getBatch/listBatches) had NO UI — bulk import only ran via apps/web/scripts/import-fmo.ts. DM-5 gives admins a self-service Import Wizard.

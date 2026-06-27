@@ -44,35 +44,35 @@ function EmptyState({ message }: { message: string }) {
 
 // ── Static chart configs ──────────────────────────────────────────────────────
 const trendsConfig = {
-  count: { label: "Registrations", color: "var(--chart-1)" },
+  count: { label: "Registrations", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
 
 const agePyramidConfig = {
-  male: { label: "Male", color: "var(--chart-1)" },
-  female: { label: "Female", color: "var(--chart-4)" },
+  male: { label: "Male", color: "hsl(var(--chart-1))" },
+  female: { label: "Female", color: "hsl(var(--chart-4))" },
 } satisfies ChartConfig;
 
 const voterConfig = {
   value: { label: "Count" },
-  eligible: { label: "Eligible", color: "var(--chart-2)" },
-  notEligible: { label: "Not Eligible", color: "var(--chart-5)" },
-  unknown: { label: "Unknown", color: "var(--chart-3)" },
+  eligible: { label: "Eligible", color: "hsl(var(--chart-2))" },
+  notEligible: { label: "Not Eligible", color: "hsl(var(--chart-5))" },
+  unknown: { label: "Unknown", color: "hsl(var(--chart-3))" },
 } satisfies ChartConfig;
 
 const barangayConfig = {
-  count: { label: "Fisherfolk", color: "var(--chart-1)" },
+  count: { label: "Fisherfolk", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
 
 const seniorsConfig = {
-  count: { label: "Seniors", color: "var(--chart-3)" },
+  count: { label: "Seniors", color: "hsl(var(--chart-3))" },
 } satisfies ChartConfig;
 
 const violationsConfig = {
-  count: { label: "Violations", color: "var(--chart-5)" },
+  count: { label: "Violations", color: "hsl(var(--chart-5))" },
 } satisfies ChartConfig;
 
 const categoriesConfig = {
-  count: { label: "Count", color: "var(--chart-2)" },
+  count: { label: "Count", color: "hsl(var(--chart-2))" },
 } satisfies ChartConfig;
 
 // ── Main client component ─────────────────────────────────────────────────────

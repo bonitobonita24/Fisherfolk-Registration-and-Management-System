@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 
@@ -187,4 +188,70 @@ export const dashboardRouter = createTRPCRouter({
       ageBuckets,
     };
   }),
+
+  // Fine-grained 6-bucket age distribution (mirrors the legacy FMO dashboard:
+  // Under 25 / 25-34 / 35-44 / 45-54 / 55-64 / 65+). Unknown DOB excluded.
+  getAgeGroups: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const rows = await ctx.db.fisherfolk.findMany({
+      where: { tenantId },
+      select: { dateOfBirth: true },
+    });
+
+    const buckets = [
+      { group: "Under 25", min: 0, max: 24 },
+      { group: "25-34", min: 25, max: 34 },
+      { group: "35-44", min: 35, max: 44 },
+      { group: "45-54", min: 45, max: 54 },
+      { group: "55-64", min: 55, max: 64 },
+      { group: "65+", min: 65, max: 200 },
+    ] as const;
+    const counts = buckets.map(() => 0);
+
+    const now = Date.now();
+    for (const r of rows) {
+      if (!r.dateOfBirth) continue;
+      const age = Math.floor(
+        (now - new Date(r.dateOfBirth).getTime()) /
+          (1000 * 60 * 60 * 24 * 365.25),
+      );
+      const idx = buckets.findIndex((b) => age >= b.min && age <= b.max);
+      if (idx >= 0) counts[idx] = (counts[idx] ?? 0) + 1;
+    }
+
+    return buckets.map((b, i) => ({ group: b.group, count: counts[i] ?? 0 }));
+  }),
+
+  // Activity-category breakdown, optionally scoped to a single barangay.
+  // Powers the dashboard's barangay-filtered category chart.
+  getCategoryByBarangay: protectedProcedure
+    .input(z.object({ barangay: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId: string = ctx.tenantId;
+
+      const barangay = input?.barangay;
+      const scope =
+        barangay && barangay !== "all" ? { barangay } : {};
+
+      const cats = await ctx.db.category.findMany({
+        where: { tenantId },
+        select: { id: true, name: true },
+      });
+
+      const counts = await Promise.all(
+        cats.map((c: { id: string; name: string }) =>
+          ctx.db.fisherfolk.count({
+            where: { tenantId, ...scope, categoryIds: { has: c.id } },
+          }),
+        ),
+      );
+
+      return cats.map((c: { id: string; name: string }, i: number) => ({
+        category: c.name,
+        count: counts[i] ?? 0,
+      }));
+    }),
 });

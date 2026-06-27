@@ -1,13 +1,41 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  Label,
+  Pie,
+  PieChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ImageOff, FileX2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
@@ -21,62 +49,11 @@ function Shimmer({ className }: { className?: string }) {
   );
 }
 
-// ── CSS bar helpers ───────────────────────────────────────────────────────────
-function CssBar({
-  label,
-  count,
-  max,
-  colorClass = "bg-primary",
-}: {
-  label: string;
-  count: number;
-  max: number;
-  colorClass?: string;
-}) {
-  const pct = max > 0 ? Math.round((count / max) * 100) : 0;
+function EmptyState({ message }: { message: string }) {
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between text-sm">
-        <span className="truncate text-foreground" title={label}>
-          {label}
-        </span>
-        <span className="ml-2 shrink-0 font-medium tabular-nums text-muted-foreground">
-          {count.toLocaleString()}
-        </span>
-      </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${colorClass}`}
-          style={{ width: `${pct}%` }}
-          role="progressbar"
-          aria-valuenow={count}
-          aria-valuemin={0}
-          aria-valuemax={max}
-        />
-      </div>
-    </div>
-  );
-}
-
-function StatRow({
-  label,
-  count,
-  colorClass = "bg-primary",
-}: {
-  label: string;
-  count: number;
-  colorClass?: string;
-}) {
-  return (
-    <div className="flex items-center justify-between py-1 text-sm">
-      <div className="flex items-center gap-2">
-        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${colorClass}`} />
-        <span className="text-foreground">{label}</span>
-      </div>
-      <span className="font-medium tabular-nums text-muted-foreground">
-        {count.toLocaleString()}
-      </span>
-    </div>
+    <p className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+      {message}
+    </p>
   );
 }
 
@@ -110,19 +87,58 @@ function KpiCard({
   );
 }
 
+// ── Chart configs ─────────────────────────────────────────────────────────────
+// --chart-N tokens are HSL triplets ("217 71% 53%") — consume via hsl().
+const CATEGORY_COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
+
+const barangayConfig = {
+  count: { label: "Fisherfolk", color: "hsl(var(--chart-1))" },
+} satisfies ChartConfig;
+
+const ageConfig = {
+  count: { label: "Fisherfolk", color: "hsl(var(--chart-2))" },
+} satisfies ChartConfig;
+
+const genderConfig = {
+  value: { label: "Count" },
+  Male: { label: "Male", color: "hsl(var(--chart-1))" },
+  Female: { label: "Female", color: "hsl(var(--chart-4))" },
+  Unspecified: { label: "Unspecified", color: "hsl(var(--chart-3))" },
+} satisfies ChartConfig;
+
+const categoryConfig = {
+  count: { label: "Fisherfolk" },
+} satisfies ChartConfig;
+
+const catByBgyConfig = {
+  count: { label: "Fisherfolk", color: "hsl(var(--chart-2))" },
+} satisfies ChartConfig;
+
 // ── Main client component ─────────────────────────────────────────────────────
 export function DashboardClient() {
   const params = useParams();
   const tenantSlug = params.tenant as string;
 
+  const [bgyFilter, setBgyFilter] = useState<string>("all");
+
   const { data: stats, isLoading: statsLoading } =
     trpc.dashboard.getStats.useQuery();
-
   const { data: barangayData, isLoading: barangayLoading } =
     trpc.dashboard.getFisherfolkByBarangay.useQuery();
-
   const { data: demo, isLoading: demoLoading } =
     trpc.dashboard.getDemographics.useQuery();
+  const { data: ageGroups, isLoading: ageLoading } =
+    trpc.dashboard.getAgeGroups.useQuery();
+  const { data: catByBgy, isLoading: catByBgyLoading } =
+    trpc.dashboard.getCategoryByBarangay.useQuery({
+      barangay: bgyFilter,
+    });
 
   // ── KPI section ────────────────────────────────────────────────────────────
   const kpis = [
@@ -134,16 +150,33 @@ export function DashboardClient() {
     { title: "Pending Edit Requests", value: stats?.pendingEditRequests },
   ] as const;
 
-  // ── Barangay section ───────────────────────────────────────────────────────
-  const top12 = barangayData?.slice(0, 12) ?? [];
-  const maxBarangay = top12[0]?.count ?? 0;
+  // ── Derived chart data ───────────────────────────────────────────────────────
+  const top15Barangay = barangayData?.slice(0, 15) ?? [];
+  const barangayOptions = barangayData ?? [];
 
-  // ── Category section ───────────────────────────────────────────────────────
+  const genderData =
+    demo != null
+      ? [
+          { name: "Male", value: demo.sex.male, fill: "var(--color-Male)" },
+          {
+            name: "Female",
+            value: demo.sex.female,
+            fill: "var(--color-Female)",
+          },
+          ...(demo.sex.unspecified > 0
+            ? [
+                {
+                  name: "Unspecified",
+                  value: demo.sex.unspecified,
+                  fill: "var(--color-Unspecified)",
+                },
+              ]
+            : []),
+        ]
+      : [];
+  const genderTotal = genderData.reduce((sum, d) => sum + d.value, 0);
+
   const categories = demo?.categories ?? [];
-  const maxCategory =
-    categories.length > 0
-      ? Math.max(...categories.map((c) => c.count))
-      : 0;
 
   return (
     <div className="space-y-8">
@@ -161,144 +194,289 @@ export function DashboardClient() {
         </div>
       </section>
 
-      {/* ── Two-column panels ──────────────────────────────────────────────── */}
+      {/* ── Barangay (bar) + Gender (donut) ────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Registered by Barangay */}
+        {/* Fisherfolk by Barangay */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Registered by Barangay</CardTitle>
+            <CardTitle className="text-base">
+              Fisherfolk Distribution by Barangay
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {barangayLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Shimmer key={i} className="h-6 w-full" />
-                ))}
-              </div>
-            ) : top12.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No barangay data yet.
-              </p>
+              <Shimmer className="h-[320px] w-full" />
+            ) : top15Barangay.length === 0 ? (
+              <EmptyState message="No barangay data yet." />
             ) : (
-              top12.map((row) => (
-                <CssBar
-                  key={row.barangay}
-                  label={row.barangay}
-                  count={row.count}
-                  max={maxBarangay}
-                  colorClass="bg-primary"
-                />
-              ))
+              <ChartContainer
+                config={barangayConfig}
+                className="aspect-auto h-[320px] w-full"
+              >
+                <BarChart
+                  data={top15Barangay}
+                  margin={{ top: 8, right: 8, bottom: 8, left: 0 }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="barangay"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    angle={-45}
+                    textAnchor="end"
+                    height={70}
+                    interval={0}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <YAxis tickLine={false} axisLine={false} width={32} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="count"
+                    fill="var(--color-count)"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
             )}
           </CardContent>
         </Card>
 
-        {/* Category Distribution */}
+        {/* Gender Distribution (donut) */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Category Distribution</CardTitle>
+            <CardTitle className="text-base">Gender Distribution</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {demoLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Shimmer key={i} className="h-6 w-full" />
-                ))}
-              </div>
+              <Shimmer className="h-[320px] w-full" />
+            ) : genderTotal === 0 ? (
+              <EmptyState message="No gender data yet." />
+            ) : (
+              <ChartContainer
+                config={genderConfig}
+                className="mx-auto aspect-square h-[320px]"
+              >
+                <PieChart>
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Pie
+                    data={genderData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={70}
+                    strokeWidth={4}
+                  >
+                    <Label
+                      content={({ viewBox }) => {
+                        if (
+                          viewBox &&
+                          "cx" in viewBox &&
+                          "cy" in viewBox &&
+                          typeof viewBox.cx === "number" &&
+                          typeof viewBox.cy === "number"
+                        ) {
+                          return (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className="fill-foreground text-3xl font-bold"
+                              >
+                                {genderTotal.toLocaleString()}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy + 22}
+                                className="fill-muted-foreground text-xs"
+                              >
+                                Total
+                              </tspan>
+                            </text>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </Pie>
+                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                </PieChart>
+              </ChartContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Age Groups (bar) + Category (horizontal bar) ───────────────────── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Age Group Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Age Group Distribution</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {ageLoading ? (
+              <Shimmer className="h-[320px] w-full" />
+            ) : (ageGroups?.length ?? 0) === 0 ? (
+              <EmptyState message="No age data yet." />
+            ) : (
+              <ChartContainer
+                config={ageConfig}
+                className="aspect-auto h-[320px] w-full"
+              >
+                <BarChart
+                  data={ageGroups ?? []}
+                  margin={{ top: 16, right: 8, bottom: 8, left: 0 }}
+                >
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="group"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                  />
+                  <YAxis tickLine={false} axisLine={false} width={32} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="count"
+                    fill="var(--color-count)"
+                    radius={[4, 4, 0, 0]}
+                  >
+                    <LabelList
+                      dataKey="count"
+                      position="top"
+                      className="fill-muted-foreground text-xs"
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Activity Category Distribution (horizontal) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Activity Category Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {demoLoading ? (
+              <Shimmer className="h-[320px] w-full" />
             ) : categories.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No categories configured.
-              </p>
+              <EmptyState message="No categories configured." />
             ) : (
-              categories.map((cat) => (
-                <CssBar
-                  key={cat.name}
-                  label={cat.name}
-                  count={cat.count}
-                  max={maxCategory}
-                  colorClass="bg-chart-2"
-                />
-              ))
+              <ChartContainer
+                config={categoryConfig}
+                className="aspect-auto h-[320px] w-full"
+              >
+                <BarChart
+                  layout="vertical"
+                  data={categories}
+                  margin={{ top: 4, right: 32, bottom: 4, left: 8 }}
+                >
+                  <CartesianGrid horizontal={false} />
+                  <XAxis type="number" tickLine={false} axisLine={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tickLine={false}
+                    axisLine={false}
+                    width={120}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                    {categories.map((cat, i) => (
+                      <Cell
+                        key={cat.name}
+                        fill={
+                          CATEGORY_COLORS[i % CATEGORY_COLORS.length] ??
+                          "hsl(var(--chart-1))"
+                        }
+                      />
+                    ))}
+                    <LabelList
+                      dataKey="count"
+                      position="right"
+                      className="fill-muted-foreground text-xs"
+                    />
+                  </Bar>
+                </BarChart>
+              </ChartContainer>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Demographics row ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {/* Sex */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Sex</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {demoLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Shimmer key={i} className="h-5 w-full" />
-                ))}
-              </div>
-            ) : (
-              <div className="divide-y">
-                <StatRow
-                  label="Male"
-                  count={demo?.sex.male ?? 0}
-                  colorClass="bg-blue-500"
+      {/* ── Activity Category by Barangay (filtered bar) ───────────────────── */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+          <CardTitle className="text-base">
+            Activity Category by Barangay
+          </CardTitle>
+          <Select value={bgyFilter} onValueChange={setBgyFilter}>
+            <SelectTrigger className="w-[200px]" aria-label="Filter by barangay">
+              <SelectValue placeholder="All Barangays" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Barangays</SelectItem>
+              {barangayOptions.map((b) => (
+                <SelectItem key={b.barangay} value={b.barangay}>
+                  {b.barangay}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent>
+          {catByBgyLoading ? (
+            <Shimmer className="h-[300px] w-full" />
+          ) : (catByBgy?.length ?? 0) === 0 ? (
+            <EmptyState message="No category data for this barangay." />
+          ) : (
+            <ChartContainer
+              config={catByBgyConfig}
+              className="aspect-auto h-[300px] w-full"
+            >
+              <BarChart
+                data={catByBgy ?? []}
+                margin={{ top: 16, right: 8, bottom: 8, left: 0 }}
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="category"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tick={{ fontSize: 11 }}
                 />
-                <StatRow
-                  label="Female"
-                  count={demo?.sex.female ?? 0}
-                  colorClass="bg-pink-500"
-                />
-                <StatRow
-                  label="Unspecified"
-                  count={demo?.sex.unspecified ?? 0}
-                  colorClass="bg-muted-foreground"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Age Buckets */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Age Groups</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {demoLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Shimmer key={i} className="h-5 w-full" />
-                ))}
-              </div>
-            ) : (
-              <div className="divide-y">
-                <StatRow
-                  label="Senior (60+)"
-                  count={demo?.ageBuckets.senior ?? 0}
-                  colorClass="bg-amber-500"
-                />
-                <StatRow
-                  label="Adult (18–59)"
-                  count={demo?.ageBuckets.adult ?? 0}
-                  colorClass="bg-primary"
-                />
-                <StatRow
-                  label="Minor (<18)"
-                  count={demo?.ageBuckets.minor ?? 0}
-                  colorClass="bg-chart-3"
-                />
-                <StatRow
-                  label="Unknown DOB"
-                  count={demo?.ageBuckets.unknown ?? 0}
-                  colorClass="bg-muted-foreground"
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                <YAxis tickLine={false} axisLine={false} width={32} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar
+                  dataKey="count"
+                  fill="var(--color-count)"
+                  radius={[4, 4, 0, 0]}
+                >
+                  <LabelList
+                    dataKey="count"
+                    position="top"
+                    className="fill-muted-foreground text-xs"
+                  />
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
 
       {/* ── Status Breakdown ───────────────────────────────────────────────── */}
       {!demoLoading && (demo?.status?.length ?? 0) > 0 && (
