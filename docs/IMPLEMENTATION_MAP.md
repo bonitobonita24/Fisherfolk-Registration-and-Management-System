@@ -183,6 +183,7 @@
 | apps/web/src/server/auth/{config,index}.ts | ✅ Generated (Auth.js v5 Credentials + Prisma adapter + JWT + securityVersion invalidation) |
 | apps/web/src/server/lib/rate-limit.ts | ✅ Generated (LRU, 4 tiers: public/auth/api/upload) |
 | apps/web/src/server/lib/sanitize.ts | ✅ Generated (DOMPurify wrappers) |
+| apps/web/scripts/link-fmo-assets.ts + photo/signature display | ✅ 2026-06-27 — FMO photos(.JPG)/signatures(.PNG) linked to all 3,002 records (2,979 photos + 2,991 sigs, 0 errors) via DB-lookup linker → sharp <200KB → MinIO `frms-dev` (bucket created via mc). next.config.ts CSP img-src extended with STORAGE_ENDPOINT origin so presigned URLs render. header.tsx role badge contrast fixed. Live-QA: detail page renders photo+signature, 0 console errors. |
 | apps/web/src/server/lib/prisma-input.ts | ✅ Generated (typed omitUndefined<T> helper for exactOptionalPropertyTypes) |
 | apps/web/src/server/trpc/{trpc,context,root}.ts | ✅ Generated (init + ctx + router barrel) |
 | apps/web/src/server/trpc/routers/*.ts (×14) | ✅ Generated (auditLog, ayuda, category, comment, dashboard, editRequest, fisherfolk, idTemplate, kanbanTask, notification, tenant, user, vessel, violation) |
