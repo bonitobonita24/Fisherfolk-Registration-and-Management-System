@@ -424,3 +424,13 @@
 - Schema/migrations:   none
 - Errors encountered:  none — pause-only entry
 - Errors resolved:     none
+
+## 2026-06-27 — DM-6 Incremental Import + DM-7 Barangay Alias Settings
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 2 waves)
+- Why:                 Complete data-management buildout DM-6 (incremental import: update existing records by idNumber instead of skip) + DM-7 (barangay typo→canonical alias Settings UI feeding validate.ts typoMap).
+- Files added:         apps/web/src/server/trpc/routers/settings.ts (barangayAlias listAliases/createAlias(upsert)/deleteAlias + barangayList); apps/web/src/app/[tenant]/settings/barangay-aliases.tsx (admin CRUD client).
+- Files modified:      apps/web/src/server/trpc/routers/import.ts (preview/commit accept mode FULL|INCREMENTAL; INCREMENTAL branch upserts by tenantId_idNumber, returns `updated`; importableRows filter includes skip-existing in incremental); apps/web/src/server/trpc/root.ts (register settingsRouter); apps/web/src/app/[tenant]/import/import-wizard.tsx (mode toggle, skip-existing→"Will update" relabel, committable=toImport+toSkip, "Import / update N records", Updated stat); apps/web/src/app/[tenant]/settings/page.tsx (render BarangayAliases).
+- Schema/migrations:   none — ImportBatchMode enum + ImportBatch.mode + BarangayAlias model already existed (DM-2).
+- Errors encountered:  Live-QA caught two gaps the static checks missed: (1) incremental commit button disabled/"Import 0 records" because committable count ignored update-only rows; (2) backend importableRows filter excluded action="skip-existing" rows so upsert loop never ran (DB unchanged, updated=0). Both found only via end-to-end browser QA.
+- Errors resolved:     (1) committable = mode==INCREMENTAL ? toImport+toSkip : toImport; button gated + relabeled on it. (2) filter rewritten: error→excl, import→incl, isIncremental && skip-existing→incl, skip-duplicate/collision→excl.
+- Verification:        tsc 0, next lint clean, 133/133 vitest. Live QA (calapan-city): DM-7 create("Nag iba 2"→"Nag-iba II")→list→delete→empty; DM-6 incremental updated record 2025-175205000-08252 contact (Updated:1), total held at 3002. All test data (batches, audit logs, contact value, alias) reverted to pristine.
