@@ -173,6 +173,7 @@
 | apps/web/src/app/[tenant]/layout.tsx + 15 module pages | ✅ Generated (dashboard, fisherfolk, vessels, violations, edit-requests, ayuda, kanban, id-generator, audit-log, notifications, reports, settings, user-management, map, analytics) |
 | apps/web/src/app/[tenant]/reports (page + reports-client) | ✅ Built out 2026-06-27 — 9-type list generator, filters, print/PDF, Admin+ Excel export (report.ts router) |
 | apps/web/src/app/[tenant]/analytics (page + analytics-client) | ✅ Built out 2026-06-27 — 7 Recharts charts (chart.tsx + analytics.ts router); recharts@3 |
+| apps/web/src/app/[tenant]/import (page + import-wizard) | ✅ Built out 2026-06-27 (DM-5) — admin Import Wizard (upload→preview→commit) over import.ts router; new parseWorkbook proc; sidebar nav. Live-QA verified (3002→import→3002). |
 | apps/web/src/app/platform/layout.tsx + tenants/page.tsx | ✅ Generated (super_admin platform routes) |
 | apps/web/src/app/api/{trpc,auth,health}/* | ✅ Generated (tRPC handler + NextAuth + health endpoint) |
 | apps/web/src/components/{header,sidebar}.tsx | ✅ Generated (signOut header + tenant nav sidebar) |

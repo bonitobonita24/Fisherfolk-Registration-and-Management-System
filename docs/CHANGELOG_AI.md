@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-06-27 — DM-5 Import Wizard UI (Full Auto)
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet)
+- Why:                 The import pipeline (import router: preview/commit/getBatch/listBatches) had NO UI — bulk import only ran via apps/web/scripts/import-fmo.ts. DM-5 gives admins a self-service Import Wizard.
+- What:
+  - apps/web/src/server/trpc/routers/import.ts — new `parseWorkbook` adminProcedure (base64 → Buffer → parseImportWorkbook). Keeps all Excel parsing server-side; avoids Node Buffer polyfill issues in client components. No existing procedure touched.
+  - apps/web/src/app/[tenant]/import/page.tsx — server shell, mirrors reports/page.tsx.
+  - apps/web/src/app/[tenant]/import/import-wizard.tsx — "use client" 3-step state machine: upload (FileReader→base64→parseWorkbook→chained preview) → preview (8-stat counts grid w/ Badges, collision callout, first-100-row status table) → done (imported/skipped). Always-visible "Recent Imports" list via listBatches, refetched after commit.
+  - apps/web/src/components/sidebar.tsx — "Data Import" nav (Upload icon), roles super_admin/admin.
+- HOW decision: server-side parse procedure (not client exceljs) — Buffer-only lib + avoids client bundle bloat. Wizard targets incremental/admin imports; the 3,002-row full FMO import stays on the script path (large base64/rows payloads can hit the ~4MB tRPC body limit — noted as carried caveat).
+- Verification:        tsc EXIT=0; next lint "No ESLint warnings or errors". Live Playwright QA vs calapan-city tenant (3,002 records): page renders + nav present; uploaded a 3-row test xlsx → preview classified 1 import / 1 skip-existing / 1 error (missing idNumber) correctly → commit wrote 1 record (verified count 3002→3003) → ALL test data deleted (fisherfolk + import_batch + audit_log), count restored to 3002.
+- Git:                 feat/data-management (e1a7280). UNMERGED.
+
+---
+
 ## 2026-06-27 — Charts & Reports milestone (Full Auto)
 - Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 3 waves)
 - Why:                 /analytics and /reports were 10-line stubs. PRODUCT.md puts charts on Dashboard/Analytics (Recharts) and Reports as a 9-type list generator with official gov header + PDF/Excel export.
