@@ -171,6 +171,8 @@
 | apps/web/src/app/layout.tsx + page.tsx + globals.css | ✅ Generated (root layout + redirect + theme tokens) |
 | apps/web/src/app/login/page.tsx | ✅ Generated (Credentials sign-in + Turnstile) |
 | apps/web/src/app/[tenant]/layout.tsx + 15 module pages | ✅ Generated (dashboard, fisherfolk, vessels, violations, edit-requests, ayuda, kanban, id-generator, audit-log, notifications, reports, settings, user-management, map, analytics) |
+| apps/web/src/app/[tenant]/reports (page + reports-client) | ✅ Built out 2026-06-27 — 9-type list generator, filters, print/PDF, Admin+ Excel export (report.ts router) |
+| apps/web/src/app/[tenant]/analytics (page + analytics-client) | ✅ Built out 2026-06-27 — 7 Recharts charts (chart.tsx + analytics.ts router); recharts@3 |
 | apps/web/src/app/platform/layout.tsx + tenants/page.tsx | ✅ Generated (super_admin platform routes) |
 | apps/web/src/app/api/{trpc,auth,health}/* | ✅ Generated (tRPC handler + NextAuth + health endpoint) |
 | apps/web/src/components/{header,sidebar}.tsx | ✅ Generated (signOut header + tenant nav sidebar) |

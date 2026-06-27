@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-06-27 — Charts & Reports milestone (Full Auto)
+- Agent:               CLAUDE_CODE (Opus architect → spec-executor Sonnet, 3 waves)
+- Why:                 /analytics and /reports were 10-line stubs. PRODUCT.md puts charts on Dashboard/Analytics (Recharts) and Reports as a 9-type list generator with official gov header + PDF/Excel export.
+- What:
+  - apps/web/src/server/trpc/routers/report.ts — 9 report types (member_list, new_registrations, renewed, inactive, senior_citizens, voter_eligible, violations, vessels, family_clusters), shared buildReport() helper, barangay/year/date filters. getReport (Viewer+) + exportExcel (Admin+) with Republic/City/FMO header via exceljs (already installed).
+  - apps/web/src/server/trpc/routers/analytics.ts — getRegistrationTrends, getVoterAnalysis, getSeniorsByBarangay, getViolationHotspots, getAgePyramid (all tenant-guarded).
+  - apps/web/src/components/ui/chart.tsx — shadcn chart primitives; recharts@3.9.0 installed.
+  - apps/web/src/app/[tenant]/reports/{page.tsx,reports-client.tsx} — type selector + filters + preview table + print/PDF view (window.print + gov header, also serves Viewer on-screen-only) + role-gated Excel download.
+  - apps/web/src/app/[tenant]/analytics/{page.tsx,analytics-client.tsx} — 7 Recharts charts over live data + existing dashboard queries.
+  - root.ts registers both routers.
+- PDF decision (HOW): print-optimized view + window.print() rather than a heavy server PDF lib; Excel via exceljs.
+- Verification:        tsc EXIT=0; next lint clean; `pnpm build` succeeds (analytics 129kB/reports 6kB routes). Live QA: dev server restarted (prior build had clobbered its .next), login OK, /analytics loads authenticated with no console errors. Full chart-by-chart + Excel-download visual QA PENDING next session.
+- Git:                 feat/data-management (fb5bd43). UNMERGED.
+
+---
+
 ## 2026-06-26 — Security fix: email-HTML XSS in notify.ts (Full Auto)
 - Agent:               CLAUDE_CODE
 - Why:                 Automated background security review flagged MEDIUM XSS in the Batch 3c-2 mailer path: notify.ts built the email HTML body as `<p>${message}</p>` with no escaping, and `message` carries user-controlled text (fisherfolk names, edit-request rejection reasons) → stored XSS in the recipient's email client.
