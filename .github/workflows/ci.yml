@@ -24,10 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      # pnpm MUST be installed before setup-node, because setup-node's
+      # `cache: pnpm` resolves the pnpm store path during its own run.
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: "pnpm" }
-      - name: Enable pnpm via corepack
-        run: corepack enable
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Validate inputs.yml
@@ -49,9 +50,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: "pnpm" }
-      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - uses: actions/cache@v4
         with:
@@ -70,9 +71,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: "${{ env.NODE_VERSION }}", cache: "pnpm" }
-      - run: corepack enable
       - run: pnpm install --frozen-lockfile
       - name: Audit for high and critical vulnerabilities
         run: pnpm audit --audit-level=high
