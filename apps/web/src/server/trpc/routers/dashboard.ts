@@ -13,6 +13,8 @@ export const dashboardRouter = createTRPCRouter({
       activeViolations,
       totalUsers,
       pendingEditRequests,
+      missingPhoto,
+      missingSignature,
     ] = await Promise.all([
       ctx.db.fisherfolk.count({ where: { tenantId: ctx.tenantId } }),
       ctx.db.fisherfolk.count({
@@ -28,6 +30,12 @@ export const dashboardRouter = createTRPCRouter({
       ctx.db.editRequest.count({
         where: { tenantId: ctx.tenantId, status: "PENDING" },
       }),
+      ctx.db.fisherfolk.count({
+        where: { tenantId: ctx.tenantId, photo: null },
+      }),
+      ctx.db.fisherfolk.count({
+        where: { tenantId: ctx.tenantId, signature: null },
+      }),
     ]);
 
     return {
@@ -37,6 +45,8 @@ export const dashboardRouter = createTRPCRouter({
       activeViolations,
       totalUsers,
       pendingEditRequests,
+      missingPhoto,
+      missingSignature,
     };
   }),
 

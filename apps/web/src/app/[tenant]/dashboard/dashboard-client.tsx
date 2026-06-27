@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ImageOff, FileX2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
@@ -109,6 +112,9 @@ function KpiCard({
 
 // ── Main client component ─────────────────────────────────────────────────────
 export function DashboardClient() {
+  const params = useParams();
+  const tenantSlug = params.tenant as string;
+
   const { data: stats, isLoading: statsLoading } =
     trpc.dashboard.getStats.useQuery();
 
@@ -316,6 +322,60 @@ export function DashboardClient() {
           </CardContent>
         </Card>
       )}
+
+      {/* ── Data Completeness ──────────────────────────────────────────────── */}
+      <section aria-label="Data completeness">
+        <h2 className="mb-4 text-base font-semibold text-foreground">
+          Data Completeness
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Missing Photo */}
+          <Link
+            href={`/${tenantSlug}/fisherfolk?missing=photo`}
+            className="group"
+          >
+            <Card className="cursor-pointer transition-colors hover:border-primary/50">
+              <CardContent className="flex items-center gap-4 pt-5 pb-5">
+                <ImageOff className="h-8 w-8 shrink-0 text-muted-foreground" />
+                <div>
+                  {statsLoading ? (
+                    <Shimmer className="mb-1 h-8 w-20" />
+                  ) : (
+                    <p className="text-3xl font-bold text-foreground">
+                      {(stats?.missingPhoto ?? 0).toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">Missing Photo</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Missing Signature */}
+          <Link
+            href={`/${tenantSlug}/fisherfolk?missing=signature`}
+            className="group"
+          >
+            <Card className="cursor-pointer transition-colors hover:border-primary/50">
+              <CardContent className="flex items-center gap-4 pt-5 pb-5">
+                <FileX2 className="h-8 w-8 shrink-0 text-muted-foreground" />
+                <div>
+                  {statsLoading ? (
+                    <Shimmer className="mb-1 h-8 w-20" />
+                  ) : (
+                    <p className="text-3xl font-bold text-foreground">
+                      {(stats?.missingSignature ?? 0).toLocaleString()}
+                    </p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Missing Signature
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

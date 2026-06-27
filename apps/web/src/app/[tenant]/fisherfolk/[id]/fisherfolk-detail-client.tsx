@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, FileX2, ImageOff, Pencil } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
@@ -191,8 +191,9 @@ export function FisherfolkDetailClient({ id }: Props) {
                   className="aspect-[1/1] w-full rounded-md border bg-muted object-cover"
                 />
               ) : (
-                <div className="flex aspect-[1/1] w-full items-center justify-center rounded-md border bg-muted">
-                  <p className="text-xs text-muted-foreground">No photo</p>
+                <div className="flex aspect-[1/1] w-full flex-col items-center justify-center gap-2 rounded-md border bg-muted">
+                  <ImageOff size={28} className="text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">No Image</p>
                 </div>
               )}
             </CardContent>
@@ -210,8 +211,9 @@ export function FisherfolkDetailClient({ id }: Props) {
                   className="h-32 w-full rounded-md border bg-white object-contain"
                 />
               ) : (
-                <div className="flex h-32 w-full items-center justify-center rounded-md border bg-muted">
-                  <p className="text-xs text-muted-foreground">No signature</p>
+                <div className="flex h-32 w-full flex-col items-center justify-center gap-2 rounded-md border bg-muted">
+                  <FileX2 size={24} className="text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">No Signature available</p>
                 </div>
               )}
             </CardContent>
