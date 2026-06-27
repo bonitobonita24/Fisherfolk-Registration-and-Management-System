@@ -6,6 +6,7 @@ import {
   buildValidationReport,
   type ValidationContext,
 } from "@/lib/import/validate";
+import { parseImportWorkbook } from "@/lib/import/excel";
 
 import { omitUndefined } from "../../lib/prisma-input";
 import { adminProcedure, createTRPCRouter } from "../trpc";
@@ -251,6 +252,15 @@ export const importRouter = createTRPCRouter({
       return ctx.db.importBatch.findFirstOrThrow({
         where: { id: input.id, tenantId: ctx.tenantId },
       });
+    }),
+
+  /** parseWorkbook — server-side Excel/CSV parse (Buffer-only lib), returns raw rows. */
+  parseWorkbook: adminProcedure
+    .input(z.object({ fileBase64: z.string() }).strict())
+    .mutation(async ({ input }) => {
+      const buffer = Buffer.from(input.fileBase64, "base64");
+      const { rows, headerWarnings } = await parseImportWorkbook(buffer);
+      return { rows, headerWarnings };
     }),
 
   /** listBatches — last 50 ImportBatch records for this tenant, newest first. */
