@@ -3,6 +3,9 @@ import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter } from "../trpc";
 
+export const DEFAULT_PRIMARY_COLOR = "#E8843C";
+export const DEFAULT_SECONDARY_COLOR = "#336F92";
+
 export const settingsRouter = createTRPCRouter({
   barangayAlias: createTRPCRouter({
     /**
@@ -92,5 +95,53 @@ export const settingsRouter = createTRPCRouter({
       });
       return tenant.barangayList;
     }),
+  }),
+
+  theme: createTRPCRouter({
+    /**
+     * get — return the tenant's current accent colors.
+     */
+    get: adminProcedure.query(async ({ ctx }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+      const db = ctx.db;
+
+      return db.tenant.findUniqueOrThrow({
+        where: { id: tenantId },
+        select: { primaryColor: true, secondaryColor: true },
+      });
+    }),
+
+    /**
+     * update — write new accent colors for the tenant.
+     * Both values must be 6-digit hex strings (#RRGGBB).
+     */
+    update: adminProcedure
+      .input(
+        z
+          .object({
+            primaryColor: z
+              .string()
+              .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color"),
+            secondaryColor: z
+              .string()
+              .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color"),
+          })
+          .strict(),
+      )
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+        const tenantId = ctx.tenantId;
+        const db = ctx.db;
+
+        return db.tenant.update({
+          where: { id: tenantId },
+          data: {
+            primaryColor: input.primaryColor,
+            secondaryColor: input.secondaryColor,
+          },
+          select: { primaryColor: true, secondaryColor: true },
+        });
+      }),
   }),
 });

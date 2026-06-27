@@ -159,6 +159,8 @@ model Tenant {
   mayorName               String?      @map("mayor_name")
   mayorSignatureUrl       String?      @map("mayor_signature_url")
   accentColor             String       @default("#4F8EF7") @map("accent_color")
+  primaryColor            String       @default("#E8843C") @map("primary_color")
+  secondaryColor          String       @default("#336F92") @map("secondary_color")
   smtpHost                String?      @map("smtp_host")
   smtpPort                Int?         @map("smtp_port")
   smtpUser                String?      @map("smtp_user")
