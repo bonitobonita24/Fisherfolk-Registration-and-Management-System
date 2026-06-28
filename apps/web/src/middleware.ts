@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/server/auth/edge";
+import {
+  buildContentSecurityPolicy,
+  storageOriginFromEnv,
+} from "@/lib/security-headers";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
 
@@ -8,7 +12,21 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 }
 
+// Apply the runtime CSP (see lib/security-headers.ts) to every response. The
+// `img-src` storage origin is resolved from runtime env here — not at build.
+function withCsp(res: NextResponse): NextResponse {
+  res.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy(storageOriginFromEnv()),
+  );
+  return res;
+}
+
 export default auth((req: NextRequest & { auth: unknown }) => {
+  return withCsp(route(req));
+});
+
+function route(req: NextRequest & { auth: unknown }): NextResponse {
   const { pathname } = req.nextUrl;
   const session = req.auth as {
     user?: {
@@ -63,7 +81,7 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   }
 
   return NextResponse.redirect(new URL("/login", req.url));
-});
+}
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
