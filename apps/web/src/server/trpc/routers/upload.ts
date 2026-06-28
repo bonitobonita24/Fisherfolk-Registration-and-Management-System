@@ -14,9 +14,23 @@ import {
   protectedProcedure,
 } from "../trpc";
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const ENTITY_TYPES = [
+  "fisherfolk-photo",
+  "fisherfolk-signature",
+  "vessel-photo",
+  "violation-evidence",
+  "ayuda-upload",
+  "kanban-attachment",
+] as const;
 
-const ENTITY_TYPES = ["fisherfolk-photo", "fisherfolk-signature", "vessel-photo"] as const;
+const MAX_BYTES_BY_ENTITY: Record<(typeof ENTITY_TYPES)[number], number> = {
+  "fisherfolk-photo": 5 * 1024 * 1024,
+  "fisherfolk-signature": 5 * 1024 * 1024,
+  "vessel-photo": 5 * 1024 * 1024,
+  "violation-evidence": 15 * 1024 * 1024,
+  "ayuda-upload": 15 * 1024 * 1024,
+  "kanban-attachment": 15 * 1024 * 1024,
+};
 
 export const uploadRouter = createTRPCRouter({
   uploadFile: encoderProcedure
@@ -54,7 +68,7 @@ export const uploadRouter = createTRPCRouter({
         });
       }
 
-      if (buffer.length === 0 || buffer.length > MAX_BYTES) {
+      if (buffer.length === 0 || buffer.length > MAX_BYTES_BY_ENTITY[input.entityType]) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "File size out of range.",

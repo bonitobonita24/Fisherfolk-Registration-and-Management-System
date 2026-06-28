@@ -222,6 +222,8 @@ model User {
   createdPrograms       AyudaProgram[]     @relation("AyudaProgramCreatedBy")
   verifiedBeneficiaries AyudaBeneficiary[] @relation("BeneficiaryVerifiedBy")
   uploadedFiles         AyudaUpload[]
+  violationAttachments  ViolationAttachment[]
+  kanbanAttachments     KanbanAttachment[]
   createdTemplates      IDTemplate[]
   importBatches         ImportBatch[]      @relation("ImportBatchCreatedBy")
 
@@ -326,6 +328,7 @@ model Violation {
   details         String?
   evidenceImages  String[]            @map("evidence_images")
   notes           String?
+  violatorName    String?             @map("violator_name")
   status          ViolationStatus     @default(ACTIVE)
   filedById       String              @map("filed_by_id")
   liftedById      String?             @map("lifted_by_id")
@@ -338,7 +341,8 @@ model Violation {
   fisherfolk Fisherfolk? @relation("FisherfolkViolations", fields: [fisherfolkId], references: [id])
   vessel     Vessel?     @relation("VesselViolations", fields: [vesselId], references: [id])
   filedBy    User        @relation("ViolationFiledBy", fields: [filedById], references: [id])
-  liftedBy   User?       @relation("ViolationLiftedBy", fields: [liftedById], references: [id])
+  liftedBy    User?       @relation("ViolationLiftedBy", fields: [liftedById], references: [id])
+  attachments ViolationAttachment[]
 
   @@index([tenantId])
   @@index([tenantId, status])
@@ -454,6 +458,7 @@ model KanbanTask {
   tenant        Tenant   @relation(fields: [tenantId], references: [id])
   assignedTo    User     @relation(fields: [assignedToId], references: [id])
   sourceComment Comment? @relation(fields: [sourceCommentId], references: [id])
+  attachments   KanbanAttachment[]
 
   @@index([tenantId])
   @@index([tenantId, assignedToId])
@@ -535,6 +540,7 @@ model AyudaUpload {
   filePath         String          @map("file_path")
   originalFilename String          @map("original_filename")
   fileSize         Int             @map("file_size")
+  mimeType         String?         @map("mime_type")
   uploadedById     String          @map("uploaded_by_id")
   uploadedAt       DateTime        @default(now()) @map("uploaded_at")
 
@@ -543,6 +549,40 @@ model AyudaUpload {
 
   @@index([programId])
   @@map("ayuda_uploads")
+}
+
+model ViolationAttachment {
+  id               String   @id @default(cuid())
+  violationId      String   @map("violation_id")
+  filePath         String   @map("file_path")
+  originalFilename String   @map("original_filename")
+  mimeType         String   @map("mime_type")
+  fileSize         Int      @map("file_size")
+  uploadedById     String   @map("uploaded_by_id")
+  uploadedAt       DateTime @default(now()) @map("uploaded_at")
+
+  violation  Violation @relation(fields: [violationId], references: [id], onDelete: Cascade)
+  uploadedBy User      @relation(fields: [uploadedById], references: [id])
+
+  @@index([violationId])
+  @@map("violation_attachments")
+}
+
+model KanbanAttachment {
+  id               String   @id @default(cuid())
+  taskId           String   @map("task_id")
+  filePath         String   @map("file_path")
+  originalFilename String   @map("original_filename")
+  mimeType         String   @map("mime_type")
+  fileSize         Int      @map("file_size")
+  uploadedById     String   @map("uploaded_by_id")
+  uploadedAt       DateTime @default(now()) @map("uploaded_at")
+
+  task       KanbanTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User       @relation(fields: [uploadedById], references: [id])
+
+  @@index([taskId])
+  @@map("kanban_attachments")
 }
 
 model IDTemplate {

@@ -8,7 +8,7 @@ const ALLOWED_MIME_TYPES: ReadonlySet<string> = new Set([
   "application/pdf",
 ]);
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15 MB
 
 const MAGIC_BYTES: ReadonlyArray<{ mime: string; bytes: ReadonlyArray<number>; offset: number }> = [
   { mime: "image/jpeg", bytes: [0xff, 0xd8, 0xff], offset: 0 },
