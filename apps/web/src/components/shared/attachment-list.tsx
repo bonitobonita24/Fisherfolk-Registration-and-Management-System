@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { FileIcon } from "lucide-react";
+import { FileIcon, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface AttachmentItem {
+export interface AttachmentItem {
+  id?: string;
   filePath: string;
   originalFilename: string;
   mimeType: string;
@@ -17,10 +18,17 @@ interface AttachmentListProps {
   attachments: AttachmentItem[];
   className?: string;
   emptyText?: string;
+  onRemove?: (item: AttachmentItem) => void;
 }
 
 /** Inner component — one hook call per item, avoids conditional hook in a loop. */
-function AttachmentThumb({ item }: { item: AttachmentItem }) {
+function AttachmentThumb({
+  item,
+  onRemove,
+}: {
+  item: AttachmentItem;
+  onRemove?: (item: AttachmentItem) => void;
+}) {
   const isImage = item.mimeType.startsWith("image/");
 
   const { data, isLoading } = trpc.upload.getDownloadUrl.useQuery(
@@ -40,24 +48,36 @@ function AttachmentThumb({ item }: { item: AttachmentItem }) {
 
   if (isImage) {
     return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-        aria-label={`Open ${item.originalFilename} in new tab`}
-      >
-        <div className="relative aspect-square h-32 overflow-hidden rounded-md border border-border bg-muted">
-          <Image
-            src={url}
-            alt={item.originalFilename}
-            fill
-            sizes="128px"
-            className="object-cover"
-            unoptimized
-          />
-        </div>
-      </a>
+      <div className="relative inline-block">
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+          aria-label={`Open ${item.originalFilename} in new tab`}
+        >
+          <div className="relative aspect-square h-32 overflow-hidden rounded-md border border-border bg-muted">
+            <Image
+              src={url}
+              alt={item.originalFilename}
+              fill
+              sizes="128px"
+              className="object-cover"
+              unoptimized
+            />
+          </div>
+        </a>
+        {onRemove !== undefined && (
+          <button
+            type="button"
+            onClick={() => onRemove(item)}
+            className="absolute right-1 top-1 rounded-full bg-background/80 p-0.5 shadow hover:bg-destructive/10"
+            aria-label={`Remove ${item.originalFilename}`}
+          >
+            <X className="h-3 w-3" aria-hidden="true" />
+          </button>
+        )}
+      </div>
     );
   }
 
@@ -77,6 +97,16 @@ function AttachmentThumb({ item }: { item: AttachmentItem }) {
       <Badge variant="secondary" className="shrink-0 text-xs">
         PDF
       </Badge>
+      {onRemove !== undefined && (
+        <button
+          type="button"
+          onClick={() => onRemove(item)}
+          className="ml-1 rounded p-0.5 hover:bg-muted"
+          aria-label={`Remove ${item.originalFilename}`}
+        >
+          <X className="h-3 w-3" aria-hidden="true" />
+        </button>
+      )}
     </div>
   );
 }
@@ -85,6 +115,7 @@ export function AttachmentList({
   attachments,
   className,
   emptyText,
+  onRemove,
 }: AttachmentListProps) {
   if (attachments.length === 0) {
     return emptyText ? (
@@ -100,7 +131,11 @@ export function AttachmentList({
       {images.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {images.map((item) => (
-            <AttachmentThumb key={item.filePath} item={item} />
+            <AttachmentThumb
+              key={item.filePath}
+              item={item}
+              {...(onRemove !== undefined ? { onRemove } : {})}
+            />
           ))}
         </div>
       )}
@@ -108,7 +143,10 @@ export function AttachmentList({
         <ul className="space-y-2">
           {others.map((item) => (
             <li key={item.filePath}>
-              <AttachmentThumb item={item} />
+              <AttachmentThumb
+                item={item}
+                {...(onRemove !== undefined ? { onRemove } : {})}
+              />
             </li>
           ))}
         </ul>

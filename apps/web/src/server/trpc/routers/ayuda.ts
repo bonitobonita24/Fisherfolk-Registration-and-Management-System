@@ -65,6 +65,18 @@ export const ayudaRouter = createTRPCRouter({
         where: { id: input.id, tenantId: ctx.tenantId },
         include: {
           createdBy: { select: { id: true, name: true } },
+          uploads: {
+            orderBy: { uploadedAt: "desc" },
+            select: {
+              id: true,
+              filePath: true,
+              originalFilename: true,
+              mimeType: true,
+              fileSize: true,
+              uploadType: true,
+              uploadedAt: true,
+            },
+          },
         },
       });
       if (!record) throw new TRPCError({ code: "NOT_FOUND" });
@@ -377,5 +389,94 @@ export const ayudaRouter = createTRPCRouter({
       });
 
       return updated;
+    }),
+
+  addUploads: adminProcedure
+    .input(
+      z
+        .object({
+          programId: z.string().cuid(),
+          files: z
+            .array(
+              z.object({
+                filePath: z.string().min(1),
+                originalFilename: z.string().min(1).max(255),
+                mimeType: z.string().min(1),
+                fileSize: z.number().int().positive(),
+              }),
+            )
+            .min(1),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const program = await ctx.db.ayudaProgram.findFirst({
+        where: { id: input.programId, tenantId: ctx.tenantId },
+      });
+      if (!program) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const result = await ctx.db.ayudaUpload.createMany({
+        data: input.files.map((file) => ({
+          programId: input.programId,
+          uploadType: file.mimeType.startsWith("image/")
+            ? ("EVENT_PHOTO" as const)
+            : ("DOCUMENT" as const),
+          filePath: file.filePath,
+          originalFilename: file.originalFilename,
+          mimeType: file.mimeType,
+          fileSize: file.fileSize,
+          uploadedById: ctx.userId!,
+        })),
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "AyudaProgram",
+          entityId: input.programId,
+          after: {
+            uploadedFiles: input.files.map((f) => f.originalFilename),
+          } as Record<string, unknown>,
+        },
+      });
+
+      return { count: result.count };
+    }),
+
+  removeUpload: adminProcedure
+    .input(z.object({ uploadId: z.string().cuid() }).strict())
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const upload = await ctx.db.ayudaUpload.findFirst({
+        where: {
+          id: input.uploadId,
+          program: { tenantId: ctx.tenantId },
+        },
+        select: { id: true, programId: true, originalFilename: true },
+      });
+      if (!upload) throw new TRPCError({ code: "NOT_FOUND" });
+
+      await ctx.db.ayudaUpload.delete({ where: { id: upload.id } });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "DELETE",
+          entityType: "AyudaProgram",
+          entityId: upload.programId,
+          before: {
+            uploadId: upload.id,
+            originalFilename: upload.originalFilename,
+          } as Record<string, unknown>,
+        },
+      });
+
+      return { success: true };
     }),
 });

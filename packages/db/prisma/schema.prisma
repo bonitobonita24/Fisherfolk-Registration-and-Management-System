@@ -142,6 +142,7 @@ enum IDTemplateStatus {
 enum AyudaUploadType {
   SIGNED_SHEET
   EVENT_PHOTO
+  DOCUMENT
 }
 
 enum CommentTicketStatus {

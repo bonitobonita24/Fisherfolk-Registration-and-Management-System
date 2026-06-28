@@ -40,6 +40,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { AttachmentList, type AttachmentItem } from "@/components/shared/attachment-list";
+import {
+  AttachmentUpload,
+  type UploadedAttachment,
+} from "@/components/shared/attachment-upload";
 
 interface Props {
   id: string;
@@ -363,6 +368,34 @@ export function AyudaDetailClient({ id, canManage }: Props) {
     },
   });
 
+  const [pending, setPending] = useState<UploadedAttachment[]>([]);
+
+  const addUploads = trpc.ayuda.addUploads.useMutation({
+    onSuccess: () => {
+      setPending([]);
+      void utils.ayuda.getProgramById.invalidate({ id });
+      toast.success("Files uploaded.");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to upload files.");
+    },
+  });
+
+  const removeUpload = trpc.ayuda.removeUpload.useMutation({
+    onSuccess: () => {
+      void utils.ayuda.getProgramById.invalidate({ id });
+      toast.success("File removed.");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to remove file.");
+    },
+  });
+
+  const handleRemove = (item: AttachmentItem) => {
+    if (!item.id) return;
+    removeUpload.mutate({ uploadId: item.id });
+  };
+
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading program…</p>;
   }
@@ -480,6 +513,45 @@ export function AyudaDetailClient({ id, canManage }: Props) {
             <CardContent className="space-y-4">
               <Field label="Title" value={record.title} />
               <Field label="Description" value={record.description} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Program Files</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <AttachmentList
+                attachments={(record.uploads ?? []).map((u) => ({
+                  id: u.id,
+                  filePath: u.filePath,
+                  originalFilename: u.originalFilename,
+                  mimeType: u.mimeType ?? "",
+                }))}
+                emptyText="No files uploaded."
+                {...(canManage ? { onRemove: handleRemove } : {})}
+              />
+              {canManage && (
+                <div className="space-y-3 border-t pt-4">
+                  <AttachmentUpload
+                    entityType="ayuda-upload"
+                    value={pending}
+                    onChange={setPending}
+                  />
+                  <Button
+                    size="sm"
+                    disabled={pending.length === 0 || addUploads.isPending}
+                    onClick={() =>
+                      addUploads.mutate({ programId: id, files: pending })
+                    }
+                  >
+                    {addUploads.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Files
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

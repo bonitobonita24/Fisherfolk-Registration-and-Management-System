@@ -51,8 +51,12 @@ PR #3 / unmerged). UNMERGED, HARD HOLD — owner merges/deploys.
 - [x] item 3c: "Registered Vessels" section (multiple, ACTIVE) with vessel info linked to vessel detail.
 - NOTE: getById already included vessels+violations; only added ayudaBeneficiaries. tsc + next lint clean.
 
-### Batch D — Ayuda uploads
-- [ ] item 4: multi image/PDF upload (AyudaUpload, 15 MB) on program detail + render list (img/pdf).
+### Batch D — Ayuda uploads ✅ DONE
+- [x] item 4: multi image/PDF upload (15 MB) on program detail — "Program Files" card with shared
+  `AttachmentUpload` (entityType ayuda-upload) + Save; render via shared `AttachmentList` (img/pdf).
+  Backend: `AyudaUploadType.DOCUMENT` added; `getProgramById` includes uploads; `addUploads` +
+  `removeUpload` adminProcedures; image→EVENT_PHOTO, pdf→DOCUMENT. `AttachmentList` gained optional
+  `onRemove` (admin-only remove; violations detail unchanged). tsc + next lint clean.
 
 ### Batch E — Demo files seed
 - [ ] item 1: attach demo images/PDFs to some vessels, violations, kanban (+ ayuda) — script that
