@@ -84,3 +84,9 @@ tests/visual/diff/
 # QA screenshots (root, untracked artifacts)
 /analytics-qa.png
 /dm5-import-page.png
+
+# QA / test evidence (local only)
+test-artifacts/
+
+# Seed export cache (contains real PII — never commit)
+.seed-cache/
