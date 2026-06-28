@@ -1,6 +1,8 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -15,15 +17,26 @@ export interface AyudaProgramListItem {
   createdAt: Date;
 }
 
+function TitleCell({ row }: { row: Row<AyudaProgramListItem> }) {
+  const params = useParams<{ tenant: string }>();
+  const item = row.original;
+  return (
+    <Link
+      href={`/${params.tenant}/ayuda/${item.id}`}
+      className="font-medium text-primary hover:underline"
+    >
+      {item.title}
+    </Link>
+  );
+}
+
 export const columns: ColumnDef<AyudaProgramListItem>[] = [
   {
     accessorKey: "title",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Title" />
     ),
-    cell: ({ row }) => (
-      <span className="font-medium">{row.getValue<string>("title")}</span>
-    ),
+    cell: ({ row }) => <TitleCell row={row} />,
   },
   {
     accessorKey: "status",
