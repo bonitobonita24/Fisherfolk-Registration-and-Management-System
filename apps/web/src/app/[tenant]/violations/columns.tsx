@@ -1,6 +1,8 @@
 "use client";
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -37,15 +39,26 @@ function formatTarget(item: ViolationListItem): string {
   return parts.join(", ") || "—";
 }
 
+function SubjectCell({ row }: { row: Row<ViolationListItem> }) {
+  const params = useParams<{ tenant: string }>();
+  const item = row.original;
+  return (
+    <Link
+      href={`/${params.tenant}/violations/${item.id}`}
+      className="font-medium text-primary hover:underline"
+    >
+      {item.subject}
+    </Link>
+  );
+}
+
 export const columns: ColumnDef<ViolationListItem>[] = [
   {
     accessorKey: "subject",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Subject" />
     ),
-    cell: ({ row }) => (
-      <span className="font-medium">{row.getValue<string>("subject")}</span>
-    ),
+    cell: ({ row }) => <SubjectCell row={row} />,
   },
   {
     id: "target",
