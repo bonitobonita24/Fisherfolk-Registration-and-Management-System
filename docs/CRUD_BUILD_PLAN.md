@@ -39,9 +39,14 @@
   dialog shows status, assignee, description, source comment, created/updated.)
 
 ### Phase 3 — Create / Edit / Actions
-- [ ] **T3a** Violations: (1) add backend `lift` + `update` procedures to violation router (mirror the
-  guard pattern in other routers); (2) "File Violation" create form (`violation.create`) — target =
-  fisherfolk OR vessel picker; (3) Lift/Resolve action button on detail.
+- [x] **T3a-1** Violations backend + lift action (commit c446172, 2026-06-28): `violation.lift`
+  already existed; added `violation.update` (admin-gated, ACTIVE-only, audit-logged). Admin-gated
+  Lift/Resolve dialog on the detail view (resolution-notes textarea → `violation.lift` → invalidate).
+  page.tsx computes `canManage` (super_admin/admin) via `auth()`.
+- [ ] **T3a-2** Violations "File Violation" create form (`violation.create`) — target = FISHERFOLK /
+  VESSEL / BOTH with a fisherfolk and/or vessel picker (use fisherfolk.list + vessel.list searchable
+  combobox; follow `vessels/register/registration-form-client.tsx`). New route
+  `violations/file/page.tsx` (admin/encoder gate) + form client + "File Violation" button on the list.
 - [ ] **T3b** Ayuda: Create Program form (`createProgram`) + Publish/Close actions
   (`publishProgram`/`closeProgram`) + Add Beneficiary (`addBeneficiary`) + Verify Beneficiary
   (`verifyBeneficiary`) on the program detail. **SCOPE-CHECK: likely split into T3b-1 (program CRUD)
