@@ -177,97 +177,100 @@ export function VesselDetailClient({ id }: Props) {
             </CardContent>
           </Card>
 
-          {/* Construction */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Construction</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Field label="Hull Material" value={record.hullMaterial} />
-                <Field label="Place Built" value={record.placeBuilt} />
-                <Field label="Year Built" value={formatNumber(record.yearBuilt)} />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Spec cards — 2-up grid */}
+          <div className="grid gap-6 sm:grid-cols-2">
+            {/* Construction */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Construction</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Field label="Hull Material" value={record.hullMaterial} />
+                  <Field label="Place Built" value={record.placeBuilt} />
+                  <Field label="Year Built" value={formatNumber(record.yearBuilt)} />
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Dimensions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Dimensions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Field
-                  label="Registered Length"
-                  value={formatNumber(record.registeredLength)}
-                />
-                <Field
-                  label="Registered Breadth"
-                  value={formatNumber(record.registeredBreadth)}
-                />
-                <Field
-                  label="Registered Depth"
-                  value={formatNumber(record.registeredDepth)}
-                />
-                <Field
-                  label="Gross Tonnage"
-                  value={formatNumber(record.grossTonnage)}
-                />
-                <Field
-                  label="Net Tonnage"
-                  value={formatNumber(record.netTonnage)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+            {/* Dimensions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Dimensions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field
+                    label="Registered Length"
+                    value={formatNumber(record.registeredLength)}
+                  />
+                  <Field
+                    label="Registered Breadth"
+                    value={formatNumber(record.registeredBreadth)}
+                  />
+                  <Field
+                    label="Registered Depth"
+                    value={formatNumber(record.registeredDepth)}
+                  />
+                  <Field
+                    label="Gross Tonnage"
+                    value={formatNumber(record.grossTonnage)}
+                  />
+                  <Field
+                    label="Net Tonnage"
+                    value={formatNumber(record.netTonnage)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Engine */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Engine</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Field label="Engine Make" value={record.engineMake} />
-                <Field
-                  label="Engine Serial Number"
-                  value={record.engineSerialNumber}
-                />
-                <Field
-                  label="Horsepower"
-                  value={formatNumber(record.horsepower)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+            {/* Engine */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Engine</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <Field label="Engine Make" value={record.engineMake} />
+                  <Field
+                    label="Engine Serial Number"
+                    value={record.engineSerialNumber}
+                  />
+                  <Field
+                    label="Horsepower"
+                    value={formatNumber(record.horsepower)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Operations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Operations</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Homeport" value={record.homeport} />
-              <Separator />
-              <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Fishing Gear Classification
-                </p>
-                {record.fishingGearClassification.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {record.fishingGearClassification.map((gear) => (
-                      <Badge key={gear} variant="secondary">
-                        {gear}
-                      </Badge>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-foreground">—</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Operations */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Operations</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Field label="Homeport" value={record.homeport} />
+                <Separator />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Fishing Gear Classification
+                  </p>
+                  {record.fishingGearClassification.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {record.fishingGearClassification.map((gear) => (
+                        <Badge key={gear} variant="secondary">
+                          {gear}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-foreground">—</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Active Violations */}
           <Card>
@@ -314,10 +317,10 @@ export function VesselDetailClient({ id }: Props) {
                 <img
                   src={photoUrlResp.url}
                   alt={`${displayName} photo`}
-                  className="aspect-[1/1] w-full rounded-md border bg-muted object-cover"
+                  className="aspect-[1/1] max-w-[200px] rounded-md border bg-muted object-cover"
                 />
               ) : (
-                <div className="flex aspect-[1/1] w-full items-center justify-center rounded-md border bg-muted">
+                <div className="flex aspect-[1/1] max-w-[200px] items-center justify-center rounded-md border bg-muted">
                   <p className="text-xs text-muted-foreground">No photo</p>
                 </div>
               )}
