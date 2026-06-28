@@ -71,6 +71,7 @@ const tenantSlug = getArg("tenant") ?? "calapan-city";
 const N_VESSELS = intArg("vessels", 80);
 const N_BENEF = intArg("beneficiaries", 40);
 const N_VIOLATIONS = intArg("violations", 12);
+const N_KANBAN = intArg("kanban", 15);
 
 // ── Deterministic RNG (mulberry32) ───────────────────────────────────────────
 function makeRng(seed: number): () => number {
@@ -241,6 +242,40 @@ async function main(): Promise<void> {
       violationCreated++;
     }
     console.log(`✅  Violations: ${violationCreated} created (target ${N_VIOLATIONS}, [DEMO] prefix).`);
+
+    // ── Kanban tasks ────────────────────────────────────────────────────────────
+    const existingDemoTasks = await prisma.kanbanTask.count({
+      where: { tenantId, title: { startsWith: "[DEMO]" } },
+    });
+    const KANBAN_STATUS = ["TODO", "IN_PROGRESS", "DONE"] as const;
+    const KANBAN_PRIORITY = ["LOW", "MEDIUM", "HIGH", "URGENT"] as const;
+    const TASK_TITLES = [
+      "Verify new fisherfolk registrations",
+      "Follow up on pending edit requests",
+      "Schedule vessel inspection",
+      "Reconcile ayuda beneficiary list",
+      "Resolve open violation cases",
+      "Update barangay alias mappings",
+      "Prepare monthly masterlist report",
+      "Review duplicate registration flags",
+      "Coordinate fishing gear distribution",
+      "Audit impounded vessel records",
+    ];
+    let kanbanCreated = 0;
+    for (let i = existingDemoTasks; i < N_KANBAN; i++) {
+      await prisma.kanbanTask.create({
+        data: {
+          tenantId,
+          assignedToId: actor.id,
+          title: `[DEMO] ${TASK_TITLES[i % TASK_TITLES.length]}`,
+          description: "Demonstration board task seeded for testing.",
+          status: pick([...KANBAN_STATUS]),
+          priority: pick([...KANBAN_PRIORITY]),
+        },
+      });
+      kanbanCreated++;
+    }
+    console.log(`✅  Kanban: ${kanbanCreated} created (target ${N_KANBAN}, [DEMO] prefix).`);
 
     console.log("\n🎉  Demo data seed complete.");
   } finally {
