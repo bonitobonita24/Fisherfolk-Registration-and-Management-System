@@ -436,9 +436,9 @@ export function ViolationFormClient() {
         <Card className="space-y-4 p-6">
           <h2 className="text-base font-semibold text-foreground">Evidence</h2>
           <div className="space-y-2">
-            <FormLabel>
+            <p className="text-sm font-medium text-foreground">
               Evidence — photos or PDF (optional, max 15MB each)
-            </FormLabel>
+            </p>
             <AttachmentUpload
               entityType="violation-evidence"
               value={attachments}
