@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -12,11 +14,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/status-badge";
 
 interface Props {
   id: string;
+  canManage: boolean;
 }
 
 function formatDate(value: Date | string | null | undefined): string {
@@ -64,7 +78,7 @@ function EvidenceImage({ imageKey }: { imageKey: string }) {
   );
 }
 
-export function ViolationDetailClient({ id }: Props) {
+export function ViolationDetailClient({ id, canManage }: Props) {
   const params = useParams<{ tenant: string }>();
 
   const {
@@ -73,6 +87,22 @@ export function ViolationDetailClient({ id }: Props) {
     isError,
     error,
   } = trpc.violation.getById.useQuery({ id });
+
+  const utils = trpc.useUtils();
+  const [open, setOpen] = useState(false);
+  const [notes, setNotes] = useState("");
+
+  const lift = trpc.violation.lift.useMutation({
+    onSuccess: () => {
+      toast.success("Violation lifted.");
+      setOpen(false);
+      setNotes("");
+      void utils.violation.getById.invalidate({ id });
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to lift violation.");
+    },
+  });
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading violation…</p>;
@@ -129,7 +159,48 @@ export function ViolationDetailClient({ id }: Props) {
             </p>
           </div>
         </div>
-        <StatusBadge status={record.status} />
+        <div className="flex items-center gap-3">
+          <StatusBadge status={record.status} />
+          {canManage && record.status === "ACTIVE" && (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">Lift / Resolve</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Lift / Resolve Violation</DialogTitle>
+                  <DialogDescription>
+                    Provide resolution notes before closing this violation.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-2">
+                  <Label htmlFor="resolutionNotes">Resolution notes</Label>
+                  <Textarea
+                    id="resolutionNotes"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Describe how this violation was resolved…"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={() => lift.mutate({ id, resolutionNotes: notes })}
+                    disabled={notes.trim().length === 0 || lift.isPending}
+                  >
+                    {lift.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Lifting…
+                      </>
+                    ) : (
+                      "Confirm lift"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

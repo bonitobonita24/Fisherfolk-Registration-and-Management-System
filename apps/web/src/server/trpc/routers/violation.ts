@@ -120,6 +120,53 @@ export const violationRouter = createTRPCRouter({
       return record;
     }),
 
+  update: adminProcedure
+    .input(
+      z
+        .object({
+          id: z.string().cuid(),
+          subject: z.string().min(1).optional(),
+          details: z.string().optional(),
+          evidenceImages: z.array(z.string()).optional(),
+          notes: z.string().optional(),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const { id, ...rest } = input;
+      const existing = await ctx.db.violation.findFirst({
+        where: { id, tenantId: ctx.tenantId },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+      if (existing.status !== "ACTIVE") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid input.",
+        });
+      }
+
+      const updated = await ctx.db.violation.update({
+        where: { id },
+        data: omitUndefined(rest),
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "Violation",
+          entityId: id,
+          before: existing as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        },
+      });
+
+      return updated;
+    }),
+
   lift: adminProcedure
     .input(
       z
