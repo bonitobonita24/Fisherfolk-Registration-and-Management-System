@@ -267,16 +267,12 @@ function BeneficiariesTable({
         {items.map((b) => (
           <TableRow key={b.id}>
             <TableCell className="font-medium">
-              {b.fisherfolk ? (
-                <Link
-                  href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
-                  className="text-primary hover:underline"
-                >
-                  {b.fisherfolk.fullName}
-                </Link>
-              ) : (
-                "—"
-              )}
+              <Link
+                href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
+                className="text-primary hover:underline"
+              >
+                {b.fisherfolk.fullName}
+              </Link>
             </TableCell>
             <TableCell>{b.fisherfolk?.idNumber ?? "—"}</TableCell>
             <TableCell>

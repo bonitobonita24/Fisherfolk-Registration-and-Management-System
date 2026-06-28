@@ -69,7 +69,6 @@ function EvidenceImage({ imageKey }: { imageKey: string }) {
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={data.url}
       alt="Evidence"

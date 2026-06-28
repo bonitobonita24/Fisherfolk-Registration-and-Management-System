@@ -422,6 +422,10 @@ function TaskDetailDialog({
       <DialogContent className="max-w-lg">
         {isLoading || !task ? (
           <div className="space-y-3 py-2">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Task details</DialogTitle>
+              <DialogDescription>Loading task details…</DialogDescription>
+            </DialogHeader>
             <div className="h-6 w-2/3 rounded bg-muted animate-pulse" />
             <div className="h-4 w-full rounded bg-muted animate-pulse" />
             <div className="h-4 w-1/2 rounded bg-muted animate-pulse" />
@@ -431,10 +435,10 @@ function TaskDetailDialog({
             <DialogHeader>
               <div className="flex items-start justify-between gap-3">
                 <DialogTitle className="leading-snug">{task.title}</DialogTitle>
-                {priorityBadge(task.priority as KanbanPriority)}
+                {priorityBadge(task.priority)}
               </div>
               <DialogDescription>
-                {STATUS_LABEL[task.status as KanbanStatus]}
+                {STATUS_LABEL[task.status]}
               </DialogDescription>
             </DialogHeader>
 
@@ -443,7 +447,7 @@ function TaskDetailDialog({
             <dl className="space-y-3">
               <DetailRow label="Status">
                 <Badge variant="outline" className="text-xs">
-                  {STATUS_LABEL[task.status as KanbanStatus]}
+                  {STATUS_LABEL[task.status]}
                 </Badge>
               </DetailRow>
               <DetailRow label="Assignee">
