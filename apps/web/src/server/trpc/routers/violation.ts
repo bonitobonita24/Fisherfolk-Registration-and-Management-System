@@ -75,6 +75,9 @@ export const violationRouter = createTRPCRouter({
           },
           filedBy: { select: { id: true, name: true } },
           liftedBy: { select: { id: true, name: true } },
+          attachments: {
+            orderBy: { uploadedAt: "asc" },
+          },
         },
       });
       if (!record) throw new TRPCError({ code: "NOT_FOUND" });
@@ -92,17 +95,41 @@ export const violationRouter = createTRPCRouter({
           details: z.string().optional(),
           evidenceImages: z.array(z.string()).default([]),
           notes: z.string().optional(),
+          violatorName: z.string().max(255).optional(),
+          attachments: z
+            .array(
+              z.object({
+                filePath: z.string().min(1),
+                originalFilename: z.string().min(1).max(255),
+                mimeType: z.string().min(1),
+                fileSize: z.number().int().positive(),
+              }),
+            )
+            .default([]),
         })
         .strict(),
     )
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
 
+      const { attachments, ...rest } = input;
+
       const record = await ctx.db.violation.create({
         data: {
-          ...omitUndefined(input),
+          ...omitUndefined(rest),
           tenantId: ctx.tenantId,
           filedById: ctx.userId!,
+          ...(attachments.length > 0 && {
+            attachments: {
+              create: attachments.map((a) => ({
+                filePath: a.filePath,
+                originalFilename: a.originalFilename,
+                mimeType: a.mimeType,
+                fileSize: a.fileSize,
+                uploadedById: ctx.userId!,
+              })),
+            },
+          }),
         },
       });
 

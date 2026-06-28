@@ -68,7 +68,15 @@ export const columns: ColumnDef<ViolationListItem>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+    cell: ({ row }) => {
+      const status = row.getValue<string>("status");
+      return (
+        <StatusBadge
+          status={status}
+          color={status === "ACTIVE" ? "red" : "green"}
+        />
+      );
+    },
   },
   {
     id: "filedBy",

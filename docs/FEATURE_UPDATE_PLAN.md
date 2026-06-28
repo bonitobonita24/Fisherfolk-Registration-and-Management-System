@@ -37,10 +37,12 @@ PR #3 / unmerged). UNMERGED, HARD HOLD — owner merges/deploys.
   `MAX_BYTES_BY_ENTITY` per-entity map (15 MB new doc entities; 5 MB photo/signature/vessel).
 - [x] Migration `20260628150127_add_attachments_and_violator_name` applied (additive only) + generate; tsc clean.
 
-### Batch B — Violations
-- [ ] item 2: violator = registered picker OR free-text name (violatorName) in file form + create proc.
-- [ ] item 2a: upload images+PDF (ViolationAttachment) in file form + render on detail (img inline, pdf link).
-- [ ] item 2b: status badge ACTIVE=red, LIFTED=green.
+### Batch B — Violations ✅ DONE
+- [x] item 2: violator = registered picker OR free-text name (violatorName) — toggle in file form + create proc.
+- [x] item 2a: upload images+PDF (ViolationAttachment) via shared `AttachmentUpload` in file form;
+  render on detail via shared `AttachmentList` (img inline, pdf link). Shared components reused by Batch D.
+- [x] item 2b: status badge ACTIVE=red, LIFTED=green (color override on detail + list columns; global map unchanged).
+- NOTE: lint caught 1 unused-arg ESLint error tsc missed (CRUD lesson confirmed) — fixed. tsc + next lint clean.
 
 ### Batch C — Fisherfolk profile
 - [ ] item 3: remove ADDRESS label/value from detail (keep barangay).

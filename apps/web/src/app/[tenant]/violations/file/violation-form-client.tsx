@@ -10,6 +10,10 @@ import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import {
+  AttachmentUpload,
+  type UploadedAttachment,
+} from "@/components/shared/attachment-upload";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -66,6 +70,11 @@ export function ViolationFormClient() {
   const params = useParams<{ tenant: string }>();
   const tenantSlug = params.tenant;
 
+  const [violatorMode, setViolatorMode] = useState<"registered" | "name">(
+    "registered",
+  );
+  const [violatorName, setViolatorName] = useState("");
+  const [attachments, setAttachments] = useState<UploadedAttachment[]>([]);
   const [fisherfolkSearch, setFisherfolkSearch] = useState("");
   const [selectedFisherfolk, setSelectedFisherfolk] =
     useState<SelectedFisherfolk | null>(null);
@@ -113,9 +122,15 @@ export function ViolationFormClient() {
   );
 
   function handleSubmit(values: FormValues) {
-    if (needsFisherfolk && !selectedFisherfolk) {
-      toast.error("Select a fisherfolk for this violation.");
-      return;
+    if (needsFisherfolk) {
+      if (violatorMode === "registered" && !selectedFisherfolk) {
+        toast.error("Select a fisherfolk for this violation.");
+        return;
+      }
+      if (violatorMode === "name" && !violatorName.trim()) {
+        toast.error("Enter the violator's name.");
+        return;
+      }
     }
     if (needsVessel && !selectedVessel) {
       toast.error("Select a vessel for this violation.");
@@ -128,8 +143,14 @@ export function ViolationFormClient() {
       details: trimOpt(values.details),
       notes: trimOpt(values.notes),
       ...(needsFisherfolk &&
+        violatorMode === "registered" &&
         selectedFisherfolk && { fisherfolkId: selectedFisherfolk.id }),
+      ...(needsFisherfolk &&
+        violatorMode === "name" && {
+          violatorName: violatorName.trim(),
+        }),
       ...(needsVessel && selectedVessel && { vesselId: selectedVessel.id }),
+      attachments,
     });
   }
 
@@ -177,7 +198,39 @@ export function ViolationFormClient() {
               <p className="text-sm font-medium text-foreground">
                 Fisherfolk *
               </p>
-              {selectedFisherfolk ? (
+              {/* Mode toggle */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={violatorMode === "registered" ? "default" : "outline"}
+                  onClick={() => {
+                    setViolatorMode("registered");
+                    setViolatorName("");
+                  }}
+                >
+                  Registered fisherfolk
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={violatorMode === "name" ? "default" : "outline"}
+                  onClick={() => {
+                    setViolatorMode("name");
+                    setSelectedFisherfolk(null);
+                    setFisherfolkSearch("");
+                  }}
+                >
+                  Name only (not in system)
+                </Button>
+              </div>
+              {violatorMode === "name" ? (
+                <Input
+                  value={violatorName}
+                  onChange={(e) => setViolatorName(e.target.value)}
+                  placeholder="Full name of violator"
+                />
+              ) : selectedFisherfolk ? (
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary" className="gap-1 pr-1">
                     <span>{selectedFisherfolk.fullName}</span>
@@ -377,6 +430,21 @@ export function ViolationFormClient() {
               </FormItem>
             )}
           />
+        </Card>
+
+        {/* Evidence */}
+        <Card className="space-y-4 p-6">
+          <h2 className="text-base font-semibold text-foreground">Evidence</h2>
+          <div className="space-y-2">
+            <FormLabel>
+              Evidence — photos or PDF (optional, max 15MB each)
+            </FormLabel>
+            <AttachmentUpload
+              entityType="violation-evidence"
+              value={attachments}
+              onChange={setAttachments}
+            />
+          </div>
         </Card>
 
         {/* Actions */}

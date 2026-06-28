@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { AttachmentList } from "@/components/shared/attachment-list";
 
 interface Props {
   id: string;
@@ -159,7 +160,10 @@ export function ViolationDetailClient({ id, canManage }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <StatusBadge status={record.status} />
+          <StatusBadge
+                status={record.status}
+                color={record.status === "ACTIVE" ? "red" : "green"}
+              />
           {canManage && record.status === "ACTIVE" && (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
@@ -226,7 +230,9 @@ export function ViolationDetailClient({ id, canManage }: Props) {
               <Separator />
               <div className="space-y-1">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Fisherfolk
+                  {targetFisherfolk == null && record.violatorName
+                    ? "Violator (unregistered)"
+                    : "Fisherfolk"}
                 </p>
                 {targetFisherfolk ? (
                   <Link
@@ -240,6 +246,8 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                       {targetFisherfolk.idNumber}
                     </span>
                   </Link>
+                ) : record.violatorName ? (
+                  <p className="text-sm text-foreground">{record.violatorName}</p>
                 ) : (
                   <p className="text-sm text-foreground">—</p>
                 )}
@@ -272,7 +280,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
             <CardHeader>
               <CardTitle>Evidence</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
               {record.evidenceImages.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   {record.evidenceImages.map((key) => (
@@ -284,6 +292,15 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                   No evidence images.
                 </p>
               )}
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Attached Files
+                </p>
+                <AttachmentList
+                  attachments={record.attachments}
+                  emptyText="No evidence files."
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
