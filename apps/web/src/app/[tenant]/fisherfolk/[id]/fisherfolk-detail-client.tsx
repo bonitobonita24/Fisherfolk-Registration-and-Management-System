@@ -162,7 +162,6 @@ export function FisherfolkDetailClient({ id }: Props) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Barangay" value={record.barangay} />
-              <Field label="Address" value={record.address} />
             </div>
 
             <Separator />
@@ -241,6 +240,102 @@ export function FisherfolkDetailClient({ id }: Props) {
           </Card>
         </div>
       </div>
+
+      {/* Registered Vessels */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Registered Vessels</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {record.vessels.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No registered vessels.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {record.vessels.map((v) => (
+                <li key={v.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/${params.tenant}/vessels/${v.id}`}
+                      className="text-sm font-medium text-foreground hover:underline"
+                    >
+                      {v.vesselName}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {v.mfvrNumber} &middot; {v.vesselType}
+                    </p>
+                  </div>
+                  <StatusBadge status={v.status} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Latest Violations */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Latest Violations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {record.violations.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No violations on record.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {record.violations.map((v) => (
+                <li key={v.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/${params.tenant}/violations/${v.id}`}
+                      className="text-sm font-medium text-foreground hover:underline"
+                    >
+                      {v.subject}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(v.createdAt)}
+                    </p>
+                  </div>
+                  <StatusBadge
+                    status={v.status}
+                    color={v.status === "ACTIVE" ? "red" : "green"}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Ayuda Received */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ayuda Received</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {record.ayudaBeneficiaries.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No ayuda programs.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {record.ayudaBeneficiaries.map((b) => (
+                <li key={b.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/${params.tenant}/ayuda/${b.program.id}`}
+                      className="text-sm font-medium text-foreground hover:underline"
+                    >
+                      {b.program.title}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {b.verifiedAt ? `Received ${formatDate(b.verifiedAt)}` : `Added ${formatDate(b.createdAt)}`}
+                    </p>
+                  </div>
+                  <StatusBadge status={b.verificationStatus} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

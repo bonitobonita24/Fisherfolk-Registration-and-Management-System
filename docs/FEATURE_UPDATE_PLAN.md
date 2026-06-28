@@ -44,11 +44,12 @@ PR #3 / unmerged). UNMERGED, HARD HOLD — owner merges/deploys.
 - [x] item 2b: status badge ACTIVE=red, LIFTED=green (color override on detail + list columns; global map unchanged).
 - NOTE: lint caught 1 unused-arg ESLint error tsc missed (CRUD lesson confirmed) — fixed. tsc + next lint clean.
 
-### Batch C — Fisherfolk profile
-- [ ] item 3: remove ADDRESS label/value from detail (keep barangay).
-- [ ] item 3a: "Latest Violations" section (status badge) linked to violation detail.
-- [ ] item 3b: "Ayuda Received" section (program + date) linked to ayuda program.
-- [ ] item 3c: "Registered Vessels" section (multiple) with vessel info, linked to vessel detail.
+### Batch C — Fisherfolk profile ✅ DONE
+- [x] item 3: removed ADDRESS field from detail (kept barangay).
+- [x] item 3a: "Latest Violations" section (red/green status) linked to violation detail.
+- [x] item 3b: "Ayuda Received" section (program + received/added date + status) linked to ayuda program.
+- [x] item 3c: "Registered Vessels" section (multiple, ACTIVE) with vessel info linked to vessel detail.
+- NOTE: getById already included vessels+violations; only added ayudaBeneficiaries. tsc + next lint clean.
 
 ### Batch D — Ayuda uploads
 - [ ] item 4: multi image/PDF upload (AyudaUpload, 15 MB) on program detail + render list (img/pdf).
