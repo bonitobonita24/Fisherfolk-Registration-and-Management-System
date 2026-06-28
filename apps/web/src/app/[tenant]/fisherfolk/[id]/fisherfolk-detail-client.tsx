@@ -138,109 +138,105 @@ export function FisherfolkDetailClient({ id }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Field label="ID Number" value={record.idNumber} />
-              <Field label="RSBSA Number" value={record.rsbsaNumber} />
-              <Field label="Status" value={record.status} />
-              <Field label="Last Name" value={record.lastName} />
-              <Field label="First Name" value={record.firstName} />
-              <Field label="Middle Name" value={record.middleName} />
-              <Field label="Suffix" value={record.suffix} />
-              <Field label="Date of Birth" value={formatDate(record.dateOfBirth)} />
-              <Field label="Sex" value={record.sex} />
-              <Field label="Civil Status" value={record.civilStatus} />
-              <Field label="Contact Number" value={record.contactNumber} />
+      {/* Profile — media on the left (compact), fields on the right */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-6 sm:flex-row">
+            {/* Media column — photo / signature / QR, smaller, inside Profile */}
+            <div className="grid shrink-0 grid-cols-3 gap-3 sm:flex sm:w-40 sm:flex-col">
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Photo
+                </p>
+                {record.photo && photoUrlResp?.url ? (
+                  <img
+                    src={photoUrlResp.url}
+                    alt={`${record.fullName} photo`}
+                    className="aspect-square w-full rounded-lg border bg-muted object-cover"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                    <ImageOff size={20} className="text-muted-foreground" />
+                    <p className="text-[10px] text-muted-foreground">No image</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Signature
+                </p>
+                {record.signature && signatureUrlResp?.url ? (
+                  <img
+                    src={signatureUrlResp.url}
+                    alt={`${record.fullName} signature`}
+                    className="h-16 w-full rounded-md border bg-white object-contain"
+                  />
+                ) : (
+                  <div className="flex h-16 w-full flex-col items-center justify-center gap-1 rounded-md border bg-muted">
+                    <FileX2 size={16} className="text-muted-foreground" />
+                    <p className="text-[10px] text-muted-foreground">None</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  QR Code
+                </p>
+                {qrDataUrl ? (
+                  <img
+                    src={qrDataUrl}
+                    alt={`${record.idNumber} QR code`}
+                    className="aspect-square w-full rounded-lg border bg-white p-1.5"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
+                    <p className="text-[10px] text-muted-foreground">
+                      {record.qrCode ? "…" : "No QR"}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <Separator />
+            {/* Fields */}
+            <div className="min-w-0 flex-1 space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Field label="ID Number" value={record.idNumber} />
+                <Field label="RSBSA Number" value={record.rsbsaNumber} />
+                <Field label="Status" value={record.status} />
+                <Field label="Last Name" value={record.lastName} />
+                <Field label="First Name" value={record.firstName} />
+                <Field label="Middle Name" value={record.middleName} />
+                <Field label="Suffix" value={record.suffix} />
+                <Field label="Date of Birth" value={formatDate(record.dateOfBirth)} />
+                <Field label="Sex" value={record.sex} />
+                <Field label="Civil Status" value={record.civilStatus} />
+                <Field label="Contact Number" value={record.contactNumber} />
+              </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Barangay" value={record.barangay} />
+              <Separator />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Field label="Barangay" value={record.barangay} />
+                <Field label="Date Joined" value={formatDate(record.dateJoined)} />
+                <Field
+                  label="Registration Year"
+                  value={record.registrationYear}
+                />
+                <Field label="Remarks" value={record.remarks} />
+              </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            <Separator />
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <Field label="Date Joined" value={formatDate(record.dateJoined)} />
-              <Field
-                label="Registration Year"
-                value={record.registrationYear}
-              />
-              <Field label="Remarks" value={record.remarks} />
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Photo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.photo && photoUrlResp?.url ? (
-                <img
-                  src={photoUrlResp.url}
-                  alt={`${record.fullName} photo`}
-                  className="aspect-[1/1] w-full rounded-md border bg-muted object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[1/1] w-full flex-col items-center justify-center gap-2 rounded-md border bg-muted">
-                  <ImageOff size={28} className="text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">No Image</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Signature</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.signature && signatureUrlResp?.url ? (
-                <img
-                  src={signatureUrlResp.url}
-                  alt={`${record.fullName} signature`}
-                  className="h-32 w-full rounded-md border bg-white object-contain"
-                />
-              ) : (
-                <div className="flex h-32 w-full flex-col items-center justify-center gap-2 rounded-md border bg-muted">
-                  <FileX2 size={24} className="text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">No Signature available</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>QR Code</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {qrDataUrl ? (
-                <img
-                  src={qrDataUrl}
-                  alt={`${record.idNumber} QR code`}
-                  className="mx-auto h-48 w-48 rounded-md border bg-white p-2"
-                />
-              ) : (
-                <div className="mx-auto flex h-48 w-48 items-center justify-center rounded-md border bg-muted">
-                  <p className="text-xs text-muted-foreground">
-                    {record.qrCode ? "Rendering…" : "No QR code"}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
+      {/* Related records — compact 3-up grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
       {/* Registered Vessels */}
       <Card>
         <CardHeader>
@@ -336,6 +332,7 @@ export function FisherfolkDetailClient({ id }: Props) {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
