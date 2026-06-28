@@ -145,6 +145,38 @@ export function VesselDetailClient({ id }: Props) {
             </CardContent>
           </Card>
 
+          {/* Linked Owners */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Linked Owners</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {record.owners.length > 0 ? (
+                <ul className="divide-y">
+                  {record.owners.map((owner) => (
+                    <li key={owner.id} className="py-2 first:pt-0 last:pb-0">
+                      <Link
+                        href={`/${params.tenant}/fisherfolk/${owner.id}`}
+                        className="flex items-center justify-between gap-2 hover:underline"
+                      >
+                        <span className="text-sm font-medium text-foreground">
+                          {owner.fullName}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {owner.idNumber}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No linked owners.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Construction */}
           <Card>
             <CardHeader>
@@ -234,38 +266,6 @@ export function VesselDetailClient({ id }: Props) {
                   <p className="text-sm text-foreground">—</p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Linked Owners */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Linked Owners</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.owners.length > 0 ? (
-                <ul className="divide-y">
-                  {record.owners.map((owner) => (
-                    <li key={owner.id} className="py-2 first:pt-0 last:pb-0">
-                      <Link
-                        href={`/${params.tenant}/fisherfolk/${owner.id}`}
-                        className="flex items-center justify-between gap-2 hover:underline"
-                      >
-                        <span className="text-sm font-medium text-foreground">
-                          {owner.fullName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {owner.idNumber}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No linked owners.
-                </p>
-              )}
             </CardContent>
           </Card>
 
