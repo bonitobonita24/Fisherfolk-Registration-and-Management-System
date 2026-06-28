@@ -64,7 +64,25 @@ PR #3 / unmerged). UNMERGED, HARD HOLD — owner merges/deploys.
   uploads via @frms/storage + creates ViolationAttachment/KanbanAttachment/AyudaUpload rows + sets
   vessel.vesselPhoto. Ran against dev DB. Idempotent via `{ none: {} }` / `vesselPhoto: null`.
 
-## Status: ✅ ALL BATCHES COMPLETE (A–E). Remaining: rebuild dev image from this branch + browser-QA;
-## then PRODUCT.md back-port (owner) + merge decision (HARD HOLD — owner).
-## NOTE: dev container frms_dev_app is a BAKED image (built from feat/violations-ayuda-kanban-crud at T4);
-## must rebuild from this branch to QA the new UI (per CRUD T4 lesson — not hot-reload).
+## Status: ✅ ALL BATCHES COMPLETE (A–E) + browser-QA PASSED. Remaining: PRODUCT.md back-port (owner)
+## + merge decision (HARD HOLD — owner).
+
+## Browser QA (2026-06-28, rebuilt dev image from this branch, super_admin webmaster, :44387)
+## Screenshots in test-artifacts/feature-update-qa/ (gitignored).
+- ✅ Violations list: ACTIVE=red, LIFTED=green (item 2b).
+- ✅ Violation detail: evidence attachments render — PDF as badge/link row, images laid out w/ filenames;
+  status red ACTIVE. Item 2a.
+- ✅ Violation file form: Registered|Name-only toggle works (Name-only → "Full name of violator" input);
+  Evidence upload zone (15 MB, img/PDF). Item 2.
+- ✅ Fisherfolk detail: Address removed; Registered Vessels / Latest Violations / Ayuda Received sections
+  render (Ayuda Received shows real linked data). Items 3, 3a–c.
+- ✅ Ayuda program detail: "Program Files" card — PDF + upload dropzone + Save Files. Item 4.
+- ✅ Demo files (item 1) present on violations + ayuda (+ vessels/kanban in DB).
+
+## 🔴 Bug found+fixed by QA (commit c0a5308): File Violation form crashed — Evidence heading used
+## <FormLabel> (useFormField) OUTSIDE <FormField> → 500 + blank form. tsc + next lint BOTH passed it
+## (runtime-only). Replaced with plain <p>. LESSON: browser-QA every new page; lint ≠ runtime.
+
+## ⚠️ CROSS-BRANCH DEP: uploaded IMAGES don't display in THIS branch — signed URLs are correct but CSP
+## (img-src 'self' data: blob:) blocks the MinIO origin. Fixed by PR #1 fix/csp-runtime-storage-origin
+## (not in this stack). PDFs (links) work. Merge CSP first (planned order) → images render.
