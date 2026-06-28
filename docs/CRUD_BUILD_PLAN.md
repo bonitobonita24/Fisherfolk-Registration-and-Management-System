@@ -61,8 +61,13 @@
   (DropdownMenu → RECEIVED/CANCELLED via `verifyBeneficiary`) shown only for PENDING rows when
   `canManage`; threaded `canManage` down into BeneficiariesTable. Both invalidate listBeneficiaries
   + getProgramById on success. tsc clean.
-- [ ] **T3c** Kanban: Create Task dialog (`kanbanTask.create`) + Edit/Move (`kanbanTask.update`) —
-  status change via a per-card menu (drag/drop optional, not required for demo).
+- [x] **T3c** Kanban Create Task dialog + per-card Move (2026-06-28): page.tsx now async, computes
+  `canManage` (super_admin/admin) via `auth()` and passes to the board client. "New Task" dialog
+  (gated `canManage`) — title + description + priority/status Selects + assignee Select populated from
+  `user.list` (adminProcedure, fetched on open) → `kanbanTask.create` → toast + invalidate list. Per-card
+  Move menu (gated `canManage`, stopPropagation so it doesn't open detail) offering the other two
+  statuses via `kanbanTask.updateStatus` → invalidate list. Drag/drop skipped (optional for demo).
+  tsc clean.
 
 ### Phase 4 — Verify + close
 - [ ] **T4** Rebuild dev app, browser-QA all three modules end-to-end (list → detail → create → edit →

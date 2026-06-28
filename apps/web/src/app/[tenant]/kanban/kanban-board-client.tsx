@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2, MoreHorizontal, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import {
@@ -10,13 +12,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 
 type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
@@ -33,6 +55,13 @@ const STATUS_LABEL: Record<KanbanStatus, string> = {
   IN_PROGRESS: "In Progress",
   DONE: "Done",
 };
+
+const PRIORITY_OPTIONS: { value: KanbanPriority; label: string }[] = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+  { value: "URGENT", label: "Urgent" },
+];
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleString("en-PH", {
@@ -73,9 +102,219 @@ function priorityBadge(priority: KanbanPriority) {
   }
 }
 
+function NewTaskDialog() {
+  const utils = trpc.useUtils();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState<KanbanPriority>("MEDIUM");
+  const [status, setStatus] = useState<KanbanStatus>("TODO");
+  const [assignedToId, setAssignedToId] = useState("");
+
+  const usersQuery = trpc.user.list.useQuery(
+    { limit: 200 },
+    { enabled: open },
+  );
+
+  const create = trpc.kanbanTask.create.useMutation({
+    onSuccess: () => {
+      toast.success("Task created.");
+      handleOpenChange(false);
+      void utils.kanbanTask.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to create task.");
+    },
+  });
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      setTitle("");
+      setDescription("");
+      setPriority("MEDIUM");
+      setStatus("TODO");
+      setAssignedToId("");
+    }
+  }
+
+  function handleSubmit() {
+    if (!title.trim() || !assignedToId) return;
+    create.mutate({
+      assignedToId,
+      title: title.trim(),
+      description: description.trim() || undefined,
+      priority,
+      status,
+    });
+  }
+
+  const users = usersQuery.data?.items ?? [];
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          New Task
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>New Task</DialogTitle>
+          <DialogDescription>
+            Create a task and assign it to a team member.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="task-title">Title</Label>
+            <Input
+              id="task-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task title"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="task-description">Description</Label>
+            <Textarea
+              id="task-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Optional details…"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <Select
+                value={priority}
+                onValueChange={(v) => setPriority(v as KanbanPriority)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as KanbanStatus)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COLUMNS.map((c) => (
+                    <SelectItem key={c.status} value={c.status}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Assignee</Label>
+            <Select value={assignedToId} onValueChange={setAssignedToId}>
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    usersQuery.isLoading ? "Loading…" : "Select a member"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name ?? u.username}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={handleSubmit}
+            disabled={!title.trim() || !assignedToId || create.isPending}
+          >
+            {create.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Create Task
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MoveMenu({
+  task,
+  onMove,
+  disabled,
+}: {
+  task: { id: string; status: KanbanStatus };
+  onMove: (id: string, status: KanbanStatus) => void;
+  disabled: boolean;
+}) {
+  const others = COLUMNS.filter((c) => c.status !== task.status);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 shrink-0"
+          disabled={disabled}
+          onClick={(e) => e.stopPropagation()}
+          aria-label="Move task"
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DropdownMenuLabel>Move to</DropdownMenuLabel>
+        {others.map((c) => (
+          <DropdownMenuItem
+            key={c.status}
+            onClick={(e) => {
+              e.stopPropagation();
+              onMove(task.id, c.status);
+            }}
+          >
+            {c.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function TaskCard({
   task,
   onSelect,
+  canManage,
+  onMove,
+  isMoving,
 }: {
   task: {
     id: string;
@@ -87,6 +326,9 @@ function TaskCard({
     assignedTo: { id: string; name: string | null } | null;
   };
   onSelect: (id: string) => void;
+  canManage: boolean;
+  onMove: (id: string, status: KanbanStatus) => void;
+  isMoving: boolean;
 }) {
   return (
     <Card
@@ -106,7 +348,12 @@ function TaskCard({
           <CardTitle className="text-sm font-medium leading-snug">
             {task.title}
           </CardTitle>
-          {priorityBadge(task.priority)}
+          <div className="flex items-center gap-1">
+            {priorityBadge(task.priority)}
+            {canManage && (
+              <MoveMenu task={task} onMove={onMove} disabled={isMoving} />
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="px-3 pb-3 space-y-1">
@@ -228,7 +475,8 @@ function TaskDetailDialog({
   );
 }
 
-export function KanbanBoardClient() {
+export function KanbanBoardClient({ canManage }: { canManage: boolean }) {
+  const utils = trpc.useUtils();
   const { data, isLoading } = trpc.kanbanTask.list.useQuery({
     page: 1,
     limit: 200,
@@ -236,11 +484,30 @@ export function KanbanBoardClient() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const move = trpc.kanbanTask.updateStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Task moved.");
+      void utils.kanbanTask.list.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to move task.");
+    },
+  });
+
+  const handleMove = (id: string, status: KanbanStatus) =>
+    move.mutate({ id, status });
+
   const itemsByStatus = (status: KanbanStatus) =>
     (data?.items ?? []).filter((t) => t.status === status);
 
   return (
     <>
+      {canManage && (
+        <div className="flex justify-end">
+          <NewTaskDialog />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {COLUMNS.map(({ status, label }) => (
           <div key={status} className="flex flex-col gap-3">
@@ -266,6 +533,9 @@ export function KanbanBoardClient() {
                     key={task.id}
                     task={task}
                     onSelect={setSelectedId}
+                    canManage={canManage}
+                    onMove={handleMove}
+                    isMoving={move.isPending}
                   />
                 ))
               )}
