@@ -1,0 +1,140 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+import { trpc } from "@/lib/trpc/client";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z
+  .object({
+    title: z.string().min(1, "Title is required").max(255),
+    description: z.string(),
+  })
+  .strict();
+
+type FormValues = z.infer<typeof formSchema>;
+
+/** Return trimmed string or undefined when blank. */
+function trimOpt(v: string): string | undefined {
+  const t = v.trim();
+  return t.length > 0 ? t : undefined;
+}
+
+export function AyudaFormClient() {
+  const router = useRouter();
+  const params = useParams<{ tenant: string }>();
+  const tenantSlug = params.tenant;
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
+
+  const utils = trpc.useUtils();
+
+  const createMutation = trpc.ayuda.createProgram.useMutation({
+    onSuccess: (record) => {
+      toast.success("Program created as draft.");
+      void utils.ayuda.listPrograms.invalidate();
+      router.push(`/${tenantSlug}/ayuda/${record.id}`);
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  function handleSubmit(values: FormValues) {
+    createMutation.mutate({
+      title: values.title.trim(),
+      description: trimOpt(values.description),
+    });
+  }
+
+  const isSubmitting = createMutation.isPending;
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={(event) => {
+          void form.handleSubmit(handleSubmit)(event);
+        }}
+        className="space-y-6"
+      >
+        <Card className="space-y-4 p-6">
+          <h2 className="text-base font-semibold text-foreground">
+            Program Details
+          </h2>
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g. Fuel Subsidy Q3 2026"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={4}
+                    placeholder="Describe the assistance program…"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  The program starts as a draft. Publish it to begin adding
+                  beneficiaries.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </Card>
+
+        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/${tenantSlug}/ayuda`}>Cancel</Link>
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Create Program
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}

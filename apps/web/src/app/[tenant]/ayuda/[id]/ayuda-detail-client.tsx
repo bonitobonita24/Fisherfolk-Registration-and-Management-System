@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -24,6 +35,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 
 interface Props {
   id: string;
+  canManage: boolean;
 }
 
 function formatDate(value: Date | string | null | undefined): string {
@@ -110,8 +122,10 @@ function BeneficiariesTable({ programId }: { programId: string }) {
   );
 }
 
-export function AyudaDetailClient({ id }: Props) {
+export function AyudaDetailClient({ id, canManage }: Props) {
   const params = useParams<{ tenant: string }>();
+  const utils = trpc.useUtils();
+  const [closeOpen, setCloseOpen] = useState(false);
 
   const {
     data: record,
@@ -119,6 +133,29 @@ export function AyudaDetailClient({ id }: Props) {
     isError,
     error,
   } = trpc.ayuda.getProgramById.useQuery({ id });
+
+  const publish = trpc.ayuda.publishProgram.useMutation({
+    onSuccess: () => {
+      toast.success("Program published.");
+      void utils.ayuda.getProgramById.invalidate({ id });
+      void utils.ayuda.listPrograms.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to publish program.");
+    },
+  });
+
+  const close = trpc.ayuda.closeProgram.useMutation({
+    onSuccess: () => {
+      toast.success("Program closed.");
+      setCloseOpen(false);
+      void utils.ayuda.getProgramById.invalidate({ id });
+      void utils.ayuda.listPrograms.invalidate();
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to close program.");
+    },
+  });
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Loading program…</p>;
@@ -166,7 +203,64 @@ export function AyudaDetailClient({ id }: Props) {
             </p>
           </div>
         </div>
-        <StatusBadge status={record.status} />
+        <div className="flex items-center gap-2">
+          {canManage && record.status === "DRAFT" && (
+            <Button
+              size="sm"
+              onClick={() => publish.mutate({ id })}
+              disabled={publish.isPending}
+            >
+              {publish.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Publish
+            </Button>
+          )}
+          {canManage && record.status === "ACTIVE" && (
+            <Dialog open={closeOpen} onOpenChange={setCloseOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  Close Program
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Close Program</DialogTitle>
+                  <DialogDescription>
+                    Mark this program as completed once distribution is done, or
+                    cancel it if it will not proceed. This cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      close.mutate({ id, status: "CANCELLED" })
+                    }
+                    disabled={close.isPending}
+                  >
+                    {close.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Cancel Program
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      close.mutate({ id, status: "COMPLETED" })
+                    }
+                    disabled={close.isPending}
+                  >
+                    {close.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Mark Completed
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          <StatusBadge status={record.status} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

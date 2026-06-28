@@ -49,10 +49,15 @@
   + form client + role-gated "File Violation" button on the list. NOTE: page/button gated to
   **super_admin/admin only** (not encoder) — `violation.create` is `adminProcedure`; gating encoder
   would show a form that 403s. (2026-06-28)
-- [ ] **T3b** Ayuda: Create Program form (`createProgram`) + Publish/Close actions
-  (`publishProgram`/`closeProgram`) + Add Beneficiary (`addBeneficiary`) + Verify Beneficiary
-  (`verifyBeneficiary`) on the program detail. **SCOPE-CHECK: likely split into T3b-1 (program CRUD)
-  and T3b-2 (beneficiary actions)** if >12 files / >80K.
+- [x] **T3b-1** Ayuda program CRUD (2026-06-28): new route `ayuda/new/page.tsx` (gated
+  **super_admin/admin only** — `createProgram` is `adminProcedure`) + `ayuda-form-client.tsx`
+  (title required + description, creates DRAFT then redirects to detail) + role-gated "New Program"
+  button on the ayuda list. Publish (DRAFT→ACTIVE) button + Close Program dialog
+  (ACTIVE→COMPLETED/CANCELLED) on the program detail header, gated by `canManage`. Follows the
+  violations create-form + lift-action pattern. tsc clean.
+- [ ] **T3b-2** Ayuda beneficiary actions: Add Beneficiary dialog (`addBeneficiary`, fisherfolk
+  picker) + Verify Beneficiary action (`verifyBeneficiary` RECEIVED/CANCELLED) on the beneficiaries
+  table in the program detail. Gated super_admin/admin; only when program is ACTIVE.
 - [ ] **T3c** Kanban: Create Task dialog (`kanbanTask.create`) + Edit/Move (`kanbanTask.update`) —
   status change via a per-card menu (drag/drop optional, not required for demo).
 
