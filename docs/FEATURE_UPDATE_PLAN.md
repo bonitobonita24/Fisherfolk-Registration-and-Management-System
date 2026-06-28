@@ -58,8 +58,13 @@ PR #3 / unmerged). UNMERGED, HARD HOLD — owner merges/deploys.
   `removeUpload` adminProcedures; image→EVENT_PHOTO, pdf→DOCUMENT. `AttachmentList` gained optional
   `onRemove` (admin-only remove; violations detail unchanged). tsc + next lint clean.
 
-### Batch E — Demo files seed
-- [ ] item 1: attach demo images/PDFs to some vessels, violations, kanban (+ ayuda) — script that
-  uploads to MinIO + links keys, runnable against current dev DB; integrate into seed-demo for repro.
+### Batch E — Demo files seed ✅ DONE
+- [x] item 1: 8 demo assets in `packages/db/demo-assets/` (PIL-generated labeled PNG/JPG + PDFs);
+  idempotent linker `packages/db/scripts/seed-demo-files.ts` (`pnpm --filter @frms/db db:seed-demo-files`)
+  uploads via @frms/storage + creates ViolationAttachment/KanbanAttachment/AyudaUpload rows + sets
+  vessel.vesselPhoto. Ran against dev DB. Idempotent via `{ none: {} }` / `vesselPhoto: null`.
 
-## Status: IN PROGRESS — Batch A
+## Status: ✅ ALL BATCHES COMPLETE (A–E). Remaining: rebuild dev image from this branch + browser-QA;
+## then PRODUCT.md back-port (owner) + merge decision (HARD HOLD — owner).
+## NOTE: dev container frms_dev_app is a BAKED image (built from feat/violations-ayuda-kanban-crud at T4);
+## must rebuild from this branch to QA the new UI (per CRUD T4 lesson — not hot-reload).
