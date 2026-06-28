@@ -43,10 +43,12 @@
   already existed; added `violation.update` (admin-gated, ACTIVE-only, audit-logged). Admin-gated
   Lift/Resolve dialog on the detail view (resolution-notes textarea → `violation.lift` → invalidate).
   page.tsx computes `canManage` (super_admin/admin) via `auth()`.
-- [ ] **T3a-2** Violations "File Violation" create form (`violation.create`) — target = FISHERFOLK /
-  VESSEL / BOTH with a fisherfolk and/or vessel picker (use fisherfolk.list + vessel.list searchable
-  combobox; follow `vessels/register/registration-form-client.tsx`). New route
-  `violations/file/page.tsx` (admin/encoder gate) + form client + "File Violation" button on the list.
+- [x] **T3a-2** Violations "File Violation" create form (`violation.create`) — target = FISHERFOLK /
+  VESSEL / BOTH with fisherfolk + vessel searchable single-pickers (fisherfolk.list + vessel.list);
+  follows `vessels/register/registration-form-client.tsx`. New route `violations/file/page.tsx`
+  + form client + role-gated "File Violation" button on the list. NOTE: page/button gated to
+  **super_admin/admin only** (not encoder) — `violation.create` is `adminProcedure`; gating encoder
+  would show a form that 403s. (2026-06-28)
 - [ ] **T3b** Ayuda: Create Program form (`createProgram`) + Publish/Close actions
   (`publishProgram`/`closeProgram`) + Add Beneficiary (`addBeneficiary`) + Verify Beneficiary
   (`verifyBeneficiary`) on the program detail. **SCOPE-CHECK: likely split into T3b-1 (program CRUD)
