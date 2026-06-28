@@ -208,18 +208,6 @@ export function ViolationDetailClient({ id, canManage }: Props) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          {/* Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Violation Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Subject" value={record.subject} />
-              <Field label="Details" value={record.details} />
-              <Field label="Notes" value={record.notes} />
-            </CardContent>
-          </Card>
-
           {/* Target */}
           <Card>
             <CardHeader>
@@ -272,6 +260,18 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                   <p className="text-sm text-foreground">—</p>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Violation Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Field label="Subject" value={record.subject} />
+              <Field label="Details" value={record.details} />
+              <Field label="Notes" value={record.notes} />
             </CardContent>
           </Card>
 
