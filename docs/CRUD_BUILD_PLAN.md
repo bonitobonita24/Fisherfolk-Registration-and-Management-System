@@ -28,8 +28,9 @@
 - [x] Violations / Ayuda / Kanban list+board views (commit fb2b220, 2026-06-28)
 
 ### Phase 2 — Detail views
-- [ ] **T2a** Violations detail `[tenant]/violations/[id]` via `violation.getById` — subject, details,
+- [x] **T2a** Violations detail `[tenant]/violations/[id]` via `violation.getById` — subject, details,
   target (linked fisherfolk/vessel), status, filed-by, dates, evidence images. Link from the list row.
+  (commit e05f1f5, 2026-06-28. NOTE: `violation.lift` already exists in the router — T3a gap note is stale.)
 - [ ] **T2b** Ayuda program detail `[tenant]/ayuda/[id]` via `ayuda.getProgramById` +
   `ayuda.listBeneficiaries` — program header + beneficiaries table (status, verified-by). Link from list.
 - [ ] **T2c** Kanban task detail — dialog opened from a board card via `kanbanTask.getById` (or reuse
