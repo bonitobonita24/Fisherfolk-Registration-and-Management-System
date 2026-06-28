@@ -1,0 +1,58 @@
+# CRUD Demo Build — autonomous reboot-loop queue
+
+**Branch:** `feat/violations-ayuda-kanban-crud` (off main). UNMERGED, unpushed (HARD HOLD).
+**Goal:** Full CRUD for Violations, Ayuda Programs, Kanban so seeded demo data is viewable + manageable.
+**Owner directive (2026-06-28):** build this as a self-rebooting loop — ONE task per session, save + reboot
+(`close-session`, no `--stop`) between tasks to avoid context drift.
+
+## Loop protocol (every session does this)
+1. Run the anti-thrashing scope check. Read ONLY the files for the current task.
+2. Reference pattern is the **Vessels** module: `apps/web/src/app/[tenant]/vessels/` (page.tsx,
+   *-list-client.tsx, columns.tsx, [id]/*-detail-client.tsx, register/registration-form-client.tsx).
+3. Do the FIRST unchecked `[ ]` task below. Dispatch parallel `spec-executor`s for independent files
+   (R7). Verify `cd apps/web && pnpm exec tsc --noEmit` clean. Do NOT run `pnpm build`/`pnpm dev`
+   (breaks the running dev server's .next).
+4. Commit (Rule 23 — this branch, never main). Check off the task here.
+5. Rewrite `.sessions/slot-1/next-session` (keep the same directive line) and `close-session`.
+6. When ALL tasks are checked: rebuild + browser-QA all flows, then `close-session --stop`.
+
+## Backends (already built + mounted — do NOT rebuild unless a gap is noted)
+- `violation`: list, getById, create. **GAP: no lift/update/archive** → add in T3a.
+- `ayuda`: listPrograms, getProgramById, createProgram, publishProgram, closeProgram,
+  listBeneficiaries, addBeneficiary, verifyBeneficiary. (rich — no gaps expected)
+- `kanbanTask`: list, getById, create, update.
+
+## Queue
+
+### Phase 1 — List views
+- [x] Violations / Ayuda / Kanban list+board views (commit fb2b220, 2026-06-28)
+
+### Phase 2 — Detail views
+- [ ] **T2a** Violations detail `[tenant]/violations/[id]` via `violation.getById` — subject, details,
+  target (linked fisherfolk/vessel), status, filed-by, dates, evidence images. Link from the list row.
+- [ ] **T2b** Ayuda program detail `[tenant]/ayuda/[id]` via `ayuda.getProgramById` +
+  `ayuda.listBeneficiaries` — program header + beneficiaries table (status, verified-by). Link from list.
+- [ ] **T2c** Kanban task detail — dialog opened from a board card via `kanbanTask.getById` (or reuse
+  the card data). Show full task fields. (May merge into T3c edit dialog.)
+
+### Phase 3 — Create / Edit / Actions
+- [ ] **T3a** Violations: (1) add backend `lift` + `update` procedures to violation router (mirror the
+  guard pattern in other routers); (2) "File Violation" create form (`violation.create`) — target =
+  fisherfolk OR vessel picker; (3) Lift/Resolve action button on detail.
+- [ ] **T3b** Ayuda: Create Program form (`createProgram`) + Publish/Close actions
+  (`publishProgram`/`closeProgram`) + Add Beneficiary (`addBeneficiary`) + Verify Beneficiary
+  (`verifyBeneficiary`) on the program detail. **SCOPE-CHECK: likely split into T3b-1 (program CRUD)
+  and T3b-2 (beneficiary actions)** if >12 files / >80K.
+- [ ] **T3c** Kanban: Create Task dialog (`kanbanTask.create`) + Edit/Move (`kanbanTask.update`) —
+  status change via a per-card menu (drag/drop optional, not required for demo).
+
+### Phase 4 — Verify + close
+- [ ] **T4** Rebuild dev app, browser-QA all three modules end-to-end (list → detail → create → edit →
+  action), screenshots to test-artifacts/. Update project memory. Then `close-session --stop`.
+
+## Notes
+- Demo data already seeded (80 vessels, 12 violations, 3 ayuda programs/120 beneficiaries, 15 kanban).
+- Running dev app currently built from `fix/csp-runtime-storage-origin` (has the CSP fix); a rebuild
+  from this branch is needed before browser-QA of the new pages (do it in T4, or per-task if verifying UI).
+- Sibling unmerged branches awaiting owner: `feat/deploy-seed` (seed pipeline + kanban seed),
+  `fix/csp-runtime-storage-origin` (runtime CSP fix).
