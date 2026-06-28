@@ -34,8 +34,9 @@
 - [x] **T2b** Ayuda program detail `[tenant]/ayuda/[id]` via `ayuda.getProgramById` +
   `ayuda.listBeneficiaries` — program header + beneficiaries table (status, verified-by). Link from list.
   (commit cd513ec, 2026-06-28)
-- [ ] **T2c** Kanban task detail — dialog opened from a board card via `kanbanTask.getById` (or reuse
-  the card data). Show full task fields. (May merge into T3c edit dialog.)
+- [x] **T2c** Kanban task detail — dialog opened from a board card via `kanbanTask.getById` (or reuse
+  the card data). Show full task fields. (commit e62479c, 2026-06-28. Card is role=button+focusable;
+  dialog shows status, assignee, description, source comment, created/updated.)
 
 ### Phase 3 — Create / Edit / Actions
 - [ ] **T3a** Violations: (1) add backend `lift` + `update` procedures to violation router (mirror the
