@@ -3,11 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -24,6 +26,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Table,
   TableBody,
   TableCell,
@@ -36,6 +44,12 @@ import { StatusBadge } from "@/components/shared/status-badge";
 interface Props {
   id: string;
   canManage: boolean;
+}
+
+interface SelectedFisherfolk {
+  id: string;
+  fullName: string;
+  idNumber: string;
 }
 
 function formatDate(value: Date | string | null | undefined): string {
@@ -61,12 +75,166 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function BeneficiariesTable({ programId }: { programId: string }) {
+function AddBeneficiaryDialog({ programId }: { programId: string }) {
+  const utils = trpc.useUtils();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<SelectedFisherfolk | null>(null);
+
+  const fisherfolkListQuery = trpc.fisherfolk.list.useQuery(
+    { search, limit: 10 },
+    { enabled: search.trim().length >= 2 },
+  );
+
+  const add = trpc.ayuda.addBeneficiary.useMutation({
+    onSuccess: () => {
+      toast.success("Beneficiary added.");
+      setOpen(false);
+      setSearch("");
+      setSelected(null);
+      void utils.ayuda.listBeneficiaries.invalidate({ programId });
+      void utils.ayuda.getProgramById.invalidate({ id: programId });
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to add beneficiary.");
+    },
+  });
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (!next) {
+      setSearch("");
+      setSelected(null);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Beneficiary
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Beneficiary</DialogTitle>
+          <DialogDescription>
+            Search for a fisherfolk to enroll in this program.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          {selected ? (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="gap-1 pr-1">
+                <span>{selected.fullName}</span>
+                <span className="font-mono text-xs opacity-70">
+                  {selected.idNumber}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelected(null)}
+                  className="ml-1 rounded hover:bg-muted"
+                  aria-label="Remove fisherfolk"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            </div>
+          ) : (
+            <>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search fisherfolk by name or ID number…"
+              />
+              <p className="text-xs text-muted-foreground">
+                Type at least 2 characters to search.
+              </p>
+              {search.trim().length >= 2 && (
+                <div className="rounded-md border border-border bg-card">
+                  {fisherfolkListQuery.isLoading && (
+                    <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Searching…
+                    </div>
+                  )}
+                  {!fisherfolkListQuery.isLoading &&
+                    (fisherfolkListQuery.data?.items.length ?? 0) === 0 && (
+                      <p className="p-3 text-sm text-muted-foreground">
+                        No fisherfolk found for &ldquo;{search}&rdquo;.
+                      </p>
+                    )}
+                  {(fisherfolkListQuery.data?.items ?? []).map((ff) => (
+                    <button
+                      key={ff.id}
+                      type="button"
+                      onClick={() => {
+                        setSelected({
+                          id: ff.id,
+                          fullName: ff.fullName,
+                          idNumber: ff.idNumber,
+                        });
+                        setSearch("");
+                      }}
+                      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted"
+                    >
+                      <span className="font-medium text-foreground">
+                        {ff.fullName}
+                      </span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {ff.idNumber}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <DialogFooter>
+          <Button
+            onClick={() => {
+              if (!selected) return;
+              add.mutate({ programId, fisherfolkId: selected.id });
+            }}
+            disabled={!selected || add.isPending}
+          >
+            {add.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Add Beneficiary
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BeneficiariesTable({
+  programId,
+  canManage,
+}: {
+  programId: string;
+  canManage: boolean;
+}) {
   const params = useParams<{ tenant: string }>();
+  const utils = trpc.useUtils();
   const { data, isLoading } = trpc.ayuda.listBeneficiaries.useQuery({
     programId,
     page: 1,
     limit: 200,
+  });
+
+  const verify = trpc.ayuda.verifyBeneficiary.useMutation({
+    onSuccess: () => {
+      toast.success("Beneficiary updated.");
+      void utils.ayuda.listBeneficiaries.invalidate({ programId });
+      void utils.ayuda.getProgramById.invalidate({ id: programId });
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to update beneficiary.");
+    },
   });
 
   if (isLoading) {
@@ -92,6 +260,7 @@ function BeneficiariesTable({ programId }: { programId: string }) {
           <TableHead>Status</TableHead>
           <TableHead>Verified By</TableHead>
           <TableHead>Verified At</TableHead>
+          {canManage && <TableHead className="text-right">Actions</TableHead>}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -115,6 +284,47 @@ function BeneficiariesTable({ programId }: { programId: string }) {
             </TableCell>
             <TableCell>{b.verifiedBy?.name ?? "—"}</TableCell>
             <TableCell>{formatDate(b.verifiedAt)}</TableCell>
+            {canManage && (
+              <TableCell className="text-right">
+                {b.verificationStatus === "PENDING" ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={verify.isPending}
+                      >
+                        Verify
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          verify.mutate({
+                            id: b.id,
+                            verificationStatus: "RECEIVED",
+                          })
+                        }
+                      >
+                        Mark Received
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          verify.mutate({
+                            id: b.id,
+                            verificationStatus: "CANCELLED",
+                          })
+                        }
+                      >
+                        Cancel
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </TableCell>
+            )}
           </TableRow>
         ))}
       </TableBody>
@@ -183,6 +393,8 @@ export function AyudaDetailClient({ id, canManage }: Props) {
   }
 
   if (!record) return null;
+
+  const canAddBeneficiary = canManage && record.status === "ACTIVE";
 
   return (
     <div className="space-y-6">
@@ -276,11 +488,17 @@ export function AyudaDetailClient({ id, canManage }: Props) {
           </Card>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle>Beneficiaries</CardTitle>
+              {canAddBeneficiary && (
+                <AddBeneficiaryDialog programId={record.id} />
+              )}
             </CardHeader>
             <CardContent>
-              <BeneficiariesTable programId={record.id} />
+              <BeneficiariesTable
+                programId={record.id}
+                canManage={canManage}
+              />
             </CardContent>
           </Card>
         </div>

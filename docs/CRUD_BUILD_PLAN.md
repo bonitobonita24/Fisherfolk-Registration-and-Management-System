@@ -55,9 +55,12 @@
   button on the ayuda list. Publish (DRAFT→ACTIVE) button + Close Program dialog
   (ACTIVE→COMPLETED/CANCELLED) on the program detail header, gated by `canManage`. Follows the
   violations create-form + lift-action pattern. tsc clean.
-- [ ] **T3b-2** Ayuda beneficiary actions: Add Beneficiary dialog (`addBeneficiary`, fisherfolk
-  picker) + Verify Beneficiary action (`verifyBeneficiary` RECEIVED/CANCELLED) on the beneficiaries
-  table in the program detail. Gated super_admin/admin; only when program is ACTIVE.
+- [x] **T3b-2** Ayuda beneficiary actions (2026-06-28): Add Beneficiary dialog (`addBeneficiary`,
+  fisherfolk searchable picker reusing the violations create-form pattern) gated `canManage` AND
+  program.status === "ACTIVE" — header button on the Beneficiaries card. Per-row Verify action
+  (DropdownMenu → RECEIVED/CANCELLED via `verifyBeneficiary`) shown only for PENDING rows when
+  `canManage`; threaded `canManage` down into BeneficiariesTable. Both invalidate listBeneficiaries
+  + getProgramById on success. tsc clean.
 - [ ] **T3c** Kanban: Create Task dialog (`kanbanTask.create`) + Edit/Move (`kanbanTask.update`) —
   status change via a per-card menu (drag/drop optional, not required for demo).
 
