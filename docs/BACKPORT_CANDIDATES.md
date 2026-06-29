@@ -112,3 +112,35 @@
   by PRODUCT.md's L1–L6 security layer description. No product-level back-port.
 </content>
 </invoke>
+
+---
+
+## NEW — feature shipped after this file was generated (custom-domain masking, 2026-06-29)
+
+### F. Custom-domain "masking" — tenants may use their own domain
+- **Decision (locked):** DECISIONS_LOG "Custom-domain 'masking' — per-tenant own-domain support
+  (2026-06-29)". A tenant serves the app from THEIR OWN domain while the shared codebase keeps
+  serving the existing `/[tenant]/...` subdirectory routes; the browser shows the tenant's domain
+  (internal `NextResponse.rewrite`, no iframes). **Data isolation is unchanged** — tenant is still
+  derived from the authenticated session, never the host/URL.
+- **Shipped (live on main):** `Tenant.customDomain` + `Tenant.domainVerifiedAt`
+  (migration `20260629140000_tenant_custom_domain`); tested resolver `lib/tenant-routing.ts`;
+  middleware wiring reading `TENANT_CUSTOM_DOMAINS` (inert while empty); `docs/MULTITENANCY.md`.
+- **PRODUCT.md drift:** the **Tenancy Model** (line 396) and **Domain / Base URL Expectations**
+  (line 456) sections describe ONLY subdirectory routing on `frms.powerbyteitsolutions.app/<slug>`;
+  custom per-tenant domains are not mentioned.
+- **Proposed back-port text:**
+  - Under **## Tenancy Model**, add a line:
+    > Custom domains (optional, per tenant): a tenant may point their own domain (CNAME) at the app
+    > and have it serve their tenant via internal URL rewrite ("domain masking" — browser shows the
+    > tenant's domain; no iframes). The data boundary is still session-derived, so a custom domain
+    > changes only the visible URL, never tenant isolation. Stored as `Tenant.customDomain` +
+    > `Tenant.domainVerifiedAt`; enabled per tenant after DNS + TLS verification.
+  - Under **## Domain / Base URL Expectations**, add:
+    > Per-tenant custom domains: e.g. a tenant LGU may use `fisherfolk.<lgu>.gov.ph` instead of the
+    > `frms.powerbyteitsolutions.app/<slug>` subdirectory URL. Subdirectory routing always remains
+    > valid; the custom domain is additive. See docs/MULTITENANCY.md.
+  - Optionally under **## Data Entities** (Tenant), note the two new fields `customDomain` (unique,
+    nullable) and `domainVerifiedAt`.
+- **Note:** when the first custom domain is onboarded, the CORS-origins line under **## Security
+  Requirements** (line ~448) and any absolute-URL builders should account for the tenant's domain.
