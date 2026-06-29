@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartLegend,
@@ -115,6 +115,7 @@ export function AnalyticsClient() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Registration Trends</CardTitle>
+          <CardDescription>Annual new fisherfolk registrations</CardDescription>
         </CardHeader>
         <CardContent>
           {trendsLoading ? (
@@ -152,6 +153,7 @@ export function AnalyticsClient() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Age Pyramid</CardTitle>
+          <CardDescription>Distribution by age bucket and sex</CardDescription>
         </CardHeader>
         <CardContent>
           {agePyramidLoading ? (
@@ -192,6 +194,7 @@ export function AnalyticsClient() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Voter Eligibility</CardTitle>
+          <CardDescription>COMELEC registration status</CardDescription>
         </CardHeader>
         <CardContent>
           {voterLoading ? (
@@ -233,6 +236,7 @@ export function AnalyticsClient() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Registered by Barangay</CardTitle>
+          <CardDescription>Top 12 barangays by count</CardDescription>
         </CardHeader>
         <CardContent>
           {barangayLoading ? (
@@ -277,6 +281,7 @@ export function AnalyticsClient() {
           <CardTitle className="text-base">
             Senior Citizens by Barangay
           </CardTitle>
+          <CardDescription>Top 15 barangays, age 60+</CardDescription>
         </CardHeader>
         <CardContent>
           {seniorsLoading ? (
@@ -319,6 +324,7 @@ export function AnalyticsClient() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Violation Hotspots</CardTitle>
+          <CardDescription>Top 15 barangays by violations</CardDescription>
         </CardHeader>
         <CardContent>
           {violationsLoading ? (
@@ -361,6 +367,7 @@ export function AnalyticsClient() {
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-base">Category Distribution</CardTitle>
+          <CardDescription>Fisherfolk count per activity category</CardDescription>
         </CardHeader>
         <CardContent>
           {demoLoading ? (

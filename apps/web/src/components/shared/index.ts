@@ -6,3 +6,4 @@ export { FileUpload } from "./file-upload";
 export { BarangayPicker } from "./barangay-picker";
 export { CategoryPicker } from "./category-picker";
 export { EmptyState } from "./empty-state";
+export { StatCard } from "./stat-card";

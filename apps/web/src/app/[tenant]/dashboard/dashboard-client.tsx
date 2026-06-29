@@ -18,6 +18,7 @@ import {
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -36,8 +37,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageOff, FileX2 } from "lucide-react";
+import { ImageOff, FileX2, Users, UserCheck, Ship, AlertTriangle, UserCog, FileClock } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
+import { StatCard } from "@/components/shared";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
@@ -54,36 +56,6 @@ function EmptyState({ message }: { message: string }) {
     <p className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
       {message}
     </p>
-  );
-}
-
-// ── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({
-  title,
-  value,
-  loading,
-}: {
-  title: string;
-  value: number | undefined;
-  loading: boolean;
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <Shimmer className="h-8 w-24" />
-        ) : (
-          <p className="text-3xl font-bold text-foreground">
-            {(value ?? 0).toLocaleString()}
-          </p>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 
@@ -142,13 +114,13 @@ export function DashboardClient() {
 
   // ── KPI section ────────────────────────────────────────────────────────────
   const kpis = [
-    { title: "Total Fisherfolk", value: stats?.totalFisherfolk },
-    { title: "Active Fisherfolk", value: stats?.activeFisherfolk },
-    { title: "Vessels", value: stats?.totalVessels },
-    { title: "Active Violations", value: stats?.activeViolations },
-    { title: "Users", value: stats?.totalUsers },
-    { title: "Pending Edit Requests", value: stats?.pendingEditRequests },
-  ] as const;
+    { title: "Total Fisherfolk", value: stats?.totalFisherfolk, icon: Users },
+    { title: "Active Fisherfolk", value: stats?.activeFisherfolk, icon: UserCheck },
+    { title: "Vessels", value: stats?.totalVessels, icon: Ship },
+    { title: "Active Violations", value: stats?.activeViolations, icon: AlertTriangle },
+    { title: "Users", value: stats?.totalUsers, icon: UserCog },
+    { title: "Pending Edit Requests", value: stats?.pendingEditRequests, icon: FileClock },
+  ];
 
   // ── Derived chart data ───────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
@@ -183,14 +155,18 @@ export function DashboardClient() {
       {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
       <section aria-label="Key metrics">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {kpis.map((kpi) => (
-            <KpiCard
-              key={kpi.title}
-              title={kpi.title}
-              value={kpi.value}
-              loading={statsLoading}
-            />
-          ))}
+          {kpis.map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <StatCard
+                key={kpi.title}
+                icon={<Icon className="size-5" />}
+                value={(kpi.value ?? 0).toLocaleString()}
+                title={kpi.title}
+                loading={statsLoading}
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -202,6 +178,7 @@ export function DashboardClient() {
             <CardTitle className="text-base">
               Fisherfolk Distribution by Barangay
             </CardTitle>
+            <CardDescription>Registered fisherfolk per barangay</CardDescription>
           </CardHeader>
           <CardContent>
             {barangayLoading ? (
@@ -246,6 +223,7 @@ export function DashboardClient() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Gender Distribution</CardTitle>
+            <CardDescription>Breakdown by sex</CardDescription>
           </CardHeader>
           <CardContent>
             {demoLoading ? (
@@ -320,6 +298,7 @@ export function DashboardClient() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Age Group Distribution</CardTitle>
+            <CardDescription>Distribution by age bracket</CardDescription>
           </CardHeader>
           <CardContent>
             {ageLoading ? (
@@ -367,6 +346,7 @@ export function DashboardClient() {
             <CardTitle className="text-base">
               Activity Category Distribution
             </CardTitle>
+            <CardDescription>Fisherfolk per primary activity</CardDescription>
           </CardHeader>
           <CardContent>
             {demoLoading ? (
@@ -420,9 +400,12 @@ export function DashboardClient() {
       {/* ── Activity Category by Barangay (filtered bar) ───────────────────── */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
-          <CardTitle className="text-base">
-            Activity Category by Barangay
-          </CardTitle>
+          <div>
+            <CardTitle className="text-base">
+              Activity Category by Barangay
+            </CardTitle>
+            <CardDescription>Activity mix for the selected barangay</CardDescription>
+          </div>
           <Select value={bgyFilter} onValueChange={setBgyFilter}>
             <SelectTrigger className="w-[200px]" aria-label="Filter by barangay">
               <SelectValue placeholder="All Barangays" />
@@ -483,6 +466,7 @@ export function DashboardClient() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Registration Status</CardTitle>
+            <CardDescription>Records by status</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-x-8 gap-y-0 sm:grid-cols-3 md:grid-cols-5">
@@ -507,50 +491,11 @@ export function DashboardClient() {
           Data Completeness
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Missing Photo */}
-          <Link
-            href={`/${tenantSlug}/fisherfolk?missing=photo`}
-            className="group"
-          >
-            <Card className="cursor-pointer transition-colors hover:border-primary/50">
-              <CardContent className="flex items-center gap-4 pt-5 pb-5">
-                <ImageOff className="h-8 w-8 shrink-0 text-muted-foreground" />
-                <div>
-                  {statsLoading ? (
-                    <Shimmer className="mb-1 h-8 w-20" />
-                  ) : (
-                    <p className="text-3xl font-bold text-foreground">
-                      {(stats?.missingPhoto ?? 0).toLocaleString()}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">Missing Photo</p>
-                </div>
-              </CardContent>
-            </Card>
+          <Link href={`/${tenantSlug}/fisherfolk?missing=photo`}>
+            <StatCard icon={<ImageOff className="size-5" />} value={(stats?.missingPhoto ?? 0).toLocaleString()} title="Missing Photo" loading={statsLoading} className="cursor-pointer transition-colors hover:border-primary/50" />
           </Link>
-
-          {/* Missing Signature */}
-          <Link
-            href={`/${tenantSlug}/fisherfolk?missing=signature`}
-            className="group"
-          >
-            <Card className="cursor-pointer transition-colors hover:border-primary/50">
-              <CardContent className="flex items-center gap-4 pt-5 pb-5">
-                <FileX2 className="h-8 w-8 shrink-0 text-muted-foreground" />
-                <div>
-                  {statsLoading ? (
-                    <Shimmer className="mb-1 h-8 w-20" />
-                  ) : (
-                    <p className="text-3xl font-bold text-foreground">
-                      {(stats?.missingSignature ?? 0).toLocaleString()}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Missing Signature
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <Link href={`/${tenantSlug}/fisherfolk?missing=signature`}>
+            <StatCard icon={<FileX2 className="size-5" />} value={(stats?.missingSignature ?? 0).toLocaleString()} title="Missing Signature" loading={statsLoading} className="cursor-pointer transition-colors hover:border-primary/50" />
           </Link>
         </div>
       </section>
