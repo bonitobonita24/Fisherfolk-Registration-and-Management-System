@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc/client";
 import type { ValidationReport } from "@/lib/import/validate";
+import { Stepper } from "@/components/shared";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type WizardStep = "upload" | "preview" | "done";
@@ -28,6 +29,10 @@ interface CommitResult {
   updated: number;
   batchId: string;
 }
+
+// ── Stepper config ─────────────────────────────────────────────────────────────
+const STEP_LABELS = ["Upload", "Preview", "Done"];
+const STEP_INDEX: Record<"upload" | "preview" | "done", number> = { upload: 0, preview: 1, done: 2 };
 
 // ── Badge variant helpers ──────────────────────────────────────────────────────
 function statusBadgeVariant(
@@ -156,6 +161,8 @@ export function ImportWizard() {
 
   return (
     <div className="space-y-6">
+      <Stepper steps={STEP_LABELS} current={STEP_INDEX[step]} className="mb-2" />
+
       {/* ── Upload step ───────────────────────────────────────────────────── */}
       {step === "upload" && (
         <Card>

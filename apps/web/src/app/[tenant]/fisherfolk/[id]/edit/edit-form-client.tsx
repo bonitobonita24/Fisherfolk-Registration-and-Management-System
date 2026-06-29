@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarangayPicker, CategoryPicker } from "@/components/shared";
+import { BarangayPicker, CategoryPicker, FormActions } from "@/components/shared";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
 import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
@@ -545,7 +545,7 @@ function EditForm({ id, record }: EditFormProps) {
         </Card>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 border-t border-border pt-4">
+        <FormActions>
           <Button type="button" variant="outline" asChild>
             <Link href={`/${tenantSlug}/fisherfolk/${id}`}>Cancel</Link>
           </Button>
@@ -553,7 +553,7 @@ function EditForm({ id, record }: EditFormProps) {
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save changes
           </Button>
-        </div>
+        </FormActions>
       </form>
     </Form>
   );

@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarangayPicker, CategoryPicker } from "@/components/shared";
+import { BarangayPicker, CategoryPicker, FormSection } from "@/components/shared";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
 import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
@@ -343,7 +343,8 @@ interface PersonalStepProps extends StepProps {
 
 function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <FormSection title="Personal Information">
+      <div className="grid gap-4 md:grid-cols-2">
       <FormField
         control={form.control}
         name="idNumber"
@@ -523,13 +524,15 @@ function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
           </FormItem>
         )}
       />
-    </div>
+      </div>
+    </FormSection>
   );
 }
 
 function AddressStep({ form }: StepProps) {
   return (
-    <div className="space-y-4">
+    <FormSection title="Address & Categories">
+      <div className="space-y-4">
       <FormField
         control={form.control}
         name="address"
@@ -584,13 +587,15 @@ function AddressStep({ form }: StepProps) {
           </FormItem>
         )}
       />
-    </div>
+      </div>
+    </FormSection>
   );
 }
 
 function DocumentsStep({ form }: StepProps) {
   return (
-    <div className="space-y-6">
+    <FormSection title="Photo & Signature">
+      <div className="space-y-6">
       <FormField
         control={form.control}
         name="photo"
@@ -631,7 +636,8 @@ function DocumentsStep({ form }: StepProps) {
           </FormItem>
         )}
       />
-    </div>
+      </div>
+    </FormSection>
   );
 }
 
@@ -660,7 +666,8 @@ function ReviewStep({ values, registrationYear }: ReviewStepProps) {
     categoryNames.length > 0 ? categoryNames.join(", ") : "—";
 
   return (
-    <div className="space-y-6">
+    <FormSection title="Review">
+      <div className="space-y-6">
       <section className="rounded-md border border-border bg-muted/30 p-4">
         <p className="text-sm font-medium text-muted-foreground">
           Fisherfolk ID
@@ -706,7 +713,8 @@ function ReviewStep({ values, registrationYear }: ReviewStepProps) {
           ["QR code", "Auto-generated on submit"],
         ]}
       />
-    </div>
+      </div>
+    </FormSection>
   );
 }
 

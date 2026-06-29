@@ -10,8 +10,8 @@ import { Loader2 } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { FormSection, FormActions } from "@/components/shared";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -82,10 +82,7 @@ export function AyudaFormClient() {
         }}
         className="space-y-6"
       >
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Program Details
-          </h2>
+        <FormSection title="Program Details">
           <FormField
             control={form.control}
             name="title"
@@ -123,9 +120,9 @@ export function AyudaFormClient() {
               </FormItem>
             )}
           />
-        </Card>
+        </FormSection>
 
-        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
+        <FormActions>
           <Button type="button" variant="outline" asChild>
             <Link href={`/${tenantSlug}/ayuda`}>Cancel</Link>
           </Button>
@@ -133,7 +130,7 @@ export function AyudaFormClient() {
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Program
           </Button>
-        </div>
+        </FormActions>
       </form>
     </Form>
   );

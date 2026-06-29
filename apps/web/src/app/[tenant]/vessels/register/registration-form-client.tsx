@@ -11,7 +11,6 @@ import { Loader2, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,6 +31,7 @@ import {
 } from "@/components/ui/select";
 
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
+import { FormSection, FormActions } from "@/components/shared";
 
 // All numeric inputs are kept as strings in the form; parsing happens in handleSubmit.
 const formSchema = z.object({
@@ -200,10 +200,7 @@ export function VesselRegistrationFormClient() {
         className="space-y-6"
       >
         {/* Identification */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Identification
-          </h2>
+        <FormSection title="Identification">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -280,13 +277,10 @@ export function VesselRegistrationFormClient() {
               )}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Construction */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Construction
-          </h2>
+        <FormSection title="Construction">
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
@@ -321,13 +315,10 @@ export function VesselRegistrationFormClient() {
               )}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Dimensions & Tonnage */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Dimensions &amp; Tonnage
-          </h2>
+        <FormSection title="Dimensions &amp; Tonnage">
           <div className="grid gap-4 md:grid-cols-3">
             <FormField
               control={form.control}
@@ -425,11 +416,10 @@ export function VesselRegistrationFormClient() {
               )}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Engine */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">Engine</h2>
+        <FormSection title="Engine">
           <div className="grid gap-4 md:grid-cols-3">
             <FormField
               control={form.control}
@@ -477,13 +467,10 @@ export function VesselRegistrationFormClient() {
               )}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Operations */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Operations
-          </h2>
+        <FormSection title="Operations">
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -550,16 +537,10 @@ export function VesselRegistrationFormClient() {
               )}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Vessel Photo */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Vessel Photo{" "}
-            <span className="text-sm font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </h2>
+        <FormSection title="Vessel Photo (optional)">
           <FormField
             control={form.control}
             name="vesselPhoto"
@@ -578,17 +559,10 @@ export function VesselRegistrationFormClient() {
               </FormItem>
             )}
           />
-        </Card>
+        </FormSection>
 
         {/* Linked Owners */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">
-            Linked Owners
-            <span className="ml-2 text-sm font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </h2>
-
+        <FormSection title="Linked Owners (optional)">
           <div className="space-y-3">
             <div>
               <Input
@@ -675,10 +649,10 @@ export function VesselRegistrationFormClient() {
               </div>
             )}
           </div>
-        </Card>
+        </FormSection>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
+        <FormActions>
           <Button type="button" variant="outline" asChild>
             <Link href={`/${tenantSlug}/vessels`}>Cancel</Link>
           </Button>
@@ -686,7 +660,7 @@ export function VesselRegistrationFormClient() {
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Register Vessel
           </Button>
-        </div>
+        </FormActions>
       </form>
     </Form>
   );

@@ -14,8 +14,8 @@ import {
   AttachmentUpload,
   type UploadedAttachment,
 } from "@/components/shared/attachment-upload";
+import { FormSection, FormActions } from "@/components/shared";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -165,8 +165,7 @@ export function ViolationFormClient() {
         className="space-y-6"
       >
         {/* Target */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">Target</h2>
+        <FormSection title="Target">
           <FormField
             control={form.control}
             name="targetType"
@@ -375,11 +374,10 @@ export function ViolationFormClient() {
               )}
             </div>
           )}
-        </Card>
+        </FormSection>
 
         {/* Details */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">Details</h2>
+        <FormSection title="Details">
           <FormField
             control={form.control}
             name="subject"
@@ -430,11 +428,10 @@ export function ViolationFormClient() {
               </FormItem>
             )}
           />
-        </Card>
+        </FormSection>
 
         {/* Evidence */}
-        <Card className="space-y-4 p-6">
-          <h2 className="text-base font-semibold text-foreground">Evidence</h2>
+        <FormSection title="Evidence">
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">
               Evidence — photos or PDF (optional, max 15MB each)
@@ -445,10 +442,10 @@ export function ViolationFormClient() {
               onChange={setAttachments}
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
+        <FormActions>
           <Button type="button" variant="outline" asChild>
             <Link href={`/${tenantSlug}/violations`}>Cancel</Link>
           </Button>
@@ -456,7 +453,7 @@ export function ViolationFormClient() {
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             File Violation
           </Button>
-        </div>
+        </FormActions>
       </form>
     </Form>
   );

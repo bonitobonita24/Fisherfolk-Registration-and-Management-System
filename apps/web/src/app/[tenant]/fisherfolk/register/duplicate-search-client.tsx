@@ -31,6 +31,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
+import { FormSection, FormActions } from "@/components/shared";
 import { RegistrationFormClient } from "./registration-form-client";
 
 const searchSchema = z
@@ -161,17 +162,10 @@ export function DuplicateSearchClient() {
 
   return (
     <div className="space-y-6">
-      <Card className="space-y-6 p-6">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">
-            Check for existing registration
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Search before registering to prevent duplicates. Enter any ID,
-            RSBSA number, or full name to scan active records.
-          </p>
-        </div>
-
+      <FormSection
+        title="Check for existing registration"
+        description="Search before registering to prevent duplicates. Enter any ID, RSBSA number, or full name to scan active records."
+      >
         <Form {...form}>
           <form
             onSubmit={(event) => {
@@ -250,7 +244,7 @@ export function DuplicateSearchClient() {
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-border pt-4">
+            <FormActions>
               <Button type="submit" disabled={isSearching}>
                 {isSearching ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -259,10 +253,10 @@ export function DuplicateSearchClient() {
                 )}
                 Search for duplicates
               </Button>
-            </div>
+            </FormActions>
           </form>
         </Form>
-      </Card>
+      </FormSection>
 
       {outcome != null && (
         <ResultsPanel
