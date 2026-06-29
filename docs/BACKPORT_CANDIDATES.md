@@ -110,14 +110,12 @@
   This is a DECISIONS_LOG / infra-runbook update, **not** a PRODUCT.md change. Surface to owner separately.
 - **platformPrisma / tenant-guard ALS fix:** technical `[HOW]` decisions already in DECISIONS_LOG; covered
   by PRODUCT.md's L1–L6 security layer description. No product-level back-port.
-</content>
-</invoke>
 
 ---
 
 ## NEW — feature shipped after this file was generated (custom-domain masking, 2026-06-29)
 
-### F. Custom-domain "masking" — tenants may use their own domain
+### J. Custom-domain "masking" — tenants may use their own domain
 - **Decision (locked):** DECISIONS_LOG "Custom-domain 'masking' — per-tenant own-domain support
   (2026-06-29)". A tenant serves the app from THEIR OWN domain while the shared codebase keeps
   serving the existing `/[tenant]/...` subdirectory routes; the browser shows the tenant's domain
