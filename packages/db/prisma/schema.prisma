@@ -156,6 +156,13 @@ model Tenant {
   id                      String       @id @default(cuid())
   slug                    String       @unique
   name                    String
+  // Optional vanity/custom domain. A tenant points this domain (CNAME) at our
+  // app; middleware resolves the Host header to this tenant and rewrites the
+  // request internally to /{slug}/... (domain masking — the browser keeps the
+  // custom domain, the existing [tenant] subdirectory routes serve it).
+  // Unique so one domain maps to exactly one tenant. See docs/MULTITENANCY.md.
+  customDomain            String?      @unique @map("custom_domain")
+  domainVerifiedAt        DateTime?    @map("domain_verified_at")
   logoUrl                 String?      @map("logo_url")
   mayorName               String?      @map("mayor_name")
   mayorSignatureUrl       String?      @map("mayor_signature_url")
