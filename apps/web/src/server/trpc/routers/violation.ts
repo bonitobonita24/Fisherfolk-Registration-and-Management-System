@@ -68,7 +68,14 @@ export const violationRouter = createTRPCRouter({
         where: { id: input.id, tenantId: ctx.tenantId },
         include: {
           fisherfolk: {
-            select: { id: true, fullName: true, idNumber: true },
+            select: {
+              id: true,
+              fullName: true,
+              idNumber: true,
+              photo: true,
+              barangay: true,
+              status: true,
+            },
           },
           vessel: {
             select: { id: true, mfvrNumber: true, vesselName: true },

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ImageOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
@@ -87,6 +87,11 @@ export function ViolationDetailClient({ id, canManage }: Props) {
     isError,
     error,
   } = trpc.violation.getById.useQuery({ id });
+
+  const { data: fisherfolkPhotoResp } = trpc.upload.getDownloadUrl.useQuery(
+    { key: record?.fisherfolk?.photo ?? "" },
+    { enabled: !!record?.fisherfolk?.photo },
+  );
 
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
@@ -206,59 +211,56 @@ export function ViolationDetailClient({ id, canManage }: Props) {
         </div>
       </div>
 
-      {/* Violation Details — full-width primary card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Violation Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Subject" value={record.subject} />
-            <Field label="Status" value={record.status} />
-            <Field label="Target Type" value={record.targetType} />
-            <Field label="Filed By" value={record.filedBy?.name} />
-            <Field label="Date Filed" value={formatDate(record.createdAt)} />
-          </div>
-          <Separator />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Details" value={record.details} />
-            <Field label="Notes" value={record.notes} />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Related cards — compact grid */}
+      {/* Top row: Target fisherfolk profile (left) beside Violation Details (right) */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Target */}
-        <Card>
+        {/* Target — fisherfolk profile with picture */}
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Target</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {targetFisherfolk == null && record.violatorName
-                  ? "Violator (unregistered)"
-                  : "Fisherfolk"}
-              </p>
-              {targetFisherfolk ? (
-                <Link
-                  href={`/${params.tenant}/fisherfolk/${targetFisherfolk.id}`}
-                  className="flex items-center justify-between gap-2 hover:underline"
-                >
-                  <span className="text-sm font-medium text-foreground">
-                    {targetFisherfolk.fullName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {targetFisherfolk.idNumber}
-                  </span>
-                </Link>
-              ) : record.violatorName ? (
+            {targetFisherfolk ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  {targetFisherfolk.photo && fisherfolkPhotoResp?.url ? (
+                    <img
+                      src={fisherfolkPhotoResp.url}
+                      alt={`${targetFisherfolk.fullName} photo`}
+                      className="h-20 w-20 shrink-0 rounded-lg border bg-muted object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                      <ImageOff size={20} className="text-muted-foreground" />
+                      <p className="text-[10px] text-muted-foreground">No photo</p>
+                    </div>
+                  )}
+                  <div className="min-w-0 space-y-1">
+                    <Link
+                      href={`/${params.tenant}/fisherfolk/${targetFisherfolk.id}`}
+                      className="block truncate text-sm font-medium text-foreground hover:underline"
+                    >
+                      {targetFisherfolk.fullName}
+                    </Link>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {targetFisherfolk.idNumber}
+                    </p>
+                    <StatusBadge status={targetFisherfolk.status} />
+                  </div>
+                </div>
+                <Separator />
+                <Field label="Barangay" value={targetFisherfolk.barangay} />
+              </div>
+            ) : record.violatorName ? (
+              <div className="space-y-1">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Violator (unregistered)
+                </p>
                 <p className="text-sm text-foreground">{record.violatorName}</p>
-              ) : (
-                <p className="text-sm text-foreground">—</p>
-              )}
-            </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No fisherfolk target.</p>
+            )}
+
             <div className="space-y-1">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Vessel
@@ -282,48 +284,67 @@ export function ViolationDetailClient({ id, canManage }: Props) {
           </CardContent>
         </Card>
 
-        {/* Evidence — spans 2 columns */}
+        {/* Violation Details — beside the target, right side */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Evidence</CardTitle>
+            <CardTitle>Violation Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {record.evidenceImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                {record.evidenceImages.map((key) => (
-                  <EvidenceImage key={key} imageKey={key} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No evidence images.
-              </p>
-            )}
-            <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Attached Files
-              </p>
-              <AttachmentList
-                attachments={record.attachments}
-                emptyText="No evidence files."
-              />
+          <CardContent className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Subject" value={record.subject} />
+              <Field label="Status" value={record.status} />
+              <Field label="Target Type" value={record.targetType} />
+              <Field label="Filed By" value={record.filedBy?.name} />
+              <Field label="Date Filed" value={formatDate(record.createdAt)} />
+            </div>
+            <Separator />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Details" value={record.details} />
+              <Field label="Notes" value={record.notes} />
             </div>
           </CardContent>
         </Card>
-
-        {record.status === "LIFTED" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Resolution</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Lifted By" value={record.liftedBy?.name} />
-              <Field label="Lifted At" value={formatDate(record.liftedAt)} />
-              <Field label="Resolution Notes" value={record.resolutionNotes} />
-            </CardContent>
-          </Card>
-        )}
       </div>
+
+      {/* Evidence — full width at the bottom */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Evidence</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {record.evidenceImages.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {record.evidenceImages.map((key) => (
+                <EvidenceImage key={key} imageKey={key} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No evidence images.</p>
+          )}
+          <div className="space-y-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Attached Files
+            </p>
+            <AttachmentList
+              attachments={record.attachments}
+              emptyText="No evidence files."
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {record.status === "LIFTED" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Resolution</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Field label="Lifted By" value={record.liftedBy?.name} />
+            <Field label="Lifted At" value={formatDate(record.liftedAt)} />
+            <Field label="Resolution Notes" value={record.resolutionNotes} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
