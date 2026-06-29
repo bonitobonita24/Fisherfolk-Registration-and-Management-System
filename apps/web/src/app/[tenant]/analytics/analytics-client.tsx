@@ -49,7 +49,7 @@ const trendsConfig = {
 
 const agePyramidConfig = {
   male: { label: "Male", color: "hsl(var(--chart-1))" },
-  female: { label: "Female", color: "hsl(var(--chart-4))" },
+  female: { label: "Female", color: "hsl(var(--chart-2))" },
 } satisfies ChartConfig;
 
 const voterConfig = {

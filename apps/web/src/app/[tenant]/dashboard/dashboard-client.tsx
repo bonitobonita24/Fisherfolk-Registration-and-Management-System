@@ -80,7 +80,7 @@ const ageConfig = {
 const genderConfig = {
   value: { label: "Count" },
   Male: { label: "Male", color: "hsl(var(--chart-1))" },
-  Female: { label: "Female", color: "hsl(var(--chart-4))" },
+  Female: { label: "Female", color: "hsl(var(--chart-2))" },
   Unspecified: { label: "Unspecified", color: "hsl(var(--chart-3))" },
 } satisfies ChartConfig;
 
