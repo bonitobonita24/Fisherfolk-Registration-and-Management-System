@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { auth } from "@/server/auth/edge";
+import {
+  buildContentSecurityPolicy,
+  storageOriginFromEnv,
+} from "@/lib/security-headers";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
 
@@ -8,7 +12,15 @@ function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 }
 
-export default auth((req: NextRequest & { auth: unknown }) => {
+function withCsp(res: NextResponse): NextResponse {
+  res.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy(storageOriginFromEnv()),
+  );
+  return res;
+}
+
+function route(req: NextRequest & { auth: unknown }): NextResponse {
   const { pathname } = req.nextUrl;
   const session = req.auth as {
     user?: {
@@ -63,6 +75,10 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   }
 
   return NextResponse.redirect(new URL("/login", req.url));
+}
+
+export default auth((req: NextRequest & { auth: unknown }) => {
+  return withCsp(route(req));
 });
 
 export const config = {

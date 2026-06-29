@@ -1,18 +1,10 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-// Object-storage origin (MinIO/S3) that serves presigned photo/signature URLs.
-// Derived from STORAGE_ENDPOINT so CSP allows images in dev (localhost:port) and prod alike.
-const storageOrigin = (() => {
-  const endpoint = process.env["STORAGE_ENDPOINT"];
-  if (!endpoint) return "";
-  try {
-    return new URL(endpoint).origin;
-  } catch {
-    return "";
-  }
-})();
-
+// NOTE: Content-Security-Policy is intentionally NOT set here. Next.js bakes
+// `headers()` at BUILD time, but the CSP `img-src` needs the object-storage
+// origin (MinIO/S3) which is only known at RUNTIME. The CSP is applied at
+// runtime in `src/middleware.ts`. These remaining headers are env-independent.
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -26,19 +18,6 @@ const securityHeaders = [
   },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
-  {
-    key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
-      "style-src 'self' 'unsafe-inline'",
-      ["img-src 'self' data: blob:", storageOrigin].filter(Boolean).join(" "),
-      "font-src 'self'",
-      "connect-src 'self'",
-      "frame-src 'self' https://challenges.cloudflare.com",
-      "frame-ancestors 'none'",
-    ].join("; "),
-  },
 ];
 
 const nextConfig: NextConfig = {
