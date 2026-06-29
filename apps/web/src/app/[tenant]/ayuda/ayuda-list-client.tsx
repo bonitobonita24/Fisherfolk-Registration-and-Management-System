@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, HandHeart } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
+import { EmptyState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -72,6 +73,13 @@ export function AyudaListClient() {
         data={data?.items ?? []}
         pageSize={limit}
         showPagination={false}
+        emptyState={
+          <EmptyState
+            icon={HandHeart}
+            title="No ayuda programs found"
+            description="Try adjusting your search or filters."
+          />
+        }
       />
 
       <div className="flex items-center justify-between px-2">

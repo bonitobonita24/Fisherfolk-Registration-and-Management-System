@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ClipboardList } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
+import { EmptyState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -67,6 +68,13 @@ export function EditRequestsListClient() {
         data={data?.items ?? []}
         pageSize={limit}
         showPagination={false}
+        emptyState={
+          <EmptyState
+            icon={ClipboardList}
+            title="No edit requests"
+            description="Change requests will appear here for review."
+          />
+        }
       />
 
       <div className="flex items-center justify-between px-2">

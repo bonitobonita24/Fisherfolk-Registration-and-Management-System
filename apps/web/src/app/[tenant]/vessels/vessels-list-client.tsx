@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Plus, Ship, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
+import { EmptyState } from "@/components/shared";
 import { SearchInput } from "@/components/shared/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,6 +94,13 @@ export function VesselsListClient() {
         data={data?.items ?? []}
         pageSize={limit}
         showPagination={false}
+        emptyState={
+          <EmptyState
+            icon={Ship}
+            title="No vessels found"
+            description="Try adjusting your search or filters."
+          />
+        }
       />
 
       <div className="flex items-center justify-between px-2">

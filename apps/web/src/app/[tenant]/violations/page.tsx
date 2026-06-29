@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 
 import { auth } from "@/server/auth";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/shared";
 import { ViolationsListClient } from "./violations-list-client";
 
 interface ViolationsPageProps {
@@ -17,22 +18,20 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Violations</h1>
-          <p className="text-muted-foreground">
-            Track and manage fishery violations, penalties, and resolutions.
-          </p>
-        </div>
-        {canManage && (
-          <Button asChild>
-            <Link href={`/${tenant}/violations/file`}>
-              <Plus className="mr-2 h-4 w-4" />
-              File Violation
-            </Link>
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Violations"
+        description="Track and manage fishery violations, penalties, and resolutions."
+        action={
+          canManage && (
+            <Button asChild>
+              <Link href={`/${tenant}/violations/file`}>
+                <Plus className="mr-2 h-4 w-4" />
+                File Violation
+              </Link>
+            </Button>
+          )
+        }
+      />
       <ViolationsListClient />
     </div>
   );

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
-import { SearchInput } from "@/components/shared/search-input";
+import { EmptyState, SearchInput } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -86,6 +86,13 @@ export function ViolationsListClient() {
         data={data?.items ?? []}
         pageSize={limit}
         showPagination={false}
+        emptyState={
+          <EmptyState
+            icon={AlertTriangle}
+            title="No violations found"
+            description="Try adjusting your search or filters."
+          />
+        }
       />
 
       <div className="flex items-center justify-between px-2">
