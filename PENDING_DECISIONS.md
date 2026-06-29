@@ -13,7 +13,7 @@ conductor's to decide and never lands here.
   drafted the proposed PRODUCT.md text (Tenancy Model + Domain sections) in
   `docs/BACKPORT_CANDIDATES.md` **candidate J** and logged the decision in
   `docs/DECISIONS_LOG.md`. PRODUCT.md is human-owned (Rule 1) → **owner reviews
-  candidate F and applies / defers / logs spec-divergent.** Only the human edit to
+  candidate J and applies / defers / logs spec-divergent.** Only the human edit to
   PRODUCT.md remains. Ref: docs/MULTITENANCY.md, [[project_tenant_isolation_custom_domains]].
 
 ## Resolved
