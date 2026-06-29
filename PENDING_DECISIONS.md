@@ -8,18 +8,24 @@ conductor's to decide and never lands here.
 
 > Owner directed these to the NEXT session reboot loop (2026-06-29).
 
-- [ ] **PRODUCT.md back-port — custom-domain support.** Custom-domain "masking" is a
-  new [WHAT] the owner approved this session. PRODUCT.md is human-owned (Rule 1), but
-  owner asked the loop to handle it next session → draft the PRODUCT.md section +
-  DECISIONS_LOG entry for owner review. Ref: docs/MULTITENANCY.md,
-  [[project_tenant_isolation_custom_domains]].
-- [ ] **Live middleware wiring for custom-domain masking.** Foundation shipped
-  (schema + tested `resolveTenantRoute` + docs). Wire `apps/web/src/middleware.ts`
-  per docs/MULTITENANCY.md §Activation (inert with empty `TENANT_CUSTOM_DOMAINS`,
-  so safe to land). Deferred from this session to keep the now-green auth middleware
-  stable; pick up next loop. Verify per the doc's checklist.
+- [ ] **PRODUCT.md back-port — custom-domain support (DRAFTED — owner to apply).**
+  Custom-domain "masking" is a new [WHAT] the owner approved 2026-06-29. The loop
+  drafted the proposed PRODUCT.md text (Tenancy Model + Domain sections) in
+  `docs/BACKPORT_CANDIDATES.md` **candidate F** and logged the decision in
+  `docs/DECISIONS_LOG.md`. PRODUCT.md is human-owned (Rule 1) → **owner reviews
+  candidate F and applies / defers / logs spec-divergent.** Only the human edit to
+  PRODUCT.md remains. Ref: docs/MULTITENANCY.md, [[project_tenant_isolation_custom_domains]].
 
 ## Resolved
+
+- [x] 2026-06-29 — **Live middleware wiring for custom-domain masking** → DONE.
+  `apps/web/src/middleware.ts` now wires `resolveTenantRoute` + `parseCustomDomainMap`
+  per docs/MULTITENANCY.md §Activation: parses `TENANT_CUSTOM_DOMAINS` once per runtime
+  and rewrites a matching Host to `/<slug>/...` before auth. **Inert** while the env var
+  is empty (resolver returns rewriteTo=null) — zero behaviour change, data boundary
+  unchanged. Verified: tsc + lint clean, 159 tests, build OK. Merged to main `3ca67bf`,
+  pushed. First real activation must still run the MULTITENANCY.md §Verify checklist
+  against a live domain.
 
 - [x] 2026-06-29 — **Merge / push the UI rehab branch** → owner **loosened the HARD HOLD**:
   "I don't have any staging nor production yet deployed so it's safe to push to main."
