@@ -2,86 +2,83 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  Users,
-  Ship,
-  AlertTriangle,
-  FileEdit,
-  KanbanSquare,
-  FileText,
-  BarChart3,
-  Upload,
-  CreditCard,
-  Map,
-  Bell,
-  Settings,
-  UserCog,
-  ScrollText,
-  HandHeart,
-} from "lucide-react";
+import { NAV_GROUPS } from "@/components/nav-items";
+import { Ship } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarProps {
   tenantSlug: string;
   role: string;
+  onNavigate?: () => void;
 }
 
-const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", roles: ["super_admin", "admin", "encoder", "viewer"] },
-  { label: "Fisherfolk", icon: Users, href: "/fisherfolk", roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"] },
-  { label: "Vessels", icon: Ship, href: "/vessels", roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"] },
-  { label: "Violations", icon: AlertTriangle, href: "/violations", roles: ["super_admin", "admin", "bantay_dagat"] },
-  { label: "Edit Requests", icon: FileEdit, href: "/edit-requests", roles: ["super_admin", "admin", "encoder"] },
-  { label: "Kanban", icon: KanbanSquare, href: "/kanban", roles: ["super_admin", "admin", "encoder"] },
-  { label: "Reports", icon: FileText, href: "/reports", roles: ["super_admin", "admin", "viewer"] },
-  { label: "Analytics", icon: BarChart3, href: "/analytics", roles: ["super_admin", "admin"] },
-  { label: "Data Import", icon: Upload, href: "/import", roles: ["super_admin", "admin"] },
-  { label: "ID Generator", icon: CreditCard, href: "/id-generator", roles: ["super_admin", "admin", "encoder"] },
-  { label: "Map", icon: Map, href: "/map", roles: ["super_admin", "admin", "viewer"] },
-  { label: "Ayuda", icon: HandHeart, href: "/ayuda", roles: ["super_admin", "admin"] },
-  { label: "Notifications", icon: Bell, href: "/notifications", roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"] },
-  { label: "Audit Log", icon: ScrollText, href: "/audit-log", roles: ["super_admin", "admin"] },
-  { label: "User Management", icon: UserCog, href: "/user-management", roles: ["super_admin", "admin"] },
-  { label: "Settings", icon: Settings, href: "/settings", roles: ["super_admin", "admin"] },
-];
-
-export function Sidebar({ tenantSlug, role }: SidebarProps) {
+export function Sidebar({ tenantSlug, role, onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
-  const filteredItems = NAV_ITEMS.filter((item) =>
-    item.roles.includes(role),
-  );
-
   return (
-    <aside className="flex h-full w-60 flex-col border-r border-border bg-card">
-      <div className="flex h-14 items-center border-b border-border px-4">
-        <Link href={`/${tenantSlug}/dashboard`} className="text-lg font-bold text-foreground">
-          FRMS
+    <aside className="flex h-full w-full flex-col bg-card">
+      {/* Logo block */}
+      <div className="flex h-14 items-center gap-2 border-b border-border px-4">
+        <Link
+          href={`/${tenantSlug}/dashboard`}
+          className="flex items-center gap-2"
+          onClick={() => onNavigate?.()}
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Ship className="h-4 w-4" />
+          </span>
+          <span className="flex flex-col leading-none">
+            <span className="text-sm font-bold text-foreground">FRMS</span>
+            <span className="text-[10px] text-muted-foreground">Fisherfolk MS</span>
+          </span>
         </Link>
       </div>
-      <nav className="flex-1 overflow-y-auto p-2">
-        <ul className="space-y-1">
-          {filteredItems.map((item) => {
-            const fullHref = `/${tenantSlug}${item.href}`;
-            const isActive = pathname.startsWith(fullHref);
+
+      {/* Scrollable nav */}
+      <ScrollArea className="flex-1">
+        <nav className="p-2">
+          {NAV_GROUPS.map((group) => {
+            const items = group.items.filter((i) => i.roles.includes(role));
+            if (items.length === 0) return null;
+
             return (
-              <li key={item.href}>
-                <Link
-                  href={fullHref}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  {item.label}
-                </Link>
-              </li>
+              <div key={group.label}>
+                <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </p>
+                <ul className="space-y-1">
+                  {items.map((item) => {
+                    const fullHref = `/${tenantSlug}${item.href}`;
+                    const isActive = pathname.startsWith(fullHref);
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={fullHref}
+                          onClick={() => onNavigate?.()}
+                          className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                            isActive
+                              ? "bg-primary/10 font-medium text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary"
+                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             );
           })}
-        </ul>
-      </nav>
+        </nav>
+      </ScrollArea>
+
+      {/* Footer */}
+      <div className="mt-auto border-t border-border p-3 text-[10px] text-muted-foreground">
+        FRMS · {tenantSlug}
+      </div>
     </aside>
   );
 }

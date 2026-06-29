@@ -2,8 +2,7 @@ import type React from "react";
 import { redirect } from "next/navigation";
 import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
-import { Sidebar } from "@/components/sidebar";
-import { Header } from "@/components/header";
+import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { hexToHslTriplet, readableForeground } from "@/lib/theme/color";
 
@@ -45,14 +44,10 @@ export default async function TenantLayout({
     : undefined;
 
   return (
-    <div id="tenant-theme-root" className="flex h-screen overflow-hidden" style={themeVars}>
-      <Sidebar tenantSlug={tenant} role={role} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header userName={name ?? "User"} role={role} />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          {children}
-        </main>
-      </div>
+    <div id="tenant-theme-root" className="h-screen overflow-hidden" style={themeVars}>
+      <AppShell tenantSlug={tenant} role={role} userName={name ?? "User"}>
+        {children}
+      </AppShell>
       <Toaster />
     </div>
   );
