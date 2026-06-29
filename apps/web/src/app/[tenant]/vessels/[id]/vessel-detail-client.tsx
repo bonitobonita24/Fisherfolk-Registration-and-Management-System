@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ImageOff } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
@@ -127,227 +127,223 @@ export function VesselDetailClient({ id }: Props) {
         <StatusBadge status={record.status} />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Main detail cards */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Identification */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Identification</CardTitle>
-            </CardHeader>
-            <CardContent>
+      {/* Identification — media on the left (compact), fields on the right */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Identification</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-6 sm:flex-row">
+            {/* Media column — photo / QR, compact */}
+            <div className="grid shrink-0 grid-cols-2 gap-3 sm:flex sm:w-40 sm:flex-col">
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Photo
+                </p>
+                {record.vesselPhoto && photoUrlResp?.url ? (
+                  <img
+                    src={photoUrlResp.url}
+                    alt={`${displayName} photo`}
+                    className="aspect-square w-full rounded-lg border bg-muted object-cover"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                    <ImageOff size={20} className="text-muted-foreground" />
+                    <p className="text-[10px] text-muted-foreground">No photo</p>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                  QR Code
+                </p>
+                {qrDataUrl ? (
+                  <img
+                    src={qrDataUrl}
+                    alt={`${record.mfvrNumber} QR code`}
+                    className="aspect-square w-full rounded-lg border bg-white p-1.5"
+                  />
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
+                    <p className="text-[10px] text-muted-foreground">
+                      {record.qrCode ? "…" : "No QR"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Fields */}
+            <div className="min-w-0 flex-1">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <Field label="MFVR Number" value={record.mfvrNumber} />
                 <Field label="Vessel Name" value={record.vesselName} />
                 <Field label="Vessel Type" value={record.vesselType} />
                 <Field label="Status" value={record.status} />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Linked Owners */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Linked Owners</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.owners.length > 0 ? (
-                <ul className="divide-y">
-                  {record.owners.map((owner) => (
-                    <li key={owner.id} className="py-2 first:pt-0 last:pb-0">
-                      <Link
-                        href={`/${params.tenant}/fisherfolk/${owner.id}`}
-                        className="flex items-center justify-between gap-2 hover:underline"
-                      >
-                        <span className="text-sm font-medium text-foreground">
-                          {owner.fullName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {owner.idNumber}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No linked owners.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Spec cards — 2-up grid */}
-          <div className="grid gap-6 sm:grid-cols-2">
-            {/* Construction */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Construction</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field label="Hull Material" value={record.hullMaterial} />
-                  <Field label="Place Built" value={record.placeBuilt} />
-                  <Field label="Year Built" value={formatNumber(record.yearBuilt)} />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Dimensions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Dimensions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <Field
-                    label="Registered Length"
-                    value={formatNumber(record.registeredLength)}
-                  />
-                  <Field
-                    label="Registered Breadth"
-                    value={formatNumber(record.registeredBreadth)}
-                  />
-                  <Field
-                    label="Registered Depth"
-                    value={formatNumber(record.registeredDepth)}
-                  />
-                  <Field
-                    label="Gross Tonnage"
-                    value={formatNumber(record.grossTonnage)}
-                  />
-                  <Field
-                    label="Net Tonnage"
-                    value={formatNumber(record.netTonnage)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Engine */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Engine</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Field label="Engine Make" value={record.engineMake} />
-                  <Field
-                    label="Engine Serial Number"
-                    value={record.engineSerialNumber}
-                  />
-                  <Field
-                    label="Horsepower"
-                    value={formatNumber(record.horsepower)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Operations */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Operations</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Field label="Homeport" value={record.homeport} />
-                <Separator />
-                <div className="space-y-1">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Fishing Gear Classification
-                  </p>
-                  {record.fishingGearClassification.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {record.fishingGearClassification.map((gear) => (
-                        <Badge key={gear} variant="secondary">
-                          {gear}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-foreground">—</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Active Violations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Violations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.violations.length > 0 ? (
-                <ul className="divide-y">
-                  {record.violations.map((v) => (
-                    <li
-                      key={v.id}
-                      className="flex items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
+      {/* Related records — compact grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Linked Owners */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Linked Owners</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {record.owners.length > 0 ? (
+              <ul className="divide-y">
+                {record.owners.map((owner) => (
+                  <li key={owner.id} className="py-2 first:pt-0 last:pb-0">
+                    <Link
+                      href={`/${params.tenant}/fisherfolk/${owner.id}`}
+                      className="flex items-center justify-between gap-2 hover:underline"
                     >
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-medium text-foreground">
-                          {v.subject}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatDate(v.createdAt)}
-                        </p>
-                      </div>
-                      <Badge variant="outline">{v.status}</Badge>
-                    </li>
+                      <span className="text-sm font-medium text-foreground">
+                        {owner.fullName}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {owner.idNumber}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No linked owners.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Construction */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Construction</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Field label="Hull Material" value={record.hullMaterial} />
+              <Field label="Place Built" value={record.placeBuilt} />
+              <Field label="Year Built" value={formatNumber(record.yearBuilt)} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Dimensions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Dimensions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Field
+                label="Registered Length"
+                value={formatNumber(record.registeredLength)}
+              />
+              <Field
+                label="Registered Breadth"
+                value={formatNumber(record.registeredBreadth)}
+              />
+              <Field
+                label="Registered Depth"
+                value={formatNumber(record.registeredDepth)}
+              />
+              <Field
+                label="Gross Tonnage"
+                value={formatNumber(record.grossTonnage)}
+              />
+              <Field
+                label="Net Tonnage"
+                value={formatNumber(record.netTonnage)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Engine */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Engine</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Field label="Engine Make" value={record.engineMake} />
+              <Field
+                label="Engine Serial Number"
+                value={record.engineSerialNumber}
+              />
+              <Field
+                label="Horsepower"
+                value={formatNumber(record.horsepower)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Operations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Operations</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Field label="Homeport" value={record.homeport} />
+            <Separator />
+            <div className="space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Fishing Gear Classification
+              </p>
+              {record.fishingGearClassification.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {record.fishingGearClassification.map((gear) => (
+                    <Badge key={gear} variant="secondary">
+                      {gear}
+                    </Badge>
                   ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No active violations.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar: photo + QR */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Photo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.vesselPhoto && photoUrlResp?.url ? (
-                <img
-                  src={photoUrlResp.url}
-                  alt={`${displayName} photo`}
-                  className="aspect-[1/1] max-w-[200px] rounded-md border bg-muted object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[1/1] max-w-[200px] items-center justify-center rounded-md border bg-muted">
-                  <p className="text-xs text-muted-foreground">No photo</p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>QR Code</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {qrDataUrl ? (
-                <img
-                  src={qrDataUrl}
-                  alt={`${record.mfvrNumber} QR code`}
-                  className="mx-auto h-48 w-48 rounded-md border bg-white p-2"
-                />
               ) : (
-                <div className="mx-auto flex h-48 w-48 items-center justify-center rounded-md border bg-muted">
-                  <p className="text-xs text-muted-foreground">
-                    {record.qrCode ? "Rendering…" : "No QR code"}
-                  </p>
-                </div>
+                <p className="text-sm text-foreground">—</p>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Active Violations */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Violations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {record.violations.length > 0 ? (
+              <ul className="divide-y">
+                {record.violations.map((v) => (
+                  <li
+                    key={v.id}
+                    className="flex items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
+                  >
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-foreground">
+                        {v.subject}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDate(v.createdAt)}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{v.status}</Badge>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No active violations.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

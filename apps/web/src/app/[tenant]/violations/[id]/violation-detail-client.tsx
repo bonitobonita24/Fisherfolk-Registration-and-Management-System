@@ -206,134 +206,123 @@ export function ViolationDetailClient({ id, canManage }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          {/* Target */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Target</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Target Type" value={record.targetType} />
-              <Separator />
-              <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {targetFisherfolk == null && record.violatorName
-                    ? "Violator (unregistered)"
-                    : "Fisherfolk"}
-                </p>
-                {targetFisherfolk ? (
-                  <Link
-                    href={`/${params.tenant}/fisherfolk/${targetFisherfolk.id}`}
-                    className="flex items-center justify-between gap-2 hover:underline"
-                  >
-                    <span className="text-sm font-medium text-foreground">
-                      {targetFisherfolk.fullName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {targetFisherfolk.idNumber}
-                    </span>
-                  </Link>
-                ) : record.violatorName ? (
-                  <p className="text-sm text-foreground">{record.violatorName}</p>
-                ) : (
-                  <p className="text-sm text-foreground">—</p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Vessel
-                </p>
-                {targetVessel ? (
-                  <Link
-                    href={`/${params.tenant}/vessels/${targetVessel.id}`}
-                    className="flex items-center justify-between gap-2 hover:underline"
-                  >
-                    <span className="text-sm font-medium text-foreground">
-                      {targetVessel.vesselName ?? targetVessel.mfvrNumber}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {targetVessel.mfvrNumber}
-                    </span>
-                  </Link>
-                ) : (
-                  <p className="text-sm text-foreground">—</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Violation Details — full-width primary card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Violation Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field label="Subject" value={record.subject} />
+            <Field label="Status" value={record.status} />
+            <Field label="Target Type" value={record.targetType} />
+            <Field label="Filed By" value={record.filedBy?.name} />
+            <Field label="Date Filed" value={formatDate(record.createdAt)} />
+          </div>
+          <Separator />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Details" value={record.details} />
+            <Field label="Notes" value={record.notes} />
+          </div>
+        </CardContent>
+      </Card>
 
-          {/* Details */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Violation Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Subject" value={record.subject} />
-              <Field label="Details" value={record.details} />
-              <Field label="Notes" value={record.notes} />
-            </CardContent>
-          </Card>
-
-          {/* Evidence */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Evidence</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {record.evidenceImages.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  {record.evidenceImages.map((key) => (
-                    <EvidenceImage key={key} imageKey={key} />
-                  ))}
-                </div>
+      {/* Related cards — compact grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Target */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Target</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {targetFisherfolk == null && record.violatorName
+                  ? "Violator (unregistered)"
+                  : "Fisherfolk"}
+              </p>
+              {targetFisherfolk ? (
+                <Link
+                  href={`/${params.tenant}/fisherfolk/${targetFisherfolk.id}`}
+                  className="flex items-center justify-between gap-2 hover:underline"
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {targetFisherfolk.fullName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {targetFisherfolk.idNumber}
+                  </span>
+                </Link>
+              ) : record.violatorName ? (
+                <p className="text-sm text-foreground">{record.violatorName}</p>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  No evidence images.
-                </p>
+                <p className="text-sm text-foreground">—</p>
               )}
-              <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Attached Files
-                </p>
-                <AttachmentList
-                  attachments={record.attachments}
-                  emptyText="No evidence files."
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Vessel
+              </p>
+              {targetVessel ? (
+                <Link
+                  href={`/${params.tenant}/vessels/${targetVessel.id}`}
+                  className="flex items-center justify-between gap-2 hover:underline"
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {targetVessel.vesselName ?? targetVessel.mfvrNumber}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {targetVessel.mfvrNumber}
+                  </span>
+                </Link>
+              ) : (
+                <p className="text-sm text-foreground">—</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
+        {/* Evidence — spans 2 columns */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Evidence</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {record.evidenceImages.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {record.evidenceImages.map((key) => (
+                  <EvidenceImage key={key} imageKey={key} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No evidence images.
+              </p>
+            )}
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Attached Files
+              </p>
+              <AttachmentList
+                attachments={record.attachments}
+                emptyText="No evidence files."
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {record.status === "LIFTED" && (
           <Card>
             <CardHeader>
-              <CardTitle>Filing</CardTitle>
+              <CardTitle>Resolution</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Status" value={record.status} />
-              <Field label="Filed By" value={record.filedBy?.name} />
-              <Field label="Date Filed" value={formatDate(record.createdAt)} />
+              <Field label="Lifted By" value={record.liftedBy?.name} />
+              <Field label="Lifted At" value={formatDate(record.liftedAt)} />
+              <Field label="Resolution Notes" value={record.resolutionNotes} />
             </CardContent>
           </Card>
-
-          {record.status === "LIFTED" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Resolution</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Field label="Lifted By" value={record.liftedBy?.name} />
-                <Field label="Lifted At" value={formatDate(record.liftedAt)} />
-                <Field
-                  label="Resolution Notes"
-                  value={record.resolutionNotes}
-                />
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

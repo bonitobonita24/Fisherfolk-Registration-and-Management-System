@@ -504,89 +504,78 @@ export function AyudaDetailClient({ id, canManage }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Program Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Title" value={record.title} />
-              <Field label="Description" value={record.description} />
-            </CardContent>
-          </Card>
+      {/* Program Details — full-width primary card (absorbs Summary) */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Program Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field label="Title" value={record.title} />
+            <Field label="Status" value={record.status} />
+            <Field
+              label="Beneficiaries"
+              value={record.beneficiaryCount.toLocaleString()}
+            />
+            <Field label="Created By" value={record.createdBy?.name} />
+            <Field label="Date Created" value={formatDate(record.createdAt)} />
+          </div>
+          <div>
+            <Field label="Description" value={record.description} />
+          </div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Program Files</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <AttachmentList
-                attachments={(record.uploads ?? []).map((u) => ({
-                  id: u.id,
-                  filePath: u.filePath,
-                  originalFilename: u.originalFilename,
-                  mimeType: u.mimeType ?? "",
-                }))}
-                emptyText="No files uploaded."
-                {...(canManage ? { onRemove: handleRemove } : {})}
-              />
-              {canManage && (
-                <div className="space-y-3 border-t pt-4">
-                  <AttachmentUpload
-                    entityType="ayuda-upload"
-                    value={pending}
-                    onChange={setPending}
-                  />
-                  <Button
-                    size="sm"
-                    disabled={pending.length === 0 || addUploads.isPending}
-                    onClick={() =>
-                      addUploads.mutate({ programId: id, files: pending })
-                    }
-                  >
-                    {addUploads.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Save Files
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      {/* Files + Beneficiaries — responsive grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Program Files</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <AttachmentList
+              attachments={(record.uploads ?? []).map((u) => ({
+                id: u.id,
+                filePath: u.filePath,
+                originalFilename: u.originalFilename,
+                mimeType: u.mimeType ?? "",
+              }))}
+              emptyText="No files uploaded."
+              {...(canManage ? { onRemove: handleRemove } : {})}
+            />
+            {canManage && (
+              <div className="space-y-3 border-t pt-4">
+                <AttachmentUpload
+                  entityType="ayuda-upload"
+                  value={pending}
+                  onChange={setPending}
+                />
+                <Button
+                  size="sm"
+                  disabled={pending.length === 0 || addUploads.isPending}
+                  onClick={() =>
+                    addUploads.mutate({ programId: id, files: pending })
+                  }
+                >
+                  {addUploads.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save Files
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
-              <CardTitle>Beneficiaries</CardTitle>
-              {canAddBeneficiary && (
-                <AddBeneficiaryDialog programId={record.id} />
-              )}
-            </CardHeader>
-            <CardContent>
-              <BeneficiariesTable
-                programId={record.id}
-                canManage={canManage}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Field label="Status" value={record.status} />
-              <Field
-                label="Beneficiaries"
-                value={record.beneficiaryCount.toLocaleString()}
-              />
-              <Field label="Created By" value={record.createdBy?.name} />
-              <Field label="Date Created" value={formatDate(record.createdAt)} />
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle>Beneficiaries</CardTitle>
+            {canAddBeneficiary && <AddBeneficiaryDialog programId={record.id} />}
+          </CardHeader>
+          <CardContent>
+            <BeneficiariesTable programId={record.id} canManage={canManage} />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
