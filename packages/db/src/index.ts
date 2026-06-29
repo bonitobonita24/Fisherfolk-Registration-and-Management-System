@@ -6,6 +6,9 @@ export {
   tenantGuardExtension,
   getCurrentTenantId,
   runWithTenant,
+  isSystemModel,
+  assertTenantContext,
+  scopeArgsToTenant,
 } from "./middleware/tenant-guard";
 export { withTenant } from "./rls";
 export * from "@prisma/client";
