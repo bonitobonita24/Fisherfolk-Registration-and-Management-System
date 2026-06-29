@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { adminProcedure, createTRPCRouter } from "../trpc";
 
-export const DEFAULT_PRIMARY_COLOR = "#0E7C86";
+export const DEFAULT_PRIMARY_COLOR = "#F97316";
 export const DEFAULT_SECONDARY_COLOR = "#1E3A5F";
 
 export const settingsRouter = createTRPCRouter({

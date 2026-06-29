@@ -11,7 +11,7 @@ import { trpc } from "@/lib/trpc/client";
 import { hexToHslTriplet, readableForeground } from "@/lib/theme/color";
 
 // Keep in sync with the settings router defaults
-const DEFAULT_PRIMARY = "#0E7C86";
+const DEFAULT_PRIMARY = "#F97316";
 const DEFAULT_SECONDARY = "#1E3A5F";
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -100,15 +100,15 @@ export function ThemeSettings() {
       <CardHeader>
         <CardTitle className="text-base">Accent Colors</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Set the primary (teal) and secondary (navy) accent colors for
+          Set the primary (orange) and secondary (navy) accent colors for
           your organization. Changes apply to everyone in this tenant. The
-          neutral background is unaffected.
+          dark background is unaffected.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* ── Primary color row ──────────────────────────────────────────────── */}
         <div className="space-y-1.5">
-          <Label htmlFor="primary-hex">Primary color (teal)</Label>
+          <Label htmlFor="primary-hex">Primary color (orange)</Label>
           <div className="flex items-center gap-3">
             <input
               id="primary-color"
@@ -122,7 +122,7 @@ export function ThemeSettings() {
               id="primary-hex"
               value={primary}
               onChange={(e) => setPrimary(e.target.value)}
-              placeholder="#0E7C86"
+              placeholder="#F97316"
               pattern="^#[0-9a-fA-F]{6}$"
               className="font-mono"
               aria-label="Primary color hex value"
@@ -130,7 +130,7 @@ export function ThemeSettings() {
           </div>
           {primary && !isValidHex(primary) && (
             <p className="text-xs text-destructive">
-              Must be a 6-digit hex color, e.g. #0E7C86
+              Must be a 6-digit hex color, e.g. #F97316
             </p>
           )}
         </div>

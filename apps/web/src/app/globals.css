@@ -3,65 +3,65 @@
 @tailwind utilities;
 
 /*
- * Deep Sea Teal — FRMS palette (V2 rehab, 2026-06-29)
- * Marine-forward identity for the coastal LGU fisherfolk system.
+ * Modern Dark — Orange & Navy (FRMS palette, 2026-06-29 rehab)
+ * Dark-default, modern deep-navy charcoal base with orange primary + navy secondary.
  * Per-tenant --primary / --secondary are overridden at runtime on
  * #tenant-theme-root (see [tenant]/layout.tsx + settings/theme-settings.tsx).
  */
 @layer base {
   :root {
-    --background: 195 33% 98%;
-    --foreground: 198 51% 9%;
+    --background: 216 38% 97%;
+    --foreground: 218 46% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 198 51% 9%;
+    --card-foreground: 218 46% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 198 51% 9%;
-    --primary: 185 81% 29%;
-    --primary-foreground: 0 0% 100%;
+    --popover-foreground: 218 46% 10%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 29 79% 6%;
     --secondary: 214 52% 25%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 195 25% 94%;
-    --muted-foreground: 198 12% 38%;
-    --accent: 189 29% 91%;
-    --accent-foreground: 198 51% 9%;
+    --muted: 213 36% 95%;
+    --muted-foreground: 213 18% 40%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 218 46% 10%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 193 20% 86%;
-    --input: 193 20% 86%;
-    --ring: 185 81% 29%;
+    --border: 214 30% 89%;
+    --input: 214 30% 89%;
+    --ring: 25 95% 53%;
     --radius: 0.625rem;
-    --chart-1: 185 81% 29%;
-    --chart-2: 214 52% 25%;
-    --chart-3: 39 75% 64%;
-    --chart-4: 162 71% 36%;
-    --chart-5: 10 70% 62%;
+    --chart-1: 25 95% 53%;
+    --chart-2: 213 53% 39%;
+    --chart-3: 39 90% 45%;
+    --chart-4: 175 83% 32%;
+    --chart-5: 6 74% 57%;
   }
 
   .dark {
-    --background: 220 49% 8%;
-    --foreground: 208 35% 93%;
-    --card: 219 43% 12%;
-    --card-foreground: 208 35% 93%;
-    --popover: 219 43% 12%;
-    --popover-foreground: 208 35% 93%;
-    --primary: 185 74% 39%;
-    --primary-foreground: 190 79% 6%;
-    --secondary: 213 43% 30%;
-    --secondary-foreground: 208 35% 93%;
-    --muted: 218 38% 15%;
-    --muted-foreground: 208 17% 64%;
-    --accent: 218 38% 15%;
-    --accent-foreground: 208 35% 93%;
+    --background: 215 33% 7%;
+    --foreground: 212 37% 93%;
+    --card: 215 33% 11%;
+    --card-foreground: 212 37% 93%;
+    --popover: 215 33% 11%;
+    --popover-foreground: 212 37% 93%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 29 79% 6%;
+    --secondary: 214 52% 25%;
+    --secondary-foreground: 212 37% 93%;
+    --muted: 213 30% 15%;
+    --muted-foreground: 213 18% 65%;
+    --accent: 213 30% 15%;
+    --accent-foreground: 212 37% 93%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 218 36% 21%;
-    --input: 218 36% 21%;
-    --ring: 185 74% 39%;
-    --chart-1: 185 62% 46%;
-    --chart-2: 213 44% 55%;
-    --chart-3: 39 75% 64%;
-    --chart-4: 160 59% 49%;
-    --chart-5: 10 81% 69%;
+    --border: 215 26% 20%;
+    --input: 215 26% 20%;
+    --ring: 25 95% 53%;
+    --chart-1: 25 95% 53%;
+    --chart-2: 211 51% 50%;
+    --chart-3: 43 96% 56%;
+    --chart-4: 172 66% 50%;
+    --chart-5: 5 85% 66%;
   }
 }
 
