@@ -211,12 +211,12 @@ export function ViolationDetailClient({ id, canManage }: Props) {
         </div>
       </div>
 
-      {/* Top row: Target fisherfolk profile (left) beside Violation Details (right) */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Target — fisherfolk profile with picture */}
-        <Card className="lg:col-span-1">
+      {/* Top row: violator profile (left) beside Violation Details (right) */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Profile — full violator details with picture */}
+        <Card>
           <CardHeader>
-            <CardTitle>Target</CardTitle>
+            <CardTitle>Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {targetFisherfolk ? (
@@ -248,7 +248,32 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                   </div>
                 </div>
                 <Separator />
-                <Field label="Barangay" value={targetFisherfolk.barangay} />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field label="ID Number" value={targetFisherfolk.idNumber} />
+                  <Field
+                    label="RSBSA Number"
+                    value={targetFisherfolk.rsbsaNumber}
+                  />
+                  <Field label="Status" value={targetFisherfolk.status} />
+                  <Field label="Sex" value={targetFisherfolk.sex} />
+                  <Field
+                    label="Civil Status"
+                    value={targetFisherfolk.civilStatus}
+                  />
+                  <Field
+                    label="Date of Birth"
+                    value={formatDate(targetFisherfolk.dateOfBirth)}
+                  />
+                  <Field
+                    label="Contact Number"
+                    value={targetFisherfolk.contactNumber}
+                  />
+                  <Field label="Barangay" value={targetFisherfolk.barangay} />
+                  <Field
+                    label="Registration Year"
+                    value={targetFisherfolk.registrationYear}
+                  />
+                </div>
               </div>
             ) : record.violatorName ? (
               <div className="space-y-1">
@@ -284,13 +309,13 @@ export function ViolationDetailClient({ id, canManage }: Props) {
           </CardContent>
         </Card>
 
-        {/* Violation Details — beside the target, right side */}
-        <Card className="lg:col-span-2">
+        {/* Violation Details — beside the profile, right side */}
+        <Card>
           <CardHeader>
             <CardTitle>Violation Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field label="Subject" value={record.subject} />
               <Field label="Status" value={record.status} />
               <Field label="Target Type" value={record.targetType} />

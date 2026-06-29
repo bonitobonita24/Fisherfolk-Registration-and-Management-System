@@ -75,6 +75,12 @@ export const violationRouter = createTRPCRouter({
               photo: true,
               barangay: true,
               status: true,
+              rsbsaNumber: true,
+              sex: true,
+              civilStatus: true,
+              dateOfBirth: true,
+              contactNumber: true,
+              registrationYear: true,
             },
           },
           vessel: {
