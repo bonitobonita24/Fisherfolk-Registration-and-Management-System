@@ -5,8 +5,20 @@ import {
   buildContentSecurityPolicy,
   storageOriginFromEnv,
 } from "@/lib/security-headers";
+import { parseCustomDomainMap, resolveTenantRoute } from "@/lib/tenant-routing";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
+
+/**
+ * Custom-domain "masking" map, parsed once per runtime from
+ * `TENANT_CUSTOM_DOMAINS` (JSON: `{"domain":"slug"}`). Empty (the default)
+ * means the resolver always falls through to subdirectory routing — zero
+ * behaviour change until the first custom domain is onboarded. See
+ * docs/MULTITENANCY.md §Activation.
+ */
+const customDomainToSlug = parseCustomDomainMap(
+  process.env.TENANT_CUSTOM_DOMAINS,
+);
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
@@ -78,6 +90,21 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
 }
 
 export default auth((req: NextRequest & { auth: unknown }) => {
+  // Custom-domain masking: if the Host matches a verified custom domain, rewrite
+  // INTERNALLY to the tenant's `/<slug>/...` route before auth/route runs. The
+  // browser keeps the custom domain in the URL bar. Inert while the map is empty
+  // (rewriteTo is always null) — zero behaviour change until a domain is added.
+  const { rewriteTo } = resolveTenantRoute({
+    host: req.headers.get("host"),
+    pathname: req.nextUrl.pathname,
+    customDomainToSlug,
+  });
+  if (rewriteTo && rewriteTo !== req.nextUrl.pathname) {
+    const url = req.nextUrl.clone();
+    url.pathname = rewriteTo;
+    return withCsp(NextResponse.rewrite(url));
+  }
+
   return withCsp(route(req));
 });
 

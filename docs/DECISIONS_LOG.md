@@ -205,3 +205,31 @@ Rationale: Owner answer 2026-06-26 — "no ID format, just make it ready for mix
 format." Supersedes the FF-YYYY-NNNN-vs-MR-CL question — neither is mandated.
 Locked: yes. Owner-decided. Scope: fisherfolk.create input + registration form idNumber
 field (manual freeform + uniqueness check) + drop any format regex. Tracked as its own batch.
+
+## Custom-domain "masking" — per-tenant own-domain support (2026-06-29)
+Decision: A tenant (LGU) may serve the app from THEIR OWN domain (e.g.
+`fisherfolk.calapancity.gov.ph`) while the single shared-schema codebase keeps
+serving from the existing `/[tenant]/...` subdirectory routes. The browser shows
+the tenant's domain (URL "masking" via internal `NextResponse.rewrite`, NOT iframes —
+iframes break auth cookies, deep links, SEO). The data boundary is UNCHANGED: tenant
+is still derived from the authenticated session (`session.user.tenantId`), never the
+URL/host — so masking only changes the visible URL, never isolation.
+Scope shipped this session:
+  - Data model: `Tenant.customDomain` (unique, nullable) + `Tenant.domainVerifiedAt`
+    (migration `20260629140000_tenant_custom_domain`).
+  - Pure, unit-tested resolver `apps/web/src/lib/tenant-routing.ts`
+    (`resolveTenantRoute` + `parseCustomDomainMap`); tests in
+    `apps/web/src/lib/__tests__/tenant-routing.test.ts`.
+  - Live middleware wiring (`apps/web/src/middleware.ts`): reads the host→slug map
+    from `TENANT_CUSTOM_DOMAINS` (JSON) once per runtime and rewrites before auth.
+    INERT while the env var is empty/unset (resolver returns rewriteTo=null → zero
+    behaviour change) — safe to land before any domain is onboarded.
+  - Cross-tenant isolation tests (forged `where.tenantId` override blocked).
+  - Docs: `docs/MULTITENANCY.md` (model, resolver, DNS/TLS steps, activation checklist).
+Per-tenant onboarding (DNS CNAME → TLS cert → set `Tenant.customDomain` +
+`domainVerifiedAt` → add to `TENANT_CUSTOM_DOMAINS` → deploy) is documented; first
+real activation must run the MULTITENANCY.md §Verify checklist against a live domain.
+Rationale: Owner approved custom-domain masking as a new [WHAT] on 2026-06-29.
+Foundation + inert wiring built so the feature is ready the moment a tenant brings a domain.
+Locked: yes (technical [HOW] of the masking mechanism). Back-port to PRODUCT.md pending
+(Rule 1 — human edits PRODUCT.md); drafted in docs/BACKPORT_CANDIDATES.md candidate F.
