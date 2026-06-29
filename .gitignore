@@ -86,6 +86,8 @@ tests/visual/diff/
 /*.jpeg
 /*.jpg
 
-# Local-only (PII export cache + QA evidence) — never commit
-.seed-cache/
+# QA / test evidence (local only)
 test-artifacts/
+
+# Seed export cache (contains real PII — never commit)
+.seed-cache/
