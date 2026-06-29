@@ -444,11 +444,16 @@ export function DashboardClient() {
                 />
                 <YAxis tickLine={false} axisLine={false} width={32} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="count"
-                  fill="var(--color-count)"
-                  radius={[4, 4, 0, 0]}
-                >
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {(catByBgy ?? []).map((row, i) => (
+                    <Cell
+                      key={row.category}
+                      fill={
+                        CATEGORY_COLORS[i % CATEGORY_COLORS.length] ??
+                        "hsl(var(--chart-1))"
+                      }
+                    />
+                  ))}
                   <LabelList
                     dataKey="count"
                     position="top"
