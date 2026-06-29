@@ -11,8 +11,8 @@ import { trpc } from "@/lib/trpc/client";
 import { hexToHslTriplet, readableForeground } from "@/lib/theme/color";
 
 // Keep in sync with the settings router defaults
-const DEFAULT_PRIMARY = "#E8843C";
-const DEFAULT_SECONDARY = "#336F92";
+const DEFAULT_PRIMARY = "#0E7C86";
+const DEFAULT_SECONDARY = "#1E3A5F";
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
@@ -100,15 +100,15 @@ export function ThemeSettings() {
       <CardHeader>
         <CardTitle className="text-base">Accent Colors</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Set the primary (tangerine) and secondary (marine) accent colors for
-          your organization. Changes apply to everyone in this tenant. The dark
-          background is unaffected.
+          Set the primary (teal) and secondary (navy) accent colors for
+          your organization. Changes apply to everyone in this tenant. The
+          neutral background is unaffected.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* ── Primary color row ──────────────────────────────────────────────── */}
         <div className="space-y-1.5">
-          <Label htmlFor="primary-hex">Primary color (tangerine)</Label>
+          <Label htmlFor="primary-hex">Primary color (teal)</Label>
           <div className="flex items-center gap-3">
             <input
               id="primary-color"
@@ -122,7 +122,7 @@ export function ThemeSettings() {
               id="primary-hex"
               value={primary}
               onChange={(e) => setPrimary(e.target.value)}
-              placeholder="#E8843C"
+              placeholder="#0E7C86"
               pattern="^#[0-9a-fA-F]{6}$"
               className="font-mono"
               aria-label="Primary color hex value"
@@ -130,14 +130,14 @@ export function ThemeSettings() {
           </div>
           {primary && !isValidHex(primary) && (
             <p className="text-xs text-destructive">
-              Must be a 6-digit hex color, e.g. #E8843C
+              Must be a 6-digit hex color, e.g. #0E7C86
             </p>
           )}
         </div>
 
         {/* ── Secondary color row ────────────────────────────────────────────── */}
         <div className="space-y-1.5">
-          <Label htmlFor="secondary-hex">Secondary color (marine)</Label>
+          <Label htmlFor="secondary-hex">Secondary color (navy)</Label>
           <div className="flex items-center gap-3">
             <input
               id="secondary-color"
@@ -151,7 +151,7 @@ export function ThemeSettings() {
               id="secondary-hex"
               value={secondary}
               onChange={(e) => setSecondary(e.target.value)}
-              placeholder="#336F92"
+              placeholder="#1E3A5F"
               pattern="^#[0-9a-fA-F]{6}$"
               className="font-mono"
               aria-label="Secondary color hex value"
@@ -159,7 +159,7 @@ export function ThemeSettings() {
           </div>
           {secondary && !isValidHex(secondary) && (
             <p className="text-xs text-destructive">
-              Must be a 6-digit hex color, e.g. #336F92
+              Must be a 6-digit hex color, e.g. #1E3A5F
             </p>
           )}
         </div>

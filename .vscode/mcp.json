@@ -11,6 +11,15 @@
     "shadcn": {
       "command": "npx",
       "args": ["-y", "shadcn@latest", "mcp"]
+    },
+    "shadcn-studio": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "shadcn-studio-mcp",
+        "API_KEY=${env:SHADCN_STUDIO_API_KEY}",
+        "EMAIL=${env:SHADCN_STUDIO_EMAIL}"
+      ]
     }
   }
 }

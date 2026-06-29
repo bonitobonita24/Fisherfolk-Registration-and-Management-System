@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className="min-h-screen font-sans antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
