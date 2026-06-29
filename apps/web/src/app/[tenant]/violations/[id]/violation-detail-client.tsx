@@ -223,14 +223,37 @@ export function ViolationDetailClient({ id, canManage }: Props) {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   {targetFisherfolk.photo && fisherfolkPhotoResp?.url ? (
-                    <img
-                      src={fisherfolkPhotoResp.url}
-                      alt={`${targetFisherfolk.fullName} photo`}
-                      className="h-20 w-20 shrink-0 rounded-lg border bg-muted object-cover"
-                    />
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label="Zoom photo"
+                          className="shrink-0 cursor-zoom-in rounded-lg border bg-muted transition hover:ring-2 hover:ring-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <img
+                            src={fisherfolkPhotoResp.url}
+                            alt={`${targetFisherfolk.fullName} photo`}
+                            className="h-32 w-32 rounded-lg object-cover"
+                          />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>{targetFisherfolk.fullName}</DialogTitle>
+                          <DialogDescription>
+                            {targetFisherfolk.idNumber}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <img
+                          src={fisherfolkPhotoResp.url}
+                          alt={`${targetFisherfolk.fullName} photo`}
+                          className="max-h-[80vh] w-full rounded-md object-contain"
+                        />
+                      </DialogContent>
+                    </Dialog>
                   ) : (
-                    <div className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
-                      <ImageOff size={20} className="text-muted-foreground" />
+                    <div className="flex h-32 w-32 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                      <ImageOff size={28} className="text-muted-foreground" />
                       <p className="text-[10px] text-muted-foreground">No photo</p>
                     </div>
                   )}
