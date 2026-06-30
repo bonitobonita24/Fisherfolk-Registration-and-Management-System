@@ -1,5 +1,12 @@
 # 📋 PRODUCT.md Back-Port Candidates
 
+> **✅ ALL CANDIDATES BACK-PORTED 2026-06-30.** Owner authorized the agent to apply candidates
+> A–I to PRODUCT.md (candidate J was applied earlier the same day). Rule 1 waiver logged in
+> DECISIONS_LOG.md ("Rule 1 waiver (extended)"). Where a candidate's pre-drafted text conflicted
+> with shipped code, the code won — notably **B** used ground-truth schema hex defaults
+> (`#F97316`/`#1E3A5F`, not the stale `#E8843C`/`#336F92`) and **C** left the Category entity
+> `iconType` enum unchanged (lucide is a render-layer mapping). This file is now historical.
+
 > **Generated 2026-06-27** by the deferred back-port surface task (V32.5.5 Back-Port Surface Check).
 > **Surface-and-inform only.** PRODUCT.md is human-owned (Rule 1) — agents do NOT edit it.
 > The owner reviews each candidate and: ✅ back-ports the proposed text, ⏸ defers, or 🚫 logs

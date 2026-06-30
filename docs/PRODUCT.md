@@ -15,7 +15,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 2. **Encoder renews a fisherfolk at start of year**: Search by ID/name/RSBSA/QR scan → match found → verify identity → click "Renew" → update any changed fields (address, contact, category, photo) without admin approval → save → status changes from "Inactive" to "Renewed" + "Active" → registration year updated → appears in Daily Operations. Error: fisherfolk has active violation → renewal blocked, must resolve violation first.
 
-3. **Encoder edits an existing record (non-renewal)**: Open fisherfolk profile → click "Edit" → modify fields → submit as edit request (not saved immediately) → Admin receives notification → Admin reviews diff (old vs new values with red strikethrough → green highlight) → approve or reject with reason → if approved: changes applied immediately, Encoder notified → if rejected: Encoder notified with rejection reason. Exception: records missing basic info (photo/signature) can be edited without approval to complete the record. Error: Admin rejects but Encoder resubmits same change → system shows previous rejection history.
+3. **Encoder edits an existing record (non-renewal)**: Open fisherfolk profile → click "Edit" → modify fields → submit as edit request (not saved immediately) → Admin receives notification → Admin reviews diff (old vs new values with red strikethrough → green highlight) → approve or reject with reason → if approved: changes applied immediately, Encoder notified → if rejected: Encoder notified with rejection reason. Exception (PD-004, provisional): any currently-**empty required field** (including a missing photo/signature) may be filled in without approval to complete the record; **changing an already-populated field always routes through admin approval**. Error: Admin rejects but Encoder resubmits → a NEW edit request is created per submission and the system shows previous rejection history (queried from prior requests).
 
 4. **Bantay Dagat files a violation**: Open QR scanner or search by ID/name/RSBSA → find fisherfolk → click "File Violation" → select violation subject (from configurable predefined list) → enter detailed description → upload evidence images (optional, auto-compressed) → add notes → choose whether violation also applies to linked vessel(s) (flexible: fisherfolk only, vessel only, or both) → submit → fisherfolk status becomes "Inactive (Violation)" → linked vessel status becomes "Impounded" if selected → Admin notified. Error: fisherfolk already has active violation → system allows additional violation to be stacked.
 
@@ -53,8 +53,8 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Status management: New, Active, Renewed, Inactive, Inactive (Violation), Archived
 - Inline vessel linking during registration for Boat Owner/Operator category
 - Image auto-compression on upload (reduce to viewable quality in kilobytes)
-- Category icons (emoji or uploaded custom image) displayed on registration form and ID cards
-- Incomplete records (missing photo/signature) allow direct edits without admin approval
+- Category icons render as **font-independent lucide SVG icons** (mapped per category name, colored-dot fallback) or an uploaded custom image — displayed on registration form and ID cards. (The emoji render path was dropped: seeded emoji showed as missing-glyph boxes on LGU workstations lacking an emoji font.)
+- Records with empty required fields (incl. missing photo/signature) allow direct fill-in without admin approval; editing an already-populated field still requires approval (PD-004, provisional)
 
 ### Daily Operations (sub-tab under Fisherfolk)
 - Today's registrations, renewals, and updates with timestamps
@@ -79,6 +79,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Change applied immediately on approval
 - Full request history per record
 - Notification to Encoder on resolution
+- Editable scope (PD-002): an encoder may request changes to **all user-editable profile fields** (the `fisherfolkUpdateSchema` field set); system/identity/audit columns — id, tenantId, idNumber, timestamps, createdBy/updatedBy, qrCode — are **never** user-editable. `fieldChanges` records only the keys that actually changed (= the change history)
 
 ### Vessel Registration (BoatR-aligned)
 - MFVR number, vessel name, vessel type (Motorized, Non-Motorized)
@@ -118,7 +119,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
   - Upload custom background image for front and back
   - Drag data field variables onto canvas (fisherfolk fields, vessel fields, shared fields)
   - Adjust font family, size, weight, color, alignment, position (X/Y in mm) per element
-  - Category icons (emoji or uploaded custom image) appear on ID card
+  - Category icons (font-independent lucide SVG icon or uploaded custom image) appear on ID card
   - ID content area: 86 × 54mm; bleed area: 90 × 58mm (2mm bleed on all sides)
   - Separate templates for fisherfolk IDs and vessel IDs
   - Save, edit, duplicate templates per tenant
@@ -167,6 +168,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Upcoming birthdays (next 30 days with urgency indicators)
 - Senior citizens (60+) by barangay
 - Violation hotspots with enforcement insights
+- Asset-coverage tracking: counts of records **missing photo** / **missing signature** (dashboard `getStats`); the fisherfolk list has a `missing` filter to surface incomplete records for completion
 - Recent activity feed (live)
 
 ### Reports (list generator with official government headers — NOT charts)
@@ -208,14 +210,14 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Per-user activity log
 - Log retention: permanent (no auto-deletion)
 
-### Tenant Settings (Admin) — tabbed: General / Categories / Violations / Email
-- **General**: LGU name, registration year, mayor name + signature upload for ID printing, accent color picker (free color selector, default #4F8EF7 blue)
+### Tenant Settings (Admin) — tabbed: General / Categories / Violations / Email / Barangay Aliases
+- **General**: LGU name, registration year, mayor name + signature upload for ID printing, **Theme editor** — configurable **primary + secondary accent colors** per tenant (free color pickers, live preview, save, reset-to-default). App is always-dark (no light mode); the accent pair is decoupled (primary ≠ secondary). Current palette + defaults live in docs/DESIGN.md.
 - **Categories**: Full CRUD management of fisherfolk categories
   - Add new category: name, description, display color
   - Edit existing categories
   - Drag-to-reorder display order (affects registration form dropdown and ID card layout)
   - Disable categories (not delete — existing member assignments preserved)
-  - Icon per category: emoji picker (24+ fishing-related emojis) or upload custom image (64×64px PNG/SVG, max 50KB, auto-compressed)
+  - Icon per category: **lucide icon selection** (font-independent SVG mapped per category, colored-dot fallback) or upload custom image (64×64px PNG/SVG, max 50KB, auto-compressed). (Emoji picker dropped — emoji rendered as missing-glyph boxes on LGU workstations without an emoji font.)
   - Category icons appear on printed ID cards next to category name
   - ID card preview showing how icon + category renders on printed ID
   - Member count per category
@@ -223,6 +225,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
   - **Default seed categories (the real FMO 6-activity taxonomy — see Data Management & Normalization Standards):** Boat Owner/Operator, Capture Fishing, Gleaning, Vendor, Fish Processing, Aquaculture. Seeded for every new tenant; tenants may add/disable but these are the canonical defaults proven against 3,003 production records.
 - **Violations**: Configurable predefined violation subjects list (add/remove tags)
 - **Email (SMTP)**: Per-tenant SMTP credentials (host, port, username, password, from address)
+- **Barangay Aliases**: admin CRUD for the tenant-editable typo-normalization map (e.g. `Comunal`→`Communal`, `Nag-Iba 1`→`Nag-Iba I`) applied by the Data Import wizard and registration normalization (see Data Management & Normalization Standards)
 - Barangay list management
 
 ### User Management (Super Admin)
@@ -234,7 +237,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 ### Data Import (Admin only — bulk migration tool)
 - 5-step wizard: Upload Excel → Upload Photos → Upload Signatures → Preview & Validate → Import
 - **Step 1 — Upload Excel**: accepts cleaned .xlsx with standard columns (ID NUMBER, FULL NAME, DATE OF BIRTH, ADDRESS, SEX, IMAGE, SIGNATURE, RSBSA #, CATEGORY, CONTACT NUMBER, REMARKS)
-  - Pre-upload validation: duplicate ID detection (keeps record with most data), date format correction (auto-fix to MM/DD/YYYY), contact number normalization (+63 prefix), category matching against tenant config, required field checks
+  - Pre-upload validation: duplicate ID detection (keeps record with most data), date format correction (auto-fix to MM/DD/YYYY), contact number normalization (canonical `09xxxxxxxxx`), category matching against tenant config, required field checks
   - Validation report: valid count, warnings, errors with specific issue descriptions
 - **Step 2 — Upload Photos**: batch .jpg files where filename = fisherfolk ID number (e.g., `2025-175205000-08252.jpg`)
   - System matches filenames to Excel rows by ID number
@@ -282,7 +285,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 - **Incremental import mode:** beyond the full 5-step wizard, an **incremental mode** adds ONLY new `idNumber`s from a partial masterlist (one barangay's batch, or another LGU office's list), links their assets, and skips any `idNumber` already present. The database is **backed up before** an incremental run. (Production reference: a 27-record "EditingPC" batch applied on top of 2,976.)
 
-- **Legacy ID preservation:** imported records **preserve their source `idNumber` exactly** as issued by FMO (production format `MR-CL-NNNNNN-YYYY`). FRMS does NOT regenerate IDs for imported records; newly registered fisherfolk receive an FRMS-generated `idNumber`. ⚠ **DEFERRED OWNER DECISION (PENDING):** whether *new* FRMS registrations should adopt the production `MR-CL-NNNNNN-YYYY` convention (LGU continuity) or keep the current generated `FF-YYYY-NNNN`. Recorded for FMO sign-off — does not block import (imported IDs are preserved either way).
+- **Legacy ID preservation & format-agnostic IDs (PD-001 — resolved 2026-06-26):** imported records **preserve their source `idNumber` exactly** as issued by FMO (e.g. `MR-CL-NNNNNN-YYYY`). FRMS does NOT regenerate IDs for imported records. For *new* registrations, `idNumber` is a **freeform, per-tenant-unique string that accepts ANY format** — no pattern is mandated. The encoder may enter the ID manually (e.g. to continue the LGU's physical-card series); `generateNextIdNumber` remains an optional "suggest next" helper, never a requirement. This intentionally supports a mixed-format population (legacy `MR-CL-NNNNNN-YYYY`, generated `FF-YYYY-NNNN`, or arbitrary).
 
 - **Dry-run / preview is non-destructive:** the import preview performs all parsing, normalization, dedup, and asset-matching with **zero DB writes and zero file copies**, then emits the full validation + data-quality summary before any commit (FRMS Step 4 = production `--dry-run`).
 
@@ -312,7 +315,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 **User**: id, tenantId, email, name, role (SuperAdmin, Admin, Encoder, Viewer, BantayDagat), status (Active, Deactivated), avatarUrl, createdAt, updatedAt
 
-**Tenant**: id, slug (URL path: calapan, naujan, etc.), name, logoUrl, mayorName, mayorSignatureUrl, accentColor (hex, default #4F8EF7), smtpHost, smtpPort, smtpUser, smtpPassword (encrypted), smtpFrom, barangayList (array), violationSubjects (array), currentRegistrationYear, customDomain (unique, nullable — tenant's own masked domain), domainVerifiedAt (timestamp, nullable — set when the custom domain's DNS + TLS is verified and activated), status (Active, Suspended), createdAt, updatedAt
+**Tenant**: id, slug (URL path: calapan, naujan, etc.), name, logoUrl, mayorName, mayorSignatureUrl, accentColor (hex, default #4F8EF7), primaryColor (hex, default #F97316), secondaryColor (hex, default #1E3A5F), smtpHost, smtpPort, smtpUser, smtpPassword (encrypted), smtpFrom, barangayList (array), violationSubjects (array), currentRegistrationYear, customDomain (unique, nullable — tenant's own masked domain), domainVerifiedAt (timestamp, nullable — set when the custom domain's DNS + TLS is verified and activated), status (Active, Suspended), createdAt, updatedAt
 
 **Category**: id, tenantId, name, description, slug (auto-generated), displayColor (hex), iconType (emoji, image), iconEmoji (nullable), iconImageUrl (nullable, compressed), displayOrder (integer), status (Active, Disabled), memberCount (computed), createdAt, updatedAt
 
@@ -330,6 +333,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 ## Integrations
 SMTP (per-tenant): transactional email for notifications, approval alerts, mention alerts — configured by Admin in tenant settings
+Notification channels (PD-003 — standard for ALL system notifications): in-app notification center + email (per-tenant SMTP) are **ACTIVE**; SMS is **prepared but inactive** (stub interface + config flag, no send). This is the standard channel set for every notification type (edit requests, renewals, violations, mentions, Ayuda, tasks).
 
 ### PWA
 Bantay Dagat personnel can install FRMS as a PWA on mobile devices for quick access to QR scanning and violation filing.
@@ -511,11 +515,11 @@ Icon set:                  lucide-react (shadcn/ui default)
 
 ## Design Identity
 Brand feel:         Professional / government-grade with modern dark aesthetic
-Target aesthetic:   Linear-inspired dark mode — minimal, monochrome dark surfaces, clean typography, subtle borders, muted palette with configurable blue accent color per tenant
+Target aesthetic:   Linear-inspired dark mode — minimal, monochrome dark surfaces, clean typography, subtle borders, muted palette with configurable primary + secondary accent colors per tenant (admin Theme editor, live preview)
 Industry category:  Government / Fisheries SaaS
-Dark mode required: Yes — dark mode by default, no light mode toggle; accent color customizable per tenant via color picker (default: #4F8EF7 blue)
+Dark mode required: Yes — dark mode by default, no light mode toggle; a primary + secondary accent pair is customizable per tenant via the admin Theme editor (current defaults + full palette in docs/DESIGN.md)
 Key constraint:     Must work on low-bandwidth connections in coastal barangays; PWA-installable for field enforcement; NO purple or violet colors anywhere in the design
-Theming approach:   shadcn/ui CSS variables (--primary set from tenant accentColor, all other tokens derived) — customized in globals.css
+Theming approach:   shadcn/ui CSS variables (--primary / --secondary set from the tenant's accent pair, all other tokens derived; runtime per-tenant CSS-var injection) — customized in globals.css
                     Design system reference: Linear (https://getdesign.md/linear.app/design-md)
                     Design tokens: see docs/DESIGN.md (extracted from confirmed Phase 2.8 JSX mockup)
                     Reference: https://ui.shadcn.com/docs/theming · Dark mode: https://ui.shadcn.com/docs/dark-mode

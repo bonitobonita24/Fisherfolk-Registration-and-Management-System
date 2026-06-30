@@ -243,3 +243,18 @@ edit was limited to the pre-drafted candidate-J wording: a custom-domains paragr
 and the `customDomain` + `domainVerifiedAt` fields on the Tenant entity under ## Data Entities.
 No other PRODUCT.md content was touched. Waiver is one-time and scoped to this back-port;
 Rule 1 (human-only PRODUCT.md edits) otherwise remains in force.
+
+## 2026-06-30 — Rule 1 waiver (extended): agent applied back-port candidates A–I to PRODUCT.md
+Same session, the owner extended the waiver: "go do the next turn but please update the
+PRODUCT.md, append all those updates we made." Claude Code applied the remaining
+`docs/BACKPORT_CANDIDATES.md` candidates A–I (custom-domain candidate J was already done):
+- **A (PD-001)** — Data Mgmt §: ID is format-agnostic / freeform per-tenant-unique; removed the stale "DEFERRED OWNER DECISION (PENDING)" sentence.
+- **B** — Settings/General, Tenant entity, Design Identity: single-blue accent → **primary + secondary accent pair** + admin Theme editor + always-dark. ⚠ Used **ground-truth schema defaults** `primaryColor #F97316` / `secondaryColor #1E3A5F` (NOT the candidate's stale `#E8843C`/`#336F92`); `accentColor #4F8EF7` retained as legacy field. Current palette deferred to docs/DESIGN.md (Deep Sea Teal rehab supersedes earlier tangerine/marine).
+- **C** — Category icons reworded to **font-independent lucide SVG** render (mapped by category name, colored-dot fallback) in 3 places. Category entity `iconType (emoji, image)` left unchanged — verified the `CategoryIconType` enum is still `EMOJI`/`IMAGE`; lucide is a render-layer mapping, not a data-model change.
+- **D (PD-004, provisional)** — bypass broadened from photo/signature to any currently-empty required field; populated-field edits still need approval; new EditRequest per resubmit.
+- **E (PD-002)** — Edit Request System: editable scope = full `fisherfolkUpdateSchema` set; system/identity/audit columns excluded.
+- **F** — Data Import contact normalization `+63 prefix` → canonical `09xxxxxxxxx`.
+- **G** — Settings: added **Barangay Aliases** tab + module bullet (typo-normalization CRUD).
+- **H** — Dashboard: added asset-coverage (missing-photo/signature) counts + list `missing` filter.
+- **I (PD-003)** — Integrations: stated the standard notification channel set (in-app + email ACTIVE, SMS prepared-inactive).
+Where a candidate's pre-drafted text conflicted with shipped code, the **code won** (B hex defaults, C entity line). Waiver remains scoped to these candidates; Rule 1 otherwise stays in force.
