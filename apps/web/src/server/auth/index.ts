@@ -54,6 +54,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (tenantSlug && user.tenant?.slug !== tenantSlug) return null;
         }
 
+        if (user.tenant?.status === "SUSPENDED") return null;
+
         return {
           id: user.id,
           username: user.username,
@@ -75,12 +77,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (typeof token.userId === "string" && token.userId.length > 0) {
         const dbUser = await platformPrisma.user.findUnique({
           where: { id: token.userId },
-          select: { securityVersion: true, status: true },
+          select: {
+            securityVersion: true,
+            status: true,
+            tenant: { select: { status: true } },
+          },
         });
         if (
           !dbUser ||
           dbUser.status !== "ACTIVE" ||
-          dbUser.securityVersion !== token.securityVersion
+          dbUser.securityVersion !== token.securityVersion ||
+          dbUser.tenant?.status === "SUSPENDED"
         ) {
           throw new Error("SESSION_INVALIDATED");
         }
