@@ -1592,6 +1592,7 @@ the PRODUCTION baseline** (see Phase 4).
 
 Note (Phase 3.3 — design principles): When docs/DESIGN.md / ui-rules.md are silent on a pattern, component state, or a11y approach, **Read .ai_prompt/design-principles.md** — principles win for structural decisions; the design system wins for token values.
 Note (Phase 3.3 — motion): When the prototype adds motion/interaction and docs/DESIGN.md / ui-rules.md are silent on a motion/easing/duration/reduced-motion pattern, **Read .ai_prompt/motion.md** (ui-rules.md Rule 14). Motion (motion.dev) is the prescribed lib; every animation MUST carry a `useReducedMotion()` guard (ties R13 WCAG gate); animate `transform`/`opacity` only. Principles win timing decisions; the design system wins token values.
+Note (Phase 3.3 — anti-slop): After design-system finalization, run `bash scripts/lint-design.sh --report-only apps/web/src` (V32.17 — surfaces D1–D7 cardinal sins in the prototype components; agent self-corrects findings before sign-off; advisory, never blocks Phase 3.3 close).
 
 **If skipped** (small app, no client validation needed): log "Phase 3.3 skipped — <reason>" to
 `agent-log.md` and proceed to Phase 3.5. If a `prototype/` was still produced, the simulated→
@@ -1911,6 +1912,7 @@ Note: vercel-agent-skills may be suggested by /scan-project for Next.js projects
 Note: shadcn/studio Pro (V32.11) — at Parts 5-6 the design is FROZEN (Phase 3.3). Use `/cui` to install any remaining production blocks/pages and `/rui` to refine — NOT `/iui` (no new design exploration; INHERIT-not-REPLACE). Reconcile every generated block to the compiled tokens (Rule 12). See `AI_Tools_Reference.md §2.5`.
 Note (Phase 4 Parts 5-6 — design principles): When docs/DESIGN.md / ui-rules.md are silent on a pattern, component state, or a11y approach, **Read .ai_prompt/design-principles.md** — principles win for structural decisions; the design system wins for token values.
 Note (Phase 4 Parts 5-6 — motion): When wiring motion/interaction and docs/DESIGN.md / ui-rules.md are silent on a motion/easing/duration/reduced-motion pattern, **Read .ai_prompt/motion.md** (ui-rules.md Rule 14). Motion (motion.dev) prescribed lib (LazyMotion/mini); mandatory `useReducedMotion()` guard on every animation, paired with the accessibility-agents WCAG gate (R13); `transform`/`opacity` only. A guardless animation FAILS the gov/LGU Phase 5 accessibility gate.
+Note (Phase 4 Parts 5-6 — anti-slop): After wiring and regression review, run `bash scripts/lint-design.sh --report-only apps/web/src` (V32.17 — regression pass for D1–D7 sins introduced during production wiring; advisory, never blocks Parts 5-6 gate).
 
 ### Phase 4 Part 7 (Docker + infrastructure) — conditional
 
@@ -3493,6 +3495,11 @@ Before running any validation commands, read `.ai_prompt/privacy.md` and run the
       → Run audit; log failures in DECISIONS_LOG.md as "Accessibility — non-blocking deferred items".
       → Proceed with validation.
    □ IF accessibility not declared: skip accessibility audit step.
+
+□ DESIGN ANTI-SLOP CHECK (V32.17 — advisory, never blocks):
+   → Run: `bash scripts/lint-design.sh --report-only apps/web/src`
+   → Surfaces D1–D7 cardinal sins (see .ai_prompt/design-principles.md Pillar 8); agent self-corrects findings.
+   → Design-slop findings do NOT block Phase 5 close. Only the WCAG gate above hard-blocks for gov/LGU apps.
 ─────────────────────────────────────────────────────────
 
 ─────────────────────────────────────────────────────────

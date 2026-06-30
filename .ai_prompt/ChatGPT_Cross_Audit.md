@@ -1,6 +1,6 @@
-# Spec-Driven Platform V32.14 — Cross-AI Audit Prompt (for ChatGPT)
+# Spec-Driven Platform V32.18 — Cross-AI Audit Prompt (for ChatGPT)
 
-> **Purpose:** Hand this prompt to ChatGPT along with the 25 V32.14 framework files. ChatGPT independently audits V32.14 to verify the framework remains internally consistent across all canonical files. Items 1-7 below are historical V31-era audit goals (still verified as baseline); V32 / V32.1 / V32.2 / V32.3 / V32.4 / V32.4.1 / V32.5 / V32.5.1 / V32.5.2 / V32.5.3 / V32.5.4 / V32.5.5 / V32.6 / V32.6.1 / V32.7 / V32.7.1 / V32.7.2 / V32.7.3 / V32.7.4 / V32.7.5 / V32.8 / V32.8.1 / V32.9 / V32.10 / V32.11 / V32.12 / V32.13 / V32.14 verification items live in **Section K (K.1-K.75)** with the V32.14 verified counts block (V32.5.3 bumps Prompts 60→61 and NEW 37→38; V32.5.4 / V32.5.5 / V32.6 / V32.6.1 / V32.7 / V32.7.1 / V32.7.3 / V32.7.4 are no-count-change patches; deliverable files changed twice: 17→19 at V32.7.2 and 19→20 at V32.7.5; **V32.8 bumps Rules 30→32, Scenarios 35→39, UI Rules 11→12, Phase Hooks 14→17, Bootstrap Steps 19→20, memory-gov sections 5→6, deliverable files 20→22**; **V32.8.1 is a docs-only patch — zero count change**; **V32.9 bumps Rules 32→33, UI Rules 12→13, Phase Hooks 17→18, deliverables 22→23, Security Checklist 84→98 items / 13→14 sections, PRODUCT.md 11→12 sections, PA Rules 11→12**; **V32.10 is a zero-count-change templates-only patch — no rule/scenario/prompt/deliverable/file added**; **V32.11 bumps MCP servers 4→5 — adds shadcn/studio Pro as the framework's default design generator (user-global MCP, phase-routed /cui /iui /rui /ftc); no rule/scenario/prompt/deliverable/file added**; **V32.12 bumps deliverable files 23→24 — adds design-principles.md on-demand reference to .ai_prompt/; no rule/scenario/prompt/phase-hook/MCP count change**; **V32.13 is a zero-count-change deploy-mechanism patch — adds the CI→Docker Hub→Komodo-API auto-deploy pipeline as Phase-6 scaffold templates (templates.md Rule 5c + phases.md); the app-side workflow + helper are NOT new deliverables, so deliverable files stay 24 and no rule/scenario/prompt/phase-hook/MCP count changes**; **V32.14 bumps UI Rules 13→14 and deliverable files 24→25 — adds motion.md on-demand reference to .ai_prompt/ + ui-rules.md Rule 14 "Motion & Micro-interactions"; no rule/scenario/prompt/phase-hook/MCP count change**):
+> **Purpose:** Hand this prompt to ChatGPT along with the 26 V32.18 framework files. ChatGPT independently audits V32.18 to verify the framework remains internally consistent across all canonical files. Items 1-7 below are historical V31-era audit goals (still verified as baseline); V32 / V32.1 / V32.2 / V32.3 / V32.4 / V32.4.1 / V32.5 / V32.5.1 / V32.5.2 / V32.5.3 / V32.5.4 / V32.5.5 / V32.6 / V32.6.1 / V32.7 / V32.7.1 / V32.7.2 / V32.7.3 / V32.7.4 / V32.7.5 / V32.8 / V32.8.1 / V32.9 / V32.10 / V32.11 / V32.12 / V32.13 / V32.14 / V32.16 / V32.17 / V32.18 verification items live in **Section K (K.1-K.78)** with the V32.18 verified counts block (V32.5.3 bumps Prompts 60→61 and NEW 37→38; V32.5.4 / V32.5.5 / V32.6 / V32.6.1 / V32.7 / V32.7.1 / V32.7.3 / V32.7.4 are no-count-change patches; deliverable files changed twice: 17→19 at V32.7.2 and 19→20 at V32.7.5; **V32.8 bumps Rules 30→32, Scenarios 35→39, UI Rules 11→12, Phase Hooks 14→17, Bootstrap Steps 19→20, memory-gov sections 5→6, deliverable files 20→22**; **V32.8.1 is a docs-only patch — zero count change**; **V32.9 bumps Rules 32→33, UI Rules 12→13, Phase Hooks 17→18, deliverables 22→23, Security Checklist 84→98 items / 13→14 sections, PRODUCT.md 11→12 sections, PA Rules 11→12**; **V32.10 is a zero-count-change templates-only patch — no rule/scenario/prompt/deliverable/file added**; **V32.11 bumps MCP servers 4→5 — adds shadcn/studio Pro as the framework's default design generator (user-global MCP, phase-routed /cui /iui /rui /ftc); no rule/scenario/prompt/deliverable/file added**; **V32.12 bumps deliverable files 23→24 — adds design-principles.md on-demand reference to .ai_prompt/; no rule/scenario/prompt/phase-hook/MCP count change**; **V32.13 is a zero-count-change deploy-mechanism patch — adds the CI→Docker Hub→Komodo-API auto-deploy pipeline as Phase-6 scaffold templates (templates.md Rule 5c + phases.md); the app-side workflow + helper are NOT new deliverables, so deliverable files stay 24 and no rule/scenario/prompt/phase-hook/MCP count changes**; **V32.14 bumps UI Rules 13→14 and deliverable files 24→25 — adds motion.md on-demand reference to .ai_prompt/ + ui-rules.md Rule 14 "Motion & Micro-interactions"; no rule/scenario/prompt/phase-hook/MCP count change**; **V32.16 is a zero-count storage-default patch — MinIO stays the staging/prod default; Cloudflare R2 demoted to budget-gated OPT-IN (V32.15 reverted before rollout); ZERO count change vs V32.14**; **V32.17 bumps deliverable files 25→26 — adds scripts/lint-design.sh design anti-slop gate (D1–D7 seven cardinal sins + P1a advisory warning); no rule/scenario/prompt/phase-hook/MCP count change**; **V32.18 bumps Security Checklist 98→114 items / 14→16 sections — adds §15 AI/LLM/MCP Security + §16 API Authorization & Injection Family (harvested from the curated Anthropic-Cybersecurity-Skills bundle; OWASP LLM/API Top 10 + MITRE ATLAS mapped); no rule/scenario/prompt/deliverable/MCP count change**):
 > 1. Phase 2.8 (Clickable Mockup Review — added V31) is correctly documented
 > 2. Cline deprecation (in-place V31 update) is consistent across all files
 > 3. Historical V30 changelog references are preserved
@@ -9,7 +9,7 @@
 > 6. No regressions introduced during the updates
 > 7. Post-lock additive patches: Phase 3.5, Phase 4+8 anti-thrashing, Skill Installer, Prompt 4.13, attribution cleanup, prompt count 55 (V31 era — V32.5.3 current: **61 prompts (38 NEW ✨)**, **35 scenarios**, **19 bootstrap steps**, **9 V32 Dispatch Rules (R1-R9) + V32.3 R6 size qualifier (allow-list >200 lines via Scout with Governance Extraction Schema)**)
 >
-> **How to interpret counts:** The **V32.14 verified counts block** (around line 87 below) is authoritative for current totals. Historical changelog entries and items 1-7 above may reference older totals reflecting their version-at-time-of-writing (e.g., 55 prompts, 34 scenarios, 18 bootstrap steps for V31 lock; 30 rules / 35 scenarios / 14 phase hooks for V32.7.5; 32 rules / 22 deliverables / 17 phase hooks for V32.8.1; 23 deliverables for V32.11; 13 UI rules / 24 deliverables for V32.13) — those are correct for their version and **MUST NOT be treated as current**. When a count appears without a V32.14 annotation, cross-check against the verified counts block before reporting.
+> **How to interpret counts:** The **V32.18 verified counts block** (around line 87 below) is authoritative for current totals. Historical changelog entries and items 1-7 above may reference older totals reflecting their version-at-time-of-writing (e.g., 55 prompts, 34 scenarios, 18 bootstrap steps for V31 lock; 30 rules / 35 scenarios / 14 phase hooks for V32.7.5; 32 rules / 22 deliverables / 17 phase hooks for V32.8.1; 23 deliverables for V32.11; 13 UI rules / 24 deliverables for V32.13; 14 UI rules / 25 deliverables for V32.14) — those are correct for their version and **MUST NOT be treated as current**. (V32.15 — R2 as staging/prod storage default — was reverted before rollout; V32.16 keeps MinIO default + R2 as a budget-gated opt-in, ZERO count change vs V32.14; V32.17 bumps deliverable files 25→26 — scripts/lint-design.sh #26 added.) When a count appears without a V32.18 annotation, cross-check against the verified counts block before reporting.
 >
 > **Use case:** Run this after every major framework update to catch mistakes Claude missed.
 >
@@ -84,14 +84,14 @@ Bonito's user preference: keep Cline extension installed in VS Code as emergency
 - Post-lock patches add Phase 3.5 as a NEW phase (between Phase 3 and Phase 4) and anti-thrashing rules to Phase 4 and Phase 8. These are in phases.md and Master_Prompt.md. They do NOT change the framework rule count, scenario count, or bootstrap step count.
 - Post-lock patches add a **Context Budget — Global Principle** to CLAUDE_compact.md and Master_Prompt.md. This is a Sonnet 4.6 model-aware task sizing principle (200K window, 120K practical, ≤80K SAFE zone, 12-file threshold). It governs how ALL work is scoped — not a new rule, but a non-negotiable behavioral principle.
 
-### V32.14 verified counts (must match in every file that quotes them)
+### V32.18 verified counts (must match in every file that quotes them)
 
 ```
 33 Rules · 39 Scenarios · 20 Bootstrap Steps · 8 Phase 4 Parts
 9 Phase 5 Commands · 16 Phase 6.5 Categories · 16 Secure Code Gen sub-sections
-14 UI Component Rules · 98 Security Checklist items (14 sections)
+14 UI Component Rules · 114 Security Checklist items (16 sections)
 61 Prompts (38 NEW ✨) in Prompt_References.md and Prompt_References.html
-25 deliverable files (19 in .ai_prompt/ + deploy.sh at project root + spec-executor.md → .claude/agents/ + settings.json → .claude/settings.json + lint-deploy.sh → scripts/lint-deploy.sh + design-stop-hook.sh → scripts/ + LESSONS_REGISTRY.md → .ai_prompt/ + privacy.md → .ai_prompt/ + design-principles.md → .ai_prompt/ + motion.md → .ai_prompt/) · 5 MCP servers (3 wired + 1 user-global + 1 plugin) · Node v22 · pnpm@10
+26 deliverable files (19 in .ai_prompt/ + deploy.sh at project root + spec-executor.md → .claude/agents/ + settings.json → .claude/settings.json + lint-deploy.sh → scripts/lint-deploy.sh + design-stop-hook.sh → scripts/ + LESSONS_REGISTRY.md → .ai_prompt/ + privacy.md → .ai_prompt/ + design-principles.md → .ai_prompt/ + motion.md → .ai_prompt/ + lint-design.sh → scripts/lint-design.sh) · 5 MCP servers (3 wired + 1 user-global + 1 plugin) · Node v22 · pnpm@10
 Phase count: 8 main phases + 2.5 + 2.6 + 2.7 + 2.8 (V31) + 3.3 (V32.6) + 3.5 (POST-LOCK) + 6.5
 6 agents (Claude Code primary: Opus 4.6 Architect + Sonnet 4.6 Executor · Cline ⚠ DEPRECATED · Copilot · SpecStory · SocratiCode · code-review-graph)
 9 governance docs (unchanged)
@@ -124,6 +124,8 @@ Count diffs vs V32.5.5: **Phase Hooks 13 → 14** (Phase 3.3 adds a memory-gover
 Count diffs vs V32.6.1 → V32.7: **counts unchanged (deploy-location change only)**. V32.7 moves all 7 detail files (phases.md, memory-governance.md, security.md, ui-rules.md, bootstrap.md, scenarios.md, templates.md) from `.claude/rules/` to `.ai_prompt/` (read on-demand). Only `CLAUDE_compact.md` auto-loads (deployed to app root as `CLAUDE.md`). `.claude/rules/` is intentionally empty after a V32.7 deploy. Root cause: subagent baseline-context inheritance was injecting ~100-130K tokens into every worker session — the 7 detail files (~130K tokens combined) were loaded unconditionally via `.claude/rules/` auto-injection. Counts: 30 Rules · 35 Scenarios · 19 Bootstrap Steps · 61 Prompts (38 NEW ✨) · 11 UI Rules · 17 deliverable files · 9 V32 Dispatch Rules · 14 Phase Hooks — all unchanged. K.45 added (V32.7 verification).
 
 Count diffs vs V32.7.1 → V32.7.2: **deliverable files 17 → 19** (added `spec-executor.md` → `.claude/agents/` and `settings.json` → jq-merged into `.claude/settings.json`); all other canonical counts unchanged (30 Rules · 35 Scenarios · 19 Bootstrap Steps · 61 Prompts (38 NEW ✨) · 11 UI Rules · 9 V32 Dispatch Rules · 14 Phase Hooks). V32.7.2 adds a custom Sonnet executor subagent (`spec-executor.md`, frontmatter `tools: Read,Write,Edit,Bash,Grep,Glob` + `model: sonnet` + `mcpServers: []`) and a `settings.json` with skill-listing context caps (`skillListingBudgetFraction: 0.01` + `maxSkillDescriptionChars: 1024`); framework executor dispatch (R1/R5/R7) now targets `Agent(subagent_type: "spec-executor")` with `Agent(model: "sonnet")` fallback. K.47 added (V32.7.2 verification). **NOTE: V32.7.2 re-bumped version markers V32.7.1 → V32.7.2 and the deliverable count 17 → 19 — supersedes K.45/K.46 count references.**
+
+Count diffs vs V32.16 → V32.17: **deliverable files 25 → 26** (lint-design.sh → scripts/lint-design.sh); all other canonical counts unchanged. V32.17 adds the **Design Anti-Slop Gate**: scripts/lint-design.sh #26 (D1–D7 seven cardinal sins + P1a advisory; --report-only at design phases); design-principles.md (#24) gains Pillar 8 Anti-AI-Slop + letter-spacing table + five-state render contract. Idea source: nexu-io/open-design craft/ axis (Apache-2.0). Counts: 33 Rules · 39 Scenarios · 20 Bootstrap Steps · 61 Prompts (38 NEW ✨) · 14 UI Rules · 9 V32 Dispatch Rules · 18 Phase Hooks · **26 deliverable files** · 5 MCP servers. K.77 added (V32.17 verification).
 
 Count diffs vs V32.13 → V32.14: **UI Component Rules 13 → 14; deliverable files 24 → 25** (motion.md → .ai_prompt/, so .ai_prompt/ files 18 → 19); all other canonical counts unchanged. V32.14 adds the **Motion Layer**: a new on-demand deliverable `.ai_prompt/motion.md` (#25) — library-agnostic UI/UX motion principles (when/when-not to animate, easing-by-intent ease-out entrances / ease-in-out moves / no linear, duration budgets, the `transform`+`opacity`-only performance rule, `prefers-reduced-motion` first-class + WCAG SC 2.3.3, spring-vs-tween, gesture interruptibility, CSS-vs-JS, Motion+Tailwind appendix) — and a new `ui-rules.md` **Rule 14 "Motion & Micro-interactions"** (Motion (motion.dev) the only prescribed React animation lib via LazyMotion/mini ~4.6KB; mandatory `useReducedMotion()` guard ties R13 WCAG gate; `transform`/`opacity` only; GSAP opt-in on a PRODUCT.md marketing/scroll signal with `@gsap/react` + `gsap.matchMedia()` guard; Three.js/R3F parked for 3D-flagged apps only). Read at design phases 3.3 / Parts 5-6 / Phase 7 when docs/DESIGN.md / ui-rules.md are silent on a motion/timing/reduced-motion pattern. INHERIT-not-REPLACE over docs/DESIGN.md motion tokens. Motion principles informed by Emil Kowalski's "Animations on the Web" (animations.dev) + the MIT-licensed emilkowalski/skills + vercel-labs/open-agents skill files (restated in the framework's own words). Wired: `deploy.sh` GROUP 8 copy + `sync-to-project.sh` whitelist (24→25) + `ui-rules.md` Rule 14 + cross-ref + `phases.md` MODEL HOOK cues + `src/data/libraries.js` GSAP/Magic UI specDrivenFit notes + project + repo CLAUDE.md + documentation-hub.html. Counts: 33 Rules · 39 Scenarios · 20 Bootstrap Steps · 61 Prompts (38 NEW ✨) · **14 UI Rules** · 9 V32 Dispatch Rules · 18 Phase Hooks · **25 deliverable files** · 5 MCP servers. K.75 added (V32.14 verification).
 
@@ -1676,7 +1678,7 @@ Verify each is present in the specified locations.
 
 □ K.65 (V32.9) — No stale current-state count references remain (zero-stale-count sweep):
        After V32.9, the canonical current-state counts are: 33 Rules · 39 Scenarios · 20 Bootstrap ·
-       13 UI Component Rules · 18 Phase Hooks · 98 Security Checklist items (14 sections) · 23
+       13 UI Component Rules · 18 Phase Hooks · 114 Security Checklist items (16 sections) · 23
        deliverable files · 12 PRODUCT.md sections · 12 PA rules · 61 Prompts (38 NEW ✨).
        LOOK FOR stale current-state occurrences of:
          - "32 Rules" / "32 rules" (outside frozen history)
@@ -1869,6 +1871,46 @@ Verify each is present in the specified locations.
              at all destination paths (`.ai_prompt/`, `AI/`, `scripts/`, `.claude/`, project root).
        FAIL if any tracked deliverable file in `specdrivenprompt/` carries a `_v31` suffix, or if
        `deploy.sh` writes to a `_v31`-suffixed destination path.
+
+□ K.77 (V32.17) — The Design Anti-Slop Gate (deliverable #26 `scripts/lint-design.sh` + design-principles.md
+       Pillar 8) is present and the deliverable count reads **26 deliverable files** in ALL current-tense
+       surfaces. Verify:
+         (a) `specdrivenprompt/lint-design.sh` exists in the framework repo, and `deploy.sh` GROUP 9
+             copies it to target `scripts/lint-design.sh` (overwrite-with-backup + chmod +x).
+         (b) The linter checks D1–D7 (seven cardinal sins: default indigo/violet accent · two-stop
+             "trust gradient" hero · emoji-as-icons · hardcoded sans on display headings · AI-tile
+             pattern · invented metrics · filler copy) + P1a (ALL-CAPS without letter-spacing —
+             advisory warning, never fails build).
+         (c) All invocations at design phases (3.3 / Phase 4 Parts 5-6 / Phase 5) use
+             `--report-only` (advisory, exit 0) — no design phase is ever hard-blocked by this gate.
+         (d) `design-principles.md` (`.ai_prompt/`) contains a letter-spacing table (Pillar 4),
+             a five-state render contract + loading thresholds (Pillar 6), and a new Pillar 8 —
+             Anti-AI-Slop (D1–D7 documented with remediation guidance).
+         (e) The **V32.17 verified counts block** + Master_Prompt.md + Framework_Feature_Index.md +
+             CLAUDE_compact.md + documentation-hub.html + repo CLAUDE.md all read **26 deliverable files**.
+       FAIL if any current-tense surface still reads 25 deliverables, if lint-design.sh is absent
+       from deploy.sh GROUP 9, or if Pillar 8 is missing from design-principles.md.
+
+□ K.78 (V32.18) — The App-Hardening Harvest (AI/LLM/MCP + API-Authz + Injection-Family security)
+       is present and the Security Checklist reads **114 items / 16 sections** in ALL current-tense
+       surfaces. Verify:
+         (a) `security.md` contains three new blocks tagged NEW V32.18: "AI / LLM / MCP SECURITY"
+             (OWASP LLM Top 10:2025 + MITRE ATLAS), "API AUTHORIZATION DEPTH — BOLA / BFLA / BOPLA"
+             (OWASP API Top 10:2023), and "INJECTION FAMILY — beyond SQL", plus an "ADVERSARIAL
+             VERIFICATION" pointer block.
+         (b) `Security_Checklist.md` has SECTION 15 — AI / LLM / MCP SECURITY (7 items) and SECTION 16
+             — API AUTHORIZATION DEPTH & INJECTION FAMILY (9 items); its header reads
+             **114 verification items across 16 sections**; HOW TO USE reads "ALL 16 sections".
+         (c) The harvested 38-skill bundle lives at `~/.claude/skills-library/Security & Testing/
+             anthropic-cybersecurity-skills/` as a reference library — it is NOT counted as a 27th
+             deliverable (deliverable count stays 26).
+         (d) The **V32.18 verified counts block** + Master_Prompt.md + Framework_Feature_Index.md +
+             CLAUDE_compact.md + documentation-hub.html + repo CLAUDE.md all read **114 Security
+             Checklist items / 16 sections**.
+         (e) No other canonical count changed (33 Rules · 39 Scenarios · 61 Prompts · 26 deliverables
+             · 14 UI Rules · 18 Phase Hooks · 5 MCP servers).
+       FAIL if any current-tense surface still reads 98 items / 14 sections, if §15 or §16 is missing,
+       or if the bundle was counted as a new deliverable.
 
 ---
 

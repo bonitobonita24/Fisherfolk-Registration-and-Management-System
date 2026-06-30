@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# Spec-Driven Platform V32.14 — File Deployment Script
+# Spec-Driven Platform V32.17 — File Deployment Script
 # ============================================================
 # V32.10 (compose resource limits) + V32.11 (shadcn/studio Pro default
 # design generator) add NO new deliverable files — their content ships via
@@ -15,6 +15,9 @@
 # V32.14 (motion.md on-demand reference) adds deliverable #25 — a library-agnostic
 # UI/UX motion-principles file shipped to .ai_prompt/ (see GROUP 8 below) + ui-rules.md
 # Rule 14. Deliverable count 24 → 25.
+# V32.17 (lint-design.sh design anti-slop gate) adds deliverable #26 — scripts/lint-design.sh
+# (D1–D7 cardinal sins + P1a; --report-only advisory at Phase 3.3/Parts5-6/Phase 5).
+# Deliverable count 25 → 26. See GROUP 9 below.
 # ============================================================
 # SAFETY CONTRACT (read this before running)
 # ============================================================
@@ -100,6 +103,7 @@
 #   │   ├── privacy.md                 ← NEW V32.9 — PH Data Privacy Act + WCAG 2.2 AA (→ .ai_prompt/, deliverable #23)
 #   │   ├── design-principles.md       ← NEW V32.12 — framework-level design guidance (→ .ai_prompt/, deliverable #24)
 #   │   ├── motion.md                  ← NEW V32.14 — framework-level motion guidance (→ .ai_prompt/, deliverable #25)
+#   │   ├── lint-design.sh             ← NEW V32.17 — design anti-slop gate (→ scripts/, deliverable #26)
 #   │   ├── Planning_Assistant.md
 #   │   ├── Framework_Feature_Index.md
 #   │   ├── AI_Tools_Reference.md
@@ -123,6 +127,8 @@
 # DEPLOYED TARGET LOCATIONS (V32.14 addition):
 #   .ai_prompt/motion.md               ← overwrite-with-backup (framework-owned) (deliverable #25, V32.14)
 #   tests/visual/                      ← scaffold-if-absent (.gitkeep); existing files untouched
+# DEPLOYED TARGET LOCATIONS (V32.17 addition):
+#   scripts/lint-design.sh             ← overwrite-with-backup (framework-owned), chmod +x (deliverable #26, V32.17)
 #   NOTE: sd.config.mjs, design-validate.mjs, STATE.md.template — scaffolded by bootstrap.md
 #   Step 20 from templates.md (not deploy-copied).
 #
@@ -161,7 +167,7 @@ if [ ! -d "$AI_PROMPT" ]; then
 fi
 
 echo "============================================================"
-echo "  Spec-Driven Platform V32.14 — Deployment"
+echo "  Spec-Driven Platform V32.16 — Deployment"
 echo "============================================================"
 echo "  Project root:  $PROJECT"
 echo "  Source folder: $AI_PROMPT"
@@ -618,6 +624,20 @@ overwrite_with_backup "$AI_PROMPT/design-principles.md" "$PROJECT/.ai_prompt/des
 overwrite_with_backup "$AI_PROMPT/motion.md" "$PROJECT/.ai_prompt/motion.md"
 echo ""
 
+# ============================================================
+# GROUP 9 — scripts/ target: lint-design.sh design anti-slop gate (V32.17)
+# Deliverable #26. phases.md Phase 3.3 / Phase 4 Parts 5-6 / Phase 5 invoke it as
+# `bash scripts/lint-design.sh --report-only apps/web/src` (advisory — never blocks).
+# Overwrite-with-backup (framework-owned) + chmod +x.
+# ============================================================
+echo "─── Group 9: scripts/lint-design.sh — design anti-slop gate (V32.17) ───"
+# scripts/ already created by Group 6 — no mkdir needed here.
+overwrite_with_backup "$AI_PROMPT/lint-design.sh" "$PROJECT/scripts/lint-design.sh"
+if [ -f "$PROJECT/scripts/lint-design.sh" ]; then
+  chmod +x "$PROJECT/scripts/lint-design.sh"
+fi
+echo ""
+
 # 7c: tests/visual/ scaffold — create directory + .gitkeep ONLY if the directory is absent.
 # Never overwrite existing snapshot files inside tests/visual/.
 if [ ! -d "$PROJECT/tests/visual" ]; then
@@ -655,7 +675,7 @@ echo ""
 # SUMMARY
 # ============================================================
 echo "============================================================"
-echo "  ✅ V32.14 deployment complete — safety contract honored"
+echo "  ✅ V32.17 deployment complete — safety contract honored"
 echo "============================================================"
 echo ""
 echo "  Files deployed to project tree (OVERWRITE bucket):"
@@ -664,6 +684,7 @@ echo "    AI/Master_Prompt.md                 ← full monolithic"
 echo "    .claude/agents/spec-executor.md         ← Sonnet executor subagent (V32.7.2)"
 echo "    scripts/lint-deploy.sh                  ← pre-deploy footgun gate, chmod +x (V32.7.5, deliverable #20)"
 echo "    scripts/design-stop-hook.sh             ← Claude Code Stop hook, chmod +x (V32.8, deliverable #21)"
+echo "    scripts/lint-design.sh                  ← design anti-slop gate, chmod +x (V32.17, deliverable #26)"
 echo ""
 echo "  Merged additively (APPEND/MERGE bucket):"
 echo "    .gitignore                              ← V32 entries added, user entries preserved"
@@ -692,7 +713,7 @@ echo "    (Human reference — do not move:)"
 echo "    Planning_Assistant.md      ← claude.ai planning + Phase 2.8 mockup (already done before this script)"
 echo "    Framework_Feature_Index.md            ← feature + capability reference"
 echo "    AI_Tools_Reference.md     ← tools + model routing reference"
-echo "    Security_Checklist.md ← 98-item security audit (14 sections)"
+echo "    Security_Checklist.md ← 114-item security audit (16 sections)"
 echo "    ChatGPT_Cross_Audit.md         ← cross-AI validation prompt"
 echo "    Prompt_References.md                      ← scenario-based prompt guide (markdown)"
 echo "    Prompt_References.html                    ← scenario-based prompt guide (interactive UI — START HERE)"
@@ -703,6 +724,7 @@ echo "    motion.md                                 ← framework-level motion g
 echo "    (Deployed to scripts/ — do not run from .ai_prompt/:)"
 echo "    lint-deploy.sh                            ← pre-deploy footgun gate (deploys to scripts/lint-deploy.sh, V32.7.5)"
 echo "    design-stop-hook.sh                       ← Claude Code Stop hook (deploys to scripts/, V32.8)"
+echo "    lint-design.sh                            ← design anti-slop gate (deploys to scripts/lint-design.sh, V32.17)"
 echo "    (Note: sd.config.mjs, design-validate.mjs, STATE.md.template are scaffolded by"
 echo "     bootstrap.md Step 20 from templates.md — not deployed by this script)"
 echo "    (Scaffold — created only if absent:)"

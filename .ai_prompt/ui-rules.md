@@ -172,6 +172,7 @@ Rule 14 (Motion & Micro-interactions) was added in V32.14 — Motion (motion.dev
 
     shadcn/ui components are WCAG 2.2 AA-aligned by default (built on Radix UI primitives).
     Custom components and design token overrides must be audited — accessibility-agents catches drift.
+    At the design phases (3.3 / Parts 5-6 / Phase 5), `bash scripts/lint-design.sh --report-only apps/web/src` runs alongside accessibility-agents as a companion D1–D7 design-anti-slop check (V32.17 — advisory, never blocks Phase 5 close; see .ai_prompt/design-principles.md Pillar 8).
 
     Reference: Master_Prompt.md Rule 33 + .ai_prompt/privacy.md (gov/LGU gate definition).
 

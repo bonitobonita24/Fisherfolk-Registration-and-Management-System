@@ -11,7 +11,7 @@
 > **How to use:** Copy this file into your project root. After code generation, `grep` or
 > manually inspect each item. Mark PASS / FAIL / N/A. Fix all FAILs before squash-merge.
 >
-> **Total: 98 verification items across 14 sections.**
+> **Total: 114 verification items across 16 sections.**
 
 ---
 
@@ -445,20 +445,123 @@ Run when PRODUCT.md §12 declares `personal data: yes`. Skip only when `personal
 
 ---
 
+## SECTION 15 — AI / LLM / MCP SECURITY (V32.18)
+
+Run when the app calls an LLM, exposes tools to a model, runs an agent, or ships/consumes an MCP server.
+Skip only when the app has no AI/LLM/agent/MCP surface. Maps to OWASP LLM Top 10:2025 + MITRE ATLAS.
+→ security.md § AI / LLM / MCP SECURITY. Deep procedures: curated cybersecurity-skills bundle.
+
+```
+□ 15.1  Untrusted-input boundary — system instructions structurally separated from all user/retrieved
+        content (no untrusted text concatenated into the system-prompt region)
+        → security.md § AI/LLM/MCP item 1–2  (OWASP LLM01 · ATLAS AML.T0051)
+        VERIFY: system role holds instructions only; user/tool content is fenced + labelled as data
+        VERIFY: privileged actions gated by L3 RBAC server-side, NOT by what the model "decided"
+
+□ 15.2  Indirect-injection sanitization on every content the model later reads (RAG chunks, fetched
+        pages, uploads, tool results, image-embedded text)
+        → security.md § AI/LLM/MCP item 1, 5  (OWASP LLM01)
+        VERIFY: retrieved/fetched text is stripped of zero-width chars + Unicode-flattened + scanned
+                before ingestion; instructions found inside retrieved chunks are NOT auto-executed
+
+□ 15.3  Tool/function-calling least privilege + server-side argument validation
+        → security.md § AI/LLM/MCP item 3  (OWASP LLM06/LLM08)
+        VERIFY: high-impact tools (delete, pay, email, role-change, raw SQL, shell) require human
+                approval or are not exposed to the model
+        VERIFY: every tool argument re-validated Zod-strict + tenant-ownership (model-supplied id is
+                an untrusted id — BOLA surface); tool outputs treated as untrusted input
+
+□ 15.4  MCP server safety — for any MCP server the app ships OR consumes
+        → security.md § AI/LLM/MCP item 4  (ATLAS AML.T0010 · OWASP MCP03:2025)
+        VERIFY: tool definitions pinned + rug-pull detection; raw tool/prompt/resource descriptions
+                inspected for hidden instructions (tool poisoning)
+        VERIFY: URL-fetching MCP tools pass the SSRF block (allowlist + blocked private ranges)
+
+□ 15.5  RAG corpus provenance + tenant-scoped retrieval
+        → security.md § AI/LLM/MCP item 5, 7  (OWASP LLM01/LLM03)
+        VERIFY: write access to the vector store is known; user-writable corpora treated as untrusted
+        VERIFY: model retrieval is scoped to the requesting tenant/user (same L1 scoping as any query)
+
+□ 15.6  Output handling — model output treated as untrusted
+        → security.md § AI/LLM/MCP item 6  (OWASP LLM02 insecure output handling)
+        VERIFY: raw LLM output never rendered as HTML unsanitized, never passed to eval/exec/shell/SQL/
+                file-path; structured output schema-validated before any downstream consumer
+        VERIFY: output rail filters leaked secrets/PII before reaching the user
+
+□ 15.7  Secrets/PII protection + consumption cap on LLM endpoints
+        → security.md § AI/LLM/MCP item 7  (OWASP LLM06/LLM10)
+        VERIFY: no API keys, tenant secrets, other users' data, or full system prompt placed where the
+                model can echo them; PII redacted from inputs that don't need it
+        VERIFY: LLM endpoints rate-limited + cost-capped (treated as public endpoint per L4 tiers)
+```
+
+---
+
+## SECTION 16 — API AUTHORIZATION DEPTH & INJECTION FAMILY (V32.18)
+
+Always run when any tRPC router or non-tRPC Route Handler exists. Sharpens IDOR into the full OWASP
+API Top 10 authorization set + the non-SQL injection classes.
+→ security.md § API AUTHORIZATION DEPTH + § INJECTION FAMILY.
+
+```
+□ 16.1  BOLA (API1) — object-level ownership verified before every read/mutate by id
+        → security.md § API AUTHORIZATION DEPTH item 1
+        VERIFY: object belongs to ctx.tenantId (and ctx.userId where relevant) BEFORE return/mutate,
+                even with L6 active; model/client-supplied ids re-checked
+
+□ 16.2  BFLA (API5) — function-level role check tested with a LOW-privilege token
+        → security.md § API AUTHORIZATION DEPTH item 2
+        VERIFY: admin/privileged procedures check role server-side; a standard user token cannot reach
+                an admin function; function never gated by UI visibility alone
+
+□ 16.3  BOPLA mass assignment (API3) — writable fields whitelisted
+        → security.md § API AUTHORIZATION DEPTH item 3
+        VERIFY: Zod .strict() + .pick() on writable fields; client-sent role, isAdmin, isVerified,
+                tenantId, balance, discountRate, permissions, securityVersion are rejected/ignored
+
+□ 16.4  BOPLA excessive data exposure (API3) — response returns only needed fields
+        → security.md § API AUTHORIZATION DEPTH item 4
+        VERIFY: Prisma select scopes output; passwordHash, internal notes, tenantId, audit fields, and
+                other users' PII never leak in a response object
+
+□ 16.5  NoSQL / operator injection closed
+        → security.md § INJECTION FAMILY item 1
+        VERIFY: object-typed values rejected where a scalar is expected (no { "$gt": "" } smuggling)
+
+□ 16.6  XXE disabled on any XML/SVG/DOCX parser
+        → security.md § INJECTION FAMILY item 2
+        VERIFY: external entity + DTD resolution disabled on every XML-parsing path
+
+□ 16.7  SSTI — no server-side template built from unsanitized user input
+        → security.md § INJECTION FAMILY item 3
+        VERIFY: email/report/label templates never interpolate raw user input into a code-executing engine
+
+□ 16.8  Insecure deserialization — typed JSON parse only
+        → security.md § INJECTION FAMILY item 4
+        VERIFY: untrusted input never deserialized into live objects; parsed to typed Zod schemas only
+
+□ 16.9  CORS not wildcard in prod + Host header validated
+        → security.md § INJECTION FAMILY item 5 + SECURE PRODUCTION DEFAULTS item 5
+        VERIFY: no wildcard CORS in production; Host header validated/pinned where it drives links or cache keys
+```
+
+---
+
 ## HOW TO USE THIS CHECKLIST
 
 **After Phase 4 (initial scaffold):**
-Run ALL 14 sections. Every item applies. This is the most critical audit — the scaffold
+Run ALL 16 sections. Every item applies. This is the most critical audit — the scaffold
 defines the security posture for the entire project lifecycle.
 
 **After Phase 7 (Feature Update):**
 Run only the sections relevant to the feature:
-- Added a new tRPC router? → Sections 2, 3, 4, 5, 8
+- Added a new tRPC router? → Sections 2, 3, 4, 5, 8, 16
 - Added file uploads? → Section 6
 - Added background jobs? → Section 7
 - Added external webhook integration? → Section 10
 - Changed auth config? → Section 1
 - Personal data feature added or changed? → Section 14
+- Added an LLM / agent / tool / MCP surface? → Section 15
 - Always run Section 13 (Phase 5 commands) regardless
 
 **Cross-AI audit loop:**
