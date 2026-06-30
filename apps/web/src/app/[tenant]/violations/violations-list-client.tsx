@@ -66,7 +66,7 @@ export function ViolationsListClient() {
             className="w-full sm:w-auto"
           />
           <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectTrigger className="w-full sm:w-[150px]" aria-label="Filter by status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -108,7 +108,7 @@ export function ViolationsListClient() {
               value={String(limit)}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent side="top">

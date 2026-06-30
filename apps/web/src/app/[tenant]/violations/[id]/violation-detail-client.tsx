@@ -232,7 +232,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                         >
                           <img
                             src={fisherfolkPhotoResp.url}
-                            alt={`${targetFisherfolk.fullName} photo`}
+                            alt={`Portrait of ${targetFisherfolk.fullName}`}
                             className="h-32 w-32 rounded-lg object-cover"
                           />
                         </button>
@@ -246,7 +246,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                         </DialogHeader>
                         <img
                           src={fisherfolkPhotoResp.url}
-                          alt={`${targetFisherfolk.fullName} photo`}
+                          alt={`Portrait of ${targetFisherfolk.fullName}`}
                           className="max-h-[80vh] w-full rounded-md object-contain"
                         />
                       </DialogContent>

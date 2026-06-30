@@ -53,7 +53,7 @@ export function AyudaListClient() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
           <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]" aria-label="Filter by status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -95,7 +95,7 @@ export function AyudaListClient() {
               value={String(limit)}
               onValueChange={handlePageSizeChange}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent side="top">

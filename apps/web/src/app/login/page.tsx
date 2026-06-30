@@ -39,7 +39,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <main className="flex min-h-screen items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 rounded-lg border border-border bg-card p-8">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
@@ -57,7 +57,7 @@ function LoginForm() {
           className="space-y-4"
         >
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="rounded-md bg-destructive p-3 text-sm text-destructive-foreground">
               {error}
             </div>
           )}
@@ -115,7 +115,7 @@ function LoginForm() {
           </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
 

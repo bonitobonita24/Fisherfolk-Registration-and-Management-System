@@ -332,23 +332,20 @@ function TaskCard({
 }) {
   return (
     <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(task.id)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect(task.id);
-        }
-      }}
-      className="shadow-sm cursor-pointer transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="relative shadow-sm cursor-pointer transition-colors hover:bg-accent"
     >
       <CardHeader className="pb-2 pt-3 px-3">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-sm font-medium leading-snug">
-            {task.title}
+            <button
+              type="button"
+              onClick={() => onSelect(task.id)}
+              className="text-left after:absolute after:inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+            >
+              {task.title}
+            </button>
           </CardTitle>
-          <div className="flex items-center gap-1">
+          <div className="relative z-10 flex items-center gap-1">
             {priorityBadge(task.priority)}
             {canManage && (
               <MoveMenu task={task} onMove={onMove} disabled={isMoving} />
