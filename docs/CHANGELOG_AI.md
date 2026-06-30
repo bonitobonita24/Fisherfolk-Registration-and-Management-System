@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-06-30 — Spec-Driven framework upgrade V32.14 → V32.18 (governance layer only)
+- Agent:               CLAUDE_CODE (Opus, from the Powerbyte-AIEF orchestration seat)
+- Why:                 Owner added FRMS to AIEF fleet monitoring and approved syncing the latest framework. FRMS was on V32.14, four versions behind source V32.18.
+- What:                Synced + MERGED to `main` (fast-forward, commit b6980e3). GOVERNANCE LAYER ONLY — verified zero changes to app code (no src/, components, prisma/, schema, package.json). Changed files limited to: .ai_prompt/* (Master_Prompt, security, phases, ui-rules, design-principles, templates, Security_Checklist, Prompt_References .md/.html, ChatGPT_Cross_Audit, Framework_Feature_Index, CLAUDE_compact), AI/Master_Prompt.md, CLAUDE.md, deploy.sh, and NEW scripts/lint-design.sh.
+  - V32.17 — NEW scripts/lint-design.sh (deliverable #26): design anti-slop gate, checks D1–D7 + P1a. ADVISORY only (`--report-only`, exit 0, never blocks). Run: `bash scripts/lint-design.sh --report-only apps/web/src`.
+  - V32.18 — App-Hardening Harvest: AI/LLM/MCP + API-authz + injection rules folded into .ai_prompt/security.md + Security_Checklist.md (now 114 items / 16 sections).
+  - V32.15–16 — templates note (R2 budget-gated opt-in storage; MinIO stays default).
+- HOW decisions:       Landed on a branch first, verified governance-only diff, then FF-merged to main (no app impact = safe). Driven from the AIEF seat via sync-to-project.sh + deploy.sh. Also fixed a recurring AIEF tool bug (the sync whitelist had silently dropped deliverable #26) so future syncs are correct.
+- Verification:        git status confirmed governance-only (no app code). Version marker in .ai_prompt/CLAUDE_compact.md now reads V32.18. scripts/lint-design.sh present + executable. No build/test run — framework docs don't change app behavior.
+- ⏭ NEXT SESSION:      RESTART Claude Code in this folder so the new .claude/ hooks + CLAUDE.md (V32.18) load — they only load at session start; until then the session still reads V32.14 rules.
+- ⚠ STILL OWED:        LGU gov compliance pass — V32.9 privacy.md / Rule 33 + WCAG 2.2 AA (DICT MC 004) is a HARD GATE before Phase 5 can close. Not part of this sync; tracked as remaining work.
+- Git:                 main (b6980e3). MERGED, fast-forward. NOT pushed (origin still V32.14; push at owner discretion). Deploy HARD HOLD unchanged.
+
+---
+
 ## 2026-06-27 — Dashboard charts: replicate legacy FMO 5-chart set (shadcn charts)
 - Agent:               CLAUDE_CODE (Opus)
 - Why:                 Owner asked to bring the legacy fmo-fisherfolk-reporting-tool dashboard charts into the FRMS dashboard. Gap analysis: FRMS already had Barangay / Gender / Category equivalents; genuinely missing = an interactive Activity-Category-by-Barangay chart, and the dashboard's age chart was only 3 coarse buckets vs the legacy 6. Owner chose: replicate all 5 on the main Dashboard, styled with shadcn/studio Pro charts.
