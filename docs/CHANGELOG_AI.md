@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-06-30 — Custom-domain back-port applied to PRODUCT.md (candidate J)
+- Agent:               CLAUDE_CODE (Opus architect; owner-authorized direct PRODUCT.md edit)
+- Why:                 Candidate J (custom-domain masking) was shipped + locked in DECISIONS_LOG (2026-06-29) but not reflected in the human-owned PRODUCT.md. Owner present this session and authorized the agent to apply the pre-drafted back-port text directly (one-time Rule 1 waiver — logged in DECISIONS_LOG.md).
+- Files modified:      docs/PRODUCT.md (## Tenancy Model — custom-domains paragraph; ## Domain / Base URL Expectations — per-tenant custom-domains line; ## Data Entities Tenant — added customDomain + domainVerifiedAt fields); docs/BACKPORT_CANDIDATES.md (candidate J marked ✅ BACK-PORTED); docs/DECISIONS_LOG.md (back-port marked done + Rule 1 one-time-waiver entry).
+- Scope note:          PRODUCT.md edit limited to the candidate-J wording only; no other spec content touched. Rule 1 (human-only PRODUCT.md) otherwise remains in force.
+- Verification:        Back-port text matches the DECISIONS_LOG locked decision; no code changes (governance/spec only).
+
 ## 2026-06-30 — Spec-Driven framework upgrade V32.14 → V32.18 (governance layer only)
 - Agent:               CLAUDE_CODE (Opus, from the Powerbyte-AIEF orchestration seat)
 - Why:                 Owner added FRMS to AIEF fleet monitoring and approved syncing the latest framework. FRMS was on V32.14, four versions behind source V32.18.

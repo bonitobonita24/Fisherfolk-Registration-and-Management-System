@@ -231,5 +231,15 @@ Per-tenant onboarding (DNS CNAME → TLS cert → set `Tenant.customDomain` +
 real activation must run the MULTITENANCY.md §Verify checklist against a live domain.
 Rationale: Owner approved custom-domain masking as a new [WHAT] on 2026-06-29.
 Foundation + inert wiring built so the feature is ready the moment a tenant brings a domain.
-Locked: yes (technical [HOW] of the masking mechanism). Back-port to PRODUCT.md pending
-(Rule 1 — human edits PRODUCT.md); drafted in docs/BACKPORT_CANDIDATES.md candidate F.
+Locked: yes (technical [HOW] of the masking mechanism). Back-port to PRODUCT.md
+✅ DONE 2026-06-30 (candidate J in docs/BACKPORT_CANDIDATES.md).
+
+## 2026-06-30 — Rule 1 one-time waiver: agent applied custom-domain back-port to PRODUCT.md
+Normally PRODUCT.md is human-owned (Rule 1) and agents never edit it. On 2026-06-30 the
+owner (Bonito) explicitly authorized Claude Code to apply the candidate-J back-port directly
+("can you do the appending of the draft you made for PRODUCT.md yourself?"). Scope of the
+edit was limited to the pre-drafted candidate-J wording: a custom-domains paragraph under
+## Tenancy Model, a per-tenant-custom-domains line under ## Domain / Base URL Expectations,
+and the `customDomain` + `domainVerifiedAt` fields on the Tenant entity under ## Data Entities.
+No other PRODUCT.md content was touched. Waiver is one-time and scoped to this back-port;
+Rule 1 (human-only PRODUCT.md edits) otherwise remains in force.

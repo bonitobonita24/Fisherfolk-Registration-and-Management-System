@@ -115,7 +115,8 @@
 
 ## NEW — feature shipped after this file was generated (custom-domain masking, 2026-06-29)
 
-### J. Custom-domain "masking" — tenants may use their own domain
+### J. Custom-domain "masking" — tenants may use their own domain  ✅ BACK-PORTED 2026-06-30
+> **Status: ✅ BACK-PORTED to PRODUCT.md 2026-06-30** (owner authorized agent to apply; Rule 1 waived for this one change — logged in DECISIONS_LOG.md). Added to ## Tenancy Model, ## Domain / Base URL Expectations, and the Tenant entity under ## Data Entities. No further action.
 - **Decision (locked):** DECISIONS_LOG "Custom-domain 'masking' — per-tenant own-domain support
   (2026-06-29)". A tenant serves the app from THEIR OWN domain while the shared codebase keeps
   serving the existing `/[tenant]/...` subdirectory routes; the browser shows the tenant's domain

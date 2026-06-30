@@ -312,7 +312,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 **User**: id, tenantId, email, name, role (SuperAdmin, Admin, Encoder, Viewer, BantayDagat), status (Active, Deactivated), avatarUrl, createdAt, updatedAt
 
-**Tenant**: id, slug (URL path: calapan, naujan, etc.), name, logoUrl, mayorName, mayorSignatureUrl, accentColor (hex, default #4F8EF7), smtpHost, smtpPort, smtpUser, smtpPassword (encrypted), smtpFrom, barangayList (array), violationSubjects (array), currentRegistrationYear, status (Active, Suspended), createdAt, updatedAt
+**Tenant**: id, slug (URL path: calapan, naujan, etc.), name, logoUrl, mayorName, mayorSignatureUrl, accentColor (hex, default #4F8EF7), smtpHost, smtpPort, smtpUser, smtpPassword (encrypted), smtpFrom, barangayList (array), violationSubjects (array), currentRegistrationYear, customDomain (unique, nullable — tenant's own masked domain), domainVerifiedAt (timestamp, nullable — set when the custom domain's DNS + TLS is verified and activated), status (Active, Suspended), createdAt, updatedAt
 
 **Category**: id, tenantId, name, description, slug (auto-generated), displayColor (hex), iconType (emoji, image), iconEmoji (nullable), iconImageUrl (nullable, compressed), displayOrder (integer), status (Active, Disabled), memberCount (computed), createdAt, updatedAt
 
@@ -398,6 +398,7 @@ Multi-tenant SaaS
 Subdirectory routing: frms.powerbyteitsolutions.app/calapan, frms.powerbyteitsolutions.app/naujan, etc.
 Shared global data: none — each LGU is fully isolated
 DB isolation exception: none — single shared database with tenant_id row-level isolation via L1-L6 security stack
+Custom domains (optional, per tenant): a tenant may point their own domain (CNAME) at the app and have it serve their tenant via internal URL rewrite ("domain masking" — browser shows the tenant's domain; no iframes). The data boundary is still session-derived, so a custom domain changes only the visible URL, never tenant isolation. Stored as Tenant.customDomain + Tenant.domainVerifiedAt; enabled per tenant after DNS + TLS verification.
 
 ## User-Facing URLs
 /                              Public landing (app info + login redirect)
@@ -457,6 +458,7 @@ dev / stage / prod
 Dev:     http://localhost:[port assigned by Phase 3 — do not specify a number here]
 Stage:   https://staging-frms.powerbyteitsolutions.app
 Prod:    https://frms.powerbyteitsolutions.app
+Per-tenant custom domains: e.g. a tenant LGU may use fisherfolk.<lgu>.gov.ph instead of the frms.powerbyteitsolutions.app/<slug> subdirectory URL. Subdirectory routing always remains valid; the custom domain is additive. See docs/MULTITENANCY.md.
 
 ## Background Jobs (BullMQ + Valkey)
 Queue provider: BullMQ (MIT) on Valkey
