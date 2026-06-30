@@ -6,7 +6,12 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
-> None open. All custom-domain / Edit-Request decisions resolved (see below).
+- [ ] **Merge PR #5 — WCAG 2.2 AA accessibility fixes** (`feat/a11y-wcag-audit`).
+  Gov hard-gate (Rule 33). All 41 a11y violations fixed; runtime axe re-scan = 0
+  across all 18 routes, jsx-a11y static = 0, tsc + next lint green, app image
+  rebuilt + verified. Held for owner merge because merging to `main` triggers the
+  CI staging build (V32.13 deploy gate). **Owner: merge PR #5 when ready.** Ref:
+  `test-artifacts/a11y-audit-2026-06-30.md`, [[project_a11y_wcag_audit]].
 
 ## Resolved
 
