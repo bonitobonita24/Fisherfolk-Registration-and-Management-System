@@ -69,6 +69,14 @@ function ChartContainer({
   const uniqueId = React.useId()
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
 
+  // Recharts is not hydration-stable: ResponsiveContainer measures to 0 width on
+  // the server and its internal <defs>/clip-path ids are non-deterministic, so any
+  // chart that renders during SSR (e.g. when react-query data is already hydrated)
+  // throws React #418. Render the chart only after the client has mounted — the
+  // sized wrapper div keeps layout stable so there is no shift.
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+
   return (
     <ChartContext.Provider value={{ config }}>
       <div
@@ -81,11 +89,13 @@ function ChartContainer({
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer
-          initialDimension={initialDimension}
-        >
-          {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        {mounted ? (
+          <RechartsPrimitive.ResponsiveContainer
+            initialDimension={initialDimension}
+          >
+            {children}
+          </RechartsPrimitive.ResponsiveContainer>
+        ) : null}
       </div>
     </ChartContext.Provider>
   )

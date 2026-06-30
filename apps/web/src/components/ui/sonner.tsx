@@ -1,16 +1,27 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner } from "sonner"
 
 type ToasterProps = React.ComponentProps<typeof Sonner>
 
 const Toaster = ({ theme: _propTheme, ...rest }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { resolvedTheme } = useTheme()
+  // next-themes resolves the theme only on the client, so the toaster's persistent
+  // DOM element must render a deterministic theme during SSR + first client render
+  // to avoid an intermittent hydration mismatch (React #418). Default to the app's
+  // always-dark baseline until mounted, then follow the resolved theme.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const theme = (mounted ? (resolvedTheme ?? "dark") : "dark") as Exclude<
+    ToasterProps["theme"],
+    undefined
+  >
 
   return (
     <Sonner
-      theme={theme as Exclude<ToasterProps["theme"], undefined>}
+      theme={theme}
       className="toaster group"
       toastOptions={{
         classNames: {
