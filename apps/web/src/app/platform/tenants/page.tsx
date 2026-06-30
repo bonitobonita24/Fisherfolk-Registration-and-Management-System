@@ -1,3 +1,5 @@
+import { TenantsClient } from "./tenants-client";
+
 export default function TenantsPage() {
   return (
     <div className="space-y-6">
@@ -5,6 +7,7 @@ export default function TenantsPage() {
       <p className="text-muted-foreground">
         Manage all tenants across the platform. Create, activate, or deactivate tenant organizations.
       </p>
+      <TenantsClient />
     </div>
   );
 }

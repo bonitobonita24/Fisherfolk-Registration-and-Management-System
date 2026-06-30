@@ -1,5 +1,8 @@
 import { TRPCError } from "@trpc/server";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
+
+import { platformPrisma } from "@frms/db";
 
 import { omitUndefined } from "../../lib/prisma-input";
 import {
@@ -98,6 +101,134 @@ export const tenantRouter = createTRPCRouter({
       });
 
       return updated;
+    }),
+
+  create: superAdminProcedure
+    .input(
+      z
+        .object({
+          name: z.string().min(1),
+          slug: z.string().regex(/^[a-z0-9-]+$/),
+          admin: z.object({
+            username: z.string().min(3),
+            fullName: z.string().min(1),
+            password: z.string().min(12),
+          }),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { name, slug, admin } = input;
+
+      const existingTenant = await platformPrisma.tenant.findUnique({
+        where: { slug },
+      });
+      if (existingTenant) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "A tenant with this slug already exists.",
+        });
+      }
+
+      const existingUser = await platformPrisma.user.findFirst({
+        where: { username: admin.username },
+      });
+      if (existingUser) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Username already taken.",
+        });
+      }
+
+      const created = await platformPrisma.$transaction(async (tx) => {
+        const tenant = await tx.tenant.create({
+          data: {
+            name,
+            slug,
+            status: "ACTIVE",
+            currentRegistrationYear: new Date().getFullYear(),
+          },
+        });
+
+        const passwordHash = await bcrypt.hash(admin.password, 12);
+
+        await tx.user.create({
+          data: {
+            username: admin.username,
+            email: `${admin.username}@${slug}.local`,
+            name: admin.fullName,
+            passwordHash,
+            role: "admin",
+            status: "ACTIVE",
+            tenantId: tenant.id,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            tenantId: tenant.id,
+            userId: ctx.userId!,
+            action: "CREATE",
+            entityType: "Tenant",
+            entityId: tenant.id,
+            after: {
+              id: tenant.id,
+              slug: tenant.slug,
+              name: tenant.name,
+              status: String(tenant.status),
+            },
+          },
+        });
+
+        return tenant;
+      });
+
+      return {
+        id: created.id,
+        slug: created.slug,
+        name: created.name,
+        status: created.status,
+      };
+    }),
+
+  setStatus: superAdminProcedure
+    .input(
+      z
+        .object({
+          id: z.string(),
+          status: z.enum(["ACTIVE", "SUSPENDED"]),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, status } = input;
+
+      const existing = await ctx.db.tenant.findUnique({ where: { id } });
+      if (!existing) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const updated = await ctx.db.tenant.update({
+        where: { id },
+        data: { status },
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: id,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "Tenant",
+          entityId: id,
+          before: { status: existing.status } as unknown as Record<
+            string,
+            unknown
+          >,
+          after: { status } as unknown as Record<string, unknown>,
+        },
+      });
+
+      return { id: updated.id, status: updated.status };
     }),
 
   list: superAdminProcedure
