@@ -143,7 +143,7 @@ export function VesselDetailClient({ id }: Props) {
                 {record.vesselPhoto && photoUrlResp?.url ? (
                   <img
                     src={photoUrlResp.url}
-                    alt={`${displayName} photo`}
+                    alt={displayName}
                     className="aspect-square w-full rounded-lg border bg-muted object-cover"
                   />
                 ) : (

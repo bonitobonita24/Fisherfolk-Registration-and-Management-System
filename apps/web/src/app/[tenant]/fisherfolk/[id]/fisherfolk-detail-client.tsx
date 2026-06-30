@@ -154,7 +154,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                 {record.photo && photoUrlResp?.url ? (
                   <img
                     src={photoUrlResp.url}
-                    alt={`${record.fullName} photo`}
+                    alt={`Portrait of ${record.fullName}`}
                     className="aspect-square w-full rounded-lg border bg-muted object-cover"
                   />
                 ) : (

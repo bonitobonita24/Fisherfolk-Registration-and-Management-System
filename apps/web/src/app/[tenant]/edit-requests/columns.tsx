@@ -111,7 +111,7 @@ export const columns: ColumnDef<EditRequestListItem>[] = [
   },
   {
     id: "review",
-    header: "",
+    header: () => <span className="sr-only">Actions</span>,
     cell: ({ row }) => <ReviewLinkCell row={row} />,
   },
 ];
