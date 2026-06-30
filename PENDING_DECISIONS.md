@@ -6,17 +6,16 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
-> Owner directed these to the NEXT session reboot loop (2026-06-29).
-
-- [ ] **PRODUCT.md back-port — custom-domain support (DRAFTED — owner to apply).**
-  Custom-domain "masking" is a new [WHAT] the owner approved 2026-06-29. The loop
-  drafted the proposed PRODUCT.md text (Tenancy Model + Domain sections) in
-  `docs/BACKPORT_CANDIDATES.md` **candidate J** and logged the decision in
-  `docs/DECISIONS_LOG.md`. PRODUCT.md is human-owned (Rule 1) → **owner reviews
-  candidate J and applies / defers / logs spec-divergent.** Only the human edit to
-  PRODUCT.md remains. Ref: docs/MULTITENANCY.md, [[project_tenant_isolation_custom_domains]].
+> None open. All custom-domain / Edit-Request decisions resolved (see below).
 
 ## Resolved
+
+- [x] 2026-06-30 — **PRODUCT.md back-port — custom-domain support** → DONE.
+  Owner authorized the agent to apply candidate J directly (Rule 1 waived for this
+  one change, logged in `docs/DECISIONS_LOG.md`). Back-ported to PRODUCT.md ## Tenancy
+  Model, ## Domain / Base URL Expectations, and the Tenant entity under ## Data Entities
+  (lines 315 / 401 / 461). Candidate J marked ✅ BACK-PORTED in
+  `docs/BACKPORT_CANDIDATES.md`; committed `c74bccb`. No further action.
 
 - [x] 2026-06-29 — **Live middleware wiring for custom-domain masking** → DONE.
   `apps/web/src/middleware.ts` now wires `resolveTenantRoute` + `parseCustomDomainMap`
