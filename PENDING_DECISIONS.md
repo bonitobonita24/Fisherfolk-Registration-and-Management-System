@@ -6,14 +6,14 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
-- [ ] **Merge PR #5 — WCAG 2.2 AA accessibility fixes** (`feat/a11y-wcag-audit`).
-  Gov hard-gate (Rule 33). All 41 a11y violations fixed; runtime axe re-scan = 0
-  across all 18 routes, jsx-a11y static = 0, tsc + next lint green, app image
-  rebuilt + verified. Held for owner merge because merging to `main` triggers the
-  CI staging build (V32.13 deploy gate). **Owner: merge PR #5 when ready.** Ref:
-  `test-artifacts/a11y-audit-2026-06-30.md`, [[project_a11y_wcag_audit]].
+_(none open — all owner `[WHAT]` decisions resolved as of 2026-06-30)_
 
 ## Resolved
+
+- [x] 2026-06-30 — **Merge PR #5 — WCAG 2.2 AA accessibility fixes** (`feat/a11y-wcag-audit`) →
+  DONE. Owner merged; squash-landed to `main` @ `bf8306f` (alongside PR #6 hydration/favicon
+  @ `eda7614`). CI green. Gov hard-gate (Rule 33) satisfied. Ref: [[project_a11y_wcag_audit]].
+
 
 - [x] 2026-06-30 — **PRODUCT.md back-port — custom-domain support** → DONE.
   Owner authorized the agent to apply candidate J directly (Rule 1 waived for this

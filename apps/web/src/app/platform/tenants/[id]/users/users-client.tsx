@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,11 +24,29 @@ import {
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc/client";
 
-import { CreateTenantDialog } from "./create-tenant-dialog";
+import { CreateUserDialog } from "./create-user-dialog";
+import { ResetPasswordDialog } from "./reset-password-dialog";
 
-export function TenantsClient() {
+interface UsersClientProps {
+  tenantId: string;
+}
+
+interface ResetTarget {
+  userId: string;
+  username: string;
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Admin",
+  encoder: "Encoder",
+  viewer: "Viewer",
+  bantay_dagat: "Bantay Dagat",
+};
+
+export function UsersClient({ tenantId }: UsersClientProps) {
   const [inputValue, setInputValue] = useState("");
   const [search, setSearch] = useState<string | undefined>(undefined);
+  const [resetTarget, setResetTarget] = useState<ResetTarget | null>(null);
 
   // Debounce: update `search` 300 ms after the user stops typing
   useEffect(() => {
@@ -40,49 +58,70 @@ export function TenantsClient() {
 
   const utils = trpc.useUtils();
 
-  const { data, isLoading } = trpc.tenant.list.useQuery({
+  const { data, isLoading } = trpc.tenantUser.list.useQuery({
+    tenantId,
     page: 1,
     limit: 20,
     search,
   });
 
-  const setStatus = trpc.tenant.setStatus.useMutation({
+  const setStatus = trpc.tenantUser.setStatus.useMutation({
     onSuccess: () => {
-      void utils.tenant.list.invalidate();
-      toast.success("Tenant status updated.");
+      void utils.tenantUser.list.invalidate();
+      toast.success("User status updated.");
     },
     onError: (err) => {
       toast.error(err.message ?? "Failed to update status.");
     },
   });
 
-  function handleActivate(id: string) {
-    setStatus.mutate({ id, status: "ACTIVE" });
+  function handleActivate(userId: string) {
+    setStatus.mutate({ tenantId, userId, status: "ACTIVE" });
   }
 
-  function handleDeactivate(id: string, name: string) {
+  function handleDeactivate(userId: string, username: string) {
     if (
       !window.confirm(
-        `Deactivate "${name}"? All active sessions for this tenant will be invalidated.`,
+        `Deactivate "${username}"? They will be logged out and unable to sign in.`,
       )
     )
       return;
-    setStatus.mutate({ id, status: "SUSPENDED" });
+    setStatus.mutate({ tenantId, userId, status: "DEACTIVATED" });
   }
 
   return (
     <div className="space-y-4">
+      {/* ── Back link + tenant name ──────────────────────────────────────── */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link
+          href="/platform/tenants"
+          className="flex items-center gap-1 hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to tenants
+        </Link>
+        {data?.tenant.name && (
+          <>
+            <span>/</span>
+            <span className="font-medium text-foreground">
+              {data.tenant.name}
+            </span>
+          </>
+        )}
+      </div>
+
       {/* ── Toolbar ───────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between gap-3">
         <Input
-          placeholder="Search tenants…"
+          placeholder="Search users…"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           className="max-w-sm"
-          aria-label="Search tenants"
+          aria-label="Search users"
         />
-        <CreateTenantDialog
-          onCreated={() => void utils.tenant.list.invalidate()}
+        <CreateUserDialog
+          tenantId={tenantId}
+          onCreated={() => void utils.tenantUser.list.invalidate()}
         />
       </div>
 
@@ -92,10 +131,10 @@ export function TenantsClient() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
+              <TableHead>Username</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Users</TableHead>
-              <TableHead className="text-right">Fisherfolk</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -116,29 +155,33 @@ export function TenantsClient() {
                   colSpan={7}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
-                  No tenants found.
+                  No users found.
                 </TableCell>
               </TableRow>
             ) : (
-              (data?.items ?? []).map((t) => (
-                <TableRow key={t.id}>
-                  <TableCell className="font-medium">{t.name}</TableCell>
-                  <TableCell className="font-mono text-sm">{t.slug}</TableCell>
+              (data?.items ?? []).map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium">{u.name}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {u.username}
+                  </TableCell>
+                  <TableCell className="text-sm">{u.email}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={t.status === "ACTIVE" ? "default" : "secondary"}
-                    >
-                      {t.status === "ACTIVE" ? "Active" : "Suspended"}
+                    <Badge variant="secondary">
+                      {ROLE_LABELS[u.role] ?? u.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    {t._count.users}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {t._count.fisherfolk}
+                  <TableCell>
+                    <Badge
+                      variant={
+                        u.status === "ACTIVE" ? "default" : "secondary"
+                      }
+                    >
+                      {u.status === "ACTIVE" ? "Active" : "Deactivated"}
+                    </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(t.createdAt).toLocaleDateString()}
+                    {new Date(u.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -146,28 +189,35 @@ export function TenantsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={`Actions for ${t.name}`}
+                          aria-label={`Actions for ${u.username}`}
                           disabled={setStatus.isPending}
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/platform/tenants/${t.id}/users`}>
-                            Manage users
-                          </Link>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setResetTarget({
+                              userId: u.id,
+                              username: u.username,
+                            })
+                          }
+                        >
+                          Reset password
                         </DropdownMenuItem>
-                        {t.status === "ACTIVE" ? (
+                        {u.status === "ACTIVE" ? (
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
-                            onClick={() => handleDeactivate(t.id, t.name)}
+                            onClick={() =>
+                              handleDeactivate(u.id, u.username)
+                            }
                           >
                             Deactivate
                           </DropdownMenuItem>
                         ) : (
                           <DropdownMenuItem
-                            onClick={() => handleActivate(t.id)}
+                            onClick={() => handleActivate(u.id)}
                           >
                             Activate
                           </DropdownMenuItem>
@@ -181,6 +231,18 @@ export function TenantsClient() {
           </TableBody>
         </Table>
       </div>
+
+      {/* ── Reset-password dialog (controlled) ────────────────────────────── */}
+      <ResetPasswordDialog
+        tenantId={tenantId}
+        userId={resetTarget?.userId ?? ""}
+        username={resetTarget?.username ?? ""}
+        open={resetTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setResetTarget(null);
+        }}
+        onReset={() => void utils.tenantUser.list.invalidate()}
+      />
     </div>
   );
 }
