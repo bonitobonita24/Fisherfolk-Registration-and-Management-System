@@ -13,6 +13,13 @@ const loginSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
   tenantSlug: z.string().optional(),
+  // Sent over the wire as a URL-encoded form value ("true"/"false"), not a
+  // real boolean — see next-auth/react `signIn()` (Credentials POSTs via
+  // `application/x-www-form-urlencoded`).
+  rememberMe: z
+    .string()
+    .optional()
+    .transform((value) => value === "true"),
 });
 
 /**
@@ -32,12 +39,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
         tenantSlug: { label: "Tenant", type: "text" },
+        rememberMe: { label: "Remember me", type: "checkbox" },
       },
       async authorize(credentials) {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        const { username, password, tenantSlug } = parsed.data;
+        const { username, password, tenantSlug, rememberMe } = parsed.data;
 
         const user = await platformPrisma.user.findFirst({
           where: { username, status: "ACTIVE" },
@@ -65,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantId: user.tenantId,
           tenantSlug: user.tenant?.slug ?? null,
           securityVersion: user.securityVersion,
+          rememberMe,
         };
       },
     }),
