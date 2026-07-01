@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-07-01 — Phase 4 S6 (ID Generator): PVC Sheet Layout — 200×300mm, 4 pairs, mirrored back, @media print + recordPrint
+- Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S6 — swarm/id-generator)
+- Why:                 Build the printable PVC sheet layout that takes the S5 selection and renders 1–4 FRONT+BACK ID pairs on a 200×300mm page, records the batch, then triggers window.print().
+- What:
+  - `pvc-sheet.tsx` (new): 200×300mm PVC sheet, 4 FRONT+BACK slots; back face mirrored via `transform: scaleX(-1)` for film back-printing; dashed-border placeholders for empty slots; `@page { size: 200mm 300mm; margin: 0 }` print CSS; body-visibility isolation (`body * hidden` + `#pvc-sheet-root * visible`) + fixed positioning; `[data-print-hide]` hides screen controls. Print button: `window.confirm` → `idPrint.recordPrint` → `toast.success` → `window.print()`. Uses `PRINT_SCALE = 96/25.4` px/mm so IdCardRenderer fills mm containers exactly. Sheet geometry: SHEET_PAD_V_MM=26mm, SHEET_PAD_H_MM=12mm, ROW_GAP_MM=8mm (4×56+3×8+2×26=300mm). WCAG: role="region", aria-labelled pairs + cut-guide aria-hidden.
+  - `idPrint.ts` (updated): new `getSubjectPrintData` procedure (encoderProcedure) — resolves all template variable keys for FISHERFOLK (photo/signature/qrCode with single-round-trip batch category fetch) and VESSEL (vesselPhoto/qrCode/dimensions). Fix: deleted category IDs silently omitted (`filter(Boolean)`) instead of printing raw CUID strings.
+  - `id-card-renderer.tsx` (updated): fixed `photo`/`signature`/`qr` element types to look up actual URLs from `data` prop in print mode (previously always rendered gray placeholders); image-kind `variable` elements now also render as `<Image>` in print mode.
+  - `id-generator-client.tsx` (updated): replaced S5 placeholder with `<PvcSheet>`.
+- Validation:          typecheck ✅ · lint ✅ · test ✅ (178/228) · build ✅
+- Code-review:         1 in-scope bug fixed (deleted category CUID fallback → filter-and-omit); Prisma select syntax refuted (uses `field: true`); negative padding refuted (26mm positive)
+- Commit:              49140a3
+
 ## 2026-07-01 — Phase 4 S5 (ID Generator): Select & Print — multi-select subject list + photo/signature gate + ID-released state
 - Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S5 — swarm/id-generator)
 - Why:                 Build the select-and-print UI: template picker, eligible-subject multi-select table with READY/INCOMPLETE gate, per-row media validation, ID-release state, registration type, sheet-count summary, and Proceed to Layout handoff to S6.
