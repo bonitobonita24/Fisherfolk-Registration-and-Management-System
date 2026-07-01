@@ -506,6 +506,14 @@
 - Code-review fix:     Added @@unique([fisherfolkId, renewalYear]) to RegistrationRenewal (CONFIRMED: PRODUCT.md describes renewal as one-per-year; without this constraint double-click/retry could insert duplicate renewals for the same year). Constraint added to both schema and migration SQL.
 - Verification:        pnpm --filter @frms/db db:generate ✔; pnpm --filter @frms/web typecheck ✔ (0 errors)
 
+## 2026-07-01 — tRPC backend: renew + markIdReleased mutations, getActivity query, list/getById extensions + shared Zod (S1)
+- Agent:               CLAUDE_CODE (Swarm Worker S1, branch swarm/registration-status-timeline)
+- Why:                 Phase 4 S1 — wire the tRPC layer for the registration-status timeline feature: renew mutation, ID-release mutation, sanitized activity read, list/getById field extensions.
+- Files modified:      packages/shared/src/schemas/fisherfolk.ts (+fisherfolkRenewSchema, +fisherfolkMarkReleasedSchema, +fisherfolkActivityQuerySchema); apps/web/src/server/trpc/routers/fisherfolk.ts (list +idReleasedAt +_count.renewals; getById +renewals take:20; +renew; +markIdReleased; +getActivity)
+- Files added:         apps/web/src/server/trpc/routers/__tests__/fisherfolk.test.ts (5 DB-integration tests; skip in CI, run locally with DATABASE_URL)
+- Code-review fixes:   (1) Duplicate-year CONFLICT guard inside $transaction (@@unique constraint would have thrown P2002 as INTERNAL_SERVER_ERROR on double-submit). (2) auditLog.create moved inside $transaction in both renew and markIdReleased (atomic audit — mutation never commits without its audit trail). (3) take:20 added to renewals include in getById (unbounded growth otherwise). TOCTOU on violation check and _count subquery on autocomplete callers noted as deferred.
+- Verification:        pnpm --filter @frms/web typecheck ✔ (0 errors); pnpm --filter @frms/web lint ✔; pnpm --filter @frms/web test ✔ (159 passed, 21 skipped/no-DB)
+
 ## 2026-07-01 — Docs: Registration-Status Timeline decisions appended (SD wave)
 - Agent:               CLAUDE_CODE (Swarm Worker SD, branch swarm/registration-status-timeline)
 - Why:                 Session SD — governance docs update only (no app code). Record all owner + [HOW] decisions for the registration-status timeline feature introduced in S0: (a) ID release = manual staff action via markIdReleased mutation, (b) NEW/RENEWED badge derived from _count.renewals, (c) renew mutation = encoder role + active-violation block + RENEW audit log, (d) new entities RegistrationRenewal + Fisherfolk.idReleasedAt/idReleasedById, (e) profile right-side activity timeline = sanitized AuditLog feed (action/actor/timestamp only, no diffs, protectedProcedure). PRODUCT.md untouched (Rule 1).

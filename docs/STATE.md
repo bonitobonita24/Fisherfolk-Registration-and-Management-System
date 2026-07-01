@@ -18,16 +18,25 @@ Branch `swarm/registration-status-timeline` is the active feature branch for the
 - **IMPLEMENTATION_MAP.md** — added NEW/RENEWED badge row to Batch 1b list table; added 4 pending (⏳ S1+) rows to Batch 3 profile table for renew mutation, markIdReleased mutation, renewal timeline panel, and right-side activity timeline.
 - **docs/PRODUCT.md** — NOT touched (`git diff` confirms zero changes; Rule 1 preserved).
 
-### Open / pending (not in S0/SD scope)
+### Completed this session (S1 — tRPC backend wave)
 
-- S1+: tRPC mutation `fisherfolk.renew` (encoder, active-violation block, RegistrationRenewal row, status→RENEWED, AuditAction.RENEW)
-- S1+: tRPC mutation `fisherfolk.markIdReleased` (encoder+admin, sets idReleasedAt/idReleasedById, AuditAction.ID_RELEASED)
-- S1+: `fisherfolk.getById` include for `renewals` (ordered renewalYear desc) and `idReleasedBy` (name)
-- S1+: UI — profile renewal timeline panel + "Mark as Released" action button
-- S1+: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
-- S1+: UI — NEW/RENEWED badge on fisherfolk list columns (derived from `_count.renewals`)
-- Zod schemas (`fisherfolkUpdateSchema`) need `idReleasedAt`/`idReleasedById` guard when mutation is wired
+- **Shared Zod schemas** — `fisherfolkRenewSchema`, `fisherfolkMarkReleasedSchema`, `fisherfolkActivityQuerySchema` added to `@frms/shared`.
+- **`fisherfolk.renew`** (encoderProcedure) — active-violation PRECONDITION_FAILED guard; duplicate-year CONFLICT guard (inside `$transaction`); creates `RegistrationRenewal` + flips `status→RENEWED` + `auditLog(RENEW)` all atomic in one transaction.
+- **`fisherfolk.markIdReleased`** (encoderProcedure) — idempotent (early-return if already set); `$transaction` wraps `fisherfolk.update` + `auditLog(UPDATE)`.
+- **`fisherfolk.getActivity`** (protectedProcedure) — tenant+entity scoped; sanitized output `{id, action, actorName, createdAt}` — no before/after diffs.
+- **`list` select** extended: `+idReleasedAt`, `+_count.renewals` for badge derivation.
+- **`getById` include** extended: `+renewals` (take:20, desc) with `renewedBy{name,email}`.
+- **Tests** — 5 DB-integration tests in `src/server/trpc/routers/__tests__/fisherfolk.test.ts` (skip in CI; run locally with DATABASE_URL).
+- Commit `a9f48c5` on `swarm/registration-status-timeline`.
+
+### Open / pending (not in S1 scope)
+
+- S2+: UI — profile renewal timeline panel + "Mark as Released" action button
+- S2+: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
+- S2+: UI — NEW/RENEWED badge on fisherfolk list columns (derived from `_count.renewals`)
 - Performance indexes (deferred from S0 code review): `@@index([tenantId, renewalYear])` on RegistrationRenewal; index on `fisherfolk(id_released_by_id)`
+- TOCTOU on violation check in `renew` (violation.count is pre-transaction; low-probability race) — architectural fix deferred
+- `_count.renewals` on `list` runs a COUNT subquery on all list callers including autocomplete dropdowns — consider splitting to a lean `listSummary` for dropdowns (deferred, needs API split)
 
 ### Main branch state
 
