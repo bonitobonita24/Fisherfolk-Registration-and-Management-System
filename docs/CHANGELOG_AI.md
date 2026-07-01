@@ -647,3 +647,12 @@
 - Code-review fixes:   (1) epsilon delta guard (Math.abs < 0.01 for sub-pixel snap residuals); (2) snapModifier useMemo (prevent mid-drag modifier re-registration); (3) wrong-side-write closure (side-specific useCallback handlers); (4) uid() secure-context fallback (crypto.randomUUID non-HTTPS); (5) dead setUploading in onError removed (finally handles it).
 - Deferred findings:   _style argument discarded in renderElement callback (cosmetic, out of S4a scope).
 - Verification:        typecheck=pass (0 errors); lint=pass (0 warnings); test=pass (178 pass / 50 skip-DB); build=pass. Commit 9995e5d on swarm/id-generator.
+
+## S7 — Page assembly, RBAC tab gating (2026-07-01)
+- Changed file:    apps/web/src/app/[tenant]/id-generator/_components/id-generator-client.tsx
+- RBAC gating:     Template Editor tab hidden for encoders (canManage=false); admins/super_admins see both tabs.
+                   defaultValue="editor" for managers, "select" for encoders.
+- WCAG:            TabsList aria-label="ID Generator sections" added.
+- No change:       page.tsx (canManage calc already correct); nav-items.ts (roles already super_admin/admin/encoder); SelectAndPrint ID-released state (unchanged from S5).
+- Code-review:     ran 2 angles; both [] (clean — no in-scope findings).
+- Verification:    typecheck=pass (0 errors); lint=pass (0 warnings); test=pass (178 pass / 50 skip-DB); build=pass. Commit 47d391b on swarm/id-generator.

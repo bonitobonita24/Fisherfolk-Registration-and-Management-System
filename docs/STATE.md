@@ -5,6 +5,18 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S7 — Page assembly, RBAC tab gating)
+
+- **`apps/web/src/app/[tenant]/id-generator/_components/id-generator-client.tsx`** (updated) — RBAC tab gating:
+  - Admins/super_admins (`canManage=true`): `defaultValue="editor"`, Template Editor tab visible.
+  - Encoders (`canManage=false`): `defaultValue="select"`, Template Editor tab + TabsContent hidden entirely.
+  - `TabsList` gains `aria-label="ID Generator sections"` for WCAG keyboard nav.
+  - `page.tsx` unchanged (already computes `canManage` from `session?.user?.role`); nav-items.ts unchanged (roles already correct).
+  - ID-released state confirmed wired in `SelectAndPrint` (S5 work, unchanged).
+- **Code-review gate**: ran (2 finder angles); both returned `[]` — clean.
+- **Validation**: typecheck ✅ (0 errors), lint ✅ (0 warnings), test ✅ (178 pass / 50 skip-DB), build ✅.
+- Commit `47d391b` on `swarm/id-generator`.
+
 ### Completed this session (S6 — PVC Sheet Layout + print rendering)
 
 - **`apps/web/src/app/[tenant]/id-generator/_components/pvc-sheet.tsx`** (new) — `<PvcSheet>` component: 200×300mm PVC sheet, 4 FRONT+BACK pairs; back face mirrored via `scaleX(-1)` for film back-printing; dashed-border placeholders for empty slots; `@page { size: 200mm 300mm; margin: 0 }` print CSS with visibility isolation (`body * hidden` + `#pvc-sheet-root * visible`) + `position: fixed` sheet; Print button calls `window.confirm` → `idPrint.recordPrint` → `toast.success` → `window.print()`; `PRINT_SCALE = 96/25.4` px/mm; sheet geometry: SHEET_PAD_V_MM=26mm, SHEET_PAD_H_MM=12mm, ROW_GAP_MM=8mm; uses `trpc.idTemplate.getById` + `trpc.idPrint.getSubjectPrintData` for template + resolved data; `[data-print-hide]` hides screen controls on print; WCAG: `role="region"`, aria-labelled pairs, `aria-hidden` on decorative elements.
