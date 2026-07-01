@@ -5,6 +5,16 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S5 — Select & Print subject list + validation gate + ID-released state)
+
+- **`apps/web/src/app/[tenant]/id-generator/_components/select-and-print.tsx`** (new) — `<SelectAndPrint>` component: Tabs (FISHERFOLK | VESSEL-coming-soon); FISHERFOLK tab has template picker (ACTIVE templates from `idTemplate.list`); multi-select table driven by `idPrint.listEligible` showing name, photo thumbnail (or "Missing" text), signature present/missing, ID-Released badge (text: Released / Not Released), NEW/RENEWED registration badge, and READY/INCOMPLETE print-status with explicit "Missing photo/signature" text; disabled checkboxes with aria-label for blocked rows; "Select all ready" bulk action; running subject + sheet count (uses `ID_CARD_GEOMETRY.maxPairsPerSheet`); "Proceed to Layout" calls `onProceedToLayout(PrintSelection)`. VESSEL tab shows "coming soon" Card. `useEffect` resets `selectedIds` on `templateId` change to prevent stale ghost selections. WCAG: `<table>` with `<caption>` + `scope="col"`, aria-labeled checkboxes, all status badges carry text.
+- **`apps/web/src/app/[tenant]/id-generator/_components/id-generator-client.tsx`** (new) — `<IdGeneratorClient>` client wrapper: Tabs (Template Editor | Select & Print); `forceMount` + `data-[state=inactive]:hidden` on both `TabsContent` to preserve selection state across tab switches; `printSelection` state holds `PrintSelection | null` for S6 PvcSheetLayout to consume; S6 placeholder card with shadcn Button (variant=link) for "← Back to selection".
+- **`apps/web/src/app/[tenant]/id-generator/page.tsx`** (updated) — renders `<IdGeneratorClient canManage={canManage} />` instead of `<TemplateEditor>` directly; description updated.
+- **Exported types for S6**: `PrintSubject` and `PrintSelection` from `select-and-print.tsx`.
+- **Code-review gate**: ran (3 agents × 8 angles); 4 in-scope findings fixed: stale `selectedIds` on template change (useEffect); `sheetsNeeded` hardcoded `4` → `ID_CARD_GEOMETRY.maxPairsPerSheet`; raw `<button>` → shadcn `Button variant=link`; JSX block comment removed. Deferred: `registrationType` UPDATE case (no data signal in `listEligible`; bucket-A follow-up); StatusBadge reuse (cosmetic divergence).
+- **Validation**: typecheck ✅ (0 errors), lint ✅ (0 warnings), test ✅ (178 pass / 50 skip-DB), build ✅.
+- Commit `030429f` on `swarm/id-generator`.
+
 ### Completed this session (S4b — ElementInspector + TemplateForm save/load + TemplateManager)
 
 - **`apps/web/src/app/[tenant]/id-generator/_components/element-inspector.tsx`** (new) — `<ElementInspector>` side panel; edits selected element props live: xMm/yMm/widthMm/heightMm (mm number inputs, step 0.1), zIndex, delete-element; text elements get content input; text/variable elements get fontFamily, fontSizePt, fontWeight (Select 400/500/600/700), color (native color picker + hex text with `#RRGGBB` validation), align (3-button group with `aria-pressed`); icon elements get emoji input. All inputs WCAG-labelled (Label+htmlFor). NaN inputs silently retained (no silent clamp-to-default).

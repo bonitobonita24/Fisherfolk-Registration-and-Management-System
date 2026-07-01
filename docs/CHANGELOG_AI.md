@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-07-01 — Phase 4 S5 (ID Generator): Select & Print — multi-select subject list + photo/signature gate + ID-released state
+- Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S5 — swarm/id-generator)
+- Why:                 Build the select-and-print UI: template picker, eligible-subject multi-select table with READY/INCOMPLETE gate, per-row media validation, ID-release state, registration type, sheet-count summary, and Proceed to Layout handoff to S6.
+- Files:               apps/web/src/app/[tenant]/id-generator/_components/select-and-print.tsx (new, ~310L), id-generator-client.tsx (new, ~55L), page.tsx (updated)
+- Validation:          typecheck ✅ lint ✅ test 178/228 ✅ build ✅
+- Commit:              030429f
+
 ## 2026-07-01 — Phase 4 S4b (ID Generator): ElementInspector + TemplateForm save/load/duplicate + TemplateManager list
 - Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S4b — swarm/id-generator)
 - Why:                 Complete the template editor UI: element property editing, template persistence (create/update), load/duplicate wiring, and a template manager list with admin-gated CRUD.
