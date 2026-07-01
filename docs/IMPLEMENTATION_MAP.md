@@ -311,6 +311,7 @@
 | List client component (search, filter, paginate) | apps/web/src/app/[tenant]/fisherfolk/fisherfolk-list-client.tsx | ✅ Built |
 | Column definitions (FisherfolkListItem + 6 columns) | apps/web/src/app/[tenant]/fisherfolk/columns.tsx | ✅ Built |
 | DataTable showPagination prop | apps/web/src/components/shared/data-table.tsx | ✅ Extended |
+| NEW/RENEWED badge column (derived from `_count.renewals` — 0=NEW/green, ≥1=RENEWED/orange) | apps/web/src/app/[tenant]/fisherfolk/columns.tsx | ⏳ S1+ (swarm/registration-status-timeline) |
 
 Commit 5c83d0c on feat/shared-ui-components. Server-side pagination via tRPC fisherfolk.list query with keepPreviousData. Client-rendered custom pager (first/prev/next/last).
 
@@ -360,6 +361,10 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 | Edit Request — in-app + email notifications (SMS prepared) | ✅ Built (Batch 3c-2, 0a7a403) |
 | In-app notification bell/center (header) | ✅ Built (Batch 3c-2) |
 | Fisherfolk ID format-agnostic / mixed IDs | ✅ Built (Batch 3f, b6572cd) |
+| `fisherfolk.renew` mutation — encoder role, active-violation block, writes RegistrationRenewal + status→RENEWED + bumps registrationYear + AuditAction.RENEW (fisherfolk.ts) | ⏳ S1+ (swarm/registration-status-timeline) |
+| `fisherfolk.markIdReleased` mutation — encoder+admin role, sets idReleasedAt/idReleasedById + AuditAction.ID_RELEASED (fisherfolk.ts) | ⏳ S1+ (swarm/registration-status-timeline) |
+| Profile renewal timeline panel — full RegistrationRenewal history, renewalYear desc; shows original dateJoined (fisherfolk-detail-client.tsx) | ⏳ S1+ (swarm/registration-status-timeline) |
+| Right-side activity timeline — sanitized AuditLog feed: action/actor/timestamp only, no diffs; protectedProcedure (fisherfolk-detail-client.tsx) | ⏳ S1+ (swarm/registration-status-timeline) |
 
 **Batch 3b shipped — Vessel Registration** (10 files: 6 new + 4 modified, squash c52a1ab on main). Full vessel feature mirroring the fisherfolk pattern: list (`/[tenant]/vessels` + columns + client, MFVR linked to detail, status filter), read-only detail (`/[tenant]/vessels/[id]` — all MFVR fields grouped, linked owners → fisherfolk profiles, active violations panel, QR render, role-gated photo), single-page register form (`/[tenant]/vessels/register` — all fields, fishing-gear chips, optional fisherfolk owner picker via `fisherfolk.list` search, optional photo). Router `vessel.create` hardened to spec: auto-generates+stores QR (`buildQRPayload`, regNo=mfvrNumber, in a transaction); `ownerIds` made OPTIONAL (default `[]`) per PRODUCT.md "optionally link owner"; clearer duplicate-MFVR message; accepts optional `vesselPhoto`. Shared: `upload` ENTITY_TYPES += `"vessel-photo"`; `PhotoUpload` given optional `entityType` prop (backward-compatible). Verified: apps/web tsc EXIT=0, next lint clean across src (no fisherfolk regression), shared tsc EXIT=0. Carried debt: `upload.getDownloadUrl` `encoderProcedure` → Viewer/Bantay Dagat see photo placeholder (same gap as fisherfolk; Batch 3d). Browser/visual QA deferred to Phase 6 (Rule 16).
 

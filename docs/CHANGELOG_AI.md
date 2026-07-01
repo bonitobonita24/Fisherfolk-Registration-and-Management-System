@@ -505,3 +505,9 @@
 - Files added:         packages/db/prisma/migrations/20260701000000_registration_renewal_and_id_released/migration.sql (additive only: 2 ADD COLUMN on fisherfolk + CREATE TABLE registration_renewals + 5 FK constraints + 2 indexes)
 - Code-review fix:     Added @@unique([fisherfolkId, renewalYear]) to RegistrationRenewal (CONFIRMED: PRODUCT.md describes renewal as one-per-year; without this constraint double-click/retry could insert duplicate renewals for the same year). Constraint added to both schema and migration SQL.
 - Verification:        pnpm --filter @frms/db db:generate ✔; pnpm --filter @frms/web typecheck ✔ (0 errors)
+
+## 2026-07-01 — Docs: Registration-Status Timeline decisions appended (SD wave)
+- Agent:               CLAUDE_CODE (Swarm Worker SD, branch swarm/registration-status-timeline)
+- Why:                 Session SD — governance docs update only (no app code). Record all owner + [HOW] decisions for the registration-status timeline feature introduced in S0: (a) ID release = manual staff action via markIdReleased mutation, (b) NEW/RENEWED badge derived from _count.renewals, (c) renew mutation = encoder role + active-violation block + RENEW audit log, (d) new entities RegistrationRenewal + Fisherfolk.idReleasedAt/idReleasedById, (e) profile right-side activity timeline = sanitized AuditLog feed (action/actor/timestamp only, no diffs, protectedProcedure). PRODUCT.md untouched (Rule 1).
+- Files modified:      docs/DECISIONS_LOG.md (appended 2026-07-01 entry with sub-decisions a–e); docs/IMPLEMENTATION_MAP.md (Batch 1b list table + Batch 3 profile table extended with renewal/ID-release/activity-timeline pending rows); docs/STATE.md (current-state block updated); docs/CHANGELOG_AI.md (this entry).
+- Verification:        git diff -- docs/PRODUCT.md confirms zero changes. Rule 1 preserved.

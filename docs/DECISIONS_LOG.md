@@ -258,3 +258,76 @@ PRODUCT.md, append all those updates we made." Claude Code applied the remaining
 - **H** — Dashboard: added asset-coverage (missing-photo/signature) counts + list `missing` filter.
 - **I (PD-003)** — Integrations: stated the standard notification channel set (in-app + email ACTIVE, SMS prepared-inactive).
 Where a candidate's pre-drafted text conflicted with shipped code, the **code won** (B hex defaults, C entity line). Waiver remains scoped to these candidates; Rule 1 otherwise stays in force.
+
+---
+
+## 2026-07-01 — Registration-Status Timeline: ID release, NEW/RENEWED badge, renew action, and activity timeline
+
+Feature branch: `swarm/registration-status-timeline`. Decisions recorded by Swarm Worker SD (Rule 15 attribution).
+
+### (a) ID "Released" flag — MANUAL staff action, not auto-on-print
+Decision: Setting a fisherfolk registration as ID "Released" is a deliberate MANUAL staff action
+("Mark as Released") performed by an encoder or admin. It is NOT triggered automatically when a
+physical ID card is printed or generated. The action is backed by two fields on the `Fisherfolk`
+model: `idReleasedAt` (DateTime) and `idReleasedById` (FK → User). The corresponding tRPC mutation
+is `fisherfolk.markIdReleased` — role-gated to `encoderProcedure` (encoder + admin roles). Every
+call writes an AuditLog entry (AuditAction.ID_RELEASED, entity FISHERFOLK).
+Rationale: Auto-on-print would silently mark IDs released if the print flow ever re-ran; a manual
+action preserves staff accountability and keeps the audit trail authoritative.
+Locked: yes
+
+### (b) NEW vs RENEWED registration badge — derived from renewal-history count
+Decision: The "NEW" (green) vs "RENEWED" (orange) badge displayed on the fisherfolk list columns
+and on the profile page header is DERIVED at render time from `_count.renewals` included in the
+`fisherfolk.list` and `fisherfolk.getById` query results.
+- `_count.renewals` = 0 → badge = **NEW** (green)
+- `_count.renewals` ≥ 1 → badge = **RENEWED** (orange)
+The fisherfolk profile page shows the original `dateJoined` field (never mutated on renewal) plus
+a full renewal timeline (all `RegistrationRenewal` rows for that fisherfolk, ordered by
+`renewalYear` desc).
+Rationale: Avoids a separate boolean or enum column that could drift out of sync; the renewal-row
+count is the single source of truth for registration status.
+Locked: yes
+
+### (c) `renew` action — encoder role, blocked on active violation
+Decision: The registration renewal action (`fisherfolk.renew` tRPC mutation) is gated to the
+encoder role (`encoderProcedure`). Before committing, the mutation MUST check for any linked
+record with status `ACTIVE_VIOLATION`; if found, the call is rejected with a user-facing error
+("Cannot renew — fisherfolk has an active violation"). On success the mutation:
+1. Writes a new `RegistrationRenewal` row (`fisherfolkId`, `tenantId`, `renewedById`,
+   `renewalYear`, optional `notes`).
+2. Transitions `Fisherfolk.status` → `RENEWED`.
+3. Bumps `Fisherfolk.registrationYear` to the renewal year.
+4. Logs `AuditAction.RENEW` (entity FISHERFOLK) to the AuditLog.
+All four writes execute in a single Prisma transaction.
+Rationale: Blocking renewal on active violations enforces operational policy; the transaction
+guarantees atomicity so a partial renewal can never leave the record in an inconsistent state.
+Locked: yes
+
+### (d) New data entities introduced in this wave
+- **RegistrationRenewal** — `id`, `fisherfolkId`, `tenantId`, `renewedById`, `renewalYear` (Int),
+  `notes?` (String), `createdAt`; unique constraint `@@unique([fisherfolkId, renewalYear])`;
+  two indexes: `@@index([tenantId])` (tenant list queries) + `@@index([fisherfolkId])` (per-fisherfolk timeline).
+- **Fisherfolk.idReleasedAt** — `DateTime?`, set to `now()` by `markIdReleased` mutation.
+- **Fisherfolk.idReleasedById** — `String?` FK → `User.id`, set by `markIdReleased` mutation.
+Migration: `20260701000000_registration_renewal_and_id_released` (additive-only — 2 ADD COLUMN on
+`fisherfolk` + CREATE TABLE `registration_renewals` + FK constraints + indexes).
+Schema committed on branch `swarm/registration-status-timeline` (commit 2687824).
+Locked: yes (schema sealed; downstream sessions must not alter this migration)
+
+### (e) Right-side profile activity timeline — sanitized per-entity audit feed
+Decision: The right-side panel on the fisherfolk profile page (`/[tenant]/fisherfolk/[id]`)
+displays a per-entity activity timeline sourced from the `AuditLog` table, filtered to
+`entity = FISHERFOLK` AND `entityId = fisherfolk.id`. The feed exposes exactly:
+- `action` (the AuditAction enum value, human-readable label in the UI)
+- `actorName` (display name of the acting User)
+- `createdAt` (timestamp)
+
+**Before/after field diffs (`before` and `after` JSON columns on AuditLog) are NOT exposed to
+this feed.** The tRPC procedure serving this feed is `protectedProcedure` — any authenticated,
+same-tenant user (all staff roles) may view it; no public or cross-tenant access.
+Rationale: Full before/after diffs are sensitive (may reveal PII edit contents or admin
+operations); sanitizing to action/actor/timestamp satisfies the audit-visibility use case without
+leaking granular diff data to front-line staff roles that should only know *what* happened, not
+the exact field values that changed.
+Locked: yes
