@@ -38,10 +38,22 @@ Branch `swarm/registration-status-timeline` is the active feature branch for the
 - lint/build/typecheck all green; code-review gate ran (1 in-scope finding fixed: `String()` → direct pass-through for non-Date idReleasedAt values).
 - Commit on `swarm/registration-status-timeline`.
 
+### Completed this session (S3 — profile UI wave)
+
+- **Two-column shell** — `grid gap-6 lg:grid-cols-[1fr_320px]` wrapping LEFT main column (Profile + Renewal History + related records) and RIGHT `<aside aria-label="Activity timeline">` placeholder Card (S4 will render the feed).
+- **Registration status line** in header: 0 renewals → NEW (green badge) + "New registration"; ≥1 → RENEWED (orange badge) + "Last renewed [date]"; always shows original `dateJoined`.
+- **Renewal History Card** (left column): lists `record.renewals` (year · renewedAt · who · notes); empty state "No renewals yet."
+- **ID-Release line** inside Profile Card fields: Released (date + who) or "ID not yet released" from `record.idReleasedAt` / `record.idReleasedBy`.
+- **Action buttons** (encoder/admin/super_admin only via `trpc.user.me`): Renew Registration (disabled+tooltip when active violation; uses shared `ConfirmDialog`; on success invalidates `getById`; toast on success/error; dialog stays open on error via re-throw); Mark ID Released (hidden once `idReleasedAt` set; uses `ConfirmDialog`).
+- **`getById` router** extended: added `idReleasedBy: { select: { name, email } }` to support "Released by [name]" display.
+- **Code review fixes**: used shared `ConfirmDialog` instead of inline Dialog (removes redundant open/loading state); added visible placeholder Card to `<aside>` to prevent empty landmark WCAG issue; dialog stays open on mutation error (re-throw pattern).
+- lint/typecheck/build all green.
+
 ### Open / pending
 
-- S3+: UI — profile renewal timeline panel + "Mark as Released" action button
-- S3+: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
+- S4: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
+- `hasActiveViolation` is derived from `violations take:5` in getById — if a fisherfolk has >5 violations and the 6th is active, the Renew button won't show disabled (server still blocks; UX degrade only). Fix: add `activeViolationCount` field to getById (deferred).
+- `log.user` null deref in `getActivity` when `userId` is null or user deleted — out of S3 scope; see code review deferred findings.
 - Performance indexes (deferred from S0 code review): `@@index([tenantId, renewalYear])` on RegistrationRenewal; index on `fisherfolk(id_released_by_id)`
 - TOCTOU on violation check in `renew` (violation.count is pre-transaction; low-probability race) — architectural fix deferred
 - `_count.renewals` on `list` runs a COUNT subquery on all list callers including autocomplete dropdowns — consider splitting to a lean `listSummary` for dropdowns (deferred, needs API split)

@@ -129,6 +129,7 @@ export const fisherfolkRouter = createTRPCRouter({
               renewedBy: { select: { name: true, email: true } },
             },
           },
+          idReleasedBy: { select: { name: true, email: true } },
         },
       });
       if (!record) throw new TRPCError({ code: "NOT_FOUND" });
