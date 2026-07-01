@@ -13,17 +13,24 @@ interface IdGeneratorClientProps {
 export function IdGeneratorClient({ canManage }: IdGeneratorClientProps) {
   const [printSelection, setPrintSelection] = useState<PrintSelection | null>(null);
 
+  // Encoders only see Select & Print; admins/super_admins see all tabs.
+  const defaultTab = canManage ? "editor" : "select";
+
   return (
-    <Tabs defaultValue="editor" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="editor">Template Editor</TabsTrigger>
+    <Tabs defaultValue={defaultTab} className="space-y-6">
+      <TabsList aria-label="ID Generator sections">
+        {canManage && (
+          <TabsTrigger value="editor">Template Editor</TabsTrigger>
+        )}
         <TabsTrigger value="select">Select &amp; Print</TabsTrigger>
       </TabsList>
 
       {/* forceMount keeps both tabs mounted so selection state survives tab switches */}
-      <TabsContent value="editor" className="mt-0 data-[state=inactive]:hidden" forceMount>
-        <TemplateEditor canManage={canManage} />
-      </TabsContent>
+      {canManage && (
+        <TabsContent value="editor" className="mt-0 data-[state=inactive]:hidden" forceMount>
+          <TemplateEditor canManage={canManage} />
+        </TabsContent>
+      )}
 
       <TabsContent value="select" className="mt-0 data-[state=inactive]:hidden" forceMount>
         {printSelection !== null ? (
