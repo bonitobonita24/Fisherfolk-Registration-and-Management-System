@@ -97,6 +97,26 @@ export function ElementVisual({
 
     case "variable": {
       const label = getVariableLabel(element.variableKey);
+      const varMeta = TEMPLATE_VARIABLES.find((v) => v.key === element.variableKey);
+      // Image-kind variables (photo, signature, qr URLs) render as <img> in print mode
+      if (!isEdit && varMeta?.kind === "image") {
+        const imageUrl = data?.[element.variableKey];
+        if (imageUrl) {
+          return (
+            <div style={{ position: "relative", width: "100%", height: "100%" }}>
+              <Image
+                src={imageUrl}
+                alt={label}
+                fill
+                sizes={`${Math.round(pxFromMm(element.widthMm, scale))}px`}
+                style={{ objectFit: "contain" }}
+                unoptimized
+              />
+            </div>
+          );
+        }
+        return null;
+      }
       const displayValue = isEdit
         ? `{${label}}`
         : (data?.[element.variableKey] ?? label);
@@ -160,22 +180,37 @@ export function ElementVisual({
         </div>
       );
 
-    case "photo":
+    case "photo": {
+      const photoUrl = !isEdit
+        ? (data?.["{{photo}}"] ?? data?.["{{vessel_photo}}"] ?? null)
+        : null;
+      if (photoUrl) {
+        return (
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Image
+              src={photoUrl}
+              alt="Photo"
+              fill
+              sizes={`${Math.round(pxFromMm(element.widthMm, scale))}px`}
+              style={{ objectFit: "cover" }}
+              unoptimized
+            />
+          </div>
+        );
+      }
       return (
         <div
           style={{
             width: "100%",
             height: "100%",
-            background: isEdit ? "#f3f4f6" : "#e5e7eb",
+            background: "#f3f4f6",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             color: "#9ca3af",
             fontSize:
-              pxFromMm(
-                Math.min(element.widthMm, element.heightMm),
-                scale
-              ) * 0.25,
+              pxFromMm(Math.min(element.widthMm, element.heightMm), scale) *
+              0.25,
             border: isEdit ? "1px dashed #d1d5db" : undefined,
             borderRadius: 2,
           }}
@@ -183,8 +218,24 @@ export function ElementVisual({
           {isEdit ? "📷 Photo" : null}
         </div>
       );
+    }
 
-    case "signature":
+    case "signature": {
+      const sigUrl = !isEdit ? (data?.["{{signature}}"] ?? null) : null;
+      if (sigUrl) {
+        return (
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Image
+              src={sigUrl}
+              alt="Signature"
+              fill
+              sizes={`${Math.round(pxFromMm(element.widthMm, scale))}px`}
+              style={{ objectFit: "contain" }}
+              unoptimized
+            />
+          </div>
+        );
+      }
       return (
         <div
           style={{
@@ -202,8 +253,26 @@ export function ElementVisual({
           {isEdit ? "✍ Signature" : null}
         </div>
       );
+    }
 
-    case "qr":
+    case "qr": {
+      const qrUrl = !isEdit
+        ? (data?.["{{qr_code}}"] ?? data?.["{{vessel_qr_code}}"] ?? null)
+        : null;
+      if (qrUrl) {
+        return (
+          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            <Image
+              src={qrUrl}
+              alt="QR Code"
+              fill
+              sizes={`${Math.round(pxFromMm(element.widthMm, scale))}px`}
+              style={{ objectFit: "contain" }}
+              unoptimized
+            />
+          </div>
+        );
+      }
       return (
         <div
           style={{
@@ -217,15 +286,14 @@ export function ElementVisual({
             borderRadius: 2,
             color: "#9ca3af",
             fontSize:
-              pxFromMm(
-                Math.min(element.widthMm, element.heightMm),
-                scale
-              ) * 0.3,
+              pxFromMm(Math.min(element.widthMm, element.heightMm), scale) *
+              0.3,
           }}
         >
           {isEdit ? "QR" : null}
         </div>
       );
+    }
   }
 }
 

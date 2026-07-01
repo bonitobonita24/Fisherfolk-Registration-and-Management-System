@@ -112,6 +112,129 @@ export const idPrintRouter = createTRPCRouter({
     }),
 
   /**
+   * Fetch all template-variable-resolvable fields for selected subjects.
+   * Used by PvcSheet to build the CardData map for IdCardRenderer (print mode).
+   * Scoped to the calling tenant; IDs not found in this tenant are silently omitted.
+   */
+  getSubjectPrintData: encoderProcedure
+    .input(
+      z
+        .object({
+          subjectIds: z.array(z.string().cuid()).min(1).max(4),
+          templateType: z.enum(["FISHERFOLK", "VESSEL"]),
+        })
+        .strict(),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const { subjectIds, templateType } = input;
+      const tenantId = ctx.tenantId;
+
+      if (templateType === "FISHERFOLK") {
+        const records = await ctx.db.fisherfolk.findMany({
+          where: { id: { in: subjectIds }, tenantId },
+          select: {
+            id: true,
+            idNumber: true,
+            fullName: true,
+            lastName: true,
+            firstName: true,
+            middleName: true,
+            dateOfBirth: true,
+            sex: true,
+            address: true,
+            barangay: true,
+            rsbsaNumber: true,
+            categoryIds: true,
+            photo: true,
+            signature: true,
+            qrCode: true,
+            dateJoined: true,
+            registrationYear: true,
+          },
+        });
+
+        // Batch-fetch category names for all subjects in a single round-trip
+        const allCategoryIds = [...new Set(records.flatMap((r) => r.categoryIds))];
+        const categoryRows =
+          allCategoryIds.length > 0
+            ? await ctx.db.category.findMany({
+                where: { id: { in: allCategoryIds }, tenantId },
+                select: { id: true, name: true },
+              })
+            : [];
+        const categoryNameById = new Map(categoryRows.map((c) => [c.id, c.name]));
+
+        return records.map((r) => ({
+          subjectId: r.id,
+          data: {
+            "{{registration_number}}": r.idNumber,
+            "{{full_name}}": r.fullName,
+            "{{last_name}}": r.lastName,
+            "{{first_name}}": r.firstName,
+            "{{middle_name}}": r.middleName ?? "",
+            "{{date_of_birth}}": r.dateOfBirth
+              ? r.dateOfBirth.toISOString().slice(0, 10)
+              : "",
+            "{{sex}}": r.sex ?? "",
+            "{{address}}": r.address,
+            "{{barangay}}": r.barangay,
+            "{{rsbsa_number}}": r.rsbsaNumber ?? "",
+            "{{categories}}": r.categoryIds
+              .map((id) => categoryNameById.get(id) ?? "")
+              .filter(Boolean)
+              .join(", "),
+            "{{photo}}": r.photo ?? "",
+            "{{signature}}": r.signature ?? "",
+            "{{qr_code}}": r.qrCode ?? "",
+            "{{date_joined}}": r.dateJoined.toISOString().slice(0, 10),
+            "{{registration_year}}": String(r.registrationYear),
+            "{{mayor_name}}": "",
+            "{{mayor_signature}}": "",
+          },
+        }));
+      }
+
+      // VESSEL
+      const vessels = await ctx.db.vessel.findMany({
+        where: { id: { in: subjectIds }, tenantId },
+        select: {
+          id: true,
+          mfvrNumber: true,
+          vesselName: true,
+          vesselType: true,
+          hullMaterial: true,
+          placeBuilt: true,
+          yearBuilt: true,
+          homeport: true,
+          grossTonnage: true,
+          horsepower: true,
+          vesselPhoto: true,
+          qrCode: true,
+        },
+      });
+
+      return vessels.map((v) => ({
+        subjectId: v.id,
+        data: {
+          "{{mfvr_number}}": v.mfvrNumber,
+          "{{vessel_name}}": v.vesselName ?? "",
+          "{{vessel_type}}": v.vesselType,
+          "{{hull_material}}": v.hullMaterial ?? "",
+          "{{place_built}}": v.placeBuilt ?? "",
+          "{{year_built}}": v.yearBuilt != null ? String(v.yearBuilt) : "",
+          "{{homeport}}": v.homeport ?? "",
+          "{{gross_tonnage}}": v.grossTonnage != null ? String(v.grossTonnage) : "",
+          "{{horsepower}}": v.horsepower != null ? String(v.horsepower) : "",
+          "{{vessel_photo}}": v.vesselPhoto ?? "",
+          "{{vessel_qr_code}}": v.qrCode ?? "",
+          "{{mayor_name}}": "",
+          "{{mayor_signature}}": "",
+        },
+      }));
+    }),
+
+  /**
    * Validate a selection of IDs: returns readyIds and blockedIds with missing field info.
    */
   validateSelection: encoderProcedure
