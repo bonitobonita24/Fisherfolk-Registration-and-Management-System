@@ -1,5 +1,5 @@
 import { auth } from "@/server/auth";
-import { TemplateEditor } from "./_components/template-editor";
+import { IdGeneratorClient } from "./_components/id-generator-client";
 
 export default async function IdGeneratorPage() {
   const session = await auth();
@@ -11,10 +11,10 @@ export default async function IdGeneratorPage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">ID Generator</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Design fisherfolk identification card templates with drag-and-drop editor.
+          Design ID card templates and select subjects for printing.
         </p>
       </div>
-      <TemplateEditor canManage={canManage} />
+      <IdGeneratorClient canManage={canManage} />
     </div>
   );
 }
