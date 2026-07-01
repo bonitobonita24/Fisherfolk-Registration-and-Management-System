@@ -5,6 +5,35 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S4b — ElementInspector + TemplateForm save/load + TemplateManager)
+
+- **`apps/web/src/app/[tenant]/id-generator/_components/element-inspector.tsx`** (new) — `<ElementInspector>` side panel; edits selected element props live: xMm/yMm/widthMm/heightMm (mm number inputs, step 0.1), zIndex, delete-element; text elements get content input; text/variable elements get fontFamily, fontSizePt, fontWeight (Select 400/500/600/700), color (native color picker + hex text with `#RRGGBB` validation), align (3-button group with `aria-pressed`); icon elements get emoji input. All inputs WCAG-labelled (Label+htmlFor). NaN inputs silently retained (no silent clamp-to-default).
+- **`apps/web/src/app/[tenant]/id-generator/_components/template-form.tsx`** (new) — `<TemplateForm>` header row: name Input + templateType Select (FISHERFOLK|VESSEL) + status Select (ACTIVE|ARCHIVED) + Save/Update Button (disabled on empty name or while saving); all fields WCAG-labelled.
+- **`apps/web/src/app/[tenant]/id-generator/_components/template-manager.tsx`** (new) — `<TemplateManager>` Table of all tenant templates (name/type/status/updated); Edit (calls `onEditTemplate` → loads into editor), Duplicate (`idTemplate.duplicate`), Archive (`idTemplate.update` status→ARCHIVED, ACTIVE-only), Delete (confirmation Dialog + `idTemplate.delete`); admin-gated via `canManage` prop (server-auth value from page.tsx, following violations/ayuda pattern); all action buttons aria-labelled.
+- **`apps/web/src/app/[tenant]/id-generator/_components/template-editor.tsx`** (updated) — integrated all three new components; added `formValues` state + `templateId`; wired `trpc.idTemplate.create/update/duplicate` mutations with toast + list invalidation; `loadTemplate(id)` uses `utils.idTemplate.getById.fetch()` to imperatively load+hydrate canvas state; `duplicate` button in canvas header (admin-gated); **code-review bug fixes**: `updateSelectedElement` and `deleteSelectedElement` now read `activeSide`/`selectedElementId` from inside the setState updater (prevents stale-closure wrong-side/wrong-element write).
+- **`apps/web/src/app/[tenant]/id-generator/page.tsx`** (updated) — now `async`; calls `auth()`, computes `canManage = role === "super_admin" || role === "admin"` with safe optional chain (`session?.user?.role`); passes `canManage` to `<TemplateEditor>`.
+- **`apps/web/src/lib/__tests__/id-element-schema.test.ts`** (fixed) — geometry test corrected to match current schema (86×54mm cut, 88×56mm bleed) after prior commits 12dbdd1/51d0b88 reverted the S4a geometry override without updating the test.
+- **Code-review gate**: ran (3 angles × parallel agents); 3 in-scope findings fixed: stale-closure in `updateSelectedElement`/`deleteSelectedElement` (both `activeSide` and `selectedElementId` now read from setState updater `s`, not render closure); `session?.user.role` → `session?.user?.role`; `fontSizePt` NaN guard changed from silent-clamp-to-8 to no-op (preserves existing value). Deferred out-of-scope: `loadTemplate` unchecked IdElement[] cast from DB JSON (application-layer Zod parse would surface schema drift; mitigated by server-side schema validation on save); `duplicate.isPending` shared across all rows (UX-only, acceptable).
+- **Validation**: typecheck ✅ (0 errors), lint ✅ (0 warnings), test ✅ (178 pass / 50 skip-DB), build ✅.
+
+### Completed this session (S4a — Editor canvas + IdCardRenderer + palette + background upload)
+
+- **`packages/shared/src/schemas/id-template.ts`** — `ID_CARD_GEOMETRY` corrected to 87×56mm content / 91×60mm bleed (owner override from S1 86×54mm; comment + DECISIONS_LOG entry added).
+- **`apps/web/package.json`** — added `@dnd-kit/core@6.3.1`, `@dnd-kit/modifiers@9.0.0`, `@dnd-kit/utilities@3.2.2`, `@radix-ui/react-tabs`.
+- **`apps/web/src/components/ui/tabs.tsx`** — shadcn Tabs component installed.
+- **`apps/web/src/server/trpc/routers/upload.ts`** — added `"id-template-bg"` entity type (5 MB cap) to `ENTITY_TYPES` and `MAX_BYTES_BY_ENTITY`.
+- **`apps/web/src/app/[tenant]/id-generator/_components/id-card-renderer.tsx`** (new) — reusable presentational `<IdCardRenderer>` component; dnd-kit-free; `renderElement` render-prop pattern for editor injection; `mode='edit'` variables as labelled placeholders; `mode='print'` variables resolved from `data`; exports `elementPositionStyle` + `pxFromMm` + `ElementVisual` for reuse.
+- **`apps/web/src/app/[tenant]/id-generator/_components/template-canvas.tsx`** (new) — `<TemplateCanvas>` wraps IdCardRenderer(mode=edit) in a dnd-kit `DndContext`; each element is a `useDraggable` with `restrictToParentElement` + 0.5mm `createSnapModifier` (both memoised); epsilon drag-delta guard (sub-pixel residual protection); `KeyboardSensor` with arrow-key nudge (WCAG 2.2 keyboard drag); `useReducedMotion()` WCAG 2.2 SC 2.3.3.
+- **`apps/web/src/app/[tenant]/id-generator/_components/element-palette.tsx`** (new) — `<ElementPalette>` showing static elements (Text, Photo, Signature, QR) + all `TEMPLATE_VARIABLES` grouped by FISHERFOLK/VESSEL/SHARED; click adds to active side; `uid()` with secure-context fallback for non-HTTPS dev envs.
+- **`apps/web/src/app/[tenant]/id-generator/_components/background-upload.tsx`** (new) — `<BackgroundUpload>` per side; reuses `trpc.upload.uploadFile` with `entityType="id-template-bg"`; thumbnail preview + remove.
+- **`apps/web/src/app/[tenant]/id-generator/_components/template-editor.tsx`** (new) — `<TemplateEditor>` orchestrator; side-keyed EditorState (front/back `SideState`); side-specific `useCallback` handlers eliminating stale-closure wrong-side-write bug; shadcn Tabs front/back toggle; selected element info panel; state only (no persistence — S4b saves).
+- **`apps/web/src/app/[tenant]/id-generator/page.tsx`** — updated to mount `<TemplateEditor />`.
+- **`apps/web/src/lib/__tests__/id-element-schema.test.ts`** — geometry assertions updated to 87/56.
+- **`docs/DECISIONS_LOG.md`** — appended decision (g): geometry correction 87×56mm owner override.
+- **Code-review gate**: ran (3 angles × parallel agents); in-scope findings fixed: epsilon delta guard (sub-pixel float residual), snapModifier useMemo (mid-drag re-registration), wrong-side-write closure bug (side-specific useCallback), uid() secure-context fallback; deferred: style render-prop argument discarded (cosmetic, out-of-scope).
+- **Validation**: typecheck ✅ (0 errors), lint ✅ (0 warnings), test ✅ (178 pass / 50 skip-DB), build ✅.
+- Commit `9995e5d` on `swarm/id-generator`.
+
 ### Completed this session (S3 — IDPrintBatch model + idPrint router)
 
 - **`packages/db/prisma/schema.prisma`** — added `IDPrintBatch` model (id, tenantId, templateId, templateType, printedById, printedAt, idCount, summaryJson, createdAt); added `PRINT` to `AuditAction` enum; added inverse relations on Tenant, User, IDTemplate.

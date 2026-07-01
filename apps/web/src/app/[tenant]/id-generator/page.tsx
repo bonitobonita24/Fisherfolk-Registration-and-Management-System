@@ -1,6 +1,11 @@
+import { auth } from "@/server/auth";
 import { TemplateEditor } from "./_components/template-editor";
 
-export default function IdGeneratorPage() {
+export default async function IdGeneratorPage() {
+  const session = await auth();
+  const role = session?.user?.role;
+  const canManage = role === "super_admin" || role === "admin";
+
   return (
     <div className="space-y-6">
       <div>
@@ -9,7 +14,7 @@ export default function IdGeneratorPage() {
           Design fisherfolk identification card templates with drag-and-drop editor.
         </p>
       </div>
-      <TemplateEditor />
+      <TemplateEditor canManage={canManage} />
     </div>
   );
 }

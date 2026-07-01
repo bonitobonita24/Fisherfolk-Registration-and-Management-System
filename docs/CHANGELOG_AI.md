@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-07-01 — Phase 4 S4b (ID Generator): ElementInspector + TemplateForm save/load/duplicate + TemplateManager list
+- Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S4b — swarm/id-generator)
+- Why:                 Complete the template editor UI: element property editing, template persistence (create/update), load/duplicate wiring, and a template manager list with admin-gated CRUD.
+- What:
+  - `element-inspector.tsx` (new): side panel for editing all element props live — geometry (xMm/yMm/widthMm/heightMm/zIndex), typography (fontFamily/fontSizePt/fontWeight/color/align) for text+variable, text content for text, emoji for icon. WCAG-labelled inputs; align group uses aria-pressed buttons.
+  - `template-form.tsx` (new): header form row — name/templateType/status fields + Save/Update button wired to create/update tRPC mutations. Button disabled while saving or when name is blank.
+  - `template-manager.tsx` (new): Table of all tenant templates with Edit/Duplicate/Archive/Delete row actions. Delete uses a confirmation Dialog. Admin-gated via `canManage` prop. All action buttons aria-labelled.
+  - `template-editor.tsx` (updated): integrated inspector, form, and manager; added formValues+templateId state; tRPC create/update/duplicate mutations; `loadTemplate(id)` imperatively fetches+hydrates canvas state; Duplicate button in canvas toolbar (admin-only). Stale-closure bug fixes: `updateSelectedElement`/`deleteSelectedElement` now read `activeSide` and `selectedElementId` from inside the setState updater.
+  - `page.tsx` (updated): async server component; auth() → canManage → passed to TemplateEditor. Optional-chain fix: `session?.user?.role`.
+  - `id-element-schema.test.ts` (fixed): geometry assertions corrected to 86×54mm after prior commits reverted the S4a override without updating the test.
+- Validation:          typecheck ✅ · lint ✅ · test ✅ (178/228) · build ✅
+- Code-review:         3 in-scope bugs fixed (stale closures × 2, optional chain); 2 items deferred (DB JSON cast, shared isPending)
+
+---
+
 ## 2026-07-01 — Phase 4 S1 (ID Generator): Shared Zod schemas — idElementSchema + geometry constants + template-variable catalog
 - Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S1 — swarm/id-generator)
 - Why:                 Establish the shared type contract for Phase 4 ID Generator wave. All downstream sessions (template editor S2, select-and-print S3, batch-print S4) must share a single validated element type.
@@ -593,3 +608,23 @@
 - Why:                 Phase 4 S3 — backend for ID card print workflow: Prisma model, additive migration, shared Zod schemas, tRPC router (listEligible/validateSelection/recordPrint/todaysPrinted), 13 DB-integration tests.
 - Files modified:      packages/db/prisma/schema.prisma (IDPrintBatch model + PRINT AuditAction + inverse relations on Tenant/User/IDTemplate); packages/db/prisma/migrations/20260701120000_add_id_print_batch/migration.sql (CREATE TABLE + ALTER TYPE PRINT + FK constraints); packages/shared/src/types/enums.ts (PRINT added); packages/shared/src/schemas/id-print.ts (new — idPrintValidateSchema + idPrintRecordSchema + idPrintSubjectSchema); packages/shared/src/schemas/index.ts (id-print export added); apps/web/src/server/trpc/routers/idPrint.ts (new router); apps/web/src/server/trpc/root.ts (idPrint registration); apps/web/src/server/trpc/routers/__tests__/idPrint.test.ts (new — 13 DB-integration tests); docs/STATE.md; docs/CHANGELOG_AI.md (this entry).
 - Verification:        typecheck ✅ 0 errors; lint ✅ 0 warnings; test ✅ 178 pass / 50 skip (13 new idPrint DB-integration tests skip correctly in CI). Code-review gate ran (4 parallel agents); 7 in-scope findings fixed (RBAC todaysPrinted, re-validation not-found detection, templateType mismatch bypass, raw IDs in error, narrowed return, templateType cross-check, PHT timezone). 3 cleanup findings deferred.
+
+## 2026-07-01 — S4a (ID Generator wave): Template editor canvas — IdCardRenderer + TemplateCanvas + ElementPalette + BackgroundUpload
+- Agent:               CLAUDE_CODE (Swarm Worker S4a, branch swarm/id-generator)
+- Why:                 Phase 4 S4a — editor canvas for ID card template builder: geometry fix (owner override 87×56mm), drag-drop canvas with keyboard a11y, variable palette, background upload. State only (no persistence — S4b saves).
+- Files modified:
+  - packages/shared/src/schemas/id-template.ts — ID_CARD_GEOMETRY corrected to 87×56mm content / 91×60mm bleed (owner override from S1 86×54mm).
+  - apps/web/package.json — @dnd-kit/core@6.3.1, @dnd-kit/modifiers@9.0.0, @dnd-kit/utilities@3.2.2, @radix-ui/react-tabs installed.
+  - apps/web/src/components/ui/tabs.tsx — shadcn Tabs installed via CLI.
+  - apps/web/src/server/trpc/routers/upload.ts — "id-template-bg" entity type added (5 MB cap).
+  - apps/web/src/app/[tenant]/id-generator/_components/id-card-renderer.tsx (NEW) — reusable presentational renderer; dnd-kit-free; renderElement render-prop for editor injection; mode=edit renders labelled placeholders, mode=print resolves variables from data; exports elementPositionStyle + pxFromMm + ElementVisual for reuse (shared with S6 print).
+  - apps/web/src/app/[tenant]/id-generator/_components/template-canvas.tsx (NEW) — DndContext; each element is useDraggable; restrictToParentElement + 0.5mm createSnapModifier (both useMemo'd to prevent mid-drag glitch); epsilon delta guard for sub-pixel float residuals; KeyboardSensor with arrow-key nudge (WCAG 2.2); useReducedMotion() hook for SC 2.3.3.
+  - apps/web/src/app/[tenant]/id-generator/_components/element-palette.tsx (NEW) — static elements (Text/Photo/Signature/QR) + TEMPLATE_VARIABLES grouped FISHERFOLK/VESSEL/SHARED; uid() with crypto.randomUUID() secure-context fallback.
+  - apps/web/src/app/[tenant]/id-generator/_components/background-upload.tsx (NEW) — trpc.upload.uploadFile entityType=id-template-bg; thumbnail preview + remove; async onChange wrapped in void handler; try/finally for setUploading cleanup.
+  - apps/web/src/app/[tenant]/id-generator/_components/template-editor.tsx (NEW) — orchestrator; side-keyed EditorState (front/back SideState); side-specific useCallback handlers eliminating stale-closure wrong-side-write bug; shadcn Tabs front/back toggle; selected element info panel.
+  - apps/web/src/app/[tenant]/id-generator/page.tsx — mounts <TemplateEditor />.
+  - apps/web/src/lib/__tests__/id-element-schema.test.ts — geometry assertions updated to 87/56.
+  - docs/DECISIONS_LOG.md — decision (g): geometry correction 87×56mm.
+- Code-review fixes:   (1) epsilon delta guard (Math.abs < 0.01 for sub-pixel snap residuals); (2) snapModifier useMemo (prevent mid-drag modifier re-registration); (3) wrong-side-write closure (side-specific useCallback handlers); (4) uid() secure-context fallback (crypto.randomUUID non-HTTPS); (5) dead setUploading in onError removed (finally handles it).
+- Deferred findings:   _style argument discarded in renderElement callback (cosmetic, out of S4a scope).
+- Verification:        typecheck=pass (0 errors); lint=pass (0 warnings); test=pass (178 pass / 50 skip-DB); build=pass. Commit 9995e5d on swarm/id-generator.
