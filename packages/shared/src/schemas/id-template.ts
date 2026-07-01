@@ -2,13 +2,15 @@ import { z } from "zod";
 import { idTemplateTypeSchema, idTemplateStatusSchema } from "./enums";
 
 // ─── Card geometry constants ────────────────────────────────────────────────
-// Owner override 2026-07-01: printed ID card is 87×56mm (not 86×54mm) — see DECISIONS_LOG.md
+// Owner spec 2026-07-01: CUT/TRIM size = 86×54mm (finished ID after cutting);
+// BACKGROUND/BLEED size = 88×56mm (design extends 1mm past the cut on all sides so it
+// overlaps the cut line — no white gaps when cut). See DECISIONS_LOG.md.
 export const ID_CARD_GEOMETRY = {
-  contentWidthMm: 87,
-  contentHeightMm: 56,
-  bleedWidthMm: 91,   // 87 + 2×2mm bleed
-  bleedHeightMm: 60,  // 56 + 2×2mm bleed
-  bleedMarginMm: 2,
+  contentWidthMm: 86,
+  contentHeightMm: 54,
+  bleedWidthMm: 88,   // 86 + 2×1mm bleed
+  bleedHeightMm: 56,  // 54 + 2×1mm bleed
+  bleedMarginMm: 1,
   sheetWidthMm: 200,
   sheetHeightMm: 300,
   maxPairsPerSheet: 4,
