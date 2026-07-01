@@ -49,9 +49,16 @@ Branch `swarm/registration-status-timeline` is the active feature branch for the
 - **Code review fixes**: used shared `ConfirmDialog` instead of inline Dialog (removes redundant open/loading state); added visible placeholder Card to `<aside>` to prevent empty landmark WCAG issue; dialog stays open on mutation error (re-throw pattern).
 - lint/typecheck/build all green.
 
+### Completed this session (S4 — activity timeline aside)
+
+- **`fisherfolk-activity-timeline.tsx`** (new client subcomponent under `[id]/`) — queries `fisherfolk.getActivity`; renders semantic `<ol>/<li>` feed (newest-first); each entry: WHO (actorName), WHAT (label + aria-hidden icon), WHEN (`<time dateTime>`); `lg:sticky lg:top-4`; loading skeleton (WCAG: `role="status"` + sr-only text + `aria-hidden` ol); empty state; `motion-reduce:animate-none` on pulse animations.
+- **`fisherfolk-detail-client.tsx`** — aside placeholder replaced with `<FisherfolkActivityTimeline id={id} />`.
+- lint/build both green.
+
 ### Open / pending
 
-- S4: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
+- `staleTime:Infinity` + mutation-driven `getActivity` invalidation — parent `renew`/`markIdReleased` mutations don't yet call `utils.fisherfolk.getActivity.invalidate()`; deferred to follow-up.
+- `formatAbsolute`/`formatDate` shared utility extraction (two-file duplication) — deferred refactor.
 - `hasActiveViolation` is derived from `violations take:5` in getById — if a fisherfolk has >5 violations and the 6th is active, the Renew button won't show disabled (server still blocks; UX degrade only). Fix: add `activeViolationCount` field to getById (deferred).
 - `log.user` null deref in `getActivity` when `userId` is null or user deleted — out of S3 scope; see code review deferred findings.
 - Performance indexes (deferred from S0 code review): `@@index([tenantId, renewalYear])` on RegistrationRenewal; index on `fisherfolk(id_released_by_id)`

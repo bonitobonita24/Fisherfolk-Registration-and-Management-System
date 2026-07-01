@@ -16,6 +16,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
+import { FisherfolkActivityTimeline } from "./fisherfolk-activity-timeline";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -584,16 +585,7 @@ export function FisherfolkDetailClient({ id }: Props) {
 
         {/* RIGHT — activity timeline slot (S4) */}
         <aside aria-label="Activity timeline">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Activity timeline coming in next update.
-              </p>
-            </CardContent>
-          </Card>
+          <FisherfolkActivityTimeline id={id} />
         </aside>
       </div>
     </div>

@@ -534,3 +534,14 @@
 - Deferred findings:   hasActiveViolation uses paginated violations (take:5) — server still enforces guard; log.user null deref in getActivity (S1 code); TOCTOU on violation check in renew (already in STATE.md).
 - Verification:        lint=pass, typecheck=pass, build=pass (Next.js production build green, all routes compiled).
 - Verification:        pnpm --filter @frms/web exec tsc --noEmit ✔ (0 errors); pnpm --filter @frms/web lint ✔ (no warnings); pnpm --filter @frms/web build ✔ (all routes compile)
+
+## 2026-07-01 — S4: Profile — right-side activity timeline aside (semantic ol/li, who/what/when, WCAG)
+- Agent:               CLAUDE_CODE (Sonnet 4.6, swarm worker S4)
+- Branch:              swarm/registration-status-timeline
+- Why:                 S4 scope: fill the <aside aria-label="Activity timeline"> placeholder (added in S3) with a real, accessible activity feed driven by the fisherfolk.getActivity tRPC procedure (S1).
+- What:
+  - NEW apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-activity-timeline.tsx — client subcomponent. Queries trpc.fisherfolk.getActivity; renders semantic <ol>/<li> feed newest-first. Each entry: WHO (actorName), WHAT (human-readable label from ACTION_META map + decorative aria-hidden lucide icon), WHEN (<time dateTime={isoDate} title={absoluteDate}>). Loading skeleton with role="status" + sr-only text (WCAG: no empty accessible list announced). Empty state "No activity yet." Sticky on lg via lg:sticky lg:top-4. AuditActions mapped: CREATE/UPDATE/DELETE/REQUEST/APPROVE/REJECT/RENEW/VIOLATION_FILED/VIOLATION_LIFTED/LOGIN/EXPORT → friendly labels. Reduced-motion guard via motion-reduce:animate-none on skeleton pulses.
+  - EDIT apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx — imports FisherfolkActivityTimeline; replaces placeholder Card in <aside> with <FisherfolkActivityTimeline id={id} />.
+- Code-review fixes:   (1) Skeleton ol with all aria-hidden children announced empty list items → wrapped in role="status" div + sr-only "Loading activity…" text + aria-hidden="true" on ol. (2) role="alert" on static error paragraph → removed (not a live region). (3) staleTime raised 30s→60s to reduce background churn on low-velocity audit log.
+- Deferred findings:   formatAbsolute/formatDate duplication (not exported, different signatures — extract shared util is a future refactor); toIso helper triviality (not blocking); staleTime:Infinity + mutation-invalidation pattern (needs parent mutations to also call getActivity.invalidate — deferred to a follow-up session).
+- Verification:        lint=pass (no ESLint warnings), build=pass (Next.js production build green, all routes compiled).
