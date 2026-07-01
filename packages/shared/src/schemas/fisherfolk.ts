@@ -77,3 +77,16 @@ export const fisherfolkUpdateSchema = z.object({
   createdById: z.string().nullable().optional(),
   updatedById: z.string().nullable().optional(),
 });
+
+export const fisherfolkRenewSchema = z.object({
+  id: z.string().cuid(),
+  notes: z.string().max(500).optional(),
+});
+
+export const fisherfolkMarkReleasedSchema = z.object({
+  id: z.string().cuid(),
+});
+
+export const fisherfolkActivityQuerySchema = z.object({
+  id: z.string().cuid(),
+});

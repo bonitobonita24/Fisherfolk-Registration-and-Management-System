@@ -2,7 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
+  fisherfolkActivityQuerySchema,
   fisherfolkCreateSchema,
+  fisherfolkMarkReleasedSchema,
+  fisherfolkRenewSchema,
   fisherfolkSearchDuplicatesSchema,
   fisherfolkUpdateSchema,
 } from "@frms/shared/schemas";
@@ -67,6 +70,8 @@ export const fisherfolkRouter = createTRPCRouter({
             contactNumber: true,
             status: true,
             createdAt: true,
+            idReleasedAt: true,
+            _count: { select: { renewals: true } },
           },
         }),
         ctx.db.fisherfolk.count({ where }),
@@ -111,6 +116,17 @@ export const fisherfolkRouter = createTRPCRouter({
               verifiedAt: true,
               createdAt: true,
               program: { select: { id: true, title: true, status: true } },
+            },
+          },
+          renewals: {
+            orderBy: { renewedAt: "desc" },
+            take: 20,
+            select: {
+              id: true,
+              renewalYear: true,
+              renewedAt: true,
+              notes: true,
+              renewedBy: { select: { name: true, email: true } },
             },
           },
         },
@@ -428,5 +444,134 @@ export const fisherfolkRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  renew: encoderProcedure
+    .input(fisherfolkRenewSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+      const userId = ctx.userId!;
+      const { id, notes } = input;
+      const currentYear = new Date().getFullYear();
+
+      const existing = await ctx.db.fisherfolk.findFirst({
+        where: { id, tenantId },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const activeViolationCount = await ctx.db.violation.count({
+        where: { fisherfolkId: id, tenantId, status: "ACTIVE" },
+      });
+      if (activeViolationCount > 0) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Cannot renew: active violation on record",
+        });
+      }
+
+      const updated = await ctx.db.$transaction(async (tx) => {
+        const alreadyRenewed = await tx.registrationRenewal.findUnique({
+          where: { fisherfolkId_renewalYear: { fisherfolkId: id, renewalYear: currentYear } },
+          select: { id: true },
+        });
+        if (alreadyRenewed) {
+          throw new TRPCError({ code: "CONFLICT", message: "Already renewed for this year" });
+        }
+        await tx.registrationRenewal.create({
+          data: omitUndefined({ tenantId, fisherfolkId: id, renewalYear: currentYear, renewedById: userId, notes }),
+        });
+        const fisherfolk = await tx.fisherfolk.update({
+          where: { id },
+          data: { status: "RENEWED", registrationYear: currentYear, updatedById: userId },
+        });
+        await tx.auditLog.create({
+          data: {
+            tenantId,
+            userId,
+            action: "RENEW",
+            entityType: "Fisherfolk",
+            entityId: id,
+            before: existing as unknown as Record<string, unknown>,
+            after: fisherfolk as unknown as Record<string, unknown>,
+          },
+        });
+        return fisherfolk;
+      });
+
+      return updated;
+    }),
+
+  markIdReleased: encoderProcedure
+    .input(fisherfolkMarkReleasedSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+      const userId = ctx.userId!;
+      const { id } = input;
+
+      const existing = await ctx.db.fisherfolk.findFirst({
+        where: { id, tenantId },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+      // Idempotent: already released — no-op, no duplicate audit entry
+      if (existing.idReleasedAt) {
+        return existing;
+      }
+
+      const updated = await ctx.db.$transaction(async (tx) => {
+        const fisherfolk = await tx.fisherfolk.update({
+          where: { id },
+          data: { idReleasedAt: new Date(), idReleasedById: userId, updatedById: userId },
+        });
+        await tx.auditLog.create({
+          data: {
+            tenantId,
+            userId,
+            action: "UPDATE",
+            entityType: "Fisherfolk",
+            entityId: id,
+            before: existing as unknown as Record<string, unknown>,
+            after: fisherfolk as unknown as Record<string, unknown>,
+          },
+        });
+        return fisherfolk;
+      });
+
+      return updated;
+    }),
+
+  getActivity: protectedProcedure
+    .input(fisherfolkActivityQuerySchema)
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const { id } = input;
+
+      const exists = await ctx.db.fisherfolk.findFirst({
+        where: { id, tenantId: ctx.tenantId },
+        select: { id: true },
+      });
+      if (!exists) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const logs = await ctx.db.auditLog.findMany({
+        where: { tenantId: ctx.tenantId, entityType: "Fisherfolk", entityId: id },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          action: true,
+          createdAt: true,
+          user: { select: { name: true, email: true } },
+        },
+      });
+
+      // Sanitized: return action/actor/timestamp ONLY — no before/after diffs
+      return logs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        actorName: log.user.name ?? log.user.email,
+        createdAt: log.createdAt,
+      }));
     }),
 });
