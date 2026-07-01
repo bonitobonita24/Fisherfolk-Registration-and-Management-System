@@ -14,6 +14,8 @@ export interface FisherfolkListItem {
   contactNumber: string | null;
   status: string;
   createdAt: Date;
+  idReleasedAt: string | null;
+  renewalCount: number;
 }
 
 function IdNumberCell({ row }: { row: Row<FisherfolkListItem> }) {
@@ -58,6 +60,39 @@ export const columns: ColumnDef<FisherfolkListItem>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+  },
+  {
+    id: "registrationType",
+    header: "Registration",
+    cell: ({ row }) => {
+      const isNew = row.original.renewalCount === 0;
+      return (
+        <StatusBadge
+          status={isNew ? "New" : "Renewed"}
+          color={isNew ? "green" : "orange"}
+        />
+      );
+    },
+  },
+  {
+    id: "idRelease",
+    header: "ID Release",
+    cell: ({ row }) => {
+      const releasedAt = row.original.idReleasedAt;
+      if (!releasedAt) {
+        return <StatusBadge status="Not Released" color="gray" />;
+      }
+      const dateStr = new Date(releasedAt).toLocaleDateString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+      return (
+        <span title={`Released: ${dateStr}`}>
+          <StatusBadge status="Released" color="green" />
+        </span>
+      );
+    },
   },
   {
     accessorKey: "createdAt",

@@ -29,11 +29,19 @@ Branch `swarm/registration-status-timeline` is the active feature branch for the
 - **Tests** — 5 DB-integration tests in `src/server/trpc/routers/__tests__/fisherfolk.test.ts` (skip in CI; run locally with DATABASE_URL).
 - Commit `a9f48c5` on `swarm/registration-status-timeline`.
 
-### Open / pending (not in S1 scope)
+### Completed this session (S2 — list badge columns)
 
-- S2+: UI — profile renewal timeline panel + "Mark as Released" action button
-- S2+: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
-- S2+: UI — NEW/RENEWED badge on fisherfolk list columns (derived from `_count.renewals`)
+- **`FisherfolkListItem` interface** extended with `idReleasedAt: string | null` and `renewalCount: number`.
+- **Registration-Type column** added to fisherfolk list: derives NEW (renewalCount===0) or RENEWED (renewalCount>0); renders `<StatusBadge>` with explicit color override (green/orange) — does NOT fall through to `statusColorMap`.
+- **ID-Release column** added: idReleasedAt null → gray "Not Released" badge; non-null → green "Released" badge with tooltip showing the formatted release date.
+- **`fisherfolk-list-client.tsx`** updated to explicitly map tRPC items to `FisherfolkListItem`, converting `idReleasedAt` (Date|null via superjson → ISO string|null) and `_count.renewals` → `renewalCount`.
+- lint/build/typecheck all green; code-review gate ran (1 in-scope finding fixed: `String()` → direct pass-through for non-Date idReleasedAt values).
+- Commit on `swarm/registration-status-timeline`.
+
+### Open / pending
+
+- S3+: UI — profile renewal timeline panel + "Mark as Released" action button
+- S3+: UI — right-side activity timeline (sanitized AuditLog feed: action/actor/timestamp)
 - Performance indexes (deferred from S0 code review): `@@index([tenantId, renewalYear])` on RegistrationRenewal; index on `fisherfolk(id_released_by_id)`
 - TOCTOU on violation check in `renew` (violation.count is pre-transaction; low-probability race) — architectural fix deferred
 - `_count.renewals` on `list` runs a COUNT subquery on all list callers including autocomplete dropdowns — consider splitting to a lean `listSummary` for dropdowns (deferred, needs API split)

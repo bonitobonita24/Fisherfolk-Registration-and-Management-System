@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { columns } from "./columns";
+import { columns, type FisherfolkListItem } from "./columns";
 
 const STATUSES = ["NEW", "ACTIVE", "RENEWED", "INACTIVE", "ARCHIVED"] as const;
 const PAGE_SIZES = [10, 20, 50] as const;
@@ -124,7 +124,21 @@ export function FisherfolkListClient() {
 
       <DataTable
         columns={columns}
-        data={data?.items ?? []}
+        data={(data?.items ?? []).map((item): FisherfolkListItem => ({
+          id: item.id,
+          idNumber: item.idNumber,
+          fullName: item.fullName,
+          barangay: item.barangay,
+          contactNumber: item.contactNumber,
+          status: item.status,
+          createdAt: item.createdAt,
+          idReleasedAt: item.idReleasedAt
+            ? item.idReleasedAt instanceof Date
+              ? item.idReleasedAt.toISOString()
+              : item.idReleasedAt
+            : null,
+          renewalCount: item._count.renewals,
+        }))}
         pageSize={limit}
         showPagination={false}
         emptyState={
