@@ -571,7 +571,7 @@ export const fisherfolkRouter = createTRPCRouter({
       return logs.map((log) => ({
         id: log.id,
         action: log.action,
-        actorName: log.user.name ?? log.user.email,
+        actorName: log.user?.name ?? log.user?.email ?? null,
         createdAt: log.createdAt,
       }));
     }),

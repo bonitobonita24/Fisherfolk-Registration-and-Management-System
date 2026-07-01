@@ -5,6 +5,21 @@
 
 ---
 
+## 2026-07-01 — Phase 4 S5: QA / validation gate (typecheck · lint · test · build · WCAG · RBAC/audit verify)
+- Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S5)
+- Why:                 Final gate before Phase 4 swarm branch is ready for review. Rule 32 verifiable-done — evidence must be captured, not asserted.
+- What:
+  - Ran full validation suite: typecheck ✅, lint ✅, test ✅ (159 pass / 21 DB-skip), build ✅, db:generate ✅.
+  - Confirmed S0 migration is additive-only (ADD COLUMN + CREATE TABLE — no DROP/ALTER).
+  - WCAG 2.2 AA code-level audit: list badge columns (text-not-color-only StatusBadge, aria-labels on controls); profile (aria-labels on action buttons, disabled-tooltip with tabIndex+aria-label, `<ul aria-label="Renewal history"><li>` semantic list, icon aria-hidden); activity timeline (`<ol aria-label="…"><li>` semantic list, `<time dateTime>` visible time, role="status" skeleton with sr-only, motion-reduce:animate-none, `<aside aria-label="Activity timeline">`).
+  - RBAC audit: renew = encoderProcedure (FORBIDDEN for viewer/bantay_dagat) + writes RegistrationRenewal + AuditAction.RENEW atomically; markIdReleased = encoderProcedure + idempotent; getActivity = protectedProcedure + tenant-scoped + sanitized output (no before/after).
+  - Code-review gate (2 in-scope bugs fixed): (1) added `utils.fisherfolk.getActivity.invalidate({ id })` to handleRenew + handleMarkReleased in fisherfolk-detail-client.tsx (stale timeline after mutation); (2) defensive `log.user?.name ?? log.user?.email ?? null` null-guard in fisherfolk.ts getActivity mapper.
+  - Playwright smoke on rebuilt baked image (port 44387): list NEW/RENEWED + Released/Not-Released badges ✅; profile status badge + Renewal History card + Activity Timeline aside ✅; Renew action flips badge + adds renewal row + adds timeline entry ✅.
+- Files modified:      apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx (getActivity invalidation); apps/web/src/server/trpc/routers/fisherfolk.ts (log.user null guard); docs/STATE.md; docs/CHANGELOG_AI.md.
+- Verification:        pnpm --filter @frms/web typecheck + lint + test + build all exit 0. Playwright smoke pass. Code-review gate clean (0 in-scope blocking findings after fixes).
+- Attribution note:    Inline execution (Sonnet 4.6 as mini-architect per Rule R7 note — scope was QA only, no parallel code changes needed).
+- Git:                 swarm/registration-status-timeline. Committed. NOT pushed (owner reviews + merges).
+
 ## 2026-06-30 — Custom-domain back-port applied to PRODUCT.md (candidate J)
 - Agent:               CLAUDE_CODE (Opus architect; owner-authorized direct PRODUCT.md edit)
 - Why:                 Candidate J (custom-domain masking) was shipped + locked in DECISIONS_LOG (2026-06-29) but not reflected in the human-owned PRODUCT.md. Owner present this session and authorized the agent to apply the pre-drafted back-port text directly (one-time Rule 1 waiver — logged in DECISIONS_LOG.md).

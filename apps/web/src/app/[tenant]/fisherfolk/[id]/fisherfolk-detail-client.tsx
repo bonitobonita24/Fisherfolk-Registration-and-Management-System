@@ -149,6 +149,7 @@ export function FisherfolkDetailClient({ id }: Props) {
     try {
       await renewMutation.mutateAsync({ id });
       void utils.fisherfolk.getById.invalidate({ id });
+      void utils.fisherfolk.getActivity.invalidate({ id });
       toast.success("Registration renewed successfully.");
     } catch (err) {
       toast.error(
@@ -162,6 +163,7 @@ export function FisherfolkDetailClient({ id }: Props) {
     try {
       await releaseMutation.mutateAsync({ id });
       void utils.fisherfolk.getById.invalidate({ id });
+      void utils.fisherfolk.getActivity.invalidate({ id });
       toast.success("ID marked as released.");
     } catch (err) {
       toast.error(

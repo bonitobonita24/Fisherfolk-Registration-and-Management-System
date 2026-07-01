@@ -4,6 +4,20 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-07-01 — 🔴 Prisma nullable-relation select: always optional-chain the result even on non-nullable FK
+- Type:      🔴 gotcha
+- Phase:     Phase 4 S1/S5 — tRPC backend + QA gate
+- Files:     apps/web/src/server/trpc/routers/fisherfolk.ts (getActivity mapper)
+- Concepts:  prisma, nullable-relation, null-deref, optional-chain, audit-log, getActivity
+- Narrative: AuditLog.userId is non-nullable in the Prisma schema and the FK is RESTRICT (user can't be deleted if audit logs exist). Despite this, `log.user.name` is risky: direct SQL operations or future cascade-delete changes could leave user null at runtime. Prisma returns null for unresolvable relations even when the schema declares non-nullable. Pattern: always optional-chain relation selects: `log.user?.name ?? log.user?.email ?? null`. Caught by code review in S5. Fix: one-liner optional-chain, tsc+build stay green.
+
+## 2026-07-01 — 🟡 Invalidate all query keys that display mutation side-effects — not just the primary entity
+- Type:      🟡 fix
+- Phase:     Phase 4 S3/S5 — profile UI + QA gate
+- Files:     apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx
+- Concepts:  tanstack-query, invalidation, stale-cache, mutation-side-effect, timeline, trpc
+- Narrative: After a renew/markIdReleased mutation, only `getById` was invalidated. The activity timeline uses a separate `getActivity` query with a 60-second staleTime — so the sidebar stayed stale after the action, making it look like the audit log entry was not written. Fix: invalidate BOTH `getById` AND `getActivity` in each mutation handler. General rule: when a mutation writes to multiple query surfaces (entity + audit log, entity + timeline, entity + list), invalidate ALL of them. Omitting one stales a sibling view.
+
 ## 2026-05-08 — 🔴 jq is not installed on this WSL2 system — use node or python3 in hooks
 - Type:      🔴 gotcha
 - Phase:     Hooks installation / governance tooling
