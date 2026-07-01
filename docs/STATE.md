@@ -5,6 +5,20 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S2 — ID Generator router hardening)
+
+- **`apps/web/src/server/trpc/routers/idTemplate.ts`** — hardened with L5 AuditLog writes and `duplicate` mutation:
+  - `create`: writes `auditLog(CREATE, after=created)` after the DB insert.
+  - `update`: reads `existing` for before-snapshot; writes `auditLog(UPDATE, before, after)`.
+  - `archive`: reads `existing`; writes `auditLog(UPDATE, before, after)` (AuditAction has no ARCHIVE; UPDATE is the correct action per fisherfolk.ts convention).
+  - `delete`: deletes first, then writes `auditLog(DELETE, before=existing)` — order fixed to avoid phantom audit entries on delete failure.
+  - `duplicate` (new): tenant-scoped load → create copy with `name "<source> (copy)"`, `status: ARCHIVED` (IDTemplateStatus only has ACTIVE|ARCHIVED; ARCHIVED avoids getActive collisions); writes `auditLog(CREATE, after=copy)`.
+  - All mutations retain the `if (!ctx.tenantId) FORBIDDEN` guard.
+- **`packages/shared/src/schemas/id-template.ts`** — added `idTemplateDuplicateSchema = z.object({ id: z.string().cuid() })`.
+- **`apps/web/src/server/trpc/routers/__tests__/idTemplate.test.ts`** (new) — 16 DB-integration tests (skip when no DATABASE_URL): create/update/archive/delete each write the correct AuditLog; duplicate produces ARCHIVED copy that does not collide with `getActive`; cross-tenant `getById`/`update`/`duplicate` all return NOT_FOUND; non-admin (encoder/viewer) FORBIDDEN on all mutations.
+- **Validation**: typecheck ✅ (0 errors), lint ✅ (0 warnings), test ✅ (178 pass / 37 skip-DB), 16 new tests correctly skipped in CI.
+- **Code-review gate**: ran (3 angles × parallel agents); 1 in-scope finding fixed (delete mutation order: audit-before-delete → delete-first-then-audit to avoid phantom audit entries); 2 out-of-scope deferred findings (non-atomic audit tradeoff + TOCTOU before-snapshot — both are fleet-wide patterns matching fisherfolk.ts).
+
 ### Completed this session (S1 — ID Generator shared schemas)
 
 - **`packages/shared/src/schemas/id-template.ts`** — fully rewritten (26→145 lines):

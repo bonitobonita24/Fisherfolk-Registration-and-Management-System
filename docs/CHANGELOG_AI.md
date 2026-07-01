@@ -574,6 +574,14 @@
 - Deferred findings:   formatAbsolute/formatDate duplication (not exported, different signatures — extract shared util is a future refactor); toIso helper triviality (not blocking); staleTime:Infinity + mutation-invalidation pattern (needs parent mutations to also call getActivity.invalidate — deferred to a follow-up session).
 - Verification:        lint=pass (no ESLint warnings), build=pass (Next.js production build green, all routes compiled).
 
+## 2026-07-01 — S2 (ID Generator wave): harden idTemplate router — AuditLog L5 + duplicate mutation + strict schema adoption
+- Agent:               CLAUDE_CODE (Swarm Worker S2, branch swarm/id-generator)
+- Why:                 Phase 4 S2 — add L5 AuditLog writes to all idTemplate mutations and introduce a `duplicate` procedure (admin-only, produces ARCHIVED copy to keep getActive deterministic).
+- Files modified:      apps/web/src/server/trpc/routers/idTemplate.ts (audit logs on create/update/archive/delete; new duplicate mutation); packages/shared/src/schemas/id-template.ts (idTemplateDuplicateSchema); apps/web/src/server/trpc/routers/__tests__/idTemplate.test.ts (new — 16 DB-integration tests, CI-skip).
+- Code-review fixes:   delete mutation audit order corrected: audit-before-delete → delete-first-then-audit (avoids phantom DELETE audit entry when delete fails).
+- Deferred findings:   (1) non-atomic audit tradeoff (record created but auditLog.create blips → silent audit gap) — fleet-wide pattern matching fisherfolk.ts, not introduced here; (2) TOCTOU on before-snapshot in update/archive (findFirst + update are two separate DB calls) — same pattern as fisherfolk.ts throughout.
+- Verification:        typecheck=pass (0 errors), lint=pass (0 warnings), test=pass (178 pass / 37 skip-DB, 16 new idTemplate tests skip in CI as expected).
+
 ## 2026-07-01 — SD (ID Generator wave): DECISIONS_LOG + CHANGELOG_AI + IMPLEMENTATION_MAP governance docs
 - Agent:               CLAUDE_CODE (Swarm Worker SD, branch swarm/id-generator)
 - Why:                 Session SD — governance docs update only (no app code). Record all [HOW] decisions for the ID Generator wave: (a) typed discriminated-union element schema (text/variable/image/icon/qr/photo/signature, mm-based, 86×54mm content / 90×58mm bleed); (b) Template Editor adminProcedure, dnd-kit, DOM+CSS-mm NOT canvas (print fidelity + WCAG); Select & Print = encoder+admin; (c) DOM+@media print render, PVC 200×300mm sheet auto-fills 1–4 ID pairs, back mirrored scaleX(-1), empty slots = dashed placeholders; (d) Select & Print checkout gate blocks fisherfolk missing photo OR signature; (e) IDPrintBatch entity persists each print event (who/when/count/idType); (f) Printing decoupled from 'ID Released' — markIdReleased remains the separate manual staff action from Wave 1. Two open [WHAT] questions flagged for owner: vessel IDs scope + Daily-Ops widget timing. PRODUCT.md untouched (Rule 1).

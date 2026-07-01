@@ -143,3 +143,5 @@ export const idTemplateUpdateSchema = z.object({
   backElements: z.array(idElementSchema).optional(),
   status: idTemplateStatusSchema.optional(),
 });
+
+export const idTemplateDuplicateSchema = z.object({ id: z.string().cuid() });

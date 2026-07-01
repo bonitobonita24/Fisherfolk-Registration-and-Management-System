@@ -1,8 +1,10 @@
+import type { Prisma } from "@frms/db";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
   idTemplateCreateSchema,
+  idTemplateDuplicateSchema,
   idTemplateUpdateSchema,
 } from "@frms/shared/schemas";
 
@@ -58,13 +60,26 @@ export const idTemplateRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
 
-      return ctx.db.iDTemplate.create({
+      const created = await ctx.db.iDTemplate.create({
         data: omitUndefined({
           ...input,
           tenantId: ctx.tenantId,
           createdById: ctx.userId!,
         }),
       });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "CREATE",
+          entityType: "IDTemplate",
+          entityId: created.id,
+          after: created as unknown as Record<string, unknown>,
+        },
+      });
+
+      return created;
     }),
 
   update: adminProcedure
@@ -84,10 +99,24 @@ export const idTemplateRouter = createTRPCRouter({
 
       const { id: _ignored, ...updateData } = input.data;
 
-      return ctx.db.iDTemplate.update({
+      const updated = await ctx.db.iDTemplate.update({
         where: { id: input.id },
         data: omitUndefined(updateData),
       });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "IDTemplate",
+          entityId: input.id,
+          before: existing as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        },
+      });
+
+      return updated;
     }),
 
   archive: adminProcedure
@@ -100,10 +129,24 @@ export const idTemplateRouter = createTRPCRouter({
       });
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return ctx.db.iDTemplate.update({
+      const updated = await ctx.db.iDTemplate.update({
         where: { id: input.id },
         data: { status: "ARCHIVED" },
       });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "IDTemplate",
+          entityId: input.id,
+          before: existing as unknown as Record<string, unknown>,
+          after: updated as unknown as Record<string, unknown>,
+        },
+      });
+
+      return updated;
     }),
 
   delete: adminProcedure
@@ -116,6 +159,60 @@ export const idTemplateRouter = createTRPCRouter({
       });
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return ctx.db.iDTemplate.delete({ where: { id: input.id } });
+      const deleted = await ctx.db.iDTemplate.delete({ where: { id: input.id } });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "DELETE",
+          entityType: "IDTemplate",
+          entityId: input.id,
+          before: existing as unknown as Record<string, unknown>,
+        },
+      });
+
+      return deleted;
+    }),
+
+  // Produces a copy of the source template with status ARCHIVED so that
+  // getActive (filters on status=ACTIVE) remains deterministic.
+  // IDTemplateStatus only has ACTIVE|ARCHIVED — no DRAFT variant exists.
+  duplicate: adminProcedure
+    .input(idTemplateDuplicateSchema)
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const source = await ctx.db.iDTemplate.findFirst({
+        where: { id: input.id, tenantId: ctx.tenantId },
+      });
+      if (!source) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const copy = await ctx.db.iDTemplate.create({
+        data: {
+          tenantId: ctx.tenantId,
+          name: `${source.name} (copy)`,
+          templateType: source.templateType,
+          frontBackgroundUrl: source.frontBackgroundUrl,
+          backBackgroundUrl: source.backBackgroundUrl,
+          frontElements: source.frontElements as Prisma.InputJsonValue,
+          backElements: source.backElements as Prisma.InputJsonValue,
+          status: "ARCHIVED",
+          createdById: ctx.userId!,
+        },
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "CREATE",
+          entityType: "IDTemplate",
+          entityId: copy.id,
+          after: copy as unknown as Record<string, unknown>,
+        },
+      });
+
+      return copy;
     }),
 });
