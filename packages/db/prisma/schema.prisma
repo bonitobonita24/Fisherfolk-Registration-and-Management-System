@@ -193,9 +193,10 @@ model Tenant {
   notifications      Notification[]
   ayudaPrograms      AyudaProgram[]
   ayudaBeneficiaries AyudaBeneficiary[]
-  idTemplates        IDTemplate[]
-  barangayAliases    BarangayAlias[]
-  importBatches      ImportBatch[]
+  idTemplates           IDTemplate[]
+  barangayAliases       BarangayAlias[]
+  importBatches         ImportBatch[]
+  registrationRenewals  RegistrationRenewal[]
 
   @@map("tenants")
 }
@@ -232,8 +233,10 @@ model User {
   uploadedFiles         AyudaUpload[]
   violationAttachments  ViolationAttachment[]
   kanbanAttachments     KanbanAttachment[]
-  createdTemplates      IDTemplate[]
-  importBatches         ImportBatch[]      @relation("ImportBatchCreatedBy")
+  createdTemplates        IDTemplate[]
+  importBatches           ImportBatch[]        @relation("ImportBatchCreatedBy")
+  renewedRegistrations    RegistrationRenewal[] @relation("RegistrationRenewalRenewedBy")
+  idReleasedFisherfolk    Fisherfolk[]         @relation("FisherfolkIdReleasedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -269,15 +272,19 @@ model Fisherfolk {
   updatedAt        DateTime         @updatedAt @map("updated_at")
   createdById      String?          @map("created_by_id")
   updatedById      String?          @map("updated_by_id")
+  idReleasedAt     DateTime?        @map("id_released_at")
+  idReleasedById   String?          @map("id_released_by_id")
 
-  tenant             Tenant             @relation(fields: [tenantId], references: [id])
-  createdBy          User?              @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
-  updatedBy          User?              @relation("FisherfolkUpdatedBy", fields: [updatedById], references: [id])
-  vessels            Vessel[]           @relation("FisherfolkVessels")
-  violations         Violation[]        @relation("FisherfolkViolations")
+  tenant             Tenant               @relation(fields: [tenantId], references: [id])
+  createdBy          User?                @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
+  updatedBy          User?                @relation("FisherfolkUpdatedBy", fields: [updatedById], references: [id])
+  idReleasedBy       User?                @relation("FisherfolkIdReleasedBy", fields: [idReleasedById], references: [id])
+  vessels            Vessel[]             @relation("FisherfolkVessels")
+  violations         Violation[]          @relation("FisherfolkViolations")
   comments           Comment[]
   editRequests       EditRequest[]
   ayudaBeneficiaries AyudaBeneficiary[]
+  renewals           RegistrationRenewal[]
 
   @@unique([tenantId, idNumber])
   @@index([tenantId])
@@ -673,4 +680,24 @@ model ImportBatch {
   @@index([tenantId])
   @@index([tenantId, status])
   @@map("import_batches")
+}
+
+model RegistrationRenewal {
+  id           String    @id @default(cuid())
+  tenantId     String    @map("tenant_id")
+  fisherfolkId String    @map("fisherfolk_id")
+  renewalYear  Int       @map("renewal_year")
+  renewedAt    DateTime  @default(now()) @map("renewed_at")
+  renewedById  String?   @map("renewed_by_id")
+  notes        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  fisherfolk Fisherfolk @relation(fields: [fisherfolkId], references: [id], onDelete: Cascade)
+  renewedBy  User?      @relation("RegistrationRenewalRenewedBy", fields: [renewedById], references: [id])
+
+  @@unique([fisherfolkId, renewalYear])
+  @@index([tenantId])
+  @@index([fisherfolkId])
+  @@map("registration_renewals")
 }
