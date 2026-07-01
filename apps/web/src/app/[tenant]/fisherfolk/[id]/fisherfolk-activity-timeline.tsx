@@ -87,7 +87,7 @@ function TimelineSkeleton() {
       <ol aria-hidden="true" className="space-y-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <li key={i} className="flex gap-3">
-            <div className="mt-0.5 size-7 shrink-0 rounded-full bg-muted animate-pulse motion-reduce:animate-none" />
+            <div className="mt-0.5 size-6 shrink-0 rounded-full bg-muted animate-pulse motion-reduce:animate-none" />
             <div className="flex-1 space-y-1.5 pt-1">
               <div className="h-3 w-3/4 rounded bg-muted animate-pulse motion-reduce:animate-none" />
               <div className="h-3 w-1/2 rounded bg-muted animate-pulse motion-reduce:animate-none" />
@@ -107,10 +107,12 @@ export function FisherfolkActivityTimeline({ id }: Props) {
 
   return (
     <Card className="lg:sticky lg:top-4">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold">Activity</CardTitle>
+      <CardHeader className="border-b pb-3">
+        <CardTitle className="text-sm font-semibold tracking-tight">
+          Activity
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-5">
         {isLoading ? (
           <TimelineSkeleton />
         ) : isError ? (
@@ -122,7 +124,7 @@ export function FisherfolkActivityTimeline({ id }: Props) {
         ) : (
           <ol
             aria-label="Fisherfolk activity history"
-            className="relative space-y-0 border-l border-border pl-4"
+            className="relative space-y-0 border-l border-border pl-5"
           >
             {data.map((entry) => {
               const { label, Icon } = ACTION_META[entry.action] ?? fallbackMeta(entry.action);
@@ -133,19 +135,19 @@ export function FisherfolkActivityTimeline({ id }: Props) {
               return (
                 <li
                   key={entry.id}
-                  className="relative pb-5 last:pb-0"
+                  className="relative pb-6 last:pb-0"
                 >
                   {/* Dot on the timeline line */}
                   <span
-                    className="absolute -left-[1.15rem] top-0.5 flex size-5 items-center justify-center rounded-full bg-background ring-2 ring-border"
+                    className="absolute -left-[1.4rem] top-0 flex size-6 items-center justify-center rounded-full border border-border bg-muted"
                     aria-hidden="true"
                   >
-                    <Icon className="size-3 text-muted-foreground" aria-hidden="true" />
+                    <Icon className="size-3.5 text-muted-foreground" aria-hidden="true" />
                   </span>
 
-                  <div className="space-y-0.5 pl-1">
+                  <div className="space-y-1 pl-1.5">
                     {/* WHAT — human-readable label (primary signal, not color-only) */}
-                    <p className="text-sm font-medium leading-snug text-foreground">
+                    <p className="text-sm font-medium leading-snug tracking-tight text-foreground">
                       {label}
                     </p>
                     {/* WHO — actor name */}

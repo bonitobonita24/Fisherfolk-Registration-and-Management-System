@@ -3,6 +3,7 @@
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { CheckCircle2, Clock3, RefreshCw, Sparkles } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -70,6 +71,7 @@ export const columns: ColumnDef<FisherfolkListItem>[] = [
         <StatusBadge
           status={isNew ? "New" : "Renewed"}
           color={isNew ? "green" : "orange"}
+          icon={isNew ? Sparkles : RefreshCw}
         />
       );
     },
@@ -80,7 +82,9 @@ export const columns: ColumnDef<FisherfolkListItem>[] = [
     cell: ({ row }) => {
       const releasedAt = row.original.idReleasedAt;
       if (!releasedAt) {
-        return <StatusBadge status="Not Released" color="gray" />;
+        return (
+          <StatusBadge status="Not Released" color="gray" icon={Clock3} />
+        );
       }
       const dateStr = new Date(releasedAt).toLocaleDateString("en-PH", {
         year: "numeric",
@@ -89,7 +93,7 @@ export const columns: ColumnDef<FisherfolkListItem>[] = [
       });
       return (
         <span title={`Released: ${dateStr}`}>
-          <StatusBadge status="Released" color="green" />
+          <StatusBadge status="Released" color="green" icon={CheckCircle2} />
         </span>
       );
     },

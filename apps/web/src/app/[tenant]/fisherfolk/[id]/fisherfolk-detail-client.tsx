@@ -11,6 +11,7 @@ import {
   ImageOff,
   Pencil,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -190,17 +191,20 @@ export function FisherfolkDetailClient({ id }: Props) {
             </h1>
             <p className="text-sm text-muted-foreground">{record.idNumber}</p>
             {/* Registration status line */}
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
               <StatusBadge
                 status={isRenewed ? "RENEWED" : "NEW"}
                 color={isRenewed ? "orange" : "green"}
+                icon={isRenewed ? RefreshCw : Sparkles}
               />
               <span className="text-xs text-muted-foreground">
                 {isRenewed
                   ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
                   : "New registration"}
               </span>
-              <span className="text-xs text-muted-foreground">·</span>
+              <span className="text-xs text-muted-foreground" aria-hidden="true">
+                ·
+              </span>
               <span className="text-xs text-muted-foreground">
                 Originally joined {formatDate(record.dateJoined)}
               </span>
@@ -209,7 +213,7 @@ export function FisherfolkDetailClient({ id }: Props) {
         </div>
 
         {/* Action buttons area — encoder/admin/super_admin only */}
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2.5">
           {canAct && (
             <>
               {/* Renew Registration — disabled + tooltip when active violation */}
@@ -282,6 +286,10 @@ export function FisherfolkDetailClient({ id }: Props) {
             </>
           )}
 
+          {canAct && (
+            <Separator orientation="vertical" className="mx-0.5 h-6" />
+          )}
+
           <Button asChild variant="outline" size="sm">
             <Link href={`/${params.tenant}/fisherfolk/${id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
@@ -293,7 +301,7 @@ export function FisherfolkDetailClient({ id }: Props) {
       </div>
 
       {/* Two-column shell: main content left + activity timeline right */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         {/* LEFT main column */}
         <div className="space-y-6">
           {/* Profile Card */}
@@ -452,8 +460,10 @@ export function FisherfolkDetailClient({ id }: Props) {
                   aria-label="Renewal history"
                 >
                   {record.renewals.map((r) => (
-                    <li key={r.id} className="py-3 first:pt-0 last:pb-0">
-                      <p className="text-sm font-medium">{r.renewalYear}</p>
+                    <li key={r.id} className="space-y-0.5 py-3 first:pt-0 last:pb-0">
+                      <p className="text-sm font-medium text-foreground">
+                        {r.renewalYear}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {formatDate(r.renewedAt)} &middot;{" "}
                         {r.renewedBy?.name ??

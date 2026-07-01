@@ -108,13 +108,16 @@ function LoginForm() {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 py-0.5">
             <Checkbox
               id="rememberMe"
               checked={rememberMe}
               onCheckedChange={(checked) => setRememberMe(checked === true)}
             />
-            <Label htmlFor="rememberMe" className="cursor-pointer font-normal text-foreground">
+            <Label
+              htmlFor="rememberMe"
+              className="cursor-pointer select-none text-sm font-normal text-foreground"
+            >
               Remember me for 30 days
             </Label>
           </div>

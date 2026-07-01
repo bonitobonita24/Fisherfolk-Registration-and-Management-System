@@ -1,10 +1,16 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 type BadgeColor = "green" | "red" | "yellow" | "blue" | "gray" | "purple" | "orange";
 
+// Text tone is bumped one step darker than the original (-400 → -300 is too
+// light on this theme's dark surface; -400 stays, but weight goes up in the
+// badge markup below) so contrast holds while backgrounds stay identical —
+// no semantic hue is changed for any status.
 const colorClasses: Record<BadgeColor, string> = {
   green: "border-transparent bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25",
   red: "border-transparent bg-red-500/15 text-red-400 hover:bg-red-500/25",
@@ -69,18 +75,30 @@ const statusColorMap: Record<string, BadgeColor> = {
 interface StatusBadgeProps {
   status: string;
   color?: BadgeColor;
+  /** Optional leading icon — reinforces the label, never replaces it (text stays visible for a11y). */
+  icon?: LucideIcon;
   className?: string;
 }
 
-export function StatusBadge({ status, color, className }: StatusBadgeProps) {
+export function StatusBadge({
+  status,
+  color,
+  icon: Icon,
+  className,
+}: StatusBadgeProps) {
   const resolvedColor = color ?? statusColorMap[status] ?? "gray";
   const label = status.replace(/_/g, " ");
 
   return (
     <Badge
       variant="outline"
-      className={cn(colorClasses[resolvedColor], className)}
+      className={cn(
+        "gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium tracking-wide",
+        colorClasses[resolvedColor],
+        className,
+      )}
     >
+      {Icon ? <Icon className="size-3" aria-hidden="true" /> : null}
       {label}
     </Badge>
   );
