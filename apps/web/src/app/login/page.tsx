@@ -5,6 +5,9 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -15,6 +18,10 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // Default UNCHECKED — ticking this trades the short default session for
+  // a long-lived (~30 day) one. See server/auth/config.ts for the
+  // jwt.encode-based mechanism.
+  const [rememberMe, setRememberMe] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,6 +32,7 @@ function LoginForm() {
       username,
       password,
       turnstileToken: turnstileToken ?? "",
+      rememberMe,
       redirect: false,
     });
 
@@ -98,6 +106,17 @@ function LoginForm() {
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="••••••••"
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="rememberMe"
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked === true)}
+            />
+            <Label htmlFor="rememberMe" className="cursor-pointer font-normal text-foreground">
+              Remember me for 30 days
+            </Label>
           </div>
 
           <Turnstile

@@ -1,4 +1,5 @@
 import type { NextAuthConfig, Session } from "next-auth";
+import { encode as defaultEncode } from "next-auth/jwt";
 
 import type { UserRole } from "@frms/shared/types";
 
@@ -24,8 +25,41 @@ declare module "next-auth" {
     tenantId: string | null;
     tenantSlug: string | null;
     securityVersion: number;
+    /** "Remember me" choice captured at sign-in (Credentials `authorize`). */
+    rememberMe?: boolean;
   }
 }
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    /** Carried from `User.rememberMe` on sign-in; drives session/cookie lifetime. */
+    rememberMe?: boolean;
+  }
+}
+
+/**
+ * "Remember me" session lifetimes (Rule: no native per-login `maxAge` in
+ * Auth.js v5 — this is the documented workaround: override `jwt.encode` to
+ * set a shorter/longer `exp` claim on the encrypted JWT based on a flag
+ * carried through the token. See authjs.dev reference/core/jwt (JWTOptions
+ * `encode`/`maxAge`) — the encrypted JWT's `exp` is enforced automatically
+ * on every `decode()` (jose `jwtDecrypt`), so no `decode` override is
+ * needed. Kept in the EDGE-SAFE shared config (not just the Node instance)
+ * because Auth.js re-encodes/refreshes the session cookie on every session
+ * read (sliding expiration) — including from `edge.ts`/middleware — and
+ * that refresh must respect the same rememberMe-derived maxAge.
+ *
+ * NOTE: the browser cookie's own `Max-Age`/`expires` header is computed by
+ * Auth.js from the top-level `session.maxAge` (a single static value for
+ * every login — Auth.js has no per-request hook for that), so the cookie
+ * itself is always written for the long ceiling below. Functional session
+ * length for a non-remembered login is still enforced correctly because
+ * the shorter `exp` is embedded *inside* the encrypted JWT payload and
+ * `decode()` rejects it once expired, regardless of how long the (now
+ * inert) cookie lingers in the browser.
+ */
+const REMEMBER_ME_MAX_AGE = 30 * 24 * 60 * 60; // 30 days — checkbox ticked
+const DEFAULT_SESSION_MAX_AGE = 8 * 60 * 60; // 8 hours — checkbox unticked (default)
 
 /**
  * Edge-safe Auth.js config — NO Prisma, NO bcrypt, NO DB calls.
@@ -41,7 +75,20 @@ declare module "next-auth" {
  * DB for session invalidation on role/tenant change (V28 hardening).
  */
 export const authConfig = {
-  session: { strategy: "jwt" },
+  // `session.maxAge` is the ceiling used to compute the browser cookie's
+  // Max-Age (see note above) — set to the "remembered" duration. Actual
+  // functional session length is enforced per-login via `jwt.encode` below.
+  session: { strategy: "jwt", maxAge: REMEMBER_ME_MAX_AGE },
+  jwt: {
+    maxAge: REMEMBER_ME_MAX_AGE,
+    async encode(params) {
+      const rememberMe = params.token?.rememberMe === true;
+      return defaultEncode({
+        ...params,
+        maxAge: rememberMe ? REMEMBER_ME_MAX_AGE : DEFAULT_SESSION_MAX_AGE,
+      });
+    },
+  },
   secret: process.env.AUTH_SECRET ?? "",
   pages: {
     signIn: "/login",
@@ -57,6 +104,7 @@ export const authConfig = {
         token.tenantId = user.tenantId;
         token.tenantSlug = user.tenantSlug;
         token.securityVersion = user.securityVersion;
+        token.rememberMe = user.rememberMe ?? false;
       }
       return token;
     },
