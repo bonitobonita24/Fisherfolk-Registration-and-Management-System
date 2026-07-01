@@ -2,7 +2,15 @@
 
 ## Current State (2026-07-01)
 
-Branch `swarm/registration-status-timeline` is the active feature branch for the registration-status timeline work.
+Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
+Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
+
+### Completed this session (SD — ID Generator docs wave)
+
+- **DECISIONS_LOG.md** — appended 2026-07-01 ID Generator entry with 6 locked sub-decisions (a–f): (a) typed discriminated-union element schema (text/variable/image/icon/qr/photo/signature, mm-based, 86×54mm/90×58mm); (b) Template Editor adminProcedure + dnd-kit DOM/CSS-mm NOT canvas; Select & Print = encoder+admin; (c) DOM+@media print, 200×300mm PVC sheet, back mirrored scaleX(-1), empty dashed placeholders; (d) Select & Print checkout blocks missing photo OR signature; (e) IDPrintBatch entity per print run; (f) printing decoupled from 'ID Released' (markIdReleased stays separate Wave 1 action). Two open [WHAT] questions flagged for owner (vessel IDs scope, Daily-Ops widget timing).
+- **CHANGELOG_AI.md** — appended SD wave entry.
+- **IMPLEMENTATION_MAP.md** — added Batch 4 — ID Generator / ID Card Printing section (schema/entities, template editor, select & print, open [WHAT] questions); updated DECISIONS_LOG.md count 16→17.
+- **docs/PRODUCT.md** — NOT touched (`git diff` confirms zero changes; Rule 1 preserved).
 
 ### Completed this session (S0)
 

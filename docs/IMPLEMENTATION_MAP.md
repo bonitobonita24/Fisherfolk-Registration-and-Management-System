@@ -372,6 +372,56 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 
 ---
 
+### Batch 4 — ID Generator / ID Card Printing (swarm/id-generator — in planning)
+
+Scope: Full fisherfolk ID card lifecycle — template design, select-and-print, issuance
+tracking. Decisions locked 2026-07-01 (SD session, DECISIONS_LOG.md "ID Generator Wave").
+
+#### Schema / Entities
+
+| Entity | Status |
+|--------|--------|
+| `IDTemplate` model — `frontElements`/`backElements` as strict typed discriminated-union element array (text \| variable \| image \| icon \| qr \| photo \| signature); position+size in mm; content 86×54mm, bleed 90×58mm | ⏳ Schema pending — implementation sessions not started |
+| `IDPrintBatch` model — `id`, `tenantId`, `printedById`, `printedAt`, `count`, `idType` (new\|renewed\|update), `fisherfolkIds` | ⏳ Schema pending |
+| `idTemplate` tRPC router (scaffold ✅ Generated) — needs `create`/`update`/`delete`/`list`/`getById` (adminProcedure) + `getForPrint` (encoder+admin) implemented | ⏳ Router procedures pending |
+| `idPrintBatch` tRPC router — `create` (encoder+admin, writes batch record + validates photo+sig gate); `list`/`getToday` (for Daily-Ops summary) | ⏳ Not yet created |
+
+#### Template Editor UI
+
+| Component | Status |
+|-----------|--------|
+| Template editor page (`/[tenant]/id-generator/editor`) — dnd-kit drag-and-drop; positioned DOM+CSS-mm elements; adminProcedure only | ⏳ Pending |
+| Element palette sidebar — add text / variable / image / icon / qr / photo / signature elements | ⏳ Pending |
+| Properties panel — position (x, y mm), size (w, h mm), font/color per element | ⏳ Pending |
+| Live card preview — 86×54mm DOM render matching print output exactly | ⏳ Pending |
+| Front / back tab toggle in editor | ⏳ Pending |
+
+#### Select & Print Flow
+
+| Component | Status |
+|-----------|--------|
+| Print-eligible fisherfolk list — shows released/not-released + print-eligible/not-eligible (missing photo or signature blocks checkout) | ⏳ Pending |
+| Checkout validation gate — server-side: rejects any fisherfolkId missing `photo` OR `signature` in MinIO | ⏳ Pending |
+| Print preview page — positioned DOM, 200×300mm PVC layout, 1–4 ID pairs; back face `scaleX(-1)` mirrored; empty slots = dashed placeholders | ⏳ Pending |
+| `@media print` stylesheet — hides chrome, sets page size 200×300mm | ⏳ Pending |
+| `IDPrintBatch` record write on confirmed print (who/when/count/idType) | ⏳ Pending |
+
+#### ID Release Integration (from Wave 1)
+
+| Component | Status |
+|-----------|--------|
+| `fisherfolk.markIdReleased` — already shipped (Wave 1, swarm/registration-status-timeline) | ✅ Shipped (separate wave) |
+| Select & Print list surfaces `idReleasedAt` state alongside print-eligibility — decoupled: printing ≠ releasing | ⏳ Pending |
+
+#### Open [WHAT] Questions (owner decision required before implementation)
+
+| ID | Question | Options |
+|----|----------|---------|
+| [WHAT]-IDG-01 | Vessel IDs in-scope for this wave or a later wave? | (A) In-scope now — extend IDTemplate targetEntity enum to fisherfolk\|vessel; (B) Defer vessel IDs to future wave |
+| [WHAT]-IDG-02 | Daily-Operations print-queue widget ships this wave or a later Daily-Ops wave? | (A) Ship now — dashboard "Print Queue" card; (B) Defer widget, IDPrintBatch data recorded now |
+
+---
+
 ## Governance Docs
 
 | Document | Status |
@@ -379,7 +429,7 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 | PRODUCT.md | ✅ Complete (505 lines) |
 | DESIGN.md | ✅ Complete (pre-existing) |
 | CHANGELOG_AI.md | ✅ Active (reconciled 2026-06-25 — Batch 2b-1 + 2b-2 entries added) |
-| DECISIONS_LOG.md | ✅ Active (16 locked decisions) |
+| DECISIONS_LOG.md | ✅ Active (17 locked decisions) |
 | IMPLEMENTATION_MAP.md | ✅ Active (this file — Phase 4 all 8 Parts complete) |
 | inputs.yml | ✅ Generated |
 | inputs.schema.json | ✅ Generated |
@@ -394,7 +444,7 @@ Original Batch 3 split into 3a (detail view, read-only), 3b (vessel registration
 
 ## Locked Decisions (from DECISIONS_LOG.md)
 
-16 decisions locked: Anti-Thrashing Enforcement (UserPromptSubmit hook), Dev Environment (WSL2 native), Git Branching, Model Routing, Port Strategy (base 44377), Docker Image Publishing (bonitobonita24/frms), Tenancy Model (multi-tenant, subdirectory, L1-L6), Auth Strategy (Auth.js v5 + JWT), platformPrisma (unguarded client for auth/platform queries), Cloudflare Turnstile (login only), SMTP Configuration (per-tenant + fallback), Komodo Deployment (V27 auto-update), Spec Stress-Test (enabled, passed), TypeScript declaration: false (apps/web), ESLint type-aware + strict-boolean-expressions options, omitUndefined&lt;T&gt; (exactOptionalPropertyTypes + Prisma payloads).
+17 decisions locked: Anti-Thrashing Enforcement (UserPromptSubmit hook), Dev Environment (WSL2 native), Git Branching, Model Routing, Port Strategy (base 44377), Docker Image Publishing (bonitobonita24/frms), Tenancy Model (multi-tenant, subdirectory, L1-L6), Auth Strategy (Auth.js v5 + JWT), platformPrisma (unguarded client for auth/platform queries), Cloudflare Turnstile (login only), SMTP Configuration (per-tenant + fallback), Komodo Deployment (V27 auto-update), Spec Stress-Test (enabled, passed), TypeScript declaration: false (apps/web), ESLint type-aware + strict-boolean-expressions options, omitUndefined&lt;T&gt; (exactOptionalPropertyTypes + Prisma payloads), ID Generator Wave — ID Card Printing (typed element schema, dnd-kit DOM/CSS-mm editor, @media print PVC layout, photo+sig validation gate, IDPrintBatch entity, printing decoupled from ID Release).
 
 ---
 

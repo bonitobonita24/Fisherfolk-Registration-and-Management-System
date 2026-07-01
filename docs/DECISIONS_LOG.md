@@ -331,3 +331,123 @@ operations); sanitizing to action/actor/timestamp satisfies the audit-visibility
 leaking granular diff data to front-line staff roles that should only know *what* happened, not
 the exact field values that changed.
 Locked: yes
+
+---
+
+## ID Generator Wave — ID Card Printing (2026-07-01)
+
+Source: swarm/id-generator SD session. Rule 15 attribution: CLAUDE_CODE (Swarm Worker SD,
+branch swarm/id-generator). Decisions (a)–(f) are [HOW] calls locked here; open [WHAT] product
+questions flagged for owner at the end of this entry.
+
+### (a) Template element schema — strict typed discriminated union, mm-based layout
+Decision: The `frontElements` and `backElements` fields on `IDTemplate` store an array of
+elements whose shape is a TypeScript **discriminated union** keyed on `type`. Permitted variants:
+`text`, `variable`, `image`, `icon`, `qr`, `photo`, `signature`.
+All variants carry a `position` (x, y in mm from top-left of card content area) and `size`
+(width, height in mm). The authoritative card geometry:
+- **Content area**: 86 × 54 mm (CR-80 standard, landscape).
+- **Bleed area**: 90 × 58 mm (2 mm bleed per side — used only for background/border elements).
+The `variable` element type resolves at render time to a named Fisherfolk field (e.g.
+`idNumber`, `fullName`, `fishingBarangay`, `registrationYear`).
+Rationale: A typed schema is machine-verifiable (Zod), future-proof for new element types, and
+avoids free-form JSON blobs that would break the drag-and-drop editor on schema evolution.
+Locked: yes
+
+### (b) Template Editor is Admin-only; technology: dnd-kit + DOM/CSS-mm (NOT canvas)
+Decision: The template editor UI (`/[tenant]/id-generator/editor`) is gated to
+`adminProcedure` — encoder role cannot edit templates. The editor uses **dnd-kit** for
+drag-and-drop element placement. Rendering is **positioned DOM + CSS `mm` units**, NOT
+canvas/raster. Reasons: (1) DOM + `mm` CSS gives exact print fidelity when combined with
+`@media print` (browsers map CSS `mm` → physical mm); (2) raster canvas at screen DPI would
+introduce blurring at print resolution; (3) dnd-kit supports full keyboard navigation and meets
+WCAG 2.2 AA accessibility requirements (canvas drag is not keyboard-navigable by default).
+
+The **Select & Print** flow (printing existing IDs against a template) and the server-side
+**print record** write are gated to `encoderProcedure` OR `adminProcedure` (both roles may
+initiate a print run).
+Locked: yes
+
+### (c) ID rendering: positioned DOM + @media print; PVC 200×300 mm sheet; back mirrored
+Decision: The printable output renders as a **positioned DOM** element styled with CSS `mm`
+units, with a print stylesheet (`@media print`) that: (1) hides all navigation/chrome; (2)
+sizes the page to **200 × 300 mm** (a standard PVC sheet that fits a laser/inkjet printer
+tray); (3) auto-fills **1–4 ID pairs** (front+back per fisherfolk) in a 2-column × N-row
+grid. Each pair = front face on the left, back face on the right.
+
+**Back content** is rendered mirrored (`transform: scaleX(-1)`) so that when the PVC film is
+flipped for back-printing on the same physical pass, text reads correctly.
+
+**Empty slots** (when a batch has fewer than 4 IDs) are rendered as **dashed placeholder
+boxes** at the correct card dimensions — this prevents the printer from scaling up the
+remaining cards to fill the sheet.
+Locked: yes
+
+### (d) Select & Print validation gate — missing photo OR signature blocks checkout
+Decision: Before a fisherfolk record may be added to a print batch (at checkout time in the
+Select & Print UI), the system MUST verify that the record has both a stored `photo` AND a
+`signature` file in MinIO. If either is missing, the record is marked **not print-eligible**
+and cannot be checked out. The UI surfaces a "Missing photo" or "Missing signature" indicator
+on the ineligible row. Staff must upload the missing asset first and then return to the print
+queue.
+Rationale: An ID without a photo or signature is physically incomplete; printing it wastes PVC
+card stock and produces an invalid municipal ID.
+Locked: yes
+
+### (e) IDPrintBatch entity — persists each print event for Daily-Operations audit trail
+Decision: A new Prisma model **`IDPrintBatch`** (also referred to as "issuance record") is
+written on every confirmed print run. Fields (minimum required):
+- `id` — CUID
+- `tenantId` — tenant isolation
+- `printedById` — FK → `User.id` (who triggered the print)
+- `printedAt` — `DateTime` (`now()`)
+- `count` — `Int` (number of IDs in this batch)
+- `idType` — enum: `new | renewed | update` (type of ID issued)
+- `fisherfolkIds` — `String[]` (native PostgreSQL `text[]` via Prisma — stores the list of fisherfolk CUIDs for this batch; no join table)
+
+The `IDPrintBatch` table is the source of truth for the Daily-Operations dashboard summary
+"today's printed IDs" and the "ready vs incomplete" print queue view (records with photo+sig
+= ready; records missing either = incomplete).
+Rationale: Printing without an audit trail makes it impossible to detect double-printing,
+track throughput, or produce the daily issuance summary the FMO staff currently track manually.
+Locked: yes
+
+### (f) 'ID Released' stays a SEPARATE manual staff action (not linked to printing)
+Decision: The **printing** step and the **ID Released** step are deliberately decoupled:
+- **Printing** is the `IDPrintBatch` record + producing the physical printable output
+  (browser `@media print`). Completing a print run does NOT set `idReleasedAt`.
+- **ID Released** remains the explicit `fisherfolk.markIdReleased` mutation (introduced in
+  Wave 1 — registration-status-timeline), which a staff member triggers AFTER the printed
+  card is physically handed to the fisherfolk. It sets `Fisherfolk.idReleasedAt` and
+  `idReleasedById`.
+
+The **Select & Print** list surfaces both states per row: `released / not released` (from
+`idReleasedAt`) AND `print-eligible / not eligible` (from photo + signature presence). Staff
+can therefore see which IDs have already been issued vs which are newly printed and awaiting
+hand-off.
+Rationale: The physical card may be printed in a batch session but distributed later; forcing
+a released flag at print time would produce inaccurate data on the release date and who
+authorized the hand-off.
+Locked: yes
+
+### ⚠ PM FLAG — Open [WHAT] questions (do NOT write to PRODUCT.md — owner decision required)
+These are product/scope questions that must be answered by the owner before the corresponding
+implementation sessions run. They are NOT [HOW] decisions and are NOT locked here.
+
+**[WHAT]-IDG-01 — Vessel IDs: in-scope for this wave or a later wave?**
+The current ID Generator spec (PRODUCT.md) describes fisherfolk IDs. The system also registers
+vessels (with MFVR numbers). It is unclear whether the `IDTemplate` / `IDPrintBatch` model
+should also cover vessel registration cards in this wave, or whether vessel IDs are deferred
+to a future Vessel-specific wave.
+Options: (A) Vessel IDs in-scope now — extend template `targetEntity` enum to `fisherfolk |
+vessel`; vessel Select & Print flow ships in the same sprint. (B) Vessel IDs deferred —
+current wave covers fisherfolk IDs only; vessel ID template is a follow-up wave.
+
+**[WHAT]-IDG-02 — Daily-Operations print-queue widget: this wave or a later Daily-Ops wave?**
+The `IDPrintBatch` entity (decision e) enables a "today's printed IDs" summary and a
+"ready vs incomplete" print queue. It is unclear whether the Daily-Operations dashboard widget
+that DISPLAYS this data ships in the current ID Generator wave, or is bundled into a future
+Daily-Operations / dashboard enhancement wave.
+Options: (A) Ship the widget in this wave — the dashboard gains a "Print Queue" card
+immediately. (B) Defer to a Daily-Ops wave — the IDPrintBatch data is recorded now but the
+dashboard card is a follow-up session.
