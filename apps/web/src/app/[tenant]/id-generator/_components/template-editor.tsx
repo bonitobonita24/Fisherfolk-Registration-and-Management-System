@@ -77,7 +77,7 @@ export function TemplateEditor() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Template Canvas</CardTitle>
             <Badge variant="outline" className="text-xs font-normal">
-              87 × 56 mm
+              86 × 54 mm cut · 88 × 56 mm bleed
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
