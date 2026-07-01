@@ -150,8 +150,9 @@ describe("idElementSchema — rejection cases", () => {
 
 describe("ID_CARD_GEOMETRY constants", () => {
   it("has correct content dimensions", () => {
-    expect(ID_CARD_GEOMETRY.contentWidthMm).toBe(86);
-    expect(ID_CARD_GEOMETRY.contentHeightMm).toBe(54);
+    // Owner override 2026-07-01: 87×56mm (not 86×54mm) — see DECISIONS_LOG.md
+    expect(ID_CARD_GEOMETRY.contentWidthMm).toBe(87);
+    expect(ID_CARD_GEOMETRY.contentHeightMm).toBe(56);
   });
 
   it("bleed = content + 2×margin", () => {

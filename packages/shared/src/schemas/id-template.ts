@@ -2,11 +2,12 @@ import { z } from "zod";
 import { idTemplateTypeSchema, idTemplateStatusSchema } from "./enums";
 
 // ─── Card geometry constants ────────────────────────────────────────────────
+// Owner override 2026-07-01: printed ID card is 87×56mm (not 86×54mm) — see DECISIONS_LOG.md
 export const ID_CARD_GEOMETRY = {
-  contentWidthMm: 86,
-  contentHeightMm: 54,
-  bleedWidthMm: 90,
-  bleedHeightMm: 58,
+  contentWidthMm: 87,
+  contentHeightMm: 56,
+  bleedWidthMm: 91,   // 87 + 2×2mm bleed
+  bleedHeightMm: 60,  // 56 + 2×2mm bleed
   bleedMarginMm: 2,
   sheetWidthMm: 200,
   sheetHeightMm: 300,

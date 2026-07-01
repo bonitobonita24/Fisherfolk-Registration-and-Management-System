@@ -451,3 +451,19 @@ Daily-Operations / dashboard enhancement wave.
 Options: (A) Ship the widget in this wave — the dashboard gains a "Print Queue" card
 immediately. (B) Defer to a Daily-Ops wave — the IDPrintBatch data is recorded now but the
 dashboard card is a follow-up session.
+
+---
+
+## 2026-07-01 — ID Generator Session S4a (Geometry Override)
+
+### (g) ID card printed size corrected to 87×56mm (owner override)
+Decision: The printed ID card size is **87mm × 56mm** (NOT 86×54mm as initially committed in S1).
+- `ID_CARD_GEOMETRY.contentWidthMm`: 86 → **87**
+- `ID_CARD_GEOMETRY.contentHeightMm`: 54 → **56**
+- `ID_CARD_GEOMETRY.bleedWidthMm`: 90 → **91** (87 + 2×2mm bleed)
+- `ID_CARD_GEOMETRY.bleedHeightMm`: 58 → **60** (56 + 2×2mm bleed)
+
+Changed in: `packages/shared/src/schemas/id-template.ts`; geometry test updated to expect 87/56.
+Rationale: Owner direct instruction on 2026-07-01 — takes precedence over the 86×54mm committed in S1.
+All S4a canvas/renderer components built against the corrected 87×56mm constants.
+Locked: yes
