@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-07-01 — Phase 4 S1 (ID Generator): Shared Zod schemas — idElementSchema + geometry constants + template-variable catalog
+- Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S1 — swarm/id-generator)
+- Why:                 Establish the shared type contract for Phase 4 ID Generator wave. All downstream sessions (template editor S2, select-and-print S3, batch-print S4) must share a single validated element type.
+- What:
+  - `idElementSchema`: discriminated union (7 members — text/variable/image/icon/photo/signature/qr) in `packages/shared/src/schemas/id-template.ts`. Common base fields (id, xMm, yMm, widthMm, heightMm, rotation, zIndex). Typography mixin for text/variable (fontFamily, fontSizePt, fontWeight 400|500|600|700, hex color regex, align enum). Variable element binds to `templateVariableKeySchema` enum for catalog key validation.
+  - `ID_CARD_GEOMETRY` typed const (86×54mm content, 90×58mm bleed, 2mm margin, 200×300mm sheet, 4 pairs/sheet).
+  - `TEMPLATE_VARIABLES` catalog — 29 entries covering FISHERFOLK (15), VESSEL (11), SHARED (3); each `{key, label, group, kind}`.
+  - `idTemplateCreateSchema` / `idTemplateUpdateSchema` — frontElements/backElements upgraded from loose `z.record(z.string(), z.unknown())` to strict `z.array(idElementSchema)`.
+  - 19 Vitest unit tests in `apps/web/src/lib/__tests__/id-element-schema.test.ts`.
+- Validation:          typecheck ✅ · lint ✅ · test 178/199 ✅ (21 DB-skip) · db:generate ✅
+- Code-review gate:    Ran (3 angles). In-scope: icon validation gap (emoji/url presence) cannot be enforced via `.refine()` inside `z.discriminatedUnion` (Zod v3 constraint — ZodEffects not ZodObject); documented in code comment, deferred to S2 application layer. Deferred: double-id in update router (pre-existing), VARIABLE_KEYS literal-type widening, photo/signature/qr vs variable overlap (design).
+- Files changed:       packages/shared/src/schemas/id-template.ts (26→145L), apps/web/src/lib/__tests__/id-element-schema.test.ts (new, 175L)
+
 ## 2026-07-01 — Phase 4 S5: QA / validation gate (typecheck · lint · test · build · WCAG · RBAC/audit verify)
 - Agent:               CLAUDE_CODE (Sonnet 4.6, Spec-Driven Swarm S5)
 - Why:                 Final gate before Phase 4 swarm branch is ready for review. Rule 32 verifiable-done — evidence must be captured, not asserted.

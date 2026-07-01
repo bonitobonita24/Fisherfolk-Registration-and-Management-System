@@ -5,6 +5,18 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S1 — ID Generator shared schemas)
+
+- **`packages/shared/src/schemas/id-template.ts`** — fully rewritten (26→145 lines):
+  - `idElementSchema`: Zod discriminated union on `type` field with 7 members (`text`, `variable`, `image`, `icon`, `photo`, `signature`, `qr`). Common base: `id`, `xMm`, `yMm`, `widthMm`, `heightMm`, `rotation` (default 0), `zIndex`. Text/variable members add typography mixin (`fontFamily`, `fontSizePt`, `fontWeight` 400|500|600|700, `color` hex-6 regex, `align` left|center|right). Variable adds `variableKey` from catalog enum. Image adds `url`. Icon adds optional `emoji`/`url`.
+  - `ID_CARD_GEOMETRY` typed const: content 86×54mm, bleed 90×58mm, bleed margin 2mm, sheet 200×300mm, 4 pairs/sheet.
+  - `TEMPLATE_VARIABLES` catalog: 15 FISHERFOLK vars + 11 VESSEL vars + 3 SHARED vars; each entry `{key, label, group, kind}`.
+  - `templateVariableKeySchema` Zod enum derived from catalog.
+  - `idTemplateCreateSchema` / `idTemplateUpdateSchema` — `frontElements`/`backElements` upgraded from `z.array(z.record(z.string(), z.unknown()))` to `z.array(idElementSchema)`.
+- **`apps/web/src/lib/__tests__/id-element-schema.test.ts`** — 19 Vitest unit tests covering: all 7 element types pass; default rotation; rejection of unknown type / missing mm fields / bad hex / unknown variableKey / non-URL; geometry constant correctness; bleed = content + 2×margin; variable catalog completeness and all keys pass templateVariableKeySchema.
+- **Validation**: typecheck ✅ (0 errors), test ✅ (178 pass / 21 DB-skip, 19 new), lint ✅, db:generate ✅ unaffected.
+- **Code-review gate**: ran; 1 in-scope finding (icon validation gap — `.refine()` inside discriminatedUnion returns ZodEffects, Zod v3 requires ZodObject members) documented in code comment; deferred to application layer in S2+. 3 out-of-scope deferred items logged.
+
 ### Completed this session (SD — ID Generator docs wave)
 
 - **DECISIONS_LOG.md** — appended 2026-07-01 ID Generator entry with 6 locked sub-decisions (a–f): (a) typed discriminated-union element schema (text/variable/image/icon/qr/photo/signature, mm-based, 86×54mm/90×58mm); (b) Template Editor adminProcedure + dnd-kit DOM/CSS-mm NOT canvas; Select & Print = encoder+admin; (c) DOM+@media print, 200×300mm PVC sheet, back mirrored scaleX(-1), empty dashed placeholders; (d) Select & Print checkout blocks missing photo OR signature; (e) IDPrintBatch entity per print run; (f) printing decoupled from 'ID Released' (markIdReleased stays separate Wave 1 action). Two open [WHAT] questions flagged for owner (vessel IDs scope, Daily-Ops widget timing).
