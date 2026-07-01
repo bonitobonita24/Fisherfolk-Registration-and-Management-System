@@ -5,6 +5,22 @@
 Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
 Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
 
+### Completed this session (S3 — IDPrintBatch model + idPrint router)
+
+- **`packages/db/prisma/schema.prisma`** — added `IDPrintBatch` model (id, tenantId, templateId, templateType, printedById, printedAt, idCount, summaryJson, createdAt); added `PRINT` to `AuditAction` enum; added inverse relations on Tenant, User, IDTemplate.
+- **`packages/db/prisma/migrations/20260701120000_add_id_print_batch/migration.sql`** — CREATE-ONLY additive migration: `ALTER TYPE "AuditAction" ADD VALUE 'PRINT'` + `CREATE TABLE "id_print_batches"` + 3 FK constraints + 2 indexes.
+- **`packages/shared/src/types/enums.ts`** — added `PRINT` to `AuditAction` const object.
+- **`packages/shared/src/schemas/id-print.ts`** (new) — `idPrintValidateSchema`, `idPrintRecordSchema`, `idPrintSubjectSchema` Zod schemas + TypeScript types.
+- **`apps/web/src/server/trpc/routers/idPrint.ts`** (new) — 4 procedures:
+  - `listEligible` (encoderProcedure): tenant-scoped fisherfolk/vessel list with `ready` boolean.
+  - `validateSelection` (encoderProcedure): per-ID photo/signature check; not-found IDs treated as blocked.
+  - `recordPrint` (encoderProcedure): subject-type/template-type mismatch guard → template tenant+type check → server-side re-validation (including not-found detection) → `$transaction(IDPrintBatch.create + AuditLog(PRINT))`; returns `{id, idCount}` minimal surface.
+  - `todaysPrinted` (encoderProcedure): PHT midnight boundary (not server UTC); viewer FORBIDDEN.
+- **`apps/web/src/server/trpc/root.ts`** — registered `idPrint: idPrintRouter`.
+- **`apps/web/src/server/trpc/routers/__tests__/idPrint.test.ts`** (new) — 13 DB-integration tests (skip in CI): validateSelection flags missing photo/sig/not-found/cross-tenant; recordPrint writes batch+audit, blocks on missing media + not-found + mismatch, viewer FORBIDDEN; todaysPrinted tenant-scoped + PHT start-of-day + rolled-up counts.
+- **Code-review gate**: ran (4 angles × parallel agents); 7 in-scope findings fixed: RBAC (todaysPrinted→encoderProcedure), re-validation not-found detection, subjectType/templateType mismatch bypass, raw IDs in error message, narrowed return surface, templateType cross-check on template lookup, PHT timezone.
+- **Validation**: typecheck ✅ (0 errors), lint ✅, test ✅ (178 pass / 50 skip-DB, 13 new tests).
+
 ### Completed this session (S2 — ID Generator router hardening)
 
 - **`apps/web/src/server/trpc/routers/idTemplate.ts`** — hardened with L5 AuditLog writes and `duplicate` mutation:

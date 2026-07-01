@@ -12,3 +12,4 @@ export * from "./kanban-task";
 export * from "./notification";
 export * from "./ayuda";
 export * from "./id-template";
+export * from "./id-print";

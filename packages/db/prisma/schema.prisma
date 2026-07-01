@@ -43,6 +43,7 @@ enum AuditAction {
   APPROVE
   REJECT
   RENEW
+  PRINT
   VIOLATION_FILED
   VIOLATION_LIFTED
   LOGIN
@@ -197,6 +198,7 @@ model Tenant {
   barangayAliases       BarangayAlias[]
   importBatches         ImportBatch[]
   registrationRenewals  RegistrationRenewal[]
+  idPrintBatches        IDPrintBatch[]
 
   @@map("tenants")
 }
@@ -237,6 +239,7 @@ model User {
   importBatches           ImportBatch[]        @relation("ImportBatchCreatedBy")
   renewedRegistrations    RegistrationRenewal[] @relation("RegistrationRenewalRenewedBy")
   idReleasedFisherfolk    Fisherfolk[]         @relation("FisherfolkIdReleasedBy")
+  idPrintBatches          IDPrintBatch[]       @relation("IDPrintBatchPrintedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -614,8 +617,9 @@ model IDTemplate {
   createdAt          DateTime         @default(now()) @map("created_at")
   updatedAt          DateTime         @updatedAt @map("updated_at")
 
-  tenant    Tenant @relation(fields: [tenantId], references: [id])
-  createdBy User   @relation(fields: [createdById], references: [id])
+  tenant      Tenant         @relation(fields: [tenantId], references: [id])
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  printBatches IDPrintBatch[]
 
   @@index([tenantId])
   @@index([tenantId, templateType, status])
@@ -700,4 +704,24 @@ model RegistrationRenewal {
   @@index([tenantId])
   @@index([fisherfolkId])
   @@map("registration_renewals")
+}
+
+model IDPrintBatch {
+  id              String           @id @default(cuid())
+  tenantId        String           @map("tenant_id")
+  templateId      String           @map("template_id")
+  templateType    IDTemplateType   @map("template_type")
+  printedById     String           @map("printed_by_id")
+  printedAt       DateTime         @default(now()) @map("printed_at")
+  idCount         Int              @map("id_count")
+  summaryJson     Json             @map("summary_json")
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  tenant      Tenant     @relation(fields: [tenantId], references: [id])
+  template    IDTemplate @relation(fields: [templateId], references: [id])
+  printedBy   User       @relation("IDPrintBatchPrintedBy", fields: [printedById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, printedAt])
+  @@map("id_print_batches")
 }
