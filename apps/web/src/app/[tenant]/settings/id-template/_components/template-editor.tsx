@@ -58,17 +58,27 @@ export function TemplateEditor({ canManage }: TemplateEditorProps) {
 
   const create = trpc.idTemplate.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Template created.");
+      toast.success(
+        data.status === "ACTIVE"
+          ? "Template created and set active — the ID Generator will use it."
+          : "Template created.",
+      );
       setTemplateId(data.id);
       void utils.idTemplate.list.invalidate();
+      void utils.idTemplate.getActive.invalidate();
     },
     onError: (err) => toast.error(err.message || "Create failed."),
   });
 
   const update = trpc.idTemplate.update.useMutation({
-    onSuccess: () => {
-      toast.success("Template updated.");
+    onSuccess: (data) => {
+      toast.success(
+        data.status === "ACTIVE"
+          ? "Template updated — it is the active template used by the ID Generator."
+          : "Template updated.",
+      );
       void utils.idTemplate.list.invalidate();
+      void utils.idTemplate.getActive.invalidate();
     },
     onError: (err) => toast.error(err.message || "Update failed."),
   });

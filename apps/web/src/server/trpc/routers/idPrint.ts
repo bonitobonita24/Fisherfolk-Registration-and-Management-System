@@ -31,12 +31,15 @@ export const idPrintRouter = createTRPCRouter({
           templateType: z.enum(["FISHERFOLK", "VESSEL"]),
           search: z.string().optional(),
           barangay: z.string().optional(),
+          /** "recent" = most recently registered first (encoder quick-select). */
+          sort: z.enum(["name", "recent"]).optional(),
+          limit: z.number().int().min(1).max(50).optional(),
         })
         .strict(),
     )
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-      const { templateType, search, barangay } = input;
+      const { templateType, search, barangay, sort, limit } = input;
 
       if (templateType === "FISHERFOLK") {
         const where = {
@@ -52,7 +55,11 @@ export const idPrintRouter = createTRPCRouter({
 
         const items = await ctx.db.fisherfolk.findMany({
           where,
-          orderBy: { fullName: "asc" },
+          orderBy:
+            sort === "recent"
+              ? { createdAt: "desc" as const }
+              : { fullName: "asc" as const },
+          ...(limit !== undefined && { take: limit }),
           select: {
             id: true,
             fullName: true,
@@ -60,6 +67,7 @@ export const idPrintRouter = createTRPCRouter({
             signature: true,
             qrCode: true,
             idReleasedAt: true,
+            createdAt: true,
             _count: { select: { renewals: true } },
           },
         });
@@ -71,6 +79,7 @@ export const idPrintRouter = createTRPCRouter({
           signature: item.signature,
           qrCode: item.qrCode,
           idReleasedAt: item.idReleasedAt,
+          registeredAt: item.createdAt,
           renewalCount: item._count.renewals,
           ready: item.photo !== null && item.signature !== null,
         }));
@@ -89,12 +98,17 @@ export const idPrintRouter = createTRPCRouter({
 
       const vessels = await ctx.db.vessel.findMany({
         where,
-        orderBy: { vesselName: "asc" },
+        orderBy:
+          sort === "recent"
+            ? { createdAt: "desc" as const }
+            : { vesselName: "asc" as const },
+        ...(limit !== undefined && { take: limit }),
         select: {
           id: true,
           vesselName: true,
           vesselPhoto: true,
           qrCode: true,
+          createdAt: true,
         },
       });
 
@@ -105,6 +119,7 @@ export const idPrintRouter = createTRPCRouter({
         signature: null,
         qrCode: v.qrCode,
         idReleasedAt: null,
+        registeredAt: v.createdAt,
         renewalCount: 0,
         // Vessels have no signature requirement — photo alone determines readiness
         ready: v.vesselPhoto !== null,

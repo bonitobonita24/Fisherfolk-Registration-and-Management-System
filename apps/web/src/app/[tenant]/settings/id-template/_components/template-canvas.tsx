@@ -12,7 +12,7 @@ import {
 } from "@dnd-kit/core";
 import { createSnapModifier, restrictToParentElement } from "@dnd-kit/modifiers";
 import { ID_CARD_GEOMETRY, type IdElement } from "@frms/shared/schemas";
-import { IdCardRenderer, elementPositionStyle, pxFromMm } from "./id-card-renderer";
+import { IdCardRenderer, elementPositionStyle, pxFromMm } from "@/components/id-card-renderer";
 
 /** Respects prefers-reduced-motion for WCAG 2.2 SC 2.3.3 */
 function useReducedMotion(): boolean {

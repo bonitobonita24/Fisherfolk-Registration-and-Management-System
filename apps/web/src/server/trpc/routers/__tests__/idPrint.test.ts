@@ -437,6 +437,10 @@ describe.skipIf(!hasDb)("idPrint router", () => {
       const batchIds = resultA.batches.map((b) => b.tenantId);
       expect(batchIds.every((tid) => tid === testTenantAId)).toBe(true);
 
+      // Delete the print batch FIRST — id_print_batches.template_id FK blocks
+      // deleting the template while its batch exists.
+      await platformPrisma.iDPrintBatch.deleteMany({ where: { tenantId: testTenantBId } });
+      await platformPrisma.auditLog.deleteMany({ where: { tenantId: testTenantBId } });
       await platformPrisma.fisherfolk.delete({ where: { id: ffB.id } });
       await platformPrisma.iDTemplate.delete({ where: { id: tmplB.id } });
       await platformPrisma.user.delete({ where: { id: encB.id } });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Copy, Archive, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Copy, Archive, Trash2, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
@@ -58,8 +58,20 @@ export function TemplateManager({
     onSuccess: () => {
       toast.success("Template archived.");
       void utils.idTemplate.list.invalidate();
+      void utils.idTemplate.getActive.invalidate();
     },
     onError: (err) => toast.error(err.message || "Archive failed."),
+  });
+
+  const setActive = trpc.idTemplate.setActive.useMutation({
+    onSuccess: (data) => {
+      toast.success(
+        `"${data.name}" is now the active template — the ID Generator will use it.`,
+      );
+      void utils.idTemplate.list.invalidate();
+      void utils.idTemplate.getActive.invalidate();
+    },
+    onError: (err) => toast.error(err.message || "Set active failed."),
   });
 
   const remove = trpc.idTemplate.delete.useMutation({
@@ -107,7 +119,7 @@ export function TemplateManager({
               <TableHead className="w-24">Status</TableHead>
               <TableHead className="w-32">Updated</TableHead>
               {canManage && (
-                <TableHead className="w-44 text-right">Actions</TableHead>
+                <TableHead className="w-64 text-right">Actions</TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -119,12 +131,16 @@ export function TemplateManager({
                   {tpl.templateType.toLowerCase()}
                 </TableCell>
                 <TableCell>
-                  <Badge
-                    variant={tpl.status === "ACTIVE" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {tpl.status.toLowerCase()}
-                  </Badge>
+                  {tpl.status === "ACTIVE" ? (
+                    <Badge className="gap-1 text-xs">
+                      <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+                      active
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-xs">
+                      {tpl.status.toLowerCase()}
+                    </Badge>
+                  )}
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {formatDate(tpl.updatedAt)}
@@ -132,6 +148,21 @@ export function TemplateManager({
                 {canManage && (
                   <TableCell>
                     <div className="flex justify-end gap-1">
+                      {/* Set Active (only when not already active) */}
+                      {tpl.status !== "ACTIVE" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => setActive.mutate({ id: tpl.id })}
+                          disabled={setActive.isPending}
+                          aria-label={`Set ${tpl.name} as the active template`}
+                        >
+                          <CheckCircle2 className="mr-1 h-3 w-3" aria-hidden="true" />
+                          Set Active
+                        </Button>
+                      )}
+
                       {/* Edit */}
                       <Button
                         size="icon"

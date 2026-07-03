@@ -148,9 +148,14 @@ afterAll(async () => {
   if (!hasDb) return;
   if (!testTenantAId || !testTenantBId) return;
 
+  // Delete ALL templates (both tenants) before ANY users: cross-tenant tests
+  // create tenant-B templates whose created_by_id points at a tenant-A user,
+  // so deleting tenant-A users first violates id_templates_created_by_id_fkey.
   for (const tenantId of [testTenantAId, testTenantBId]) {
     await platformPrisma.auditLog.deleteMany({ where: { tenantId } });
     await platformPrisma.iDTemplate.deleteMany({ where: { tenantId } });
+  }
+  for (const tenantId of [testTenantAId, testTenantBId]) {
     await platformPrisma.user.deleteMany({ where: { tenantId } });
     await platformPrisma.tenant.delete({ where: { id: tenantId } }).catch(() => { /* already gone */ });
   }
@@ -349,6 +354,124 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
       const source = await createTemplate(testTenantAId, testAdminId);
       const caller = callerAs(testTenantAId, testAdminId, "encoder");
       await expect(caller.duplicate({ id: source.id })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
+  });
+
+  // ── setActive (single-active invariant) ───────────────────────────────────
+
+  describe("setActive", () => {
+    it("activates the target and archives every other ACTIVE template of the same type", async () => {
+      const oldActive = await createTemplate(testTenantAId, testAdminId, {
+        status: "ACTIVE",
+        name: "Old Active",
+      });
+      const target = await createTemplate(testTenantAId, testAdminId, {
+        status: "ARCHIVED",
+        name: "New Active",
+      });
+      const caller = callerAs(testTenantAId, testAdminId, "admin");
+
+      const result = await caller.setActive({ id: target.id });
+      expect(result.status).toBe("ACTIVE");
+
+      const demoted = await platformPrisma.iDTemplate.findUnique({ where: { id: oldActive.id } });
+      expect(demoted?.status).toBe("ARCHIVED");
+
+      // getActive now resolves to the target — this is what the ID Generator loads
+      const active = await caller.getActive({ templateType: "FISHERFOLK" });
+      expect(active.id).toBe(target.id);
+    });
+
+    it("writes UPDATE audit logs for the activated AND the demoted template", async () => {
+      const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
+      const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
+      const caller = callerAs(testTenantAId, testAdminId, "admin");
+
+      await caller.setActive({ id: target.id });
+
+      const targetLog = await platformPrisma.auditLog.findFirst({
+        where: { entityType: "IDTemplate", entityId: target.id, action: "UPDATE" },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(targetLog).not.toBeNull();
+      expect(targetLog?.before).not.toBeNull();
+      expect(targetLog?.after).not.toBeNull();
+
+      const demotedLog = await platformPrisma.auditLog.findFirst({
+        where: { entityType: "IDTemplate", entityId: oldActive.id, action: "UPDATE" },
+        orderBy: { createdAt: "desc" },
+      });
+      expect(demotedLog).not.toBeNull();
+      expect((demotedLog?.after as { status?: string })?.status).toBe("ARCHIVED");
+    });
+
+    it("does not touch ACTIVE templates of a different templateType", async () => {
+      const vesselActive = await createTemplate(testTenantAId, testAdminId, {
+        status: "ACTIVE",
+        templateType: "VESSEL",
+      });
+      const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
+      const caller = callerAs(testTenantAId, testAdminId, "admin");
+
+      await caller.setActive({ id: target.id });
+
+      const vessel = await platformPrisma.iDTemplate.findUnique({ where: { id: vesselActive.id } });
+      expect(vessel?.status).toBe("ACTIVE");
+    });
+
+    it("NOT_FOUND for cross-tenant setActive (tenant isolation)", async () => {
+      const templateB = await createTemplate(testTenantBId, testAdminId);
+      const callerA = callerAs(testTenantAId, testAdminId, "admin");
+      await expect(callerA.setActive({ id: templateB.id })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+
+    it("FORBIDDEN for encoder role", async () => {
+      const target = await createTemplate(testTenantAId, testAdminId);
+      const caller = callerAs(testTenantAId, testAdminId, "encoder");
+      await expect(caller.setActive({ id: target.id })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
+  });
+
+  // ── single-active invariant on create/update ──────────────────────────────
+
+  describe("single-active invariant (create/update)", () => {
+    it("create with status ACTIVE archives the previously active template of the same type", async () => {
+      const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
+      const caller = callerAs(testTenantAId, testAdminId, "admin");
+
+      const created = await caller.create({
+        name: `Fresh-${Date.now()}`,
+        templateType: "FISHERFOLK",
+        status: "ACTIVE",
+        frontElements: [],
+        backElements: [],
+      });
+
+      const demoted = await platformPrisma.iDTemplate.findUnique({ where: { id: oldActive.id } });
+      expect(demoted?.status).toBe("ARCHIVED");
+
+      const actives = await platformPrisma.iDTemplate.findMany({
+        where: { tenantId: testTenantAId, templateType: "FISHERFOLK", status: "ACTIVE" },
+      });
+      expect(actives).toHaveLength(1);
+      expect(actives[0]?.id).toBe(created.id);
+    });
+
+    it("update to status ACTIVE archives the previously active template of the same type", async () => {
+      const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
+      const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
+      const caller = callerAs(testTenantAId, testAdminId, "admin");
+
+      await caller.update({ id: target.id, data: { id: target.id, status: "ACTIVE" } });
+
+      const demoted = await platformPrisma.iDTemplate.findUnique({ where: { id: oldActive.id } });
+      expect(demoted?.status).toBe("ARCHIVED");
+
+      const actives = await platformPrisma.iDTemplate.findMany({
+        where: { tenantId: testTenantAId, templateType: "FISHERFOLK", status: "ACTIVE" },
+      });
+      expect(actives).toHaveLength(1);
+      expect(actives[0]?.id).toBe(target.id);
     });
   });
 

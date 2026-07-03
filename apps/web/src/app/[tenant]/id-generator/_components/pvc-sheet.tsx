@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { Printer } from "lucide-react";
 import { ID_CARD_GEOMETRY, idElementSchema, type IdElement } from "@frms/shared/schemas";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { IdCardRenderer, type CardData } from "./id-card-renderer";
+import { IdCardRenderer, type CardData } from "@/components/id-card-renderer";
 import { type PrintSelection, type PrintSubject } from "./select-and-print";
 
 // 1 CSS mm = 96/25.4 CSS px at standard 96 DPI.
@@ -54,15 +55,9 @@ export function PvcSheet({ selection, onBack }: PvcSheetProps) {
 
   const recordPrint = trpc.idPrint.recordPrint.useMutation();
 
+  // Step 2 of the print flow: the on-screen preview below IS the confirmation —
+  // this button records the batch and opens the print dialog.
   const handlePrint = useCallback(async () => {
-    const count = selection.subjects.length;
-    if (
-      !window.confirm(
-        `Print ${count} ID${count !== 1 ? "s" : ""}? This will record a print batch.`,
-      )
-    )
-      return;
-
     setPrinting(true);
     try {
       const result = await recordPrint.mutateAsync({
@@ -155,9 +150,10 @@ export function PvcSheet({ selection, onBack }: PvcSheetProps) {
             size="sm"
             onClick={() => { void handlePrint(); }}
             disabled={!canPrint}
-            aria-label="Print ID cards and record print batch"
+            aria-label={`Confirm and print ${selection.subjects.length} ID card${selection.subjects.length !== 1 ? "s" : ""} — records a print batch`}
           >
-            {printing ? "Recording…" : "Print"}
+            <Printer className="mr-1.5 h-4 w-4" aria-hidden="true" />
+            {printing ? "Recording…" : "Confirm & Print"}
           </Button>
         </div>
       </div>

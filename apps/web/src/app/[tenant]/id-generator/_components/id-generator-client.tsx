@@ -1,47 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TemplateEditor } from "./template-editor";
 import { SelectAndPrint, type PrintSelection } from "./select-and-print";
 import { PvcSheet } from "./pvc-sheet";
 
-interface IdGeneratorClientProps {
-  canManage: boolean;
-}
+/**
+ * Encoder print flow — two steps:
+ *  1. Select fisherfolk to print (1–4, recent quick-select + search)
+ *  2. Confirm & print (exact print preview with the active template)
+ *
+ * Template design lives in Settings → ID Card Template (admin only).
+ */
+export function IdGeneratorClient() {
+  const [printSelection, setPrintSelection] = useState<PrintSelection | null>(
+    null,
+  );
 
-export function IdGeneratorClient({ canManage }: IdGeneratorClientProps) {
-  const [printSelection, setPrintSelection] = useState<PrintSelection | null>(null);
-
-  // Encoders only see Select & Print; admins/super_admins see all tabs.
-  const defaultTab = canManage ? "editor" : "select";
+  const step = printSelection === null ? 1 : 2;
 
   return (
-    <Tabs defaultValue={defaultTab} className="space-y-6">
-      <TabsList aria-label="ID Generator sections">
-        {canManage && (
-          <TabsTrigger value="editor">Template Editor</TabsTrigger>
-        )}
-        <TabsTrigger value="select">Select &amp; Print</TabsTrigger>
-      </TabsList>
+    <div className="space-y-4">
+      {/* Step indicator */}
+      <ol
+        className="flex items-center gap-2 text-sm"
+        aria-label="Print flow progress"
+      >
+        <li
+          aria-current={step === 1 ? "step" : undefined}
+          className={`flex items-center gap-2 rounded-full border px-3 py-1 ${
+            step === 1
+              ? "border-primary bg-primary/10 font-medium"
+              : "text-muted-foreground"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${
+              step === 1
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            1
+          </span>
+          Select fisherfolk
+        </li>
+        <li aria-hidden="true" className="text-muted-foreground">
+          →
+        </li>
+        <li
+          aria-current={step === 2 ? "step" : undefined}
+          className={`flex items-center gap-2 rounded-full border px-3 py-1 ${
+            step === 2
+              ? "border-primary bg-primary/10 font-medium"
+              : "text-muted-foreground"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${
+              step === 2
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            2
+          </span>
+          Confirm &amp; print
+        </li>
+      </ol>
 
-      {/* forceMount keeps both tabs mounted so selection state survives tab switches */}
-      {canManage && (
-        <TabsContent value="editor" className="mt-0 data-[state=inactive]:hidden" forceMount>
-          <TemplateEditor canManage={canManage} />
-        </TabsContent>
+      {printSelection !== null ? (
+        <PvcSheet
+          selection={printSelection}
+          onBack={() => setPrintSelection(null)}
+        />
+      ) : (
+        <SelectAndPrint onProceedToLayout={setPrintSelection} />
       )}
-
-      <TabsContent value="select" className="mt-0 data-[state=inactive]:hidden" forceMount>
-        {printSelection !== null ? (
-          <PvcSheet
-            selection={printSelection}
-            onBack={() => setPrintSelection(null)}
-          />
-        ) : (
-          <SelectAndPrint onProceedToLayout={setPrintSelection} />
-        )}
-      </TabsContent>
-    </Tabs>
+    </div>
   );
 }
