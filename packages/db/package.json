@@ -16,6 +16,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-demo-files": "tsx scripts/seed-demo-files.ts",
+    "db:seed-qa": "tsx scripts/seed-qa-demo.ts",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit"
