@@ -2,7 +2,7 @@
 
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { Menu, LogOut, Settings } from "lucide-react";
+import { Menu, LogOut, Settings, Search, PanelLeft } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -20,10 +20,11 @@ interface HeaderProps {
   userName: string;
   role: string;
   onMenuClick?: () => void;
+  onToggleSidebar?: () => void;
   tenantSlug?: string;
 }
 
-export function Header({ userName, role, onMenuClick, tenantSlug }: HeaderProps) {
+export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlug }: HeaderProps) {
   const initials =
     userName
       .trim()
@@ -35,21 +36,48 @@ export function Header({ userName, role, onMenuClick, tenantSlug }: HeaderProps)
       .toUpperCase() || "U";
 
   return (
-    <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-card px-4 md:px-6">
-      <div className="flex items-center gap-2">
+    <header className="flex h-14 items-center gap-2 border-b border-border bg-card px-3">
+      {/* Mobile: always-present drawer trigger */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="shrink-0 md:hidden"
+        onClick={onMenuClick}
+        aria-label="Open menu"
+      >
+        <Menu className="h-4 w-4" />
+      </Button>
+
+      {/* Desktop: collapse toggle — only when app-shell provides the handler */}
+      {onToggleSidebar && (
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
-          onClick={onMenuClick}
-          aria-label="Open menu"
+          className="hidden shrink-0 md:flex"
+          onClick={onToggleSidebar}
+          aria-label="Toggle sidebar"
         >
-          <Menu className="h-4 w-4" />
+          <PanelLeft className="h-4 w-4" />
         </Button>
+      )}
+
+      {/* Search — desktop only; button (not input) so screen readers don't enter forms mode */}
+      <div className="hidden flex-1 md:flex">
+        <button
+          type="button"
+          className="flex h-8 w-60 items-center gap-2 rounded-md bg-muted/50 px-2.5 text-sm text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Search"
+        >
+          <Search className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="rounded border border-border px-1 text-xs opacity-60">⌘K</kbd>
+        </button>
       </div>
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
+
+      {/* Right actions */}
+      <div className="ml-auto flex items-center gap-1">
         <NotificationBell />
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
