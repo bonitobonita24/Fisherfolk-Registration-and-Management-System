@@ -467,3 +467,55 @@ Changed in: `packages/shared/src/schemas/id-template.ts`; geometry test updated 
 Rationale: Owner direct instruction on 2026-07-01 — takes precedence over the 86×54mm committed in S1.
 All S4a canvas/renderer components built against the corrected 87×56mm constants.
 Locked: yes
+
+---
+
+## 2026-07-04 — AdminCN Reskin wave (branch swarm/admincn-reskin)
+
+### (a) App shell and theme reskinned to AdminCN template pattern
+Decision: FRMS is reskinned to match the **AdminCN shadcn admin template** aesthetic.
+- Scope: dashboard page + full app shell (sidebar + top header) + global theme tokens.
+- **Dark stays the default.** `apps/web/src/app/[tenant]/layout.tsx` already sets
+  `defaultTheme="dark"` — this is left unchanged. The reskin targets dark-mode surfaces only.
+- **Surface palette**: AdminCN neutral-dark surfaces adopted — body/page `bg ~#0a0a0a`
+  (`--background: 0 0% 3.9%`), card `bg ~#171717` (`--card: 0 0% 9%`), with matching border
+  (`--border: 0 0% 14.9%`) and muted (`--muted: 0 0% 14.9%`) tokens.
+- **Orange `--primary` kept.** FRMS's orange `--primary` is per-tenant runtime-overridable in
+  `[tenant]/layout.tsx` (CSS-var injection at `#tenant-theme-root`); it lives outside the
+  tokens this reskin changes and must not be overwritten.
+- **Accent identity — teal/orange via `--accent` + `--chart-1..5`**: AdminCN's dark chart
+  palette is blue/purple by default; we substitute AdminCN's *light* teal/orange hues into the
+  dark chart slots per owner request (`--chart-1` teal, `--chart-2` orange, `--chart-3..5`
+  supporting). `--accent` and `--accent-foreground` are set to the teal identity for
+  interactive highlights (hover, focus rings) that are not covered by `--primary`.
+Rationale: Owner directive — modernize FRMS look to a professional admin dashboard aesthetic
+(AdminCN) while preserving the per-tenant theming contract and the existing dark default.
+Locked: yes
+
+### (b) DENSITY pass — compact KPI strip + tighter layout
+Decision: A global density pass ships with the reskin:
+- Dashboard KPI tiles: **6-across compact strip** (was 4-across or 3-across larger cards).
+  `p-3` / `gap-3` inner padding; chart heights reduced (~180px → ~140px where applicable).
+- App-wide: tighter `gap-3`/`gap-4` section spacing, reduced `p-4`/`p-6` page padding to
+  `p-3`/`p-4`; sidebars and headers use `h-14` / `px-4` instead of `h-16` / `px-6`.
+- Cards and section wrappers use `py-3 px-4` instead of `py-6 px-6`.
+Rationale: LGU daily-operations use case — staff need more data visible per screen without
+scrolling. The denser layout matches AdminCN's compact professional admin style.
+Locked: yes
+
+### (c) Implementation split — 5 code sessions + 1 docs session
+Decision: The AdminCN reskin wave is split into 5 parallel/sequential code sessions + this SD
+docs session:
+- **S1** — Theme tokens: CSS custom-property overrides in `globals.css` (dark surface palette +
+  accent/chart tokens); Tailwind config base-color updates.
+- **S2** — Sidebar + shell: update `app-sidebar.tsx` / `sidebar.tsx` / shell layout to AdminCN
+  spacing, icon sizing, group labels, collapsed state styling.
+- **S3** — Top header: update `header.tsx` / breadcrumb / search bar / user-menu to AdminCN
+  header pattern; `h-14` height, `border-b`, muted background.
+- **S4** — Dense dashboard: rebuild KPI strip as 6-across compact row; reduce chart heights;
+  apply density-pass padding/gap values to all dashboard sections.
+- **S5** — QA: full typecheck + lint + build + visual smoke-test (Playwright screenshot or
+  manual check); WCAG contrast ratio verification for new token values.
+- **SD** (this session) — governance docs: DECISIONS_LOG + CHANGELOG_AI; PRODUCT.md untouched.
+Rationale: Parallel fan-out (S1–S4 are largely independent surfaces) then serial QA gate (S5).
+Locked: yes

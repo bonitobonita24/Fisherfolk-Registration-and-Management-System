@@ -656,3 +656,9 @@
 - No change:       page.tsx (canManage calc already correct); nav-items.ts (roles already super_admin/admin/encoder); SelectAndPrint ID-released state (unchanged from S5).
 - Code-review:     ran 2 angles; both [] (clean — no in-scope findings).
 - Verification:    typecheck=pass (0 errors); lint=pass (0 warnings); test=pass (178 pass / 50 skip-DB); build=pass. Commit 47d391b on swarm/id-generator.
+
+## 2026-07-04 — SD (AdminCN Reskin wave): DECISIONS_LOG + CHANGELOG_AI governance docs
+- Agent:           CLAUDE_CODE (Swarm Worker SD, branch swarm/admincn-reskin)
+- Why:             Session SD — governance docs update only (no app code). Record all [HOW] decisions for the AdminCN Reskin wave: (a) full app shell + dashboard reskinned to AdminCN template pattern — dark default kept, neutral-dark surfaces (#0a0a0a bg / #171717 card), orange --primary preserved (per-tenant runtime-overridable), teal/orange accent identity via --accent + --chart-1..5 substituting AdminCN's default blue/purple; (b) global density pass — 6-across compact KPI strip, reduced chart heights, tighter padding/gaps throughout; (c) implementation split — S1 theme tokens, S2 sidebar+shell, S3 header, S4 dense dashboard, S5 QA. PRODUCT.md untouched (Rule 1).
+- Files modified:  docs/DECISIONS_LOG.md (appended 2026-07-04 AdminCN Reskin entry with sub-decisions a–c); docs/STATE.md (current-state block updated); docs/CHANGELOG_AI.md (this entry).
+- Verification:    git diff -- docs/PRODUCT.md confirms zero changes. Rule 1 preserved.

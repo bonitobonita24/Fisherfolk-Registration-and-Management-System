@@ -1,11 +1,23 @@
 # FRMS — Project State
 
-## Current State (2026-07-01)
+## Current State (2026-07-04)
 
-Branch `swarm/id-generator` is the active feature branch for the ID Generator / ID Card Printing wave.
-Branch `swarm/registration-status-timeline` contains completed Wave 1 (registration-status timeline) work.
+Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
+Sessions S1 (theme tokens), S2 (sidebar+shell), S3 (header), S4 (dense dashboard), S5 (QA)
+are the implementation sessions for this wave. SD (this session) records governance docs only.
 
-### Completed this session (S7 — Page assembly, RBAC tab gating)
+### Completed this session (SD — AdminCN Reskin governance docs)
+
+- **`docs/DECISIONS_LOG.md`** (updated) — appended `2026-07-04 AdminCN Reskin wave` section with
+  sub-decisions (a) app shell + theme reskin to AdminCN pattern (dark default kept, neutral-dark
+  surfaces, teal/orange accent via --accent + --chart-1..5, orange --primary preserved), (b) density
+  pass (6-across KPI strip, tighter padding/gaps, reduced chart heights), (c) implementation split
+  (S1–S5 + SD). PRODUCT.md untouched (Rule 1).
+- **`docs/CHANGELOG_AI.md`** (updated) — appended SD wave summary entry.
+- **`docs/STATE.md`** (this file) — current-state block updated.
+- Commit on `swarm/admincn-reskin`.
+
+### Completed previous session (S7 — Page assembly, RBAC tab gating)
 
 - **`apps/web/src/app/[tenant]/id-generator/_components/id-generator-client.tsx`** (updated) — RBAC tab gating:
   - Admins/super_admins (`canManage=true`): `defaultValue="editor"`, Template Editor tab visible.
