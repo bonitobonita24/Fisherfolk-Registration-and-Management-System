@@ -3,6 +3,16 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-05 — SET-2 Dashboard Redesign S6: QA/WCAG gate — axe clean, dark-mode verified (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S6, swarm/dashboard-redesign)
+
+- VALIDATED typecheck ✅ lint ✅ build ✅ test ✅ (178 pass / 62 skip-DB).
+- VERIFIED dark-mode Playwright walkthrough: no KPI strip, map ~75%, year-select + registration-type filter (filter confirmed working), group tiles (Fisherfolk 3,007 / Vessels 80 / Active Violations 8 with real data), 3 lower chart tiles (Barangay Distribution + Demographics + Activity Categories), 0 app-origin console errors.
+- FIXED `aria-prohibited-attr` (serious, axe 4.11): added `role="figure"` to the Activity Categories by-barangay `ChartContainer` that carried `aria-labelledby="cat-by-bgy-heading"`. axe 4.11 prohibits `aria-labelledby` on a generic `<div>` (no explicit role); `role="figure"` is the semantically correct ARIA 1.2 role for a labelled chart.
+- RESULT: axe WCAG 2.2 AA = **ZERO serious/critical violations** on /calapan-city/dashboard (gov HARD gate passed).
+- Screenshots: test-artifacts/s6-dashboard-dark-before.png, test-artifacts/s6-dashboard-dark-after.png.
+
 ## 2026-07-05 — SET-2 Dashboard Redesign S5: Lower charts → 3 grouped Card tiles (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S5, swarm/dashboard-redesign)

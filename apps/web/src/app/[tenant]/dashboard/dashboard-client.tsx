@@ -419,7 +419,7 @@ export function DashboardClient() {
               ) : (catByBgy?.length ?? 0) === 0 ? (
                 <EmptyState message="No category data for this barangay." />
               ) : (
-                <ChartContainer config={catByBgyConfig} className="aspect-auto h-[200px] w-full" aria-labelledby="cat-by-bgy-heading">
+                <ChartContainer config={catByBgyConfig} className="aspect-auto h-[200px] w-full" role="figure" aria-labelledby="cat-by-bgy-heading">
                   <BarChart
                     data={catByBgy ?? []}
                     margin={{ top: 12, right: 4, bottom: 4, left: 0 }}

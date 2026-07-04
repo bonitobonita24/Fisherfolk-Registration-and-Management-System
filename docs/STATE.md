@@ -3,7 +3,7 @@
 ## Current State (2026-07-05)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
-SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles). **S5 ✅ complete** (lower charts → 3 grouped Card tiles; typecheck ✅ lint ✅ build ✅). S6 remains. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles). **S5 ✅ complete** (lower charts → 3 grouped Card tiles; typecheck ✅ lint ✅ build ✅). **S6 ✅ complete** (QA/WCAG gate). PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
 
 ### Completed this session (S5 — Lower charts → 3 grouped Card tiles, 2026-07-05)
 

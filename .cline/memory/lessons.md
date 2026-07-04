@@ -4,6 +4,13 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-07-05 — 🔴 axe 4.11+: aria-labelledby prohibited on generic div — add explicit role
+- Type:      🔴 gotcha
+- Phase:     Phase 4 S6 — QA/WCAG gate
+- Files:     apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (line 422)
+- Concepts:  wcag, axe-core, aria-labelledby, aria-prohibited-attr, role-figure, ChartContainer, shadcn-chart
+- Narrative: axe-core 4.11 enforces ARIA 1.2's removal of `aria-labelledby` from the allowed attribute set for the implicit `generic` role (plain `<div>` with no explicit role). Any `<ChartContainer>` (shadcn chart wrapper → renders a bare `<div>`) that carries `aria-labelledby` will fail axe rule `aria-prohibited-attr` (serious). Fix: add `role="figure"` alongside `aria-labelledby` — `figure` is the semantically correct ARIA 1.2 role for a standalone data chart (a "perceivable section of content that typically contains a graphical document"), and it accepts the full global ARIA attribute set including `aria-labelledby`. Do NOT use `role="region"` (landmark — adds to nav landmarks list) or `role="img"` (implies a single atomic image, wrong for interactive charts). The Recharts SVG inside may have its own `role="img"` — this is valid as a child of `role="figure"`.
+
 ## 2026-07-04 — 🔴 Teal/dark-surface palette: check contrast BEFORE committing theme tokens
 - Type:      🔴 gotcha
 - Phase:     Phase 4 S1/S5 — AdminCN theme tokens + QA gate
