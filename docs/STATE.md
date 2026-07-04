@@ -3,7 +3,18 @@
 ## Current State (2026-07-05)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
-SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI: KPI strip deleted, map → 75% width lg:col-span-3, year-select wired; typecheck ✅ lint ✅ build ✅). S4–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles: FisherfolkGroupTile + VesselGroupTile + ViolationsGroupTile + RegistrationTypeSelect; typecheck ✅ lint ✅ build ✅). S5–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+
+### Completed this session (S4 — Group tiles, 2026-07-05)
+
+- **`apps/web/src/app/[tenant]/dashboard/registration-type-select.tsx`** (NEW) — shadcn Select with ALL|NEW|RENEWED options; `aria-label="Filter by registration type"` on trigger; type-safe discriminated guard on `onValueChange` callback.
+- **`apps/web/src/app/[tenant]/dashboard/fisherfolk-group-tile.tsx`** (NEW) — headline = ACTIVE+NEW+RENEWED (D1); NEW·RENEWED fraction from `getStats`; "vs last year" slot renders placeholder text only (NEVER fabricated %; guarded behind `!statsLoading`); internal BarChart of `getFisherfolkCategoryBreakdown` driven by `registrationType`+`year`; all chart colors via `hsl(var(--chart-n))`.
+- **`apps/web/src/app/[tenant]/dashboard/vessel-group-tile.tsx`** (NEW) — headline = sum of `getVesselCategoryBreakdown` counts; BarChart of vessel types with per-Cell `hsl(var(--chart-n))` colors; no year filter / no NEW·RENEWED fraction (D3: Vessel lacks `registrationYear`).
+- **`apps/web/src/app/[tenant]/dashboard/violations-group-tile.tsx`** (NEW) — headline = `stats.activeViolations`; no chart (per scope).
+- **`apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx`** (updated) — added `registrationType` state (default "ALL"); mounts RegistrationTypeSelect + FisherfolkGroupTile + VesselGroupTile + ViolationsGroupTile in right column where S3 left `{/* S4: group tiles mount here */}`.
+- **Code-review gate**: ran (2 finder angles × 6 candidates; 1 verifier pass); 6 candidates: 5 refuted (statuses mutually exclusive so no double-count; D1/D3 spec decisions; vesselChartConfig follows existing categoryConfig pattern; inline Shimmer not a twin-file violation); 1 confirmed and fixed (placeholder text unconditionally rendered during loading → wrapped in `!statsLoading` guard).
+- **Validation**: typecheck ✅, lint ✅, build ✅.
+- Commit `0040c43` on `swarm/dashboard-redesign`.
 
 ### Completed this session (S2 — Backend tRPC: registration lifecycle, 2026-07-05)
 

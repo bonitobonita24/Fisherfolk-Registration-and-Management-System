@@ -3,6 +3,17 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-05 — SET-2 Dashboard Redesign S4: Group tiles (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S4, swarm/dashboard-redesign)
+
+- NEW `registration-type-select.tsx`: shadcn Select ALL|NEW|RENEWED; `aria-label="Filter by registration type"`.
+- NEW `fisherfolk-group-tile.tsx`: headline ACTIVE+NEW+RENEWED (D1); NEW·RENEWED fraction; placeholder-only vs-last-year slot; internal BarChart of `getFisherfolkCategoryBreakdown` driven by `registrationType`+`year`.
+- NEW `vessel-group-tile.tsx`: headline from `getVesselCategoryBreakdown` sum; vessel-type BarChart with per-Cell colors; no year/NEW-RENEWED (D3).
+- NEW `violations-group-tile.tsx`: headline `stats.activeViolations`; no chart.
+- UPDATED `dashboard-client.tsx`: mounts all four new components in right column; `registrationType` state added.
+- Code-review: 1 bug fixed (placeholder text guard); 5 candidates refuted.
+
 ## 2026-07-05 — Dashboard Redesign S3: Top-section UI (KPI strip deleted, map 75%, year selector)
 **Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S3)
 **Branch:** swarm/dashboard-redesign
