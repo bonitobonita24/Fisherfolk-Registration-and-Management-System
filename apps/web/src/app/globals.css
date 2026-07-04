@@ -3,65 +3,66 @@
 @tailwind utilities;
 
 /*
- * Modern Dark — Orange & Navy (FRMS palette, 2026-06-29 rehab)
- * Dark-default, modern deep-navy charcoal base with orange primary + navy secondary.
+ * AdminCN Reskin — Teal/Orange accent, neutral dark surfaces (2026-07-04)
+ * Dark-default. Teal (#accent, --chart-2) + orange (#ring, --chart-1) identity.
  * Per-tenant --primary / --secondary are overridden at runtime on
  * #tenant-theme-root (see [tenant]/layout.tsx + settings/theme-settings.tsx).
+ * FRMS orange kept as --primary fallback so runtime overrides are additive.
  */
 @layer base {
   :root {
-    --background: 216 38% 97%;
-    --foreground: 218 46% 10%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 218 46% 10%;
+    --card-foreground: 0 0% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 218 46% 10%;
+    --popover-foreground: 0 0% 4%;
     --primary: 25 95% 53%;
     --primary-foreground: 29 79% 6%;
     --secondary: 214 52% 25%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 213 36% 95%;
-    --muted-foreground: 213 18% 40%;
-    --accent: 210 40% 94%;
-    --accent-foreground: 218 46% 10%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 175 100% 29%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 30% 89%;
-    --input: 214 30% 89%;
-    --ring: 25 95% 53%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 20 100% 47%;
     --radius: 0.625rem;
-    --chart-1: 25 95% 53%;
-    --chart-2: 213 53% 39%;
-    --chart-3: 39 90% 45%;
-    --chart-4: 175 83% 32%;
-    --chart-5: 6 74% 57%;
+    --chart-1: 20 100% 47%;
+    --chart-2: 175 100% 29%;
+    --chart-3: 196 72% 23%;
+    --chart-4: 45 100% 49%;
+    --chart-5: 38 100% 49%;
   }
 
   .dark {
-    --background: 215 33% 7%;
-    --foreground: 212 37% 93%;
-    --card: 215 33% 11%;
-    --card-foreground: 212 37% 93%;
-    --popover: 215 33% 11%;
-    --popover-foreground: 212 37% 93%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
     --primary: 25 95% 53%;
     --primary-foreground: 29 79% 6%;
-    --secondary: 214 52% 25%;
-    --secondary-foreground: 212 37% 93%;
-    --muted: 213 30% 15%;
-    --muted-foreground: 213 18% 65%;
-    --accent: 213 30% 15%;
-    --accent-foreground: 212 37% 93%;
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 215 26% 20%;
-    --input: 215 26% 20%;
-    --ring: 25 95% 53%;
-    --chart-1: 25 95% 53%;
-    --chart-2: 211 51% 50%;
-    --chart-3: 43 96% 56%;
-    --chart-4: 172 66% 50%;
-    --chart-5: 5 85% 66%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63%;
+    --accent: 175 100% 29%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 359 100% 70%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 22%;
+    --ring: 20 100% 47%;
+    --chart-1: 20 100% 47%;
+    --chart-2: 175 100% 29%;
+    --chart-3: 196 72% 23%;
+    --chart-4: 45 100% 49%;
+    --chart-5: 38 100% 49%;
   }
 }
 
