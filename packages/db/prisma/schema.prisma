@@ -292,6 +292,7 @@ model Fisherfolk {
   @@unique([tenantId, idNumber])
   @@index([tenantId])
   @@index([tenantId, status])
+  @@index([tenantId, status, registrationYear])
   @@index([tenantId, barangay])
   @@index([tenantId, lastName, firstName])
   @@map("fisherfolk")

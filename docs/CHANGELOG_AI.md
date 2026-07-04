@@ -717,6 +717,13 @@
 - Files modified:  apps/web/src/app/[tenant]/dashboard/kpi-card.tsx (NEW — local compact KPI card with sparkline slot); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (dense layout: 6-across KPI strip, mini sparklines, chart heights reduced, card padding tightened, density map in 3-col grid row alongside status card); apps/web/src/app/[tenant]/dashboard/page.tsx (h1 text-lg, space-y-4).
 - Verification:    typecheck ✅ lint ✅ build ✅. Code-review gate ran (medium effort); 3 in-scope bugs fixed (sparkline during loading, unclamped activeRatio, zero-count sparkline guard).
 
+## 2026-07-05 — S1 (Dashboard Redesign wave): Fisherfolk composite index migration
+- Agent:           CLAUDE_CODE (Swarm Worker S1, branch swarm/dashboard-redesign)
+- Why:             Add `@@index([tenantId, status, registrationYear])` to Fisherfolk model to support dashboard year+status aggregation queries planned in S2. Additive-only change — no enum changes, no Vessel.categoryIds, no other model touched.
+- Files modified:  packages/db/prisma/schema.prisma (added @@index([tenantId, status, registrationYear]) to Fisherfolk model); packages/db/prisma/migrations/20260705000000_fisherfolk_dashboard_index/migration.sql (new additive CREATE INDEX; hand-written due to pre-existing dev DB migration drift unrelated to this session).
+- Verification:    prisma generate ✅ (Prisma v6.19.3); pnpm --filter web typecheck ✅ (exit 0). Code-review gate ran (low effort); 0 blocking in-scope findings. Deferred observation: @@index([tenantId, status]) may be redundant prefix once composite exists — out of scope for S1.
+- Note:            `prisma migrate dev --create-only` could not run due to pre-existing drift in migration `20260701000000_registration_renewal_and_id_released` (modified after apply in dev DB); migration SQL hand-written per scope fallback instruction. `prisma migrate deploy` must be run on any QA env to apply the new index.
+
 ## 2026-07-05 — SD (Dashboard Redesign wave): DECISIONS_LOG + CHANGELOG_AI governance docs
 - Agent:           CLAUDE_CODE (Swarm Worker SD, branch swarm/dashboard-redesign)
 - Why:             Session SD — governance docs update only (no app code). Appends [HOW] locked implementation decisions (a–g) for the SET-2 Dashboard Redesign wave; D1–D6 [WHAT] owner defaults were already recorded in the planning step. PRODUCT.md untouched (Rule 1).

@@ -3,7 +3,7 @@
 ## Current State (2026-07-05)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
-SD ✅ complete (governance docs — DECISIONS_LOG [HOW] sub-decisions a–g + CHANGELOG_AI wave summary appended). Code sessions S1–S6 are planned and ready to execute sequentially (S1 schema index → S2 backend lifecycle → S3 top-section UI → S4 group tiles → S5 lower-chart reflow → S6 WCAG gate). PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+SD ✅ complete. **S1 ✅ complete** (schema index — `@@index([tenantId, status, registrationYear])` added to Fisherfolk; additive migration hand-written; prisma generate ✅; typecheck ✅; code-review clean). S2–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
 
 ### Completed this session (SD — Dashboard Redesign governance docs, 2026-07-05)
 
