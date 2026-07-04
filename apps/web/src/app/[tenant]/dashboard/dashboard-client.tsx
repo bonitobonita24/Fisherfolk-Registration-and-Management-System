@@ -40,6 +40,7 @@ import {
 import { ImageOff, FileX2, Users, UserCheck, Ship, AlertTriangle, UserCog, FileClock } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { StatCard } from "@/components/shared";
+import { BarangayDensityMap } from "./barangay-density-map";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
@@ -169,6 +170,9 @@ export function DashboardClient() {
           })}
         </div>
       </section>
+
+      {/* ── Barangay Density Map ─────────────────────────────────────────────  */}
+      <BarangayDensityMap />
 
       {/* ── Barangay (bar) + Gender (donut) ────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

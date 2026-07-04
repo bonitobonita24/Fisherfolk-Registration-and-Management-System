@@ -254,4 +254,45 @@ export const dashboardRouter = createTRPCRouter({
         count: counts[i] ?? 0,
       }));
     }),
+
+  // Per-barangay fisherfolk density + activity-category breakdown, for the
+  // dashboard's barangay density map. ACTIVE-only, mirroring
+  // getFisherfolkByBarangay/getCategoryByBarangay for consistency.
+  getBarangayDensity: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const rows = await ctx.db.fisherfolk.findMany({
+      where: { tenantId, status: "ACTIVE" },
+      select: { barangay: true, categoryIds: true },
+    });
+
+    const byBarangay = new Map<
+      string,
+      { total: number; byCategory: Map<string, number> }
+    >();
+
+    for (const r of rows) {
+      let entry = byBarangay.get(r.barangay);
+      if (entry == null) {
+        entry = { total: 0, byCategory: new Map<string, number>() };
+        byBarangay.set(r.barangay, entry);
+      }
+      entry.total += 1;
+      for (const categoryId of r.categoryIds) {
+        entry.byCategory.set(
+          categoryId,
+          (entry.byCategory.get(categoryId) ?? 0) + 1,
+        );
+      }
+    }
+
+    return Array.from(byBarangay.entries()).map(([barangay, entry]) => ({
+      barangay,
+      total: entry.total,
+      byCategory: Array.from(entry.byCategory.entries()).map(
+        ([categoryId, count]) => ({ categoryId, count }),
+      ),
+    }));
+  }),
 });
