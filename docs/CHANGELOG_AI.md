@@ -3,6 +3,15 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-04 — AdminCN Reskin S1: Theme tokens (globals.css)
+**Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S1)
+**Branch:** swarm/admincn-reskin · **Commit:** 7652d61
+- Applied AdminCN palette to `apps/web/src/app/globals.css` (light + dark modes).
+- `.dark`: pure-neutral surfaces, teal --accent (175 100% 29%), orange --ring/--chart-1 (20 100% 47%), full teal/orange chart set, neutral --secondary/--muted (0 0% 15%), FRMS orange --primary preserved.
+- `:root` (light): white background, AdminCN neutral borders/muted, same teal accent + chart set.
+- Tailwind HSL-triplet contract unchanged; --radius preserved; no hex values introduced.
+- typecheck ✅ · lint ✅ · build ✅ · code-review clean (0 findings).
+
 ---
 
 ## 2026-07-01 — Phase 4 S6 (ID Generator): PVC Sheet Layout — 200×300mm, 4 pairs, mirrored back, @media print + recordPrint

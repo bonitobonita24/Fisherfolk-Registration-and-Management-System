@@ -3,8 +3,17 @@
 ## Current State (2026-07-04)
 
 Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-Sessions S1 (theme tokens), S2 (sidebar+shell), S3 (header), S4 (dense dashboard), S5 (QA)
-are the implementation sessions for this wave. SD (this session) records governance docs only.
+S1 ✅ complete (theme tokens). S2 (sidebar+shell), S3 (header), S4 (dense dashboard), S5 (QA) pending.
+
+### Completed this session (S1 — AdminCN theme tokens)
+
+- **`apps/web/src/app/globals.css`** (updated) — AdminCN palette applied:
+  - `.dark`: pure-neutral surfaces (bg 0 0% 4%, card/popover 0 0% 9%), teal accent (175 100% 29%), orange ring/chart-1 (20 100% 47%), teal chart-2 (175 100% 29%), neutral secondary/muted (0 0% 15%), --primary orange preserved.
+  - `:root` (light): white background, near-black foreground, same teal accent + chart set, neutral borders.
+  - Tailwind HSL-triplet contract maintained; --radius (0.625rem) preserved; no hex values.
+- **Code-review gate**: ran (low effort); verdict = clean, 0 findings.
+- **Validation**: typecheck ✅, lint ✅, build ✅.
+- Commit `7652d61` on `swarm/admincn-reskin`.
 
 ### Completed this session (SD — AdminCN Reskin governance docs)
 
