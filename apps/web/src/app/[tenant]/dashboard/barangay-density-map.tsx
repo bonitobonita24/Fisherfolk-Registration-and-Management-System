@@ -52,8 +52,8 @@ interface DensityFeatureProps {
 // that don't normalize to the canonical centroid keys (Sta./Sto. abbreviations,
 // "(Pob.)" suffixes, spacing/spelling drift). Map the known variants (simplified
 // form → canonical centroid key) so their counts still land on the map.
-// ("San Rafael" + "Svs" are genuinely off the 62-barangay Calapan list and stay
-// unmapped — surfaced in the "no mapped location" notice.)
+// ("San Rafael" is the former name of Salong; "Svs" abbreviates San Vicente
+// South — both confirmed by the FMO, so they now resolve to their centroids.)
 const BARANGAY_ALIASES: Record<string, string> = {
   wawa: "Sabang",
   "nag-iba i": "Nag-iba I",
@@ -65,6 +65,8 @@ const BARANGAY_ALIASES: Record<string, string> = {
   lumangbayan: "Lumang Bayan",
   "sta rita": "Santa Rita",
   "sta isabel": "Santa Isabel",
+  "san rafael": "Salong",
+  svs: "San Vicente South",
 };
 
 function simplifyBarangay(raw: string): string {
@@ -487,6 +489,7 @@ export function BarangayDensityMap() {
                   id="bgy-boundaries"
                   checked={showBoundaries}
                   onCheckedChange={setShowBoundaries}
+                  aria-label="Toggle Boundaries"
                 />
               </div>
 
@@ -500,6 +503,7 @@ export function BarangayDensityMap() {
                   onCheckedChange={(checked) =>
                     setDisplayMode(checked ? "marks" : "heatmap")
                   }
+                  aria-label={`Toggle ${displayMode === "marks" ? "Marks" : "Heatmap"} view`}
                 />
               </div>
 
@@ -512,6 +516,7 @@ export function BarangayDensityMap() {
                     id="bgy-all"
                     checked={allSelected}
                     onCheckedChange={toggleAll}
+                    aria-label="Toggle All fisherfolk"
                   />
                 </div>
                 <div className="max-h-40 space-y-1 overflow-y-auto pr-1">
@@ -538,6 +543,7 @@ export function BarangayDensityMap() {
                           onCheckedChange={(checked) =>
                             toggleCategory(cat.id, checked)
                           }
+                          aria-label={`Toggle ${cat.name}`}
                         />
                       </div>
                     );

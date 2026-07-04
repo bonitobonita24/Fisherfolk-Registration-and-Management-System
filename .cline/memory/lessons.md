@@ -4,6 +4,20 @@
 # READ ORDER: 🔴 first → 🟤 second → rest by relevance
 # ---
 
+## 2026-07-04 — 🔴 Teal/dark-surface palette: check contrast BEFORE committing theme tokens
+- Type:      🔴 gotcha
+- Phase:     Phase 4 S1/S5 — AdminCN theme tokens + QA gate
+- Files:     apps/web/src/app/globals.css, apps/web/src/components/sidebar.tsx
+- Concepts:  wcag, color-contrast, teal-accent, dark-mode, bg-accent, chart-tokens, adminCN
+- Narrative: S1 set `--accent: 175 100% 29%` (→ #009488 teal) and S2 applied `bg-accent text-accent-foreground` to the active nav item. Axe audit in S5 caught 3.59:1 contrast ratio (#fafafa on #009488) — below the 4.5:1 AA minimum for text. Additionally, `--chart-3: 196 72% 23%` (→ #104e65) has only 1.97:1 contrast against the dark card background, making it near-invisible. Rule: when setting teal/dark palette tokens, run a contrast check (WebAIM Contrast Checker or equivalent) for BOTH text-on-accent-bg AND chart-N-on-card-bg BEFORE committing. Fix requires: lighten `--accent` in dark to ≥30% lightness for text, OR use `--accent-foreground` as a separate token with guaranteed 4.5:1; raise `--chart-3` lightness to ~45%.
+
+## 2026-07-04 — 🔴 Density-map Switch buttons: add aria-label — plain role="switch" without label fails WCAG
+- Type:      🔴 gotcha
+- Phase:     Phase 4 S5 — QA gate / WCAG axe
+- Files:     apps/web/src/app/[tenant]/dashboard/barangay-density-map.tsx (lines 486–536)
+- Concepts:  wcag, aria-label, shadcn-switch, role-switch, button-name, density-map
+- Narrative: The density map legend uses shadcn `<Switch>` for per-category toggles. These render as `role="switch"` buttons. Without an `aria-label` or adjacent `<label htmlFor>`, they have no accessible name — axe rule `button-name` (critical). The "Boundaries" and "Heatmap view" switches were labeled via `id` + adjacent text, but the 6 category switches (Boat Owner/Operator, Capture Fishing, Gleaning, Vendor, Fish Processing, Aquaculture) inside `.max-h-40` were not. Fix: add `aria-label="Toggle <category>"` to each category Switch. Pre-existing bug (d580650); not introduced by AdminCN wave but found in S5 axe audit.
+
 ## 2026-07-01 — 🔴 Prisma nullable-relation select: always optional-chain the result even on non-nullable FK
 - Type:      🔴 gotcha
 - Phase:     Phase 4 S1/S5 — tRPC backend + QA gate

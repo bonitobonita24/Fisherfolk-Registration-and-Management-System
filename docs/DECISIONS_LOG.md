@@ -519,3 +519,9 @@ docs session:
 - **SD** (this session) — governance docs: DECISIONS_LOG + CHANGELOG_AI; PRODUCT.md untouched.
 Rationale: Parallel fan-out (S1–S4 are largely independent surfaces) then serial QA gate (S5).
 Locked: yes
+- [swarm S5 · 2026-07-04 22:11:50] S5/q-S5-01 [A]: 6 <Switch> elements in barangay-density-map.tsx (L486-536) missing aria-label → axe button-name (SC 4.1.2, WCAG 2.2 AA hard gate, gov/LGU). Resolved: fix in-session on swarm/admincn-reskin with aria-label='Toggle <Category>' per switch. Governing rules: ui-rules.md R13 + privacy.md (V32.9) + Rule 32.
+- [swarm S5 · 2026-07-04 22:12:09] S5 q-S5-02 (A): WCAG AA nav-active contrast fix — introduce --nav-active-bg/--nav-active-fg token pair and apply to sidebar active item; keep global --accent unchanged. Governing: ui-rules.md R13 (WCAG 2.2 AA gov/LGU hard gate) + V32.12 design-principles (INHERIT-not-REPLACE tokens).
+- [swarm S5 · 2026-07-04 22:12:24] S5/q-S5-03: A — Fixed WCAG AA contrast failure on header ⌘K kbd (3.18:1). Removed opacity-60; use text-muted-foreground token per ui-rules.md R13 + privacy.md gov/LGU hard gate.
+- [swarm S5 · 2026-07-04 22:12:40] S5/q-S5-04: A (framework) — resolved by Brain. Confirmed missing onToggleSidebar prop on <Header> in apps/web/src/components/app-shell.tsx. Directed worker to apply fix in-session (Rule 32 Verifiable-Done); reject 'defer to S5a / polish session' options.
+- [swarm S5 · 2026-07-04 22:12:52] S5/q-S5-05: A — activeSpark guarded to undefined on stats==null to match totalSpark; enforces consistent StatCard empty-state per ui-rules.md.
+- [swarm S5 · 2026-07-04 22:13:12] 2026-07-04 S5 q-S5-06 [Bucket A / framework]: --chart-3 dark 196 72% 23% (1.97:1 vs #171717) fails WCAG 2.2 AA SC 1.4.11 non-text contrast on gov/LGU app. Fix: raise to 196 60% 45% (hue-preserving lightness lift, keeps S1 teal palette). Authority: ui-rules.md R13 + privacy.md V32.9 + Rule 32. Rejected: revert to amber 43 96% 56% (breaks S1 palette).

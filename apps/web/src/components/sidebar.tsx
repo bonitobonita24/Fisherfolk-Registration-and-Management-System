@@ -111,7 +111,7 @@ export function Sidebar({
                         "relative flex items-center rounded-md text-sm transition-colors",
                         isCollapsed ? "justify-center px-2 py-1.5" : "gap-2.5 px-2 py-1.5",
                         isActive
-                          ? "bg-accent text-accent-foreground font-medium before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary"
+                          ? "bg-[hsl(var(--nav-active-bg))] text-[hsl(var(--nav-active-fg))] font-medium before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                       );
                       return (

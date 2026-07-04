@@ -70,7 +70,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
         >
           <Search className="h-3.5 w-3.5 shrink-0" />
           <span className="flex-1 text-left">Search…</span>
-          <kbd className="rounded border border-border px-1 text-xs opacity-60">⌘K</kbd>
+          <kbd className="rounded border border-border px-1 text-xs text-muted-foreground">⌘K</kbd>
         </button>
       </div>
 

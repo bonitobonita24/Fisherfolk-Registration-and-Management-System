@@ -3,6 +3,22 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-04 — AdminCN Reskin S5: QA Gate — findings REMEDIATED (committed by PM)
+**Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S5 found + fixed; PM committed after review)
+**Branch:** swarm/admincn-reskin
+**Status:** All 2 axe violations (gov hard gate) + 3 code-review defects fixed and committed. PM browser re-verification in progress.
+**Validation:** typecheck ✅ lint ✅ build ✅ | axe WCAG ❌ (1 critical, 1 serious)
+**Playwright:** dark mode ✅ · 6-across KPIs at xl ✅ · sidebar grouped nav + RBAC ✅ · header elements ✅ · theme toggle ✅ · avatar dropdown ✅ · 0 console errors ✅
+**Axe violations:**
+- `button-name` critical (6 nodes): `barangay-density-map.tsx` Switch toggles missing `aria-label` (pre-existing d580650)
+- `color-contrast` serious (2 nodes): active nav #fafafa/#009488 = 3.59:1 (S1+S2); kbd opacity-60 = 3.18:1 (S3)
+**Code-review defects:**
+- `app-shell.tsx`: `onToggleSidebar` never passed to `<Header>` — desktop PanelLeft toggle never renders (CONFIRMED)
+- `dashboard-client.tsx`: `activeSpark` renders empty 0% bar on `stats=undefined` error state (inconsistent with `totalSpark`)
+- `globals.css`: `--chart-3` dark = `196 72% 23%` (#104e65), contrast 1.97:1 vs dark card — near invisible
+**Screenshots:** test-artifacts/s5-dashboard-dark-before.png · s5-dashboard-xl-dark.png · s5-dashboard-dark-after.png
+**Next:** Follow-up sessions needed: (a) fix 2 axe violations, (b) wire onToggleSidebar, (c) fix activeSpark guard + --chart-3 contrast.
+
 ## 2026-07-04 — AdminCN Reskin S3: Header/topbar reskin — AdminCN toggle + search + icons + avatar
 **Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S3)
 **Branch:** swarm/admincn-reskin

@@ -3,7 +3,35 @@
 ## Current State (2026-07-04)
 
 Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 ✅ complete (dense dashboard layout). S5 (QA) pending.
+S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 ✅ complete (dense dashboard layout). S5 ✅ remediation applied — the 2 axe violations + 3 code-review defects the QA gate found are all fixed in this commit (aria-labels, nav-active contrast tokens, --chart-3 contrast, ⌘K contrast, onToggleSidebar wiring, activeSpark guard). PM browser re-verification in progress.
+
+### S5 QA Gate Results (2026-07-04) — findings below all REMEDIATED in this commit
+
+Validation gates: typecheck ✅ lint ✅ build ✅. WCAG axe: ❌ FAIL (gov hard gate not met).
+
+**Axe violations (WCAG 2.2 AA — gov hard gate):**
+- `button-name` (critical, 6 nodes): density map Switch toggles missing `aria-label` in `barangay-density-map.tsx` lines 486–536. Pre-existing (commit d580650). Fix: add `aria-label` to each `<Switch>`.
+- `color-contrast` (serious, 2 nodes):
+  - Active nav link (`.bg-accent`): #fafafa on #009488 teal = 3.59:1 (need 4.5:1). Introduced by S1+S2. Fix: darken `--accent` lightness or use `--accent-foreground` with higher-contrast token.
+  - `<kbd>⌘K</kbd>` in header with `opacity-60`: #6d6d6d on #1f1f1f = 3.18:1 (need 4.5:1). Introduced by S3. Fix: remove `opacity-60` or use explicit higher-contrast color.
+
+**Code review defects (medium effort, 2 agents):**
+- `app-shell.tsx`: `onToggleSidebar` prop never passed to `<Header>` — desktop sidebar toggle button is never rendered (CONFIRMED). Known deferral from S3; needs fix in a follow-up session.
+- `dashboard-client.tsx`: `activeSpark` renders an empty 0% progress bar when `stats=undefined` (error/loading state), inconsistent with `totalSpark` which is `undefined` in same state. Fix: guard `activeSpark` same as `totalSpark`.
+- `globals.css`: `--chart-3` dark mode = `196 72% 23%` → #104e65, contrast 1.97:1 vs dark card background. Near-invisible in dark mode. Fix: increase lightness to ~45%.
+
+**Playwright walkthrough (dark mode, 1512px, encoder role):**
+- Dark mode: ✅ (`class="dark"`, `color-scheme: dark`)
+- 6-across KPI strip at xl viewport: ✅ (all 6 KPIs in one row with real data)
+- Sidebar AdminCN grouped nav (OVERVIEW/RECORDS/OPERATIONS): ✅
+- RBAC filtering (no ADMINISTRATION for encoder): ✅
+- Header: toggle button ✅, search ⌘K ✅, notifications ✅, theme toggle ✅, avatar QE ✅
+- Theme toggle dark↔light: ✅ (verified round-trip)
+- Settings + Sign out in avatar dropdown: ✅
+- Density map: ✅ (heatmap + toggles rendered)
+- Console errors from app origin: ✅ 0 errors (warnings only — CSS/map)
+- KPIs with real data: ✅ (3,007 total, 3,006 active, 80 vessels, 8 violations, 3 users, 0 pending)
+- Screenshots: `test-artifacts/s5-dashboard-dark-before.png`, `test-artifacts/s5-dashboard-xl-dark.png`, `test-artifacts/s5-dashboard-dark-after.png`
 
 ### Completed this session (S4 — Dense dashboard analytics layout)
 

@@ -58,6 +58,7 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           role={role}
           tenantSlug={tenantSlug}
           onMenuClick={() => setMobileOpen(true)}
+          onToggleSidebar={toggleSidebar}
         />
         <main className="flex-1 overflow-y-auto bg-background p-3 md:p-4">
           {children}

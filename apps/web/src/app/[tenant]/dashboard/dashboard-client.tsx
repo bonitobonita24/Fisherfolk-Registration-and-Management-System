@@ -166,17 +166,18 @@ export function DashboardClient() {
           )
         )
       : 0;
-  const activeSpark = (
-    <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-      <div
-        className="h-full rounded-full"
-        style={{
-          width: `${activeRatio}%`,
-          backgroundColor: "hsl(var(--chart-2))",
-        }}
-      />
-    </div>
-  );
+  const activeSpark =
+    stats != null ? (
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${activeRatio}%`,
+            backgroundColor: "hsl(var(--chart-2))",
+          }}
+        />
+      </div>
+    ) : undefined;
 
   // ── KPI strip config ────────────────────────────────────────────────────────
   const kpis = [
