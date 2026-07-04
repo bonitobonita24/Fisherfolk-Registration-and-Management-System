@@ -3,6 +3,14 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-05 — Dashboard Redesign S3: Top-section UI (KPI strip deleted, map 75%, year selector)
+**Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S3)
+**Branch:** swarm/dashboard-redesign
+**Changes:**
+- `apps/web/src/app/[tenant]/dashboard/year-select.tsx` (NEW) — shadcn Select wrapper; `aria-label="Registration year"`; keyboard-operable; token-only styling; wired to `year` state in DashboardClient.
+- `apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx` (updated) — deleted 6-tile KPI strip + all sparkline/kpis derivations + unused lucide imports (Users/UserCheck/Ship/AlertTriangle/UserCog/FileClock) + KpiCard import; Row2 grid promoted to `lg:grid-cols-4`; map wrapper → `lg:col-span-3` (≈75%); right column = S4 placeholder comment + YearSelect; `year` state added (useState<number>); `getStats` query now passes `{ year }`; redundant `col-span-1` removed per code-review.
+**Validation:** typecheck ✅ lint ✅ build ✅ | code-review: 1 in-scope finding fixed (redundant col-span-1), remaining findings by-design (single-year option per S3 scope).
+
 ## 2026-07-04 — AdminCN Reskin S5: QA Gate — findings REMEDIATED (committed by PM)
 **Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S5 found + fixed; PM committed after review)
 **Branch:** swarm/admincn-reskin

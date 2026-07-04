@@ -37,20 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ImageOff,
-  FileX2,
-  Users,
-  UserCheck,
-  Ship,
-  AlertTriangle,
-  UserCog,
-  FileClock,
-} from "lucide-react";
+import { ImageOff, FileX2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { StatCard } from "@/components/shared";
 import { BarangayDensityMap } from "./barangay-density-map";
-import { KpiCard } from "./kpi-card";
+import { YearSelect } from "./year-select";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
@@ -109,9 +100,10 @@ export function DashboardClient() {
   const tenantSlug = params.tenant as string;
 
   const [bgyFilter, setBgyFilter] = useState<string>("all");
+  const [year, setYear] = useState<number>(new Date().getFullYear());
 
   const { data: stats, isLoading: statsLoading } =
-    trpc.dashboard.getStats.useQuery();
+    trpc.dashboard.getStats.useQuery({ year });
   const { data: barangayData, isLoading: barangayLoading } =
     trpc.dashboard.getFisherfolkByBarangay.useQuery();
   const { data: demo, isLoading: demoLoading } =
@@ -123,7 +115,6 @@ export function DashboardClient() {
 
   // ── Derived data ────────────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
-  const top5Barangay = barangayData?.slice(0, 5) ?? [];
   const barangayOptions = barangayData ?? [];
 
   const genderData =
@@ -139,112 +130,17 @@ export function DashboardClient() {
   const genderTotal = genderData.reduce((sum, d) => sum + d.value, 0);
   const categories = demo?.categories ?? [];
 
-  // ── Mini sparklines ─────────────────────────────────────────────────────────
-  const miniMax = Math.max(...top5Barangay.map((d) => d.count), 1);
-  const totalSpark =
-    top5Barangay.length > 0 && top5Barangay.some((d) => d.count > 0) ? (
-      <div className="flex h-8 items-end gap-px" aria-hidden="true">
-        {top5Barangay.map((d) => (
-          <div
-            key={d.barangay}
-            className="flex-1 rounded-t-[1px] opacity-70"
-            style={{
-              height: `${Math.round((d.count / miniMax) * 100)}%`,
-              backgroundColor: "hsl(var(--chart-1))",
-            }}
-          />
-        ))}
-      </div>
-    ) : undefined;
-
-  const activeRatio =
-    stats != null
-      ? Math.min(
-          100,
-          Math.round(
-            ((stats.activeFisherfolk ?? 0) / Math.max(stats.totalFisherfolk ?? 1, 1)) * 100
-          )
-        )
-      : 0;
-  const activeSpark =
-    stats != null ? (
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-        <div
-          className="h-full rounded-full"
-          style={{
-            width: `${activeRatio}%`,
-            backgroundColor: "hsl(var(--chart-2))",
-          }}
-        />
-      </div>
-    ) : undefined;
-
-  // ── KPI strip config ────────────────────────────────────────────────────────
-  const kpis = [
-    { title: "Total Fisherfolk", value: stats?.totalFisherfolk ?? 0, Icon: Users, sparkline: totalSpark },
-    { title: "Active Fisherfolk", value: stats?.activeFisherfolk ?? 0, Icon: UserCheck, sparkline: activeSpark },
-    { title: "Vessels", value: stats?.totalVessels ?? 0, Icon: Ship },
-    { title: "Active Violations", value: stats?.activeViolations ?? 0, Icon: AlertTriangle },
-    { title: "New", value: stats?.newFisherfolk ?? 0, Icon: UserCog },
-    { title: "Renewed", value: stats?.renewedFisherfolk ?? 0, Icon: FileClock },
-  ] as const;
-
   return (
     <div className="space-y-4">
-      {/* ── KPI Strip — 6 across ──────────────────────────────────────────── */}
-      <section aria-label="Key metrics">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-          {kpis.map((kpi) => (
-            <KpiCard
-              key={kpi.title}
-              title={kpi.title}
-              value={kpi.value}
-              Icon={kpi.Icon}
-              loading={statsLoading}
-              sparkline={"sparkline" in kpi ? kpi.sparkline : undefined}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* ── Density Map (2/3) + Status Breakdown (1/3) ───────────────────── */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      {/* ── Density Map (~75%) + Side Column (25%) ───────────────────────── */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+        <div className="lg:col-span-3">
           <BarangayDensityMap />
         </div>
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Registration Status</CardTitle>
-            <CardDescription className="text-xs">Records by status</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {demoLoading ? (
-              <div className="space-y-2">
-                <Shimmer className="h-12 w-full" />
-                <Shimmer className="h-12 w-full" />
-                <Shimmer className="h-12 w-full" />
-              </div>
-            ) : (demo?.status?.length ?? 0) === 0 ? (
-              <p className="text-xs text-muted-foreground">No status data yet.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-2">
-                {demo?.status.map((s) => (
-                  <div
-                    key={s.status}
-                    className="rounded-md bg-muted/40 px-2 py-2 text-center"
-                  >
-                    <p className="text-xl font-bold text-foreground">
-                      {s.count.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                      {s.status}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="flex flex-col gap-3">
+          {/* S4: group tiles mount here */}
+          <YearSelect value={year} onValueChange={setYear} />
+        </div>
       </div>
 
       {/* ── Barangay (bar) + Gender (donut) ──────────────────────────────── */}
