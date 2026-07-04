@@ -3,6 +3,15 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-04 — AdminCN Reskin S2: Sidebar + app-shell reskin — AdminCN grouped nav, dense, desktop collapse
+**Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S2)
+**Branch:** swarm/admincn-reskin
+- `apps/web/src/components/sidebar.tsx` — AdminCN grouped nav: UPPERCASE 10px section labels, `bg-accent` active highlight + left indicator bar, `py-1.5` density, desktop collapse to icon-rail (Tooltip labels), WCAG aria-expanded + aria-label. All NAV_GROUPS + RBAC filter verbatim preserved. Brand block h-14 retained; collapse toggle in expanded header only (footer expand button when collapsed — overflow fix from code-review).
+- `apps/web/src/components/app-shell.tsx` — `sidebarCollapsed` state + `toggleSidebar`; desktop sidebar `w-56`/`w-14`; mobile Sheet `w-56`; main padding `p-3 md:p-4`.
+- typecheck ✅ · lint ✅ · build ✅ · code-review medium (3 bugs fixed in-scope, 2 deferred).
+
+---
+
 ## 2026-07-04 — AdminCN Reskin S1: Theme tokens (globals.css)
 **Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S1)
 **Branch:** swarm/admincn-reskin · **Commit:** 7652d61

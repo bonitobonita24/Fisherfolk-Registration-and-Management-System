@@ -3,7 +3,27 @@
 ## Current State (2026-07-04)
 
 Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-S1 ✅ complete (theme tokens). S2 (sidebar+shell), S3 (header), S4 (dense dashboard), S5 (QA) pending.
+S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 (header), S4 (dense dashboard), S5 (QA) pending.
+
+### Completed this session (S2 — Sidebar + app-shell reskin)
+
+- **`apps/web/src/components/sidebar.tsx`** (updated) — AdminCN grouped nav:
+  - Brand block (h-14): icon-only when collapsed (no overflow), icon+text+collapse button when expanded.
+  - Grouped sections: UPPERCASE 10px muted labels (Overview/Records/Operations/Administration) preserved verbatim with all items + RBAC filter (`item.roles.includes(role)`) unchanged.
+  - Active-item style: `bg-accent text-accent-foreground` + 4px left primary indicator bar.
+  - Density: `py-1.5` nav items (from `py-2`), `space-y-0.5` gaps, group padding reduced.
+  - Desktop collapse: `isCollapsed` prop — icon-rail mode (icon-only nav items + Tooltip for labels), dividers between groups, expand button in footer slot.
+  - WCAG: `aria-expanded` on toggle/expand buttons, `aria-label` on icon-only links and collapsed logo link, tooltips via shadcn TooltipProvider.
+  - New props: `isCollapsed?: boolean` (default false), `onToggle?: () => void`.
+  - Bug fix from code-review: toggle button moved out of collapsed header (overflow fix); aria-expanded added.
+- **`apps/web/src/components/app-shell.tsx`** (updated) — app shell:
+  - Desktop sidebar: `w-56` expanded (from `w-60`), `w-14` collapsed; `sidebarCollapsed` state + `toggleSidebar` function.
+  - Passes `isCollapsed` + `onToggle` to desktop Sidebar.
+  - Mobile Sheet: `w-56` (matched to expanded desktop width; was `w-60`); no collapse props (correct).
+  - Main padding: `p-3 md:p-4` (from `p-4 md:p-6`).
+  - Note: `onToggleSidebar` prop for Header deferred to S3 (S3 adds the prop to HeaderProps + adds header toggle button).
+- **Code-review gate**: ran (medium effort, 8 angles); 3 in-scope bugs fixed: collapsed header overflow (restructured), aria-expanded on toggle/expand buttons, mobile Sheet width inconsistency (w-60→w-56). Deferred: pathname.startsWith prefix-collision (pre-existing, not this session's bug); re-render on collapse (out of scope, children optimization); no CSS width transition (not required by spec).
+- **Validation**: typecheck ✅, lint ✅, build ✅.
 
 ### Completed this session (S1 — AdminCN theme tokens)
 
