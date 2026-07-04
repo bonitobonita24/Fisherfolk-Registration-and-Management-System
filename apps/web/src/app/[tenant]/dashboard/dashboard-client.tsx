@@ -37,10 +37,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageOff, FileX2, Users, UserCheck, Ship, AlertTriangle, UserCog, FileClock } from "lucide-react";
+import {
+  ImageOff,
+  FileX2,
+  Users,
+  UserCheck,
+  Ship,
+  AlertTriangle,
+  UserCog,
+  FileClock,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { StatCard } from "@/components/shared";
 import { BarangayDensityMap } from "./barangay-density-map";
+import { KpiCard } from "./kpi-card";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
@@ -54,7 +64,7 @@ function Shimmer({ className }: { className?: string }) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <p className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+    <p className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
       {message}
     </p>
   );
@@ -109,135 +119,188 @@ export function DashboardClient() {
   const { data: ageGroups, isLoading: ageLoading } =
     trpc.dashboard.getAgeGroups.useQuery();
   const { data: catByBgy, isLoading: catByBgyLoading } =
-    trpc.dashboard.getCategoryByBarangay.useQuery({
-      barangay: bgyFilter,
-    });
+    trpc.dashboard.getCategoryByBarangay.useQuery({ barangay: bgyFilter });
 
-  // ── KPI section ────────────────────────────────────────────────────────────
-  const kpis = [
-    { title: "Total Fisherfolk", value: stats?.totalFisherfolk, icon: Users },
-    { title: "Active Fisherfolk", value: stats?.activeFisherfolk, icon: UserCheck },
-    { title: "Vessels", value: stats?.totalVessels, icon: Ship },
-    { title: "Active Violations", value: stats?.activeViolations, icon: AlertTriangle },
-    { title: "Users", value: stats?.totalUsers, icon: UserCog },
-    { title: "Pending Edit Requests", value: stats?.pendingEditRequests, icon: FileClock },
-  ];
-
-  // ── Derived chart data ───────────────────────────────────────────────────────
+  // ── Derived data ────────────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
+  const top5Barangay = barangayData?.slice(0, 5) ?? [];
   const barangayOptions = barangayData ?? [];
 
   const genderData =
     demo != null
       ? [
           { name: "Male", value: demo.sex.male, fill: "var(--color-Male)" },
-          {
-            name: "Female",
-            value: demo.sex.female,
-            fill: "var(--color-Female)",
-          },
+          { name: "Female", value: demo.sex.female, fill: "var(--color-Female)" },
           ...(demo.sex.unspecified > 0
-            ? [
-                {
-                  name: "Unspecified",
-                  value: demo.sex.unspecified,
-                  fill: "var(--color-Unspecified)",
-                },
-              ]
+            ? [{ name: "Unspecified", value: demo.sex.unspecified, fill: "var(--color-Unspecified)" }]
             : []),
         ]
       : [];
   const genderTotal = genderData.reduce((sum, d) => sum + d.value, 0);
-
   const categories = demo?.categories ?? [];
 
+  // ── Mini sparklines ─────────────────────────────────────────────────────────
+  const miniMax = Math.max(...top5Barangay.map((d) => d.count), 1);
+  const totalSpark =
+    top5Barangay.length > 0 && top5Barangay.some((d) => d.count > 0) ? (
+      <div className="flex h-8 items-end gap-px" aria-hidden="true">
+        {top5Barangay.map((d) => (
+          <div
+            key={d.barangay}
+            className="flex-1 rounded-t-[1px] opacity-70"
+            style={{
+              height: `${Math.round((d.count / miniMax) * 100)}%`,
+              backgroundColor: "hsl(var(--chart-1))",
+            }}
+          />
+        ))}
+      </div>
+    ) : undefined;
+
+  const activeRatio =
+    stats != null
+      ? Math.min(
+          100,
+          Math.round(
+            ((stats.activeFisherfolk ?? 0) / Math.max(stats.totalFisherfolk ?? 1, 1)) * 100
+          )
+        )
+      : 0;
+  const activeSpark = (
+    <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+      <div
+        className="h-full rounded-full"
+        style={{
+          width: `${activeRatio}%`,
+          backgroundColor: "hsl(var(--chart-2))",
+        }}
+      />
+    </div>
+  );
+
+  // ── KPI strip config ────────────────────────────────────────────────────────
+  const kpis = [
+    { title: "Total Fisherfolk", value: stats?.totalFisherfolk ?? 0, Icon: Users, sparkline: totalSpark },
+    { title: "Active Fisherfolk", value: stats?.activeFisherfolk ?? 0, Icon: UserCheck, sparkline: activeSpark },
+    { title: "Vessels", value: stats?.totalVessels ?? 0, Icon: Ship },
+    { title: "Active Violations", value: stats?.activeViolations ?? 0, Icon: AlertTriangle },
+    { title: "Users", value: stats?.totalUsers ?? 0, Icon: UserCog },
+    { title: "Pending Edits", value: stats?.pendingEditRequests ?? 0, Icon: FileClock },
+  ] as const;
+
   return (
-    <div className="space-y-8">
-      {/* ── KPI Cards ──────────────────────────────────────────────────────── */}
+    <div className="space-y-4">
+      {/* ── KPI Strip — 6 across ──────────────────────────────────────────── */}
       <section aria-label="Key metrics">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-          {kpis.map((kpi) => {
-            const Icon = kpi.icon;
-            return (
-              <StatCard
-                key={kpi.title}
-                icon={<Icon className="size-5" />}
-                value={(kpi.value ?? 0).toLocaleString()}
-                title={kpi.title}
-                loading={statsLoading}
-              />
-            );
-          })}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {kpis.map((kpi) => (
+            <KpiCard
+              key={kpi.title}
+              title={kpi.title}
+              value={kpi.value}
+              Icon={kpi.Icon}
+              loading={statsLoading}
+              sparkline={"sparkline" in kpi ? kpi.sparkline : undefined}
+            />
+          ))}
         </div>
       </section>
 
-      {/* ── Barangay Density Map ─────────────────────────────────────────────  */}
-      <BarangayDensityMap />
+      {/* ── Density Map (2/3) + Status Breakdown (1/3) ───────────────────── */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <BarangayDensityMap />
+        </div>
+        <Card>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Registration Status</CardTitle>
+            <CardDescription className="text-xs">Records by status</CardDescription>
+          </CardHeader>
+          <CardContent className="p-3 pt-0">
+            {demoLoading ? (
+              <div className="space-y-2">
+                <Shimmer className="h-12 w-full" />
+                <Shimmer className="h-12 w-full" />
+                <Shimmer className="h-12 w-full" />
+              </div>
+            ) : (demo?.status?.length ?? 0) === 0 ? (
+              <p className="text-xs text-muted-foreground">No status data yet.</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {demo?.status.map((s) => (
+                  <div
+                    key={s.status}
+                    className="rounded-md bg-muted/40 px-2 py-2 text-center"
+                  >
+                    <p className="text-xl font-bold text-foreground">
+                      {s.count.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      {s.status}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* ── Barangay (bar) + Gender (donut) ────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* ── Barangay (bar) + Gender (donut) ──────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Fisherfolk by Barangay */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              Fisherfolk Distribution by Barangay
-            </CardTitle>
-            <CardDescription>Registered fisherfolk per barangay</CardDescription>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Distribution by Barangay</CardTitle>
+            <CardDescription className="text-xs">Top 15 barangays by count</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {barangayLoading ? (
-              <Shimmer className="h-[320px] w-full" />
+              <Shimmer className="h-[220px] w-full" />
             ) : top15Barangay.length === 0 ? (
               <EmptyState message="No barangay data yet." />
             ) : (
-              <ChartContainer
-                config={barangayConfig}
-                className="aspect-auto h-[320px] w-full"
-              >
+              <ChartContainer config={barangayConfig} className="aspect-auto h-[220px] w-full">
                 <BarChart
                   data={top15Barangay}
-                  margin={{ top: 8, right: 8, bottom: 8, left: 0 }}
+                  margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
                 >
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey="barangay"
                     tickLine={false}
                     axisLine={false}
-                    tickMargin={8}
+                    tickMargin={4}
                     angle={-45}
                     textAnchor="end"
-                    height={70}
+                    height={60}
                     interval={0}
-                    tick={{ fontSize: 11 }}
+                    tick={{ fontSize: 10 }}
                   />
-                  <YAxis tickLine={false} axisLine={false} width={32} />
+                  <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar
-                    dataKey="count"
-                    fill="var(--color-count)"
-                    radius={[4, 4, 0, 0]}
-                  />
+                  <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ChartContainer>
             )}
           </CardContent>
         </Card>
 
-        {/* Gender Distribution (donut) */}
+        {/* Gender Distribution */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Gender Distribution</CardTitle>
-            <CardDescription>Breakdown by sex</CardDescription>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Gender Distribution</CardTitle>
+            <CardDescription className="text-xs">Breakdown by sex</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {demoLoading ? (
-              <Shimmer className="h-[320px] w-full" />
+              <Shimmer className="h-[220px] w-full" />
             ) : genderTotal === 0 ? (
               <EmptyState message="No gender data yet." />
             ) : (
               <ChartContainer
                 config={genderConfig}
-                className="mx-auto aspect-square h-[320px]"
+                className="mx-auto aspect-square h-[220px]"
               >
                 <PieChart>
                   <ChartTooltip
@@ -248,8 +311,8 @@ export function DashboardClient() {
                     data={genderData}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={70}
-                    strokeWidth={4}
+                    innerRadius={55}
+                    strokeWidth={3}
                   >
                     <Label
                       content={({ viewBox }) => {
@@ -270,13 +333,13 @@ export function DashboardClient() {
                               <tspan
                                 x={viewBox.cx}
                                 y={viewBox.cy}
-                                className="fill-foreground text-3xl font-bold"
+                                className="fill-foreground text-2xl font-bold"
                               >
                                 {genderTotal.toLocaleString()}
                               </tspan>
                               <tspan
                                 x={viewBox.cx}
-                                y={viewBox.cy + 22}
+                                y={viewBox.cy + 18}
                                 className="fill-muted-foreground text-xs"
                               >
                                 Total
@@ -296,42 +359,36 @@ export function DashboardClient() {
         </Card>
       </div>
 
-      {/* ── Age Groups (bar) + Category (horizontal bar) ───────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* ── Age Groups (bar) + Category (horizontal bar) ─────────────────── */}
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {/* Age Group Distribution */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Age Group Distribution</CardTitle>
-            <CardDescription>Distribution by age bracket</CardDescription>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Age Group Distribution</CardTitle>
+            <CardDescription className="text-xs">Distribution by age bracket</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {ageLoading ? (
-              <Shimmer className="h-[320px] w-full" />
+              <Shimmer className="h-[220px] w-full" />
             ) : (ageGroups?.length ?? 0) === 0 ? (
               <EmptyState message="No age data yet." />
             ) : (
-              <ChartContainer
-                config={ageConfig}
-                className="aspect-auto h-[320px] w-full"
-              >
+              <ChartContainer config={ageConfig} className="aspect-auto h-[220px] w-full">
                 <BarChart
                   data={ageGroups ?? []}
-                  margin={{ top: 16, right: 8, bottom: 8, left: 0 }}
+                  margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
                 >
                   <CartesianGrid vertical={false} />
                   <XAxis
                     dataKey="group"
                     tickLine={false}
                     axisLine={false}
-                    tickMargin={8}
+                    tickMargin={6}
+                    tick={{ fontSize: 11 }}
                   />
-                  <YAxis tickLine={false} axisLine={false} width={32} />
+                  <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar
-                    dataKey="count"
-                    fill="var(--color-count)"
-                    radius={[4, 4, 0, 0]}
-                  >
+                  <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]}>
                     <LabelList
                       dataKey="count"
                       position="top"
@@ -344,48 +401,40 @@ export function DashboardClient() {
           </CardContent>
         </Card>
 
-        {/* Activity Category Distribution (horizontal) */}
+        {/* Activity Category Distribution */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              Activity Category Distribution
-            </CardTitle>
-            <CardDescription>Fisherfolk per primary activity</CardDescription>
+          <CardHeader className="p-3 pb-2">
+            <CardTitle className="text-sm">Activity Category Distribution</CardTitle>
+            <CardDescription className="text-xs">Fisherfolk per primary activity</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 pt-0">
             {demoLoading ? (
-              <Shimmer className="h-[320px] w-full" />
+              <Shimmer className="h-[220px] w-full" />
             ) : categories.length === 0 ? (
               <EmptyState message="No categories configured." />
             ) : (
-              <ChartContainer
-                config={categoryConfig}
-                className="aspect-auto h-[320px] w-full"
-              >
+              <ChartContainer config={categoryConfig} className="aspect-auto h-[220px] w-full">
                 <BarChart
                   layout="vertical"
                   data={categories}
-                  margin={{ top: 4, right: 32, bottom: 4, left: 8 }}
+                  margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
                 >
                   <CartesianGrid horizontal={false} />
-                  <XAxis type="number" tickLine={false} axisLine={false} />
+                  <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
                   <YAxis
                     type="category"
                     dataKey="name"
                     tickLine={false}
                     axisLine={false}
-                    width={120}
-                    tick={{ fontSize: 12 }}
+                    width={110}
+                    tick={{ fontSize: 11 }}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                  <Bar dataKey="count" radius={[0, 3, 3, 0]}>
                     {categories.map((cat, i) => (
                       <Cell
                         key={cat.name}
-                        fill={
-                          CATEGORY_COLORS[i % CATEGORY_COLORS.length] ??
-                          "hsl(var(--chart-1))"
-                        }
+                        fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
                       />
                     ))}
                     <LabelList
@@ -401,17 +450,15 @@ export function DashboardClient() {
         </Card>
       </div>
 
-      {/* ── Activity Category by Barangay (filtered bar) ───────────────────── */}
+      {/* ── Activity Category by Barangay ────────────────────────────────── */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 p-3 pb-2">
           <div>
-            <CardTitle className="text-base">
-              Activity Category by Barangay
-            </CardTitle>
-            <CardDescription>Activity mix for the selected barangay</CardDescription>
+            <CardTitle className="text-sm">Activity Category by Barangay</CardTitle>
+            <CardDescription className="text-xs">Activity mix for selected barangay</CardDescription>
           </div>
           <Select value={bgyFilter} onValueChange={setBgyFilter}>
-            <SelectTrigger className="w-[200px]" aria-label="Filter by barangay">
+            <SelectTrigger className="h-7 w-[160px] text-xs" aria-label="Filter by barangay">
               <SelectValue placeholder="All Barangays" />
             </SelectTrigger>
             <SelectContent>
@@ -424,38 +471,32 @@ export function DashboardClient() {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0">
           {catByBgyLoading ? (
-            <Shimmer className="h-[300px] w-full" />
+            <Shimmer className="h-[200px] w-full" />
           ) : (catByBgy?.length ?? 0) === 0 ? (
             <EmptyState message="No category data for this barangay." />
           ) : (
-            <ChartContainer
-              config={catByBgyConfig}
-              className="aspect-auto h-[300px] w-full"
-            >
+            <ChartContainer config={catByBgyConfig} className="aspect-auto h-[200px] w-full">
               <BarChart
                 data={catByBgy ?? []}
-                margin={{ top: 16, right: 8, bottom: 8, left: 0 }}
+                margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
               >
                 <CartesianGrid vertical={false} />
                 <XAxis
                   dataKey="category"
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  tick={{ fontSize: 11 }}
+                  tickMargin={6}
+                  tick={{ fontSize: 10 }}
                 />
-                <YAxis tickLine={false} axisLine={false} width={32} />
+                <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="count" radius={[3, 3, 0, 0]}>
                   {(catByBgy ?? []).map((row, i) => (
                     <Cell
                       key={row.category}
-                      fill={
-                        CATEGORY_COLORS[i % CATEGORY_COLORS.length] ??
-                        "hsl(var(--chart-1))"
-                      }
+                      fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
                     />
                   ))}
                   <LabelList
@@ -470,41 +511,27 @@ export function DashboardClient() {
         </CardContent>
       </Card>
 
-      {/* ── Status Breakdown ───────────────────────────────────────────────── */}
-      {!demoLoading && (demo?.status?.length ?? 0) > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Registration Status</CardTitle>
-            <CardDescription>Records by status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-0 sm:grid-cols-3 md:grid-cols-5">
-              {demo?.status.map((s) => (
-                <div key={s.status} className="py-2 text-center">
-                  <p className="text-2xl font-bold text-foreground">
-                    {s.count.toLocaleString()}
-                  </p>
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {s.status}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Data Completeness ──────────────────────────────────────────────── */}
+      {/* ── Data Completeness ─────────────────────────────────────────────── */}
       <section aria-label="Data completeness">
-        <h2 className="mb-4 text-base font-semibold text-foreground">
-          Data Completeness
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Data Completeness</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Link href={`/${tenantSlug}/fisherfolk?missing=photo`}>
-            <StatCard icon={<ImageOff className="size-5" />} value={(stats?.missingPhoto ?? 0).toLocaleString()} title="Missing Photo" loading={statsLoading} className="cursor-pointer transition-colors hover:border-primary/50" />
+            <StatCard
+              icon={<ImageOff className="size-5" />}
+              value={(stats?.missingPhoto ?? 0).toLocaleString()}
+              title="Missing Photo"
+              loading={statsLoading}
+              className="cursor-pointer transition-colors hover:border-primary/50"
+            />
           </Link>
           <Link href={`/${tenantSlug}/fisherfolk?missing=signature`}>
-            <StatCard icon={<FileX2 className="size-5" />} value={(stats?.missingSignature ?? 0).toLocaleString()} title="Missing Signature" loading={statsLoading} className="cursor-pointer transition-colors hover:border-primary/50" />
+            <StatCard
+              icon={<FileX2 className="size-5" />}
+              value={(stats?.missingSignature ?? 0).toLocaleString()}
+              title="Missing Signature"
+              loading={statsLoading}
+              className="cursor-pointer transition-colors hover:border-primary/50"
+            />
           </Link>
         </div>
       </section>
