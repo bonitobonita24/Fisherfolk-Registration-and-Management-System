@@ -133,8 +133,30 @@ afterAll(async () => {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe.skipIf(!hasDb)("fisherfolk.renew", () => {
-  it("blocks renew when fisherfolk has an active violation", async () => {
+  it("blocks renew when fisherfolk status is not INACTIVE", async () => {
+    // Default createTestFisherfolk produces ACTIVE status — guard must reject
     const ff = await createTestFisherfolk(testTenantAId);
+    await expect(
+      caller(testTenantAId).renew({ id: ff.id }),
+    ).rejects.toMatchObject({ code: "PRECONDITION_FAILED", message: "Cannot renew: record is not INACTIVE" });
+
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("allows renew when fisherfolk status is INACTIVE", async () => {
+    const ff = await createTestFisherfolk(testTenantAId, { status: "INACTIVE" });
+
+    const result = await caller(testTenantAId).renew({ id: ff.id });
+    expect(result.status).toBe("RENEWED");
+
+    // Clean up
+    await platformPrisma.auditLog.deleteMany({ where: { entityId: ff.id } });
+    await platformPrisma.registrationRenewal.deleteMany({ where: { fisherfolkId: ff.id } });
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("blocks renew when fisherfolk has an active violation", async () => {
+    const ff = await createTestFisherfolk(testTenantAId, { status: "INACTIVE" });
     await platformPrisma.violation.create({
       data: {
         tenantId: testTenantAId,
@@ -156,7 +178,7 @@ describe.skipIf(!hasDb)("fisherfolk.renew", () => {
   });
 
   it("writes RegistrationRenewal row, flips status to RENEWED, and audits RENEW", async () => {
-    const ff = await createTestFisherfolk(testTenantAId);
+    const ff = await createTestFisherfolk(testTenantAId, { status: "INACTIVE" });
     const currentYear = new Date().getFullYear();
 
     const result = await caller(testTenantAId).renew({ id: ff.id, notes: "Annual renewal" });
@@ -212,7 +234,7 @@ describe.skipIf(!hasDb)("fisherfolk.markIdReleased", () => {
 
 describe.skipIf(!hasDb)("fisherfolk.getActivity", () => {
   it("returns sanitized activity (no before/after) and is tenant-scoped", async () => {
-    const ff = await createTestFisherfolk(testTenantAId);
+    const ff = await createTestFisherfolk(testTenantAId, { status: "INACTIVE" });
 
     // Trigger a RENEW so there's an audit log
     await caller(testTenantAId).renew({ id: ff.id });

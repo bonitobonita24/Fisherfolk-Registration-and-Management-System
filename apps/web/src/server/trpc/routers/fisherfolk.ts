@@ -461,6 +461,13 @@ export const fisherfolkRouter = createTRPCRouter({
       });
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
+      if (existing.status !== "INACTIVE") {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Cannot renew: record is not INACTIVE",
+        });
+      }
+
       const activeViolationCount = await ctx.db.violation.count({
         where: { fisherfolkId: id, tenantId, status: "ACTIVE" },
       });

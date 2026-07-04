@@ -736,3 +736,11 @@
   - S6 (WCAG QA gate): Full axe WCAG 2.2 AA audit on all new surfaces; all violations fixed in-session (zero deferred); typecheck+lint+build green.
 - Files modified:  docs/DECISIONS_LOG.md (appended SET-2 [HOW] sub-decisions a–g); docs/STATE.md (current-state block updated); docs/CHANGELOG_AI.md (this entry).
 - Verification:    git diff -- docs/PRODUCT.md confirms zero changes. Rule 1 preserved.
+
+## 2026-07-05 — S2 (Dashboard Redesign wave): Backend tRPC — registration lifecycle
+- Agent:           CLAUDE_CODE (Swarm Worker S2, branch swarm/dashboard-redesign)
+- Why:             Implement the backend layer for the SET-2 Dashboard Redesign: idempotent annual-reset helper, renew INACTIVE guard (TDD-first), getStats shape update, and two new category-breakdown procedures. All changes are additive or shape-changes to internal API; no UI beyond a 2-line dashboard-client patch.
+- Files created:   apps/web/src/server/lib/registration-lifecycle.ts (resetAnnualRegistrations helper); apps/web/src/server/lib/__tests__/registration-lifecycle.test.ts (3 DB-gated integration tests).
+- Files modified:  apps/web/src/server/trpc/routers/fisherfolk.ts (INACTIVE guard on renew mutation); apps/web/src/server/trpc/routers/__tests__/fisherfolk.test.ts (2 new TDD tests + 3 existing tests updated to use INACTIVE status); apps/web/src/server/trpc/routers/dashboard.ts (getStats year param + new counts; resetAnnualRegistrations adminProcedure; getFisherfolkCategoryBreakdown; getVesselCategoryBreakdown); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (2-line KPI title/field update).
+- Code-review:     Medium effort. 3 CONFIRMED findings fixed in-session: (1) getFisherfolkCategoryBreakdown ALL branch used empty statusFilter {} — fixed to {status:{in:["NEW","RENEWED","ACTIVE"]}} to exclude INACTIVE/ARCHIVED; (2) getVesselCategoryBreakdown had dead year input param (Vessel has no registrationYear per D3) — param removed; (3) sequential tenant lookup latency — noted, non-blocking, deferred.
+- Verification:    pnpm --filter web typecheck ✅; pnpm --filter web lint ✅; pnpm --filter web test ✅ (178 passed / 62 skipped — DB-integration tests skip without DATABASE_URL). PRODUCT.md untouched (Rule 1).

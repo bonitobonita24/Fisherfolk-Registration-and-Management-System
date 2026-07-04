@@ -1,55 +1,66 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import type { FisherfolkStatus } from "@frms/db";
 
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure } from "../trpc";
+import { resetAnnualRegistrations } from "../../lib/registration-lifecycle";
 
 export const dashboardRouter = createTRPCRouter({
-  getStats: protectedProcedure.query(async ({ ctx }) => {
-    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+  getStats: protectedProcedure
+    .input(z.object({ year: z.number().int().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
 
-    const [
-      totalFisherfolk,
-      activeFisherfolk,
-      totalVessels,
-      activeViolations,
-      totalUsers,
-      pendingEditRequests,
-      missingPhoto,
-      missingSignature,
-    ] = await Promise.all([
-      ctx.db.fisherfolk.count({ where: { tenantId: ctx.tenantId } }),
-      ctx.db.fisherfolk.count({
-        where: { tenantId: ctx.tenantId, status: "ACTIVE" },
-      }),
-      ctx.db.vessel.count({ where: { tenantId: ctx.tenantId } }),
-      ctx.db.violation.count({
-        where: { tenantId: ctx.tenantId, status: "ACTIVE" },
-      }),
-      ctx.db.user.count({
-        where: { tenantId: ctx.tenantId, status: "ACTIVE" },
-      }),
-      ctx.db.editRequest.count({
-        where: { tenantId: ctx.tenantId, status: "PENDING" },
-      }),
-      ctx.db.fisherfolk.count({
-        where: { tenantId: ctx.tenantId, photo: null },
-      }),
-      ctx.db.fisherfolk.count({
-        where: { tenantId: ctx.tenantId, signature: null },
-      }),
-    ]);
+      const tenant = await ctx.db.tenant.findFirst({
+        where: { id: ctx.tenantId },
+        select: { currentRegistrationYear: true },
+      });
+      const year =
+        input?.year ?? tenant?.currentRegistrationYear ?? new Date().getFullYear();
 
-    return {
-      totalFisherfolk,
-      activeFisherfolk,
-      totalVessels,
-      activeViolations,
-      totalUsers,
-      pendingEditRequests,
-      missingPhoto,
-      missingSignature,
-    };
-  }),
+      const [
+        totalFisherfolk,
+        activeFisherfolk,
+        totalVessels,
+        activeViolations,
+        missingPhoto,
+        missingSignature,
+        newFisherfolk,
+        renewedFisherfolk,
+      ] = await Promise.all([
+        ctx.db.fisherfolk.count({ where: { tenantId: ctx.tenantId } }),
+        ctx.db.fisherfolk.count({
+          where: { tenantId: ctx.tenantId, status: "ACTIVE" },
+        }),
+        ctx.db.vessel.count({ where: { tenantId: ctx.tenantId } }),
+        ctx.db.violation.count({
+          where: { tenantId: ctx.tenantId, status: "ACTIVE" },
+        }),
+        ctx.db.fisherfolk.count({
+          where: { tenantId: ctx.tenantId, photo: null },
+        }),
+        ctx.db.fisherfolk.count({
+          where: { tenantId: ctx.tenantId, signature: null },
+        }),
+        ctx.db.fisherfolk.count({
+          where: { tenantId: ctx.tenantId, status: "NEW", registrationYear: year },
+        }),
+        ctx.db.fisherfolk.count({
+          where: { tenantId: ctx.tenantId, status: "RENEWED", registrationYear: year },
+        }),
+      ]);
+
+      return {
+        totalFisherfolk,
+        activeFisherfolk,
+        totalVessels,
+        activeViolations,
+        missingPhoto,
+        missingSignature,
+        newFisherfolk,
+        renewedFisherfolk,
+      };
+    }),
 
   getRecentActivity: protectedProcedure.query(async ({ ctx }) => {
     if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
@@ -295,4 +306,87 @@ export const dashboardRouter = createTRPCRouter({
       ),
     }));
   }),
+
+  // Admin-only mutation: bulk-reset ACTIVE/RENEWED fisherfolk from prior years
+  // to INACTIVE. Idempotent. Called manually by admin; helper path is reusable
+  // by a future cron.
+  resetAnnualRegistrations: adminProcedure.mutation(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenant = await ctx.db.tenant.findFirst({
+      where: { id: ctx.tenantId },
+      select: { currentRegistrationYear: true },
+    });
+    if (!tenant) throw new TRPCError({ code: "NOT_FOUND" });
+    const result = await resetAnnualRegistrations(
+      ctx.db,
+      ctx.tenantId,
+      tenant.currentRegistrationYear,
+    );
+    return result;
+  }),
+
+  // Per-Category fisherfolk counts filtered by registration type + year.
+  getFisherfolkCategoryBreakdown: protectedProcedure
+    .input(
+      z.object({
+        registrationType: z.enum(["ALL", "NEW", "RENEWED"]),
+        year: z.number().int().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId: string = ctx.tenantId;
+
+      const tenant = await ctx.db.tenant.findFirst({
+        where: { id: tenantId },
+        select: { currentRegistrationYear: true },
+      });
+      const year =
+        input.year ?? tenant?.currentRegistrationYear ?? new Date().getFullYear();
+
+      const statusFilter =
+        input.registrationType === "ALL"
+          ? { status: { in: ["NEW", "RENEWED", "ACTIVE"] as FisherfolkStatus[] } }
+          : { status: input.registrationType };
+
+      const cats = await ctx.db.category.findMany({
+        where: { tenantId },
+        select: { id: true, name: true },
+      });
+
+      const counts = await Promise.all(
+        cats.map((c: { id: string; name: string }) =>
+          ctx.db.fisherfolk.count({
+            where: {
+              tenantId,
+              ...statusFilter,
+              registrationYear: year,
+              categoryIds: { has: c.id },
+            },
+          }),
+        ),
+      );
+
+      return cats.map((c: { id: string; name: string }, i: number) => ({
+        category: c.name,
+        count: counts[i] ?? 0,
+      }));
+    }),
+
+  // Per-vesselType counts. Groups by vesselType (D3: vessel has no registrationYear).
+  getVesselCategoryBreakdown: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId: string = ctx.tenantId;
+
+      const groups = await ctx.db.vessel.groupBy({
+        by: ["vesselType"],
+        where: { tenantId },
+        _count: { _all: true },
+      });
+
+      return groups.map((g: { vesselType: string; _count: { _all: number } }) => ({
+        vesselType: g.vesselType,
+        count: g._count._all,
+      }));
+    }),
 });

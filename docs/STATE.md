@@ -3,7 +3,19 @@
 ## Current State (2026-07-05)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
-SD ✅ complete. **S1 ✅ complete** (schema index — `@@index([tenantId, status, registrationYear])` added to Fisherfolk; additive migration hand-written; prisma generate ✅; typecheck ✅; code-review clean). S2–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend: annual-reset helper + renew INACTIVE guard + getStats shape + category breakdowns; typecheck ✅ lint ✅ tests 178 passed). S3–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+
+### Completed this session (S2 — Backend tRPC: registration lifecycle, 2026-07-05)
+
+- **`apps/web/src/server/lib/registration-lifecycle.ts`** (NEW) — `resetAnnualRegistrations(db, tenantId, currentRegistrationYear)`: idempotent `updateMany` bulk-resets ACTIVE/RENEWED fisherfolk from prior years to INACTIVE. Callable from tRPC mutations and future crons.
+- **`apps/web/src/server/lib/__tests__/registration-lifecycle.test.ts`** (NEW) — 3 DB-gated integration tests: deactivates old ACTIVE, idempotent (second call → count 0), skips current-year records.
+- **`apps/web/src/server/trpc/routers/fisherfolk.ts`** (updated) — INACTIVE guard added to `renew` mutation: throws `PRECONDITION_FAILED` unless `existing.status === "INACTIVE"`, placed after NOT_FOUND check and before active-violation check.
+- **`apps/web/src/server/trpc/routers/__tests__/fisherfolk.test.ts`** (updated) — TDD: 2 new tests ("blocks renew when not INACTIVE", "allows renew when INACTIVE") added before existing tests; 3 existing renew tests updated to pass `{ status: "INACTIVE" }`.
+- **`apps/web/src/server/trpc/routers/dashboard.ts`** (updated) — `getStats`: optional `year` param (defaults to `tenant.currentRegistrationYear`), adds `newFisherfolk`/`renewedFisherfolk` counts, drops `totalUsers`/`pendingEditRequests`. Added `resetAnnualRegistrations` (adminProcedure), `getFisherfolkCategoryBreakdown` (protectedProcedure, registrationType ALL|NEW|RENEWED + optional year), `getVesselCategoryBreakdown` (protectedProcedure, groupBy vesselType).
+- **`apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx`** (updated) — 2-line patch: KPI tiles updated to `newFisherfolk` / `renewedFisherfolk` from new `getStats` shape.
+- **Code-review gate** (medium, 3 CONFIRMED findings fixed): (1) `getFisherfolkCategoryBreakdown` ALL branch `{}` status filter → fixed to `{ status: { in: ["NEW","RENEWED","ACTIVE"] } }` to exclude INACTIVE/ARCHIVED; (2) dead `year` input param on `getVesselCategoryBreakdown` → removed (Vessel has no `registrationYear` per D3); (3) latency finding (sequential tenant lookup before Promise.all) — noted, non-blocking, deferred.
+- **Validation**: typecheck ✅, lint ✅, tests 178 passed / 62 skipped (DB-integration tests skip without DATABASE_URL).
+- Dispatch ratio: sonnet_writes/opus_writes = S2 executed (Sonnet workers + Opus PM review).
 
 ### Completed this session (SD — Dashboard Redesign governance docs, 2026-07-05)
 

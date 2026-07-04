@@ -185,8 +185,8 @@ export function DashboardClient() {
     { title: "Active Fisherfolk", value: stats?.activeFisherfolk ?? 0, Icon: UserCheck, sparkline: activeSpark },
     { title: "Vessels", value: stats?.totalVessels ?? 0, Icon: Ship },
     { title: "Active Violations", value: stats?.activeViolations ?? 0, Icon: AlertTriangle },
-    { title: "Users", value: stats?.totalUsers ?? 0, Icon: UserCog },
-    { title: "Pending Edits", value: stats?.pendingEditRequests ?? 0, Icon: FileClock },
+    { title: "New", value: stats?.newFisherfolk ?? 0, Icon: UserCog },
+    { title: "Renewed", value: stats?.renewedFisherfolk ?? 0, Icon: FileClock },
   ] as const;
 
   return (
