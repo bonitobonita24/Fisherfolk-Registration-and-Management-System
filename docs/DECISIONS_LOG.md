@@ -525,3 +525,29 @@ Locked: yes
 - [swarm S5 · 2026-07-04 22:12:40] S5/q-S5-04: A (framework) — resolved by Brain. Confirmed missing onToggleSidebar prop on <Header> in apps/web/src/components/app-shell.tsx. Directed worker to apply fix in-session (Rule 32 Verifiable-Done); reject 'defer to S5a / polish session' options.
 - [swarm S5 · 2026-07-04 22:12:52] S5/q-S5-05: A — activeSpark guarded to undefined on stats==null to match totalSpark; enforces consistent StatCard empty-state per ui-rules.md.
 - [swarm S5 · 2026-07-04 22:13:12] 2026-07-04 S5 q-S5-06 [Bucket A / framework]: --chart-3 dark 196 72% 23% (1.97:1 vs #171717) fails WCAG 2.2 AA SC 1.4.11 non-text contrast on gov/LGU app. Fix: raise to 196 60% 45% (hue-preserving lightness lift, keeps S1 teal palette). Authority: ui-rules.md R13 + privacy.md V32.9 + Rule 32. Rejected: revert to amber 43 96% 56% (breaks S1 palette).
+
+### AdminCN reskin — PM ground-truth QA verification (2026-07-05)
+The hung S5 QA worker's fixes were recovered + committed by PM (`7b32f9a`), then browser-verified
+by the PM (not trusting the worker self-report) at :44387 dark mode, encoder role:
+- Active nav contrast: **6.86:1** (was 3.59:1) ✅ AA · ⌘K kbd: **5.86:1** (was 3.18:1) ✅ AA
+- Density-map switches: **9/9 have aria-label, 0 missing** (was 6 missing button-name critical) ✅
+- 0 buttons missing accessible name · 0 app console errors · dark default · 6-across dense KPIs w/ real data
+All S5 axe violations confirmed remediated. Reskin QA gate = PASS. Branch dev-only (merge owner-gated).
+
+### FMO barangay alias corrections (2026-07-05, owner-confirmed data facts)
+Owner: two barangays previously flagged "no mapped location" are real Calapan barangays under
+other names — "San Rafael" is the former name of **Salong**; "Svs" abbreviates **San Vicente South**.
+Added both to `BARANGAY_ALIASES` in barangay-density-map.tsx → resolve to existing centroids.
+Verified: the density map's unmapped notice is now gone (0 unmapped, was 2). Committed `7b32f9a`.
+
+## FRMS Dashboard Redesign wave (2026-07-05) — owner [WHAT] decisions (defaults applied, non-blocking)
+Owner queued an 8-item dashboard redesign (see docs/plans/frms-dashboard-redesign-plan.md). PM+Architect
+co-planned; grounded in real code (RegistrationRenewal model, fisherfolk.renew mutation, and
+Tenant.currentRegistrationYear ALREADY EXIST). Six [WHAT] gaps deferred to owner with sane technical
+defaults so the build proceeds un-blocked (Rule 1: PRODUCT.md untouched; re-surface until answered):
+- **D1 — "Active Fisherfolk" headline definition.** Default applied: headline = status IN (ACTIVE, RENEWED, NEW). Owner to confirm whether NEW (freshly-registered, unreviewed) counts immediately.
+- **D2 — Annual INACTIVE-reset trigger.** Default applied: admin-triggered bulk updateMany when a super-admin advances Tenant.currentRegistrationYear (auditable, no cron infra). Owner to confirm vs a hard automatic Jan-1-00:01 cron cutover.
+- **D3 — Vessel "category" + vessel NEW/RENEWED.** Vessel has no category relation and no NEW/RENEWED states. Default applied: group the vessel tile by existing `vesselType` string; omit (not fabricate) a vessel NEW/RENEWED fraction. Owner to confirm whether vessels need a real Category relation (schema change) and a renewal lifecycle.
+- **D4 — Renewal action per-record vs bulk.** Default applied: keep existing per-record fisherfolk.renew + add the missing `status==="INACTIVE"` guard. Owner to confirm if a bulk "renew all INACTIVE" admin action is needed this wave.
+- **D5 — ARCHIVED vs INACTIVE interplay.** Default applied: annual sweep excludes ARCHIVED; archival is terminal (only INACTIVE can renew). Owner to confirm.
+- **D6 — Lower-chart grouping (item 7).** Default applied: 5 existing charts → 3 tiles (barangay+status · gender+age · category+category-by-barangay). Owner may prefer a different pairing.
