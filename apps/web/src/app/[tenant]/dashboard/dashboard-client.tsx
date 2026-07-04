@@ -42,6 +42,13 @@ import { trpc } from "@/lib/trpc/client";
 import { StatCard } from "@/components/shared";
 import { BarangayDensityMap } from "./barangay-density-map";
 import { YearSelect } from "./year-select";
+import {
+  RegistrationTypeSelect,
+  type RegistrationType,
+} from "./registration-type-select";
+import { FisherfolkGroupTile } from "./fisherfolk-group-tile";
+import { VesselGroupTile } from "./vessel-group-tile";
+import { ViolationsGroupTile } from "./violations-group-tile";
 
 // ── Skeleton shimmer ──────────────────────────────────────────────────────────
 function Shimmer({ className }: { className?: string }) {
@@ -101,6 +108,8 @@ export function DashboardClient() {
 
   const [bgyFilter, setBgyFilter] = useState<string>("all");
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [registrationType, setRegistrationType] =
+    useState<RegistrationType>("ALL");
 
   const { data: stats, isLoading: statsLoading } =
     trpc.dashboard.getStats.useQuery({ year });
@@ -138,8 +147,24 @@ export function DashboardClient() {
           <BarangayDensityMap />
         </div>
         <div className="flex flex-col gap-3">
-          {/* S4: group tiles mount here */}
           <YearSelect value={year} onValueChange={setYear} />
+          <RegistrationTypeSelect
+            value={registrationType}
+            onValueChange={setRegistrationType}
+          />
+          <FisherfolkGroupTile
+            activeFisherfolk={stats?.activeFisherfolk ?? 0}
+            newFisherfolk={stats?.newFisherfolk ?? 0}
+            renewedFisherfolk={stats?.renewedFisherfolk ?? 0}
+            statsLoading={statsLoading}
+            year={year}
+            registrationType={registrationType}
+          />
+          <VesselGroupTile />
+          <ViolationsGroupTile
+            activeViolations={stats?.activeViolations ?? 0}
+            loading={statsLoading}
+          />
         </div>
       </div>
 
