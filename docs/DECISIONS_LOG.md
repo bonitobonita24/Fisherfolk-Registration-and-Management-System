@@ -551,3 +551,59 @@ defaults so the build proceeds un-blocked (Rule 1: PRODUCT.md untouched; re-surf
 - **D4 — Renewal action per-record vs bulk.** Default applied: keep existing per-record fisherfolk.renew + add the missing `status==="INACTIVE"` guard. Owner to confirm if a bulk "renew all INACTIVE" admin action is needed this wave.
 - **D5 — ARCHIVED vs INACTIVE interplay.** Default applied: annual sweep excludes ARCHIVED; archival is terminal (only INACTIVE can renew). Owner to confirm.
 - **D6 — Lower-chart grouping (item 7).** Default applied: 5 existing charts → 3 tiles (barangay+status · gender+age · category+category-by-barangay). Owner may prefer a different pairing.
+
+### SET-2 Dashboard Redesign — [HOW] locked implementation decisions (2026-07-05, CLAUDE_CODE SD)
+PM+Architect co-planned this wave against real code (RegistrationRenewal, fisherfolk.renew, and
+Tenant.currentRegistrationYear already exist). [WHAT] defaults D1–D6 are logged above; [HOW]
+implementation choices below are locked for the build:
+
+#### (a) Sequential wave S1→S6 — no parallel fan-out after S1
+Decision: All six code sessions run strictly sequential. Sessions S2–S5 all write
+`dashboard-client.tsx` (shared file) — no two sessions after S1 are file-disjoint. Wave order:
+S1 (schema index) → S2 (backend lifecycle) → S3 (top-section UI) → S4 (group tiles) →
+S5 (lower-chart reflow) → S6 (WCAG gate) → SD (governance docs).
+Rationale: Shared file surface makes parallel agents unsafe; correctness over speed.
+Locked: yes
+
+#### (b) Schema — additive index only, no new relations
+Decision: S1 adds `@@index([tenantId, status, registrationYear])` on `Fisherfolk` via an additive
+migration (CREATE INDEX only). No `Vessel.categoryIds` relation added (D3 default: group by existing
+`vesselType` string). No new enum values.
+Rationale: Additive-only migration is safe (no DROP/ALTER). Vessel category model is owner [WHAT].
+Locked: yes
+
+#### (c) Annual-reset as admin-triggered updateMany via registration-lifecycle.ts helper
+Decision: S2 creates `server/lib/registration-lifecycle.ts` with a `bulkResetToInactive(tenantId,
+currentYear)` helper called by the tRPC admin mutation. A future cron reuses the same path without
+duplicating logic. `fisherfolk.renew` gains an `existing.status === "INACTIVE"` guard (throws
+PRECONDITION_FAILED if not INACTIVE) — the existing active-violation + duplicate-year guards are kept.
+Rationale: Human-authority pattern (D2); no cron infrastructure exists in the repo; helper is reusable.
+Locked: yes
+
+#### (d) getStats shape — add new/renewed counts, drop totalUsers + pendingEditRequests
+Decision: `dashboard.getStats` adds `newFisherfolk` (status NEW count) and `renewedFisherfolk`
+(status RENEWED count). Removes `totalUsers` and `pendingEditRequests` (no longer displayed on the
+redesigned dashboard). Sole consumer is `dashboard-client.tsx`.
+Rationale: New group tiles need NEW/RENEWED breakdown; old KPI strip is deleted in S3 (D1).
+Locked: yes
+
+#### (e) New category-breakdown procedures with optional year param
+Decision: S2 adds `getFisherfolkCategoryBreakdown(registrationType: ALL|NEW|RENEWED)` (counts per
+Category using `categoryIds: { has: id }`) and `getVesselCategoryBreakdown` (groupBy `vesselType`
+string, omits NEW/RENEWED fraction per D3). Both accept an optional `year` param defaulting to
+`Tenant.currentRegistrationYear`.
+Rationale: Group tiles (S4) need per-category breakdowns; Vessel has no Category model (D3).
+Locked: yes
+
+#### (f) "vs last year" comparison — placeholder text only, no fabricated percentage
+Decision: `FisherfolkGroupTile` renders "–" in the year-over-year comparison slot; no historical stat
+is estimated or fabricated.
+Rationale: No prior-year snapshot mechanism exists in the repo. Owner must confirm data-retention
+strategy before a real % comparison can be surfaced.
+Locked: yes
+
+#### (g) WCAG 2.2 AA hard gate covers all new surfaces (gov/LGU)
+Decision: S6 runs a full axe WCAG 2.2 AA audit on every new surface (year select, registration-type
+filter, group tiles, lower-chart tiles). All violations found in S6 are fixed in-session — none
+deferred. Governing: ui-rules.md R13 + privacy.md (V32.9) + Rule 33 (gov/LGU app, DICT MC 004).
+Locked: yes

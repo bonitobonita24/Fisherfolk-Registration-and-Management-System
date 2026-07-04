@@ -716,3 +716,16 @@
 - Why:             Phase-4 S4 — Rebuild dashboard page into AdminCN dense analytics layout. Replace spacious whitespace layout with compact KPI strip, tighter chart grid, and density-map placement in a grid row.
 - Files modified:  apps/web/src/app/[tenant]/dashboard/kpi-card.tsx (NEW — local compact KPI card with sparkline slot); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (dense layout: 6-across KPI strip, mini sparklines, chart heights reduced, card padding tightened, density map in 3-col grid row alongside status card); apps/web/src/app/[tenant]/dashboard/page.tsx (h1 text-lg, space-y-4).
 - Verification:    typecheck ✅ lint ✅ build ✅. Code-review gate ran (medium effort); 3 in-scope bugs fixed (sparkline during loading, unclamped activeRatio, zero-count sparkline guard).
+
+## 2026-07-05 — SD (Dashboard Redesign wave): DECISIONS_LOG + CHANGELOG_AI governance docs
+- Agent:           CLAUDE_CODE (Swarm Worker SD, branch swarm/dashboard-redesign)
+- Why:             Session SD — governance docs update only (no app code). Appends [HOW] locked implementation decisions (a–g) for the SET-2 Dashboard Redesign wave; D1–D6 [WHAT] owner defaults were already recorded in the planning step. PRODUCT.md untouched (Rule 1).
+- Wave summary (S1–S6 planned sessions):
+  - S1 (schema index): @@index([tenantId, status, registrationYear]) on Fisherfolk; additive-only migration; no enum changes; no Vessel.categoryIds added.
+  - S2 (backend lifecycle): registration-lifecycle.ts bulkResetToInactive helper; fisherfolk.renew gains INACTIVE status guard; getStats adds newFisherfolk+renewedFisherfolk, drops totalUsers+pendingEditRequests; getFisherfolkCategoryBreakdown + getVesselCategoryBreakdown (groupBy vesselType); optional year param wired to currentRegistrationYear; TDD-first (renew guard failing test written first).
+  - S3 (top-section UI + year select): 6-KPI strip deleted; density map → lg:col-span-3 (~75%); right column placeholder for group tiles; YearSelect (shadcn Select, aria-label="Registration year").
+  - S4 (group tiles): fisherfolk-group-tile.tsx (big number + per-category bar chart, no fabricated "vs last year" %) + vessel-group-tile.tsx (vesselType groups, no NEW/RENEWED) + violations-group-tile.tsx (count only) + registration-type-select; all wired to real tRPC data.
+  - S5 (lower-chart reflow): 5 existing charts → 3 Card tiles (barangay+status · gender+age · category+category-by-barangay); no chart data removed.
+  - S6 (WCAG QA gate): Full axe WCAG 2.2 AA audit on all new surfaces; all violations fixed in-session (zero deferred); typecheck+lint+build green.
+- Files modified:  docs/DECISIONS_LOG.md (appended SET-2 [HOW] sub-decisions a–g); docs/STATE.md (current-state block updated); docs/CHANGELOG_AI.md (this entry).
+- Verification:    git diff -- docs/PRODUCT.md confirms zero changes. Rule 1 preserved.

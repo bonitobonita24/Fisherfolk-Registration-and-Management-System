@@ -1,9 +1,16 @@
 # FRMS — Project State
 
-## Current State (2026-07-04)
+## Current State (2026-07-05)
 
-Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 ✅ complete (dense dashboard layout). S5 ✅ remediation applied — the 2 axe violations + 3 code-review defects the QA gate found are all fixed in this commit (aria-labels, nav-active contrast tokens, --chart-3 contrast, ⌘K contrast, onToggleSidebar wiring, activeSpark guard). PM browser re-verification in progress.
+Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
+SD ✅ complete (governance docs — DECISIONS_LOG [HOW] sub-decisions a–g + CHANGELOG_AI wave summary appended). Code sessions S1–S6 are planned and ready to execute sequentially (S1 schema index → S2 backend lifecycle → S3 top-section UI → S4 group tiles → S5 lower-chart reflow → S6 WCAG gate). PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+
+### Completed this session (SD — Dashboard Redesign governance docs, 2026-07-05)
+
+- **`docs/DECISIONS_LOG.md`** (updated) — appended `SET-2 Dashboard Redesign — [HOW] locked implementation decisions` section with sub-decisions (a) sequential wave S1→S6, (b) additive schema index only, (c) annual-reset via registration-lifecycle.ts helper + renew INACTIVE guard, (d) getStats shape change (add new/renewed, drop totalUsers/pendingEditRequests), (e) new category-breakdown procedures + optional year param, (f) "vs last year" placeholder (no fabricated %), (g) WCAG 2.2 AA hard gate on all new surfaces. PRODUCT.md untouched (Rule 1).
+- **`docs/CHANGELOG_AI.md`** (updated) — appended SD wave summary entry with S1–S6 session descriptions.
+- **`docs/STATE.md`** (this file) — current-state block updated to reflect swarm/dashboard-redesign branch + SD complete.
+- Commit on `swarm/dashboard-redesign`.
 
 ### S5 QA Gate Results (2026-07-04) — findings below all REMEDIATED in this commit
 
