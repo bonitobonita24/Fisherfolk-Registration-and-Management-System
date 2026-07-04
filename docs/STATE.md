@@ -3,7 +3,22 @@
 ## Current State (2026-07-04)
 
 Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 (header), S4 (dense dashboard), S5 (QA) pending.
+S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 (dense dashboard), S5 (QA) pending.
+
+### Completed this session (S3 — Header/topbar reskin)
+
+- **`apps/web/src/components/header.tsx`** (updated) — AdminCN topbar:
+  - Added `onToggleSidebar?: () => void` to HeaderProps (S2 app-shell's `toggleSidebar`; optional — no break to existing callers).
+  - Mobile `md:hidden` Menu button (calls `onMenuClick` → Sheet drawer) always rendered at all times.
+  - Desktop `hidden md:flex` PanelLeft button (calls `onToggleSidebar`) conditionally shown when prop provided.
+  - Search: `<button>` styled as ⌘K search bar — replaced `<Input type="search" readOnly>` to avoid WCAG 4.1.2 screen-reader forms-mode bug.
+  - Right section: NotificationBell → ThemeToggle → avatar dropdown; `gap-1` tight spacing; `ml-auto` pushes to edge.
+  - All preserved: signOut, Settings link, name/role display, initials logic, ThemeToggle functional.
+  - h-14 height, `px-3` tight padding, `bg-card` surface — AdminCN style maintained.
+  - ⚠ **Pending wire-up**: `app-shell.tsx` still omits `onToggleSidebar={toggleSidebar}` (the function exists in S2 app-shell but is not yet passed to Header — out of S3 scope per hard rules). Next session touching app-shell should add `onToggleSidebar={toggleSidebar}` to the `<Header>` call.
+- **Code-review gate**: ran medium effort (2 angles × 6 candidates); 2 in-scope bugs fixed: (1) mobile drawer trigger lost when `onToggleSidebar` truthy → fixed by always rendering mobile Menu button separately; (2) `readOnly` Input WCAG 4.1.2 violation → replaced with `<button>`. 1 deferred (app-shell wiring, out of scope).
+- **Validation**: typecheck ✅, lint ✅, build ✅.
+- Commit `33a40a1` on `swarm/admincn-reskin`.
 
 ### Completed this session (S2 — Sidebar + app-shell reskin)
 

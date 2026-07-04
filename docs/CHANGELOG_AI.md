@@ -3,6 +3,20 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-04 — AdminCN Reskin S3: Header/topbar reskin — AdminCN toggle + search + icons + avatar
+**Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S3)
+**Branch:** swarm/admincn-reskin
+**Files:** apps/web/src/components/header.tsx
+**Summary:**
+- Added `onToggleSidebar?: () => void` to HeaderProps (wired from S2 app-shell's `toggleSidebar`; optional so callers without it still compile)
+- Mobile `md:hidden` Menu button (calls `onMenuClick` → sheet drawer) always rendered — preserved
+- Desktop `hidden md:flex` PanelLeft button (calls `onToggleSidebar`) renders when prop provided
+- Search: `<button>` styled as ⌘K search bar (not `<Input type="search" readOnly>` — avoids WCAG 4.1.2 forms-mode screen-reader bug)
+- Right section: NotificationBell → ThemeToggle → avatar dropdown; gap-1 tight spacing
+- All aria-labels, signOut, Settings link (`/${tenantSlug}/settings`), initials logic, ThemeToggle functional — all preserved
+- Code-review gate: ran medium effort; 2 in-scope bugs fixed (mobile drawer trigger lost when onToggleSidebar truthy; readOnly Input WCAG violation). 1 item deferred (app-shell.tsx not passing onToggleSidebar yet — out of S3 scope).
+- Validation: typecheck=pass, lint=pass, build=pass. Commit 33a40a1.
+
 ## 2026-07-04 — AdminCN Reskin S2: Sidebar + app-shell reskin — AdminCN grouped nav, dense, desktop collapse
 **Attribution:** CLAUDE_CODE (Sonnet 4.6, swarm worker S2)
 **Branch:** swarm/admincn-reskin
