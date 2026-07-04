@@ -3,6 +3,19 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-05 — SET-2 Dashboard Redesign S5: Lower charts → 3 grouped Card tiles (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S5, swarm/dashboard-redesign)
+
+- UPDATED `dashboard-client.tsx` (rows 3-5): 5 separate Card components in 3 row-divs refactored into 3 grouped Card tiles per D6 default grouping.
+  - Tile A (Barangay Distribution): barangay bar chart + status breakdown `<ul>` pills (ACTIVE/NEW/RENEWED from `stats`; shimmer on load+error; semantic list markup).
+  - Tile B (Demographics): Gender donut + Age Groups bar, `md:grid-cols-2` inside one Card.
+  - Tile C (Activity Categories): Category bar + Category-by-Barangay bar, `md:grid-cols-2`; bgyFilter Select preserved at `h-7 w-[160px]` (touch-target compliant); ChartContainer `aria-labelledby="cat-by-bgy-heading"`.
+- `isError: statsError` destructured — pills shimmer on error state (no silent disappear).
+- Code-review gate: 4 in-scope bugs fixed (role="group"→`<ul>`/`<li>`; error branch for pills; aria-labelledby on cat-by-bgy chart; SelectTrigger touch-target revert). 1 deferred (activeFisherfolk year-scope, backend S2 concern).
+- Validation: typecheck ✅ lint ✅ build ✅.
+- Pre-answer items q-S5-01..06 confirmed already applied to branch; no re-application needed.
+
 ## 2026-07-05 — SET-2 Dashboard Redesign S4: Group tiles (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S4, swarm/dashboard-redesign)

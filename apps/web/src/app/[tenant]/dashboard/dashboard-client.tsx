@@ -111,8 +111,11 @@ export function DashboardClient() {
   const [registrationType, setRegistrationType] =
     useState<RegistrationType>("ALL");
 
-  const { data: stats, isLoading: statsLoading } =
-    trpc.dashboard.getStats.useQuery({ year });
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    isError: statsError,
+  } = trpc.dashboard.getStats.useQuery({ year });
   const { data: barangayData, isLoading: barangayLoading } =
     trpc.dashboard.getFisherfolkByBarangay.useQuery();
   const { data: demo, isLoading: demoLoading } =
@@ -168,268 +171,287 @@ export function DashboardClient() {
         </div>
       </div>
 
-      {/* ── Barangay (bar) + Gender (donut) ──────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {/* Fisherfolk by Barangay */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Distribution by Barangay</CardTitle>
-            <CardDescription className="text-xs">Top 15 barangays by count</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {barangayLoading ? (
-              <Shimmer className="h-[220px] w-full" />
-            ) : top15Barangay.length === 0 ? (
-              <EmptyState message="No barangay data yet." />
-            ) : (
-              <ChartContainer config={barangayConfig} className="aspect-auto h-[220px] w-full">
-                <BarChart
-                  data={top15Barangay}
-                  margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="barangay"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={4}
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                    interval={0}
-                    tick={{ fontSize: 10 }}
-                  />
-                  <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Gender Distribution */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Gender Distribution</CardTitle>
-            <CardDescription className="text-xs">Breakdown by sex</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {demoLoading ? (
-              <Shimmer className="h-[220px] w-full" />
-            ) : genderTotal === 0 ? (
-              <EmptyState message="No gender data yet." />
-            ) : (
-              <ChartContainer
-                config={genderConfig}
-                className="mx-auto aspect-square h-[220px]"
-              >
-                <PieChart>
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Pie
-                    data={genderData}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={55}
-                    strokeWidth={3}
-                  >
-                    <Label
-                      content={({ viewBox }) => {
-                        if (
-                          viewBox &&
-                          "cx" in viewBox &&
-                          "cy" in viewBox &&
-                          typeof viewBox.cx === "number" &&
-                          typeof viewBox.cy === "number"
-                        ) {
-                          return (
-                            <text
-                              x={viewBox.cx}
-                              y={viewBox.cy}
-                              textAnchor="middle"
-                              dominantBaseline="middle"
-                            >
-                              <tspan
-                                x={viewBox.cx}
-                                y={viewBox.cy}
-                                className="fill-foreground text-2xl font-bold"
-                              >
-                                {genderTotal.toLocaleString()}
-                              </tspan>
-                              <tspan
-                                x={viewBox.cx}
-                                y={viewBox.cy + 18}
-                                className="fill-muted-foreground text-xs"
-                              >
-                                Total
-                              </tspan>
-                            </text>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                  </Pie>
-                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
-                </PieChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── Age Groups (bar) + Category (horizontal bar) ─────────────────── */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        {/* Age Group Distribution */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Age Group Distribution</CardTitle>
-            <CardDescription className="text-xs">Distribution by age bracket</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {ageLoading ? (
-              <Shimmer className="h-[220px] w-full" />
-            ) : (ageGroups?.length ?? 0) === 0 ? (
-              <EmptyState message="No age data yet." />
-            ) : (
-              <ChartContainer config={ageConfig} className="aspect-auto h-[220px] w-full">
-                <BarChart
-                  data={ageGroups ?? []}
-                  margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
-                >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="group"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={6}
-                    tick={{ fontSize: 11 }}
-                  />
-                  <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]}>
-                    <LabelList
-                      dataKey="count"
-                      position="top"
-                      className="fill-muted-foreground text-xs"
-                    />
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Activity Category Distribution */}
-        <Card>
-          <CardHeader className="p-3 pb-2">
-            <CardTitle className="text-sm">Activity Category Distribution</CardTitle>
-            <CardDescription className="text-xs">Fisherfolk per primary activity</CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 pt-0">
-            {demoLoading ? (
-              <Shimmer className="h-[220px] w-full" />
-            ) : categories.length === 0 ? (
-              <EmptyState message="No categories configured." />
-            ) : (
-              <ChartContainer config={categoryConfig} className="aspect-auto h-[220px] w-full">
-                <BarChart
-                  layout="vertical"
-                  data={categories}
-                  margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
-                >
-                  <CartesianGrid horizontal={false} />
-                  <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    tickLine={false}
-                    axisLine={false}
-                    width={110}
-                    tick={{ fontSize: 11 }}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" radius={[0, 3, 3, 0]}>
-                    {categories.map((cat, i) => (
-                      <Cell
-                        key={cat.name}
-                        fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
-                      />
-                    ))}
-                    <LabelList
-                      dataKey="count"
-                      position="right"
-                      className="fill-muted-foreground text-xs"
-                    />
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── Activity Category by Barangay ────────────────────────────────── */}
+      {/* ── TILE A: Barangay Distribution + Status Breakdown ──────────────── */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 p-3 pb-2">
-          <div>
-            <CardTitle className="text-sm">Activity Category by Barangay</CardTitle>
-            <CardDescription className="text-xs">Activity mix for selected barangay</CardDescription>
-          </div>
-          <Select value={bgyFilter} onValueChange={setBgyFilter}>
-            <SelectTrigger className="h-7 w-[160px] text-xs" aria-label="Filter by barangay">
-              <SelectValue placeholder="All Barangays" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Barangays</SelectItem>
-              {barangayOptions.map((b) => (
-                <SelectItem key={b.barangay} value={b.barangay}>
-                  {b.barangay}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm">Barangay Distribution</CardTitle>
+          <CardDescription className="text-xs">Top 15 barangays · Registration status overview</CardDescription>
         </CardHeader>
         <CardContent className="p-3 pt-0">
-          {catByBgyLoading ? (
-            <Shimmer className="h-[200px] w-full" />
-          ) : (catByBgy?.length ?? 0) === 0 ? (
-            <EmptyState message="No category data for this barangay." />
+          {/* Status breakdown — existing stats data, no new query */}
+          {statsLoading || statsError ? (
+            <Shimmer className="mb-3 h-6 w-56" />
+          ) : stats != null ? (
+            <ul
+              className="mb-3 flex list-none flex-wrap gap-2 p-0"
+              aria-label="Registration status counts"
+            >
+              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
+                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-2))]" aria-hidden="true" />
+                <span className="font-semibold">{stats.activeFisherfolk.toLocaleString()}</span>
+                <span className="text-muted-foreground">Active</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
+                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-1))]" aria-hidden="true" />
+                <span className="font-semibold">{stats.newFisherfolk.toLocaleString()}</span>
+                <span className="text-muted-foreground">New</span>
+              </li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
+                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-4))]" aria-hidden="true" />
+                <span className="font-semibold">{stats.renewedFisherfolk.toLocaleString()}</span>
+                <span className="text-muted-foreground">Renewed</span>
+              </li>
+            </ul>
+          ) : null}
+          {barangayLoading ? (
+            <Shimmer className="h-[220px] w-full" />
+          ) : top15Barangay.length === 0 ? (
+            <EmptyState message="No barangay data yet." />
           ) : (
-            <ChartContainer config={catByBgyConfig} className="aspect-auto h-[200px] w-full">
+            <ChartContainer config={barangayConfig} className="aspect-auto h-[220px] w-full">
               <BarChart
-                data={catByBgy ?? []}
-                margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                data={top15Barangay}
+                margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
               >
                 <CartesianGrid vertical={false} />
                 <XAxis
-                  dataKey="category"
+                  dataKey="barangay"
                   tickLine={false}
                   axisLine={false}
-                  tickMargin={6}
+                  tickMargin={4}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  interval={0}
                   tick={{ fontSize: 10 }}
                 />
                 <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]}>
-                  {(catByBgy ?? []).map((row, i) => (
-                    <Cell
-                      key={row.category}
-                      fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
-                    />
-                  ))}
-                  <LabelList
-                    dataKey="count"
-                    position="top"
-                    className="fill-muted-foreground text-xs"
-                  />
-                </Bar>
+                <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ChartContainer>
           )}
+        </CardContent>
+      </Card>
+
+      {/* ── TILE B: Demographics — Gender + Age ────────────────────────────── */}
+      <Card>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm">Demographics</CardTitle>
+          <CardDescription className="text-xs">Gender distribution and age group breakdown</CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Gender Distribution */}
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted-foreground">Gender</p>
+              {demoLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : genderTotal === 0 ? (
+                <EmptyState message="No gender data yet." />
+              ) : (
+                <ChartContainer
+                  config={genderConfig}
+                  className="mx-auto aspect-square h-[200px]"
+                >
+                  <PieChart>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Pie
+                      data={genderData}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={50}
+                      strokeWidth={3}
+                    >
+                      <Label
+                        content={({ viewBox }) => {
+                          if (
+                            viewBox &&
+                            "cx" in viewBox &&
+                            "cy" in viewBox &&
+                            typeof viewBox.cx === "number" &&
+                            typeof viewBox.cy === "number"
+                          ) {
+                            return (
+                              <text
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                              >
+                                <tspan
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                  className="fill-foreground text-2xl font-bold"
+                                >
+                                  {genderTotal.toLocaleString()}
+                                </tspan>
+                                <tspan
+                                  x={viewBox.cx}
+                                  y={viewBox.cy + 18}
+                                  className="fill-muted-foreground text-xs"
+                                >
+                                  Total
+                                </tspan>
+                              </text>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </Pie>
+                    <ChartLegend content={<ChartLegendContent nameKey="name" />} />
+                  </PieChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Age Group Distribution */}
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted-foreground">Age Groups</p>
+              {ageLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : (ageGroups?.length ?? 0) === 0 ? (
+                <EmptyState message="No age data yet." />
+              ) : (
+                <ChartContainer config={ageConfig} className="aspect-auto h-[200px] w-full">
+                  <BarChart
+                    data={ageGroups ?? []}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="group"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      tick={{ fontSize: 11 }}
+                    />
+                    <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]}>
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── TILE C: Activity Categories ──────────────────────────────────── */}
+      <Card>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm">Activity Categories</CardTitle>
+          <CardDescription className="text-xs">Category distribution and by-barangay breakdown</CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Activity Category Distribution */}
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted-foreground">Overall distribution</p>
+              {demoLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : categories.length === 0 ? (
+                <EmptyState message="No categories configured." />
+              ) : (
+                <ChartContainer config={categoryConfig} className="aspect-auto h-[200px] w-full">
+                  <BarChart
+                    layout="vertical"
+                    data={categories}
+                    margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
+                  >
+                    <CartesianGrid horizontal={false} />
+                    <XAxis type="number" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tickLine={false}
+                      axisLine={false}
+                      width={110}
+                      tick={{ fontSize: 11 }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" radius={[0, 3, 3, 0]}>
+                      {categories.map((cat, i) => (
+                        <Cell
+                          key={cat.name}
+                          fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
+                        />
+                      ))}
+                      <LabelList
+                        dataKey="count"
+                        position="right"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Activity Category by Barangay */}
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <p id="cat-by-bgy-heading" className="text-xs font-medium text-muted-foreground">By barangay</p>
+                <Select value={bgyFilter} onValueChange={setBgyFilter}>
+                  <SelectTrigger className="h-7 w-[160px] text-xs" aria-label="Filter by barangay">
+                    <SelectValue placeholder="All Barangays" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Barangays</SelectItem>
+                    {barangayOptions.map((b) => (
+                      <SelectItem key={b.barangay} value={b.barangay}>
+                        {b.barangay}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {catByBgyLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : (catByBgy?.length ?? 0) === 0 ? (
+                <EmptyState message="No category data for this barangay." />
+              ) : (
+                <ChartContainer config={catByBgyConfig} className="aspect-auto h-[200px] w-full" aria-labelledby="cat-by-bgy-heading">
+                  <BarChart
+                    data={catByBgy ?? []}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="category"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" radius={[3, 3, 0, 0]}>
+                      {(catByBgy ?? []).map((row, i) => (
+                        <Cell
+                          key={row.category}
+                          fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
+                        />
+                      ))}
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 

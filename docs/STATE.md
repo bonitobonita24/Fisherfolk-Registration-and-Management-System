@@ -3,7 +3,18 @@
 ## Current State (2026-07-05)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
-SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles: FisherfolkGroupTile + VesselGroupTile + ViolationsGroupTile + RegistrationTypeSelect; typecheck ✅ lint ✅ build ✅). S5–S6 remain. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles). **S5 ✅ complete** (lower charts → 3 grouped Card tiles; typecheck ✅ lint ✅ build ✅). S6 remains. PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.
+
+### Completed this session (S5 — Lower charts → 3 grouped Card tiles, 2026-07-05)
+
+- **`apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx`** (updated) — lower charts region (rows 3-5) refactored from 5 separate Card components in 3 row-divs into EXACTLY 3 grouped Card tiles:
+  - **Tile A (Barangay Distribution)**: Distribution by Barangay bar chart + status breakdown pill row (ACTIVE/NEW/RENEWED counts from already-loaded `stats`; semantic `<ul>`/`<li>` markup; `aria-label`; shimmer on load OR error).
+  - **Tile B (Demographics)**: Gender Distribution donut + Age Group Distribution bar, side-by-side (`md:grid-cols-2`), sub-labeled.
+  - **Tile C (Activity Categories)**: Activity Category horizontal bar + Activity Category by Barangay bar, side-by-side; `bgyFilter` Select preserved inside Tile C (reverted to `h-7 w-[160px]` for touch-target compliance); `aria-labelledby="cat-by-bgy-heading"` added to ChartContainer.
+- All 5 existing charts present; all tRPC queries preserved; all `hsl(var(--chart-n))` colors unchanged.
+- `isError: statsError` destructured from `getStats.useQuery` — pills row shows shimmer on error instead of disappearing silently.
+- **Code-review gate**: ran (2 finder angles × 5 candidates; 4 CONFIRMED in-scope); fixed all 4: (1) `role="group"` → `<ul>`/`<li>` semantic list (WCAG 4.1.2); (2) error state for pills — shimmer on `statsError`; (3) `aria-labelledby` on cat-by-bgy ChartContainer (WCAG 1.3.1); (4) SelectTrigger h-6/w-140 → h-7/w-160 (WCAG 2.5.8 touch target). 1 deferred out-of-scope: `activeFisherfolk` year-scope mismatch (backend S2 concern, not layout).
+- **Validation**: typecheck ✅, lint ✅, build ✅.
 
 ### Completed this session (S4 — Group tiles, 2026-07-05)
 
