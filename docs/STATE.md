@@ -3,7 +3,30 @@
 ## Current State (2026-07-04)
 
 Branch `swarm/admincn-reskin` is the active feature branch for the AdminCN Reskin wave.
-S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 (dense dashboard), S5 (QA) pending.
+S1 ✅ complete (theme tokens). S2 ✅ complete (sidebar + app-shell reskin). S3 ✅ complete (header/topbar reskin). S4 ✅ complete (dense dashboard layout). S5 (QA) pending.
+
+### Completed this session (S4 — Dense dashboard analytics layout)
+
+- **`apps/web/src/app/[tenant]/dashboard/kpi-card.tsx`** (NEW) — local compact KPI card:
+  - `text-[10px]` uppercase label, `text-2xl font-bold` value, `size-4` lucide icon.
+  - Optional `sparkline` slot rendered below value; suppressed when `loading === true`.
+  - Inline shimmer (`animate-pulse rounded bg-muted`) — no Skeleton component needed.
+- **`apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx`** (updated) — AdminCN dense layout:
+  - 6-across KPI strip: `grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3` using local `KpiCard`.
+  - `totalSpark`: mini CSS bar chart of top-5 barangay counts (h-8, aria-hidden); guarded against empty/zero data.
+  - `activeSpark`: progress bar at `activeRatio`% clamped to 100%; shown only when data loaded.
+  - Density map + Registration Status in 3-col grid (`lg:col-span-2` + 1/3 col).
+  - Chart heights reduced: `h-[320px]` → `h-[220px]`, `h-[300px]` → `h-[200px]`.
+  - Card padding: `CardHeader p-3 pb-2`, `CardContent p-3 pt-0`; gaps `gap-6` → `gap-3`; root `space-y-8` → `space-y-4`.
+  - All real tRPC queries preserved; `hsl(var(--chart-n))` colors maintained throughout.
+  - `StatCard` kept for "Data Completeness" clickable links (Missing Photo/Signature).
+- **`apps/web/src/app/[tenant]/dashboard/page.tsx`** (updated): `text-2xl` → `text-lg font-semibold`; `space-y-6` → `space-y-4`.
+- **Code-review gate**: ran (medium effort, 2 angles × 6 candidates); 3 in-scope bugs fixed:
+  (1) `activeSpark` rendered during loading state → suppressed sparklines in `KpiCard` when `loading === true`;
+  (2) `activeRatio` unclamped → `Math.min(100, ...)` applied;
+  (3) zero-count totalSpark guard → added `.some(d => d.count > 0)` check.
+- **Validation**: typecheck ✅, lint ✅, build ✅.
+- Commit `5cb0db9` on `swarm/admincn-reskin`.
 
 ### Completed this session (S3 — Header/topbar reskin)
 

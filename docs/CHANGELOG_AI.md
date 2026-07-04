@@ -694,3 +694,9 @@
 - Why:             Session SD — governance docs update only (no app code). Record all [HOW] decisions for the AdminCN Reskin wave: (a) full app shell + dashboard reskinned to AdminCN template pattern — dark default kept, neutral-dark surfaces (#0a0a0a bg / #171717 card), orange --primary preserved (per-tenant runtime-overridable), teal/orange accent identity via --accent + --chart-1..5 substituting AdminCN's default blue/purple; (b) global density pass — 6-across compact KPI strip, reduced chart heights, tighter padding/gaps throughout; (c) implementation split — S1 theme tokens, S2 sidebar+shell, S3 header, S4 dense dashboard, S5 QA. PRODUCT.md untouched (Rule 1).
 - Files modified:  docs/DECISIONS_LOG.md (appended 2026-07-04 AdminCN Reskin entry with sub-decisions a–c); docs/STATE.md (current-state block updated); docs/CHANGELOG_AI.md (this entry).
 - Verification:    git diff -- docs/PRODUCT.md confirms zero changes. Rule 1 preserved.
+
+## 2026-07-04 — S4 (AdminCN Reskin): Dense Dashboard Analytics Layout
+- Agent:           CLAUDE_CODE (Swarm Worker S4, branch swarm/admincn-reskin, commit 5cb0db9)
+- Why:             Phase-4 S4 — Rebuild dashboard page into AdminCN dense analytics layout. Replace spacious whitespace layout with compact KPI strip, tighter chart grid, and density-map placement in a grid row.
+- Files modified:  apps/web/src/app/[tenant]/dashboard/kpi-card.tsx (NEW — local compact KPI card with sparkline slot); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (dense layout: 6-across KPI strip, mini sparklines, chart heights reduced, card padding tightened, density map in 3-col grid row alongside status card); apps/web/src/app/[tenant]/dashboard/page.tsx (h1 text-lg, space-y-4).
+- Verification:    typecheck ✅ lint ✅ build ✅. Code-review gate ran (medium effort); 3 in-scope bugs fixed (sparkline during loading, unclamped activeRatio, zero-count sparkline guard).
