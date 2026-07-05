@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { Menu, LogOut, Settings, Search, PanelLeft } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Menu, LogOut, Settings, PanelLeft } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { YearSelect } from "@/app/[tenant]/dashboard/year-select";
+import {
+  RegistrationTypeSelect,
+  type RegistrationType,
+} from "@/app/[tenant]/dashboard/registration-type-select";
 
 interface HeaderProps {
   userName: string;
@@ -22,6 +29,46 @@ interface HeaderProps {
   onMenuClick?: () => void;
   onToggleSidebar?: () => void;
   tenantSlug?: string;
+}
+
+// Isolated so useSearchParams() doesn't force the whole Header (and thus
+// every authenticated route via AppShell) to bail out of static rendering.
+function DashboardHeaderFilters() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const parsedYear = Number(searchParams.get("year"));
+  const year =
+    Number.isFinite(parsedYear) && parsedYear > 0
+      ? parsedYear
+      : new Date().getFullYear();
+  const rawReg = searchParams.get("reg");
+  const registrationType: RegistrationType =
+    rawReg === "NEW" || rawReg === "RENEWED" ? rawReg : "ALL";
+
+  function updateDashboardParam(key: "year" | "reg", value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(key, value);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
+
+  return (
+    <div className="hidden flex-1 items-center gap-2 md:flex">
+      <div className="w-28">
+        <YearSelect
+          value={year}
+          onValueChange={(y) => updateDashboardParam("year", String(y))}
+        />
+      </div>
+      <div className="w-44">
+        <RegistrationTypeSelect
+          value={registrationType}
+          onValueChange={(v) => updateDashboardParam("reg", v)}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlug }: HeaderProps) {
@@ -34,6 +81,9 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
       .slice(0, 2)
       .join("")
       .toUpperCase() || "U";
+
+  const pathname = usePathname();
+  const onDashboard = pathname?.endsWith("/dashboard") ?? false;
 
   return (
     <header className="flex h-14 items-center gap-2 border-b border-border bg-card px-3">
@@ -61,18 +111,14 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
         </Button>
       )}
 
-      {/* Search — desktop only; button (not input) so screen readers don't enter forms mode */}
-      <div className="hidden flex-1 md:flex">
-        <button
-          type="button"
-          className="flex h-8 w-60 items-center gap-2 rounded-md bg-muted/50 px-2.5 text-sm text-muted-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Search"
-        >
-          <Search className="h-3.5 w-3.5 shrink-0" />
-          <span className="flex-1 text-left">Search…</span>
-          <kbd className="rounded border border-border px-1 text-xs text-muted-foreground">⌘K</kbd>
-        </button>
-      </div>
+      {/* Dashboard-only filters — desktop only */}
+      {onDashboard ? (
+        <Suspense fallback={<div className="hidden flex-1 md:flex" />}>
+          <DashboardHeaderFilters />
+        </Suspense>
+      ) : (
+        <div className="hidden flex-1 md:flex" />
+      )}
 
       {/* Right actions */}
       <div className="ml-auto flex items-center gap-1">

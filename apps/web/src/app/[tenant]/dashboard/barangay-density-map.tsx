@@ -203,7 +203,13 @@ export function BarangayDensityMap() {
     const weights = new Map<string, number>();
     const colors = new Map<string, string>();
     const rows = density ?? [];
-    const useAll = allSelected || activeCategoryIds.size === 0;
+    // NOTE: must be gated on `allSelected` alone. Falling back to "show all"
+    // whenever activeCategoryIds is empty (the previous behavior) meant
+    // deliberately switching every category off was indistinguishable from
+    // "nothing chosen yet" and silently re-enabled every category's data —
+    // the root cause of the heatmap still rendering with everything toggled
+    // off.
+    const useAll = allSelected;
     // When exactly one category is active, color marks by that category's
     // displayColor; otherwise fall back to the default accent.
     const singleColor =
@@ -286,10 +292,13 @@ export function BarangayDensityMap() {
         id: BOUNDARY_LAYER_ID,
         type: "line",
         source: BOUNDARY_SOURCE_ID,
+        layout: {
+          visibility: showBoundaries ? "visible" : "none",
+        },
         paint: {
           "line-color": "#9ca3af",
-          "line-width": 1,
-          "line-opacity": 0.35,
+          "line-width": 1.25,
+          "line-opacity": 0.6,
         },
       });
     }
@@ -298,6 +307,15 @@ export function BarangayDensityMap() {
       "visibility",
       showBoundaries ? "visible" : "none",
     );
+    // The heatmap/circle/label effect (below) can add its layers either
+    // before or after this one depending on which async dependency (style
+    // load vs. the boundaries fetch) settles first, and `addLayer` always
+    // inserts at the current top of the stack. That race made the boundary
+    // outline land BENEATH the opaque heat/circle layers roughly half the
+    // time, at only 0.35 opacity/1px width — so toggling it back on often
+    // rendered nothing perceptible. Pin it to the top of the stack on every
+    // run so the toggle's effect is always visible regardless of load order.
+    map.moveLayer(BOUNDARY_LAYER_ID);
   }, [mapReady, showBoundaries, boundaries]);
 
   // ── Heatmap / marks layers ───────────────────────────────────────────────
@@ -420,7 +438,15 @@ export function BarangayDensityMap() {
       });
     }
 
-    const heatVisible = displayMode === "heatmap";
+    // "Heatmap view" chooses the RENDER MODE (heat vs discrete marks); the
+    // category toggles choose WHAT DATA shows. With zero categories selected
+    // (or all selected categories summing to zero anywhere), geojson has no
+    // features — but we also gate visibility explicitly here rather than
+    // relying solely on an empty source, so the data layers are unambiguously
+    // hidden regardless of render mode.
+    const hasData = weightByBarangay.size > 0;
+    const heatVisible = hasData && displayMode === "heatmap";
+    const marksVisible = hasData && displayMode !== "heatmap";
     map.setLayoutProperty(
       HEAT_LAYER_ID,
       "visibility",
@@ -429,12 +455,12 @@ export function BarangayDensityMap() {
     map.setLayoutProperty(
       CIRCLE_LAYER_ID,
       "visibility",
-      heatVisible ? "none" : "visible",
+      marksVisible ? "visible" : "none",
     );
     map.setLayoutProperty(
       LABEL_LAYER_ID,
       "visibility",
-      heatVisible ? "none" : "visible",
+      marksVisible ? "visible" : "none",
     );
   }, [mapReady, weightByBarangay, colorByBarangay, displayMode]);
 
@@ -475,7 +501,7 @@ export function BarangayDensityMap() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="relative h-[28rem] w-full overflow-hidden rounded-md border">
+        <div className="relative h-[36rem] w-full overflow-hidden rounded-md border">
           <div ref={containerRef} className="h-full w-full" />
 
           {/* ── Floating controls ─────────────────────────────────────── */}

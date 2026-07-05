@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -41,11 +41,7 @@ import { ImageOff, FileX2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { StatCard } from "@/components/shared";
 import { BarangayDensityMap } from "./barangay-density-map";
-import { YearSelect } from "./year-select";
-import {
-  RegistrationTypeSelect,
-  type RegistrationType,
-} from "./registration-type-select";
+import type { RegistrationType } from "./registration-type-select";
 import { FisherfolkGroupTile } from "./fisherfolk-group-tile";
 import { VesselGroupTile } from "./vessel-group-tile";
 import { ViolationsGroupTile } from "./violations-group-tile";
@@ -102,20 +98,43 @@ const catByBgyConfig = {
 } satisfies ChartConfig;
 
 // ── Main client component ─────────────────────────────────────────────────────
+// Wrapped in Suspense because the inner component reads useSearchParams()
+// (year/registration-type filters are now driven by the header — see header.tsx).
 export function DashboardClient() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardClientInner />
+    </Suspense>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-4">
+      <Shimmer className="h-64 w-full" />
+      <Shimmer className="h-48 w-full" />
+    </div>
+  );
+}
+
+function DashboardClientInner() {
   const params = useParams();
   const tenantSlug = params.tenant as string;
+  const searchParams = useSearchParams();
 
   const [bgyFilter, setBgyFilter] = useState<string>("all");
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [registrationType, setRegistrationType] =
-    useState<RegistrationType>("ALL");
 
-  const {
-    data: stats,
-    isLoading: statsLoading,
-    isError: statsError,
-  } = trpc.dashboard.getStats.useQuery({ year });
+  const parsedYear = Number(searchParams.get("year"));
+  const year =
+    Number.isFinite(parsedYear) && parsedYear > 0
+      ? parsedYear
+      : new Date().getFullYear();
+  const rawReg = searchParams.get("reg");
+  const registrationType: RegistrationType =
+    rawReg === "NEW" || rawReg === "RENEWED" ? rawReg : "ALL";
+
+  const { data: stats, isLoading: statsLoading } =
+    trpc.dashboard.getStats.useQuery({ year });
   const { data: barangayData, isLoading: barangayLoading } =
     trpc.dashboard.getFisherfolkByBarangay.useQuery();
   const { data: demo, isLoading: demoLoading } =
@@ -150,11 +169,6 @@ export function DashboardClient() {
           <BarangayDensityMap />
         </div>
         <div className="flex flex-col gap-3">
-          <YearSelect value={year} onValueChange={setYear} />
-          <RegistrationTypeSelect
-            value={registrationType}
-            onValueChange={setRegistrationType}
-          />
           <FisherfolkGroupTile
             activeFisherfolk={stats?.activeFisherfolk ?? 0}
             newFisherfolk={stats?.newFisherfolk ?? 0}
@@ -171,77 +185,14 @@ export function DashboardClient() {
         </div>
       </div>
 
-      {/* ── TILE A: Barangay Distribution + Status Breakdown ──────────────── */}
-      <Card>
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm">Barangay Distribution</CardTitle>
-          <CardDescription className="text-xs">Top 15 barangays · Registration status overview</CardDescription>
-        </CardHeader>
-        <CardContent className="p-3 pt-0">
-          {/* Status breakdown — existing stats data, no new query */}
-          {statsLoading || statsError ? (
-            <Shimmer className="mb-3 h-6 w-56" />
-          ) : stats != null ? (
-            <ul
-              className="mb-3 flex list-none flex-wrap gap-2 p-0"
-              aria-label="Registration status counts"
-            >
-              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
-                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-2))]" aria-hidden="true" />
-                <span className="font-semibold">{stats.activeFisherfolk.toLocaleString()}</span>
-                <span className="text-muted-foreground">Active</span>
-              </li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
-                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-1))]" aria-hidden="true" />
-                <span className="font-semibold">{stats.newFisherfolk.toLocaleString()}</span>
-                <span className="text-muted-foreground">New</span>
-              </li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
-                <span className="size-2 shrink-0 rounded-full bg-[hsl(var(--chart-4))]" aria-hidden="true" />
-                <span className="font-semibold">{stats.renewedFisherfolk.toLocaleString()}</span>
-                <span className="text-muted-foreground">Renewed</span>
-              </li>
-            </ul>
-          ) : null}
-          {barangayLoading ? (
-            <Shimmer className="h-[220px] w-full" />
-          ) : top15Barangay.length === 0 ? (
-            <EmptyState message="No barangay data yet." />
-          ) : (
-            <ChartContainer config={barangayConfig} className="aspect-auto h-[220px] w-full">
-              <BarChart
-                data={top15Barangay}
-                margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
-              >
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="barangay"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={4}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                  interval={0}
-                  tick={{ fontSize: 10 }}
-                />
-                <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ── TILE B: Demographics — Gender + Age ────────────────────────────── */}
+      {/* ── TILE B: Demographics — Gender + Age + Barangay ─────────────────── */}
       <Card>
         <CardHeader className="p-3 pb-2">
           <CardTitle className="text-sm">Demographics</CardTitle>
-          <CardDescription className="text-xs">Gender distribution and age group breakdown</CardDescription>
+          <CardDescription className="text-xs">Gender, age group, and barangay breakdown</CardDescription>
         </CardHeader>
         <CardContent className="p-3 pt-0">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Gender Distribution */}
             <div>
               <p className="mb-1 text-xs font-medium text-muted-foreground">Gender</p>
@@ -338,6 +289,38 @@ export function DashboardClient() {
                         className="fill-muted-foreground text-xs"
                       />
                     </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Barangay Distribution */}
+            <div>
+              <p className="mb-1 text-xs font-medium text-muted-foreground">By barangay (top 15)</p>
+              {barangayLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : top15Barangay.length === 0 ? (
+                <EmptyState message="No barangay data yet." />
+              ) : (
+                <ChartContainer config={barangayConfig} className="aspect-auto h-[200px] w-full">
+                  <BarChart
+                    data={top15Barangay}
+                    margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="barangay"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={4}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      interval={0}
+                      tick={{ fontSize: 9 }}
+                    />
+                    <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ChartContainer>
               )}

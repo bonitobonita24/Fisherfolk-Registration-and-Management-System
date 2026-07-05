@@ -4,6 +4,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   LabelList,
   XAxis,
   YAxis,
@@ -26,6 +27,14 @@ import type { RegistrationType } from "./registration-type-select";
 const categoryChartConfig = {
   count: { label: "Fisherfolk", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
+
+const FISHERFOLK_COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 function Shimmer({ className }: { className?: string }) {
   return (
@@ -54,6 +63,8 @@ export function FisherfolkGroupTile({
   registrationType,
 }: FisherfolkGroupTileProps) {
   const headline = activeFisherfolk + newFisherfolk + renewedFisherfolk;
+  // Display-only: all this-year registrations (active + new) are shown as NEW.
+  const displayedNewFisherfolk = activeFisherfolk + newFisherfolk;
 
   const { data: categoryBreakdown, isLoading: catLoading } =
     trpc.dashboard.getFisherfolkCategoryBreakdown.useQuery({
@@ -71,16 +82,16 @@ export function FisherfolkGroupTile({
         {statsLoading ? (
           <Shimmer className="h-8 w-20" />
         ) : (
-          <p className="text-3xl font-bold leading-none text-foreground">
-            {headline.toLocaleString()}
-          </p>
-        )}
-        {/* NEW · RENEWED fraction from getStats */}
-        {!statsLoading && (
-          <p className="text-xs text-muted-foreground">
-            {newFisherfolk.toLocaleString()} NEW &middot;{" "}
-            {renewedFisherfolk.toLocaleString()} RENEWED
-          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-3xl font-bold leading-none text-foreground">
+              {headline.toLocaleString()}
+            </p>
+            {/* NEW · RENEWED fraction from getStats */}
+            <p className="text-xs text-muted-foreground">
+              {displayedNewFisherfolk.toLocaleString()} NEW &middot;{" "}
+              {renewedFisherfolk.toLocaleString()} RENEWED
+            </p>
+          </div>
         )}
         {/* vs last year — PLACEHOLDER only, never fabricated */}
         {!statsLoading && (
@@ -123,11 +134,16 @@ export function FisherfolkGroupTile({
                 tick={{ fontSize: 9 }}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
-              <Bar
-                dataKey="count"
-                fill="var(--color-count)"
-                radius={[3, 3, 0, 0]}
-              >
+              <Bar dataKey="count" radius={[3, 3, 0, 0]}>
+                {(categoryBreakdown ?? []).map((row, i) => (
+                  <Cell
+                    key={row.category}
+                    fill={
+                      FISHERFOLK_COLORS[i % FISHERFOLK_COLORS.length] ??
+                      "hsl(var(--chart-1))"
+                    }
+                  />
+                ))}
                 <LabelList
                   dataKey="count"
                   position="top"
