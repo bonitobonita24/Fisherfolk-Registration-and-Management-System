@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, CreditCard } from "lucide-react";
+import { prisma } from "@frms/db";
 
+import { auth } from "@/server/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeSettings } from "./theme-settings";
 import { BarangayAliases } from "./barangay-aliases";
+import { AnnualResetCard } from "./annual-reset-card";
 
 export default async function SettingsPage({
   params,
@@ -11,6 +14,16 @@ export default async function SettingsPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant } = await params;
+  const session = await auth();
+  const role = session?.user?.role;
+  const isAdmin = role === "super_admin" || role === "admin";
+
+  const tenantRecord = isAdmin
+    ? await prisma.tenant.findUnique({
+        where: { slug: tenant },
+        select: { currentRegistrationYear: true },
+      })
+    : null;
 
   return (
     <div className="space-y-6">
@@ -44,6 +57,11 @@ export default async function SettingsPage({
 
       <ThemeSettings />
       <BarangayAliases />
+
+      {/* Administrative Actions — danger zone, admin-only, placed last */}
+      {isAdmin && tenantRecord ? (
+        <AnnualResetCard currentYear={tenantRecord.currentRegistrationYear} />
+      ) : null}
     </div>
   );
 }
