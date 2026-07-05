@@ -177,6 +177,18 @@ export function BarangayDensityMap() {
     // Intentionally init once; theme swaps are handled via setStyle below.
   }, [mounted]);
 
+  // Keep the map sized to its (now flex-filled) container — the card stretches
+  // to match the right-column tile stack, so height is not a fixed value.
+  useEffect(() => {
+    if (!mapReady) return;
+    const el = containerRef.current;
+    const map = mapRef.current;
+    if (el == null || map == null) return;
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mapReady]);
+
   // ── Theme swap ───────────────────────────────────────────────────────────
   const prevThemeRef = useRef(resolvedTheme);
   useEffect(() => {
@@ -484,7 +496,7 @@ export function BarangayDensityMap() {
   }
 
   return (
-    <Card>
+    <Card className="flex h-full flex-col">
       <CardHeader>
         <CardTitle className="text-base">Fisherfolk Density Map</CardTitle>
         <CardDescription>
@@ -500,8 +512,8 @@ export function BarangayDensityMap() {
           )}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="relative h-[36rem] w-full overflow-hidden rounded-md border">
+      <CardContent className="flex-1 lg:min-h-0">
+        <div className="relative h-[36rem] w-full overflow-hidden rounded-md border lg:h-full lg:min-h-[28rem]">
           <div ref={containerRef} className="h-full w-full" />
 
           {/* ── Floating controls ─────────────────────────────────────── */}
