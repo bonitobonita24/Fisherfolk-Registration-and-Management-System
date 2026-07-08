@@ -170,10 +170,16 @@ afterAll(async () => {
     where: { tenantId: testTenantId },
     data: { householdId: null },
   });
+  await platformPrisma.vessel.deleteMany({
+    where: { tenantId: testTenantId },
+  });
   await platformPrisma.household.deleteMany({
     where: { tenantId: testTenantId },
   });
   await platformPrisma.fisherfolk.deleteMany({
+    where: { tenantId: testTenantId },
+  });
+  await platformPrisma.category.deleteMany({
     where: { tenantId: testTenantId },
   });
   await platformPrisma.user.deleteMany({ where: { tenantId: testTenantId } });
@@ -275,6 +281,230 @@ describe.skipIf(!hasDb)(
       await expect(
         ayudaCaller(testTenantId).addBeneficiary({ programId, householdId }),
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+  },
+);
+
+// ─── Multi-filter facet search (M1) ────────────────────────────────────────────
+
+describe.skipIf(!hasDb)(
+  "ayuda.filterFacetOptions + ayuda.searchEligibleBeneficiaries",
+  () => {
+    function ageDob(age: number): Date {
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - age);
+      return d;
+    }
+
+    // Each call uses a unique tag so barangay/vesselType/category values never
+    // collide with other tests sharing the same tenant (no per-test teardown).
+    let trioSeq = 0;
+    async function seedFisherfolkTrio(tenantId: string) {
+      trioSeq += 1;
+      const tag = `${RUN}-${trioSeq}`;
+      const barangayA = `Bara-${tag}`;
+      const barangayB = `Barb-${tag}`;
+      const vesselType = `Motorized-${tag}`;
+
+      const catA = await platformPrisma.category.create({
+        data: {
+          tenantId,
+          name: `CatA-${tag}`,
+          slug: `cat-a-${tag}`,
+          displayColor: "#123456",
+          status: "ACTIVE",
+        },
+      });
+
+      const f1 = await makeFisherfolk(tenantId, {
+        barangay: barangayA,
+        categoryIds: [catA.id],
+        status: "NEW",
+        dateOfBirth: ageDob(30),
+      });
+      const f2 = await makeFisherfolk(tenantId, {
+        barangay: barangayB,
+        categoryIds: [],
+        status: "RENEWED",
+        dateOfBirth: ageDob(60),
+      });
+      const f3 = await makeFisherfolk(tenantId, {
+        barangay: barangayA,
+        categoryIds: [catA.id],
+        status: "NEW",
+        dateOfBirth: ageDob(20),
+      });
+
+      await platformPrisma.vessel.create({
+        data: {
+          tenantId,
+          mfvrNumber: `MFVR-${tag}`,
+          vesselType,
+          status: "ACTIVE",
+          owners: { connect: { id: f2.id } },
+        },
+      });
+
+      const programId = await makeActiveProgram(tenantId, "FISHERFOLK");
+
+      return { catA, f1, f2, f3, programId, barangayA, barangayB, vesselType };
+    }
+
+    it("filterFacetOptions returns barangays, categories, vesselTypes, statuses", async () => {
+      const { catA, barangayA, barangayB, vesselType } =
+        await seedFisherfolkTrio(testTenantId);
+
+      const facets = await ayudaCaller(testTenantId).filterFacetOptions();
+
+      expect(facets.barangays).toContain(barangayA);
+      expect(facets.barangays).toContain(barangayB);
+      expect(facets.categories.some((c) => c.id === catA.id)).toBe(true);
+      expect(facets.vesselTypes).toContain(vesselType);
+      expect(facets.statuses).toEqual([
+        "NEW",
+        "ACTIVE",
+        "RENEWED",
+        "INACTIVE",
+        "ARCHIVED",
+      ]);
+    });
+
+    it("filters by barangay (multi-value OR within facet)", async () => {
+      const { f1, f3, programId, barangayA } =
+        await seedFisherfolkTrio(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: [barangayA] },
+      });
+
+      expect(result.mode).toBe("FISHERFOLK");
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      const ids = result.rows.map((r) => r.id).sort();
+      expect(ids).toEqual([f1.id, f3.id].sort());
+      expect(result.total).toBe(2);
+    });
+
+    it("ANDs facets across barangay + status + ageMax", async () => {
+      const { f3, programId, barangayA } =
+        await seedFisherfolkTrio(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: [barangayA], statuses: ["NEW"], ageMax: 25 },
+      });
+
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(result.rows.map((r) => r.id)).toEqual([f3.id]);
+    });
+
+    it("filters vessel owner yes/no", async () => {
+      const { f1, f2, f3, programId, barangayA, barangayB } =
+        await seedFisherfolkTrio(testTenantId);
+      // Scope to this trio's barangays — vesselOwner alone has no unique tag
+      // and would otherwise match vessel-owning fisherfolk seeded by other tests.
+      const scope = [barangayA, barangayB];
+
+      const owners = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: scope, vesselOwner: "yes" },
+      });
+      if (owners.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(owners.rows.map((r) => r.id)).toEqual([f2.id]);
+
+      const nonOwners = await ayudaCaller(
+        testTenantId,
+      ).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: scope, vesselOwner: "no" },
+      });
+      if (nonOwners.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(nonOwners.rows.map((r) => r.id).sort()).toEqual(
+        [f1.id, f3.id].sort(),
+      );
+    });
+
+    it("filters vessel type", async () => {
+      const { f2, programId, vesselType } =
+        await seedFisherfolkTrio(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { vesselTypes: [vesselType] },
+      });
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(result.rows.map((r) => r.id)).toEqual([f2.id]);
+    });
+
+    it("filters by category hasSome", async () => {
+      const { catA, f1, f3, programId } = await seedFisherfolkTrio(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { categoryIds: [catA.id] },
+      });
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(result.rows.map((r) => r.id).sort()).toEqual(
+        [f1.id, f3.id].sort(),
+      );
+    });
+
+    it("excludes alreadyEnrolled when onlyEligible", async () => {
+      const { f1, f3, programId, barangayA } =
+        await seedFisherfolkTrio(testTenantId);
+
+      await ayudaCaller(testTenantId).addBeneficiary({
+        programId,
+        fisherfolkId: f1.id,
+      });
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: [barangayA] },
+        onlyEligible: true,
+      });
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(result.rows.map((r) => r.id)).toEqual([f3.id]);
+      expect(result.total).toBe(1);
+    });
+
+    it("returns matchingIds for the whole eligible set", async () => {
+      const { f1, f3, programId, barangayA } =
+        await seedFisherfolkTrio(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { barangays: [barangayA] },
+      });
+      if (result.mode !== "FISHERFOLK") throw new Error("unreachable");
+      expect(result.matchingIds.length).toBe(result.total);
+      expect(result.matchingIds.sort()).toEqual([f1.id, f3.id].sort());
+      expect(result.matchingTruncated).toBe(false);
+    });
+
+    it("household mode filters on head and returns households", async () => {
+      const head = await makeFisherfolk(testTenantId, {
+        barangay: "Bara",
+        status: "NEW",
+      });
+      const { id: householdId } = await householdCaller(testTenantId).create({
+        headId: head.id,
+      });
+      const programId = await makeActiveProgram(testTenantId, "HOUSEHOLD");
+
+      const result = await ayudaCaller(testTenantId).searchEligibleBeneficiaries({
+        programId,
+        filter: { statuses: ["NEW"] },
+      });
+
+      expect(result.mode).toBe("HOUSEHOLD");
+      if (result.mode !== "HOUSEHOLD") throw new Error("unreachable");
+      expect(result.rows.some((r) => r.householdId === householdId)).toBe(
+        true,
+      );
+      const matched = result.rows.find((r) => r.householdId === householdId);
+      expect(matched?.headId).toBe(head.id);
+      expect(result.matchingIds).toContain(householdId);
     });
   },
 );

@@ -1,12 +1,83 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import type { FisherfolkStatus, Prisma } from "@frms/db";
+import {
+  ayudaBeneficiaryFilterSchema,
+  FISHERFOLK_STATUS_VALUES,
+  type AyudaBeneficiaryFilter,
+} from "@frms/shared/schemas";
+
 import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
 } from "../trpc";
+
+// ─── Ayuda beneficiary multi-filter WHERE builder (shared by search + bulk-add) ──
+
+export function buildFisherfolkFilterWhere(
+  filter: AyudaBeneficiaryFilter,
+  tenantId: string,
+  now: Date,
+): Prisma.FisherfolkWhereInput {
+  const where: Prisma.FisherfolkWhereInput = { tenantId };
+
+  if (filter.barangays !== undefined && filter.barangays.length > 0) {
+    where.barangay = { in: filter.barangays };
+  }
+  if (filter.householdIds !== undefined && filter.householdIds.length > 0) {
+    where.householdId = { in: filter.householdIds };
+  }
+  if (filter.categoryIds !== undefined && filter.categoryIds.length > 0) {
+    where.categoryIds = { hasSome: filter.categoryIds };
+  }
+  if (filter.statuses !== undefined && filter.statuses.length > 0) {
+    where.status = { in: filter.statuses as FisherfolkStatus[] };
+  }
+
+  if (filter.ageMin !== undefined || filter.ageMax !== undefined) {
+    const dob: Prisma.DateTimeFilter = {};
+    if (filter.ageMin !== undefined) {
+      const d = new Date(now);
+      d.setFullYear(d.getFullYear() - filter.ageMin);
+      dob.lte = d;
+    }
+    if (filter.ageMax !== undefined) {
+      const d = new Date(now);
+      d.setFullYear(d.getFullYear() - filter.ageMax - 1);
+      d.setDate(d.getDate() + 1);
+      dob.gte = d;
+    }
+    where.dateOfBirth = dob;
+  }
+
+  if (filter.vesselTypes !== undefined && filter.vesselTypes.length > 0) {
+    where.vessels = { some: { vesselType: { in: filter.vesselTypes } } };
+  } else if (filter.vesselOwner === "yes") {
+    where.vessels = { some: {} };
+  } else if (filter.vesselOwner === "no") {
+    where.vessels = { none: {} };
+  }
+
+  return where;
+}
+
+function computeAge(dateOfBirth: Date | null, now: Date): number | null {
+  if (dateOfBirth === null) return null;
+  let age = now.getFullYear() - dateOfBirth.getFullYear();
+  const monthDiff = now.getMonth() - dateOfBirth.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && now.getDate() < dateOfBirth.getDate())
+  ) {
+    age -= 1;
+  }
+  return age;
+}
+
+const MATCHING_IDS_CAP = 5000;
 
 export const ayudaRouter = createTRPCRouter({
   // ── AyudaProgram ────────────────────────────────────────────────────────────
@@ -265,6 +336,179 @@ export const ayudaRouter = createTRPCRouter({
       ]);
 
       return { items, total, page, limit };
+    }),
+
+  filterFacetOptions: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId = ctx.tenantId;
+
+    const [barangayRows, categories, vesselTypeRows] = await Promise.all([
+      ctx.db.fisherfolk.findMany({
+        where: { tenantId },
+        distinct: ["barangay"],
+        select: { barangay: true },
+      }),
+      ctx.db.category.findMany({
+        where: { tenantId, status: "ACTIVE" },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      }),
+      ctx.db.vessel.findMany({
+        where: { tenantId },
+        distinct: ["vesselType"],
+        select: { vesselType: true },
+      }),
+    ]);
+
+    const barangays = barangayRows
+      .map((r) => r.barangay)
+      .filter((b) => b.length > 0)
+      .sort((a, b) => a.localeCompare(b));
+
+    const vesselTypes = vesselTypeRows
+      .map((r) => r.vesselType)
+      .filter((v) => v.length > 0)
+      .sort((a, b) => a.localeCompare(b));
+
+    return {
+      barangays,
+      categories,
+      vesselTypes,
+      statuses: FISHERFOLK_STATUS_VALUES,
+    };
+  }),
+
+  searchEligibleBeneficiaries: protectedProcedure
+    .input(
+      z
+        .object({
+          programId: z.string().cuid(),
+          filter: ayudaBeneficiaryFilterSchema,
+          page: z.number().int().min(1).default(1),
+          limit: z.number().int().min(1).max(200).default(50),
+          onlyEligible: z.boolean().optional(),
+        })
+        .strict(),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+
+      const program = await ctx.db.ayudaProgram.findFirst({
+        where: { id: input.programId, tenantId },
+        select: { id: true, distributionUnit: true },
+      });
+      if (!program) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const now = new Date();
+      const baseWhere = buildFisherfolkFilterWhere(input.filter, tenantId, now);
+      const { page, limit } = input;
+      const skip = (page - 1) * limit;
+      const excludeEnrolled = input.onlyEligible !== false;
+
+      const enrolled = await ctx.db.ayudaBeneficiary.findMany({
+        where: { programId: input.programId, tenantId },
+        select: { fisherfolkId: true },
+      });
+      const enrolledFisherfolkIds = new Set(
+        enrolled.map((b) => b.fisherfolkId),
+      );
+
+      const fisherfolkWhere: Prisma.FisherfolkWhereInput =
+        excludeEnrolled && enrolledFisherfolkIds.size > 0
+          ? { ...baseWhere, id: { notIn: [...enrolledFisherfolkIds] } }
+          : baseWhere;
+
+      if (program.distributionUnit === "HOUSEHOLD") {
+        const householdWhere: Prisma.HouseholdWhereInput = {
+          tenantId,
+          head: { is: fisherfolkWhere },
+        };
+
+        const [rows, total, matchingRows] = await Promise.all([
+          ctx.db.household.findMany({
+            where: householdWhere,
+            skip,
+            take: limit,
+            orderBy: { householdNumber: "asc" },
+            select: {
+              id: true,
+              householdNumber: true,
+              headId: true,
+              barangay: true,
+              head: { select: { fullName: true } },
+              _count: { select: { members: true } },
+            },
+          }),
+          ctx.db.household.count({ where: householdWhere }),
+          ctx.db.household.findMany({
+            where: householdWhere,
+            select: { id: true },
+            take: MATCHING_IDS_CAP + 1,
+          }),
+        ]);
+
+        return {
+          mode: "HOUSEHOLD" as const,
+          rows: rows.map((h) => ({
+            householdId: h.id,
+            householdNumber: h.householdNumber,
+            headId: h.headId,
+            headName: h.head.fullName,
+            barangay: h.barangay,
+            memberCount: h._count.members,
+            alreadyEnrolled: enrolledFisherfolkIds.has(h.headId),
+          })),
+          total,
+          matchingIds: matchingRows.slice(0, MATCHING_IDS_CAP).map((h) => h.id),
+          matchingTruncated: matchingRows.length > MATCHING_IDS_CAP,
+        };
+      }
+
+      const [rows, total, matchingRows] = await Promise.all([
+        ctx.db.fisherfolk.findMany({
+          where: fisherfolkWhere,
+          skip,
+          take: limit,
+          orderBy: { fullName: "asc" },
+          select: {
+            id: true,
+            fullName: true,
+            idNumber: true,
+            barangay: true,
+            status: true,
+            dateOfBirth: true,
+            categoryIds: true,
+            _count: { select: { vessels: true } },
+          },
+        }),
+        ctx.db.fisherfolk.count({ where: fisherfolkWhere }),
+        ctx.db.fisherfolk.findMany({
+          where: fisherfolkWhere,
+          select: { id: true },
+          take: MATCHING_IDS_CAP + 1,
+        }),
+      ]);
+
+      return {
+        mode: "FISHERFOLK" as const,
+        rows: rows.map((f) => ({
+          id: f.id,
+          fullName: f.fullName,
+          idNumber: f.idNumber,
+          barangay: f.barangay,
+          status: f.status,
+          age: computeAge(f.dateOfBirth, now),
+          categoryIds: f.categoryIds,
+          isVesselOwner: f._count.vessels > 0,
+          alreadyEnrolled: excludeEnrolled
+            ? false
+            : enrolledFisherfolkIds.has(f.id),
+        })),
+        total,
+        matchingIds: matchingRows.slice(0, MATCHING_IDS_CAP).map((f) => f.id),
+        matchingTruncated: matchingRows.length > MATCHING_IDS_CAP,
+      };
     }),
 
   addBeneficiary: adminProcedure
