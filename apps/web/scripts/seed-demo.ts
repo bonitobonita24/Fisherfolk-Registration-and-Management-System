@@ -1,8 +1,13 @@
 #!/usr/bin/env tsx
 /**
  * seed-demo.ts — Seed DEMO data for the non-fisherfolk modules (Vessels, Ayuda
- * programs/beneficiaries, Violations) so every screen has realistic content on
- * a fresh staging/production deployment.
+ * programs/beneficiaries, Violations) so every screen has realistic content.
+ *
+ * ⚠ DEV + DEMO ONLY — data-governance policy (owner-set 2026-07-08, see
+ *   docs/DATA_SEEDING_POLICY.md). These are FABRICATED records; they must NEVER
+ *   be seeded into staging or production, which carry the official data with the
+ *   official records only. The hard guard below refuses to run unless
+ *   ALLOW_DEMO_SEED is explicitly set (set it ONLY for local dev or the demo stack).
  *
  * Fisherfolk records are NOT created here — those come from the official
  * masterlist via import-fmo.ts. This script links demo Vessels/Ayuda/Violations
@@ -51,6 +56,26 @@ function loadEnvFile(filePath: string): void {
 }
 loadEnvFile(path.resolve(process.cwd(), "../../.env.dev"));
 loadEnvFile(path.resolve(process.cwd(), "../../.env"));
+
+// ── HARD GUARD — dummy/demo data is for DEV + DEMO ONLY ──────────────────────
+// Data-governance policy (owner-set 2026-07-08 — docs/DATA_SEEDING_POLICY.md):
+// this script fabricates DEMO Vessels/Ayuda/Violations, which must NEVER reach
+// staging or production. Detecting "localhost" is NOT a safe guard here — remote
+// seeding runs over an SSH tunnel that makes a remote DB look local. So demo
+// seeding is OPT-IN: it refuses unless ALLOW_DEMO_SEED is set. Set that flag ONLY
+// when the target DATABASE_URL is local dev or the demo stack.
+if (
+  process.env["ALLOW_DEMO_SEED"] !== "1" &&
+  process.env["ALLOW_DEMO_SEED"] !== "true"
+) {
+  console.error(
+    "❌ REFUSED: seed-demo.ts writes DUMMY/DEMO records (Vessels/Ayuda/Violations).\n" +
+      "   Policy (docs/DATA_SEEDING_POLICY.md): demo data is for LOCAL DEV + the DEMO\n" +
+      "   stack ONLY — NEVER staging or production. Re-run with ALLOW_DEMO_SEED=1 only\n" +
+      "   when the target DB is local dev or the demo stack.",
+  );
+  process.exit(1);
+}
 
 import { PrismaClient } from "@frms/db";
 

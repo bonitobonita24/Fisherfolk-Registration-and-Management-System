@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 #
-# seed-remote.sh — Seed an FRMS environment (staging or production) with the
-# official fisherfolk masterlist plus demo data for the other modules.
+# seed-remote.sh — Seed an FRMS OFFICIAL environment (staging or production) with
+# the official fisherfolk masterlist ONLY.
 #
-#   prod  → real 3,002 official records (from the canonical SQLite masterlist)
-#           + modest demo Vessels / Ayuda / Violations
-#   stage → ANONYMIZED subset of fisherfolk (PII scrambled, no real photos)
-#           + the same demo data
+#   prod  → real official records (from the canonical SQLite masterlist)
+#   stage → ANONYMIZED subset of the official records (PII scrambled, no real photos)
+#
+# DATA-GOVERNANCE POLICY (owner-set 2026-07-08 — see docs/DATA_SEEDING_POLICY.md):
+#   Dummy / demo records (fabricated Vessels / Ayuda / Violations, QA fisherfolk)
+#   belong to LOCAL DEV and the DEMO stack ONLY. Staging and production carry the
+#   OFFICIAL data with the official records — NO fabricated/demo records. This
+#   script therefore seeds fisherfolk from the official masterlist and nothing
+#   else; it never invokes seed-demo.ts. (seed-demo.ts additionally hard-refuses
+#   to run against a non-dev/-demo database.)
 #
 # Fisherfolk text-data only — real photos/signatures are NOT shipped by this
 # script (a separate, optional asset-upload step handles those for production).
@@ -16,13 +22,9 @@
 #
 # Usage:
 #   bash deploy/scripts/seed-remote.sh <stage|prod> [options]
-#     --limit <n>        staging subset size (default 300; ignored for prod)
-#     --vessels <n>      demo vessels (default 80)
-#     --beneficiaries <n> demo ayuda beneficiaries per program (default 40)
-#     --violations <n>   demo violations (default 12)
-#     --no-demo          skip demo Vessels/Ayuda/Violations (fisherfolk only)
-#     --db <path>        path to fisherfolk.sqlite (default: sibling FMO project)
-#     --yes              skip the production confirmation prompt
+#     --limit <n>   staging subset size (default 300; ignored for prod)
+#     --db <path>   path to fisherfolk.sqlite (default: sibling FMO project)
+#     --yes         skip the production confirmation prompt
 #
 # Requires: python3, pnpm, and the target env file (.env.staging / .env.prod)
 # present at repo root with a DATABASE_URL pointing at the remote DB.
@@ -38,20 +40,12 @@ case "$ENV" in
 esac
 
 LIMIT=300
-VESSELS=80
-BENEF=40
-VIOLATIONS=12
-WITH_DEMO=1
 ASSUME_YES=0
 DB_PATH=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --limit) LIMIT="$2"; shift 2 ;;
-    --vessels) VESSELS="$2"; shift 2 ;;
-    --beneficiaries) BENEF="$2"; shift 2 ;;
-    --violations) VIOLATIONS="$2"; shift 2 ;;
-    --no-demo) WITH_DEMO=0; shift ;;
     --db) DB_PATH="$2"; shift 2 ;;
     --yes) ASSUME_YES=1; shift ;;
     *) echo "❌ Unknown option: $1"; exit 1 ;;
@@ -66,9 +60,9 @@ if [ ! -f "$ENV_FILE" ]; then
   exit 1
 fi
 
-# Load the TARGET env into the environment. import-fmo.ts / seed-demo.ts use
-# loadEnvFile() which never overrides an already-set var, so exporting the
-# target env here pins them to the $TARGET database regardless of .env.dev.
+# Load the TARGET env into the environment. import-fmo.ts uses loadEnvFile()
+# which never overrides an already-set var, so exporting the target env here
+# pins it to the $TARGET database regardless of .env.dev.
 set -a
 # shellcheck disable=SC1090
 . "$ENV_FILE"
@@ -80,9 +74,8 @@ if [ -z "${DATABASE_URL:-}" ]; then
 fi
 
 echo "──────────────────────────────────────────────"
-echo "  FRMS seed → $TARGET"
+echo "  FRMS seed → $TARGET  (OFFICIAL records only — no demo/dummy data)"
 echo "  DB host : $(echo "$DATABASE_URL" | sed -E 's#.*@([^/?]+).*#\1#')"
-echo "  Demo    : $([ "$WITH_DEMO" = 1 ] && echo "yes (vessels=$VESSELS, benef=$BENEF, violations=$VIOLATIONS)" || echo "no")"
 [ "$ENV" = "stage" ] && echo "  Mode    : ANONYMIZED subset (limit=$LIMIT)"
 [ "$ENV" = "prod" ]  && echo "  Mode    : REAL official masterlist (all records)"
 echo "──────────────────────────────────────────────"
@@ -112,14 +105,10 @@ else
   DATA_FILE="$EXPORT_JSON"
 fi
 
-# 3. Import fisherfolk + seed demo data --------------------------------------
-echo "▶ [3/3] Importing fisherfolk into $TARGET DB…"
+# 3. Import the official fisherfolk masterlist -------------------------------
+#    NO demo/dummy data is seeded here — Vessels/Ayuda/Violations in staging and
+#    production come from real official sources / real user entry only.
+echo "▶ [3/3] Importing OFFICIAL fisherfolk into $TARGET DB…"
 ( cd apps/web && pnpm exec tsx scripts/import-fmo.ts --data "$DATA_FILE" )
 
-if [ "$WITH_DEMO" = 1 ]; then
-  echo "▶ Seeding demo Vessels / Ayuda / Violations…"
-  ( cd apps/web && pnpm exec tsx scripts/seed-demo.ts \
-      --vessels "$VESSELS" --beneficiaries "$BENEF" --violations "$VIOLATIONS" )
-fi
-
-echo "✅ Seed complete for $TARGET."
+echo "✅ Seed complete for $TARGET (official records only)."
