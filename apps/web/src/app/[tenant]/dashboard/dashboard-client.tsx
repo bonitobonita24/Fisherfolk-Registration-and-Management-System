@@ -97,6 +97,18 @@ const catByBgyConfig = {
   count: { label: "Fisherfolk", color: "hsl(var(--chart-2))" },
 } satisfies ChartConfig;
 
+const vesselTypeConfig = {
+  count: { label: "Vessels", color: "hsl(var(--chart-3))" },
+} satisfies ChartConfig;
+
+const ayudaProgramConfig = {
+  count: { label: "Beneficiaries", color: "hsl(var(--chart-4))" },
+} satisfies ChartConfig;
+
+const violationTypeConfig = {
+  count: { label: "Violations", color: "hsl(var(--chart-5))" },
+} satisfies ChartConfig;
+
 // ── Main client component ─────────────────────────────────────────────────────
 // Wrapped in Suspense because the inner component reads useSearchParams()
 // (year/registration-type filters are now driven by the header — see header.tsx).
@@ -143,6 +155,12 @@ function DashboardClientInner() {
     trpc.dashboard.getAgeGroups.useQuery();
   const { data: catByBgy, isLoading: catByBgyLoading } =
     trpc.dashboard.getCategoryByBarangay.useQuery({ barangay: bgyFilter });
+  const { data: vesselBreakdown, isLoading: vesselLoading } =
+    trpc.dashboard.getVesselCategoryBreakdown.useQuery();
+  const { data: ayudaBreakdown, isLoading: ayudaLoading } =
+    trpc.dashboard.getAyudaProgramBreakdown.useQuery();
+  const { data: violationBreakdown, isLoading: violationLoading } =
+    trpc.dashboard.getViolationBreakdown.useQuery();
 
   // ── Derived data ────────────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
@@ -424,6 +442,187 @@ function DashboardClientInner() {
                           fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
                         />
                       ))}
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── TILE D: Vessels · Ayuda · Violations ─────────────────────────── */}
+      <Card>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm">Vessels · Ayuda · Violations</CardTitle>
+          <CardDescription className="text-xs">
+            Vessels by type, ayuda by program, and violations by status
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {/* Vessels by type */}
+            <div>
+              <p
+                id="vessels-breakdown-heading"
+                className="mb-1 text-xs font-medium text-muted-foreground"
+              >
+                Vessels by type
+              </p>
+              {vesselLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : (vesselBreakdown?.length ?? 0) === 0 ? (
+                <EmptyState message="No vessels yet." />
+              ) : (
+                <ChartContainer
+                  config={vesselTypeConfig}
+                  className="aspect-auto h-[200px] w-full"
+                  role="figure"
+                  aria-labelledby="vessels-breakdown-heading"
+                >
+                  <BarChart
+                    data={vesselBreakdown ?? []}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="vesselType"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      interval={0}
+                      tick={{ fontSize: 9 }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      width={28}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar
+                      dataKey="count"
+                      fill="var(--color-count)"
+                      radius={[3, 3, 0, 0]}
+                    >
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Ayuda by program */}
+            <div>
+              <p
+                id="ayuda-breakdown-heading"
+                className="mb-1 text-xs font-medium text-muted-foreground"
+              >
+                Ayuda by program
+              </p>
+              {ayudaLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : (ayudaBreakdown?.length ?? 0) === 0 ? (
+                <EmptyState message="No ayuda programs yet." />
+              ) : (
+                <ChartContainer
+                  config={ayudaProgramConfig}
+                  className="aspect-auto h-[200px] w-full"
+                  role="figure"
+                  aria-labelledby="ayuda-breakdown-heading"
+                >
+                  <BarChart
+                    data={ayudaBreakdown ?? []}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="program"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      interval={0}
+                      tick={{ fontSize: 9 }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      width={28}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar
+                      dataKey="count"
+                      fill="var(--color-count)"
+                      radius={[3, 3, 0, 0]}
+                    >
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Violations by status */}
+            <div>
+              <p
+                id="violations-breakdown-heading"
+                className="mb-1 text-xs font-medium text-muted-foreground"
+              >
+                Violations by status
+              </p>
+              {violationLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : (violationBreakdown?.length ?? 0) === 0 ? (
+                <EmptyState message="No violations yet." />
+              ) : (
+                <ChartContainer
+                  config={violationTypeConfig}
+                  className="aspect-auto h-[200px] w-full"
+                  role="figure"
+                  aria-labelledby="violations-breakdown-heading"
+                >
+                  <BarChart
+                    data={violationBreakdown ?? []}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="type"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      width={28}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar
+                      dataKey="count"
+                      fill="var(--color-count)"
+                      radius={[3, 3, 0, 0]}
+                    >
                       <LabelList
                         dataKey="count"
                         position="top"

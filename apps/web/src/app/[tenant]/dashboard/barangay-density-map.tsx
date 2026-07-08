@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc/client";
 import {
   CALAPAN_BARANGAY_CENTROIDS,
@@ -41,6 +48,26 @@ const CIRCLE_LAYER_ID = "barangay-density-circles";
 const LABEL_LAYER_ID = "barangay-density-labels";
 
 type DisplayMode = "heatmap" | "marks";
+
+type Dataset = "fisherfolk" | "vessels" | "ayuda" | "violations";
+
+const DATASET_LABELS: Record<Dataset, string> = {
+  fisherfolk: "Fisherfolk",
+  vessels: "Vessels",
+  ayuda: "Ayuda",
+  violations: "Violations",
+};
+
+const DATASET_DESCRIPTIONS: Record<Dataset, string> = {
+  fisherfolk:
+    "Approximated at barangay centers — exact residence coordinates aren't collected, so each point represents the barangay's registered fisherfolk count.",
+  vessels:
+    "Geolocated through the vessel's owners — each vessel is placed at its owner's barangay center and counts once per distinct owner barangay.",
+  ayuda:
+    "Geolocated through the beneficiary — each ayuda beneficiary is placed at their barangay center.",
+  violations:
+    "Geolocated through the linked fisherfolk — each violation is placed at the violator's barangay center. Free-text violations with no linked fisherfolk are excluded.",
+};
 
 interface DensityFeatureProps {
   barangay: string;
@@ -124,26 +151,31 @@ export function BarangayDensityMap() {
   const [mapReady, setMapReady] = useState(false);
   const { resolvedTheme } = useTheme();
 
+  const [dataset, setDataset] = useState<Dataset>("fisherfolk");
   const [showBoundaries, setShowBoundaries] = useState(true);
   const [displayMode, setDisplayMode] = useState<DisplayMode>("heatmap");
-  const [activeCategoryIds, setActiveCategoryIds] = useState<Set<string>>(
+  const [activeSubgroupIds, setActiveSubgroupIds] = useState<Set<string>>(
     new Set(),
   );
   const [allSelected, setAllSelected] = useState(true);
   const [unmatchedBarangays, setUnmatchedBarangays] = useState<string[]>([]);
 
   const { data: density, isLoading: densityLoading } =
-    trpc.dashboard.getBarangayDensity.useQuery();
-  const { data: categories, isLoading: categoriesLoading } =
-    trpc.category.list.useQuery({ status: "ACTIVE" });
+    trpc.dashboard.getBarangayDensity.useQuery({ dataset });
 
   useEffect(() => setMounted(true), []);
 
-  // Default every category to "on" once categories load.
+  // Switching the dataset resets the master toggle back on so the new dataset
+  // starts fully-shown (the subgroup set refills once its density loads below).
   useEffect(() => {
-    if (categories == null) return;
-    setActiveCategoryIds(new Set(categories.map((c) => c.id)));
-  }, [categories]);
+    setAllSelected(true);
+  }, [dataset]);
+
+  // Default every subgroup to "on" once the active dataset's density loads.
+  useEffect(() => {
+    if (density == null) return;
+    setActiveSubgroupIds(new Set(density.subgroups.map((s) => s.id)));
+  }, [density]);
 
   // ── Map init (once) ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -204,54 +236,54 @@ export function BarangayDensityMap() {
     void map.once("styledata", () => setMapReady(true));
   }, [resolvedTheme, mapReady]);
 
-  // ── Derived: per-barangay weight + color from selected categories ──────
-  const categoryColorById = useMemo(() => {
+  // ── Derived: per-barangay weight + color from selected subgroups ───────
+  const subgroupColorById = useMemo(() => {
     const m = new Map<string, string>();
-    for (const c of categories ?? []) m.set(c.id, c.displayColor ?? "#38bdf8");
+    for (const s of density?.subgroups ?? []) m.set(s.id, s.color);
     return m;
-  }, [categories]);
+  }, [density]);
 
   const { weightByBarangay, colorByBarangay } = useMemo(() => {
     const weights = new Map<string, number>();
     const colors = new Map<string, string>();
-    const rows = density ?? [];
+    const rows = density?.barangays ?? [];
     // NOTE: must be gated on `allSelected` alone. Falling back to "show all"
-    // whenever activeCategoryIds is empty (the previous behavior) meant
-    // deliberately switching every category off was indistinguishable from
-    // "nothing chosen yet" and silently re-enabled every category's data —
+    // whenever activeSubgroupIds is empty (the previous behavior) meant
+    // deliberately switching every subgroup off was indistinguishable from
+    // "nothing chosen yet" and silently re-enabled every subgroup's data —
     // the root cause of the heatmap still rendering with everything toggled
     // off.
     const useAll = allSelected;
-    // When exactly one category is active, color marks by that category's
-    // displayColor; otherwise fall back to the default accent.
+    // When exactly one subgroup is active, color marks by that subgroup's
+    // color; otherwise fall back to the default accent.
     const singleColor =
-      !useAll && activeCategoryIds.size === 1
-        ? (categoryColorById.get([...activeCategoryIds][0] ?? "") ??
+      !useAll && activeSubgroupIds.size === 1
+        ? (subgroupColorById.get([...activeSubgroupIds][0] ?? "") ??
           "#38bdf8")
         : null;
 
     for (const row of rows) {
       const weight = useAll
         ? row.total
-        : row.byCategory
-            .filter((bc) => activeCategoryIds.has(bc.categoryId))
+        : row.bySubgroup
+            .filter((bc) => activeSubgroupIds.has(bc.id))
             .reduce((sum, bc) => sum + bc.count, 0);
       if (weight <= 0) continue;
       // Key by the CANONICAL centroid key so it joins to the map (stored
-      // fisherfolk.barangay strings vary in casing / suffix / spelling). Sum in
-      // case two raw spellings resolve to the same barangay.
+      // barangay strings vary in casing / suffix / spelling). Sum in case two
+      // raw spellings resolve to the same barangay.
       const key = resolveCentroidKey(row.barangay);
       weights.set(key, (weights.get(key) ?? 0) + weight);
       colors.set(key, singleColor ?? "#38bdf8");
     }
     return { weightByBarangay: weights, colorByBarangay: colors };
-  }, [density, allSelected, activeCategoryIds, categoryColorById]);
+  }, [density, allSelected, activeSubgroupIds, subgroupColorById]);
 
   // Track barangays present in density data but missing a centroid — surface
   // for data-quality visibility (dev console only, not shown in UI chrome).
   useEffect(() => {
     if (density == null) return;
-    const missing = density
+    const missing = density.barangays
       .map((row) => {
         const key = resolveCentroidKey(row.barangay);
         return CALAPAN_BARANGAY_CENTROIDS[key] == null ? row.barangay : null;
@@ -476,11 +508,11 @@ export function BarangayDensityMap() {
     );
   }, [mapReady, weightByBarangay, colorByBarangay, displayMode]);
 
-  const isLoading = densityLoading || categoriesLoading;
+  const isLoading = densityLoading;
 
-  function toggleCategory(id: string, next: boolean) {
+  function toggleSubgroup(id: string, next: boolean) {
     setAllSelected(false);
-    setActiveCategoryIds((prev) => {
+    setActiveSubgroupIds((prev) => {
       const copy = new Set(prev);
       if (next) copy.add(id);
       else copy.delete(id);
@@ -490,19 +522,25 @@ export function BarangayDensityMap() {
 
   function toggleAll(next: boolean) {
     setAllSelected(next);
-    if (next && categories != null) {
-      setActiveCategoryIds(new Set(categories.map((c) => c.id)));
+    if (next && density != null) {
+      setActiveSubgroupIds(new Set(density.subgroups.map((s) => s.id)));
+    } else if (!next) {
+      // Turning the master toggle OFF must also empty the active set. Leaving
+      // the previously-full set behind (with allSelected=false) made the weight
+      // memo sum every subgroup anyway — so "all toggles off" still rendered the
+      // full heatmap. Clearing here makes "off" mean off.
+      setActiveSubgroupIds(new Set());
     }
   }
 
   return (
     <Card className="flex h-full flex-col">
       <CardHeader>
-        <CardTitle className="text-base">Fisherfolk Density Map</CardTitle>
+        <CardTitle className="text-base">
+          {DATASET_LABELS[dataset]} Density Map
+        </CardTitle>
         <CardDescription>
-          Approximated at barangay centers — exact residence coordinates
-          aren&apos;t collected, so each point represents the barangay&apos;s
-          registered fisherfolk count.
+          {DATASET_DESCRIPTIONS[dataset]}
           {unmatchedBarangays.length > 0 && (
             <span className="mt-1 block text-amber-500">
               {unmatchedBarangays.length} barangay
@@ -519,6 +557,30 @@ export function BarangayDensityMap() {
           {/* ── Floating controls ─────────────────────────────────────── */}
           <div className="absolute left-3 top-3 z-10 w-64 rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur">
             <div className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="bgy-dataset" className="text-xs font-semibold">
+                  Dataset
+                </Label>
+                <Select
+                  value={dataset}
+                  onValueChange={(v) => setDataset(v as Dataset)}
+                >
+                  <SelectTrigger
+                    id="bgy-dataset"
+                    className="h-8 w-full text-xs"
+                    aria-label="Select dataset"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fisherfolk">Fisherfolk</SelectItem>
+                    <SelectItem value="vessels">Vessels</SelectItem>
+                    <SelectItem value="ayuda">Ayuda</SelectItem>
+                    <SelectItem value="violations">Violations</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex items-center justify-between gap-2">
                 <Label htmlFor="bgy-boundaries" className="text-xs">
                   Boundaries
@@ -548,40 +610,38 @@ export function BarangayDensityMap() {
               <div className="border-t pt-2">
                 <div className="mb-1.5 flex items-center justify-between gap-2">
                   <Label htmlFor="bgy-all" className="text-xs font-semibold">
-                    All fisherfolk
+                    All {DATASET_LABELS[dataset]}
                   </Label>
                   <Switch
                     id="bgy-all"
                     checked={allSelected}
                     onCheckedChange={toggleAll}
-                    aria-label="Toggle All fisherfolk"
+                    aria-label={`Toggle All ${DATASET_LABELS[dataset]}`}
                   />
                 </div>
                 <div className="max-h-40 space-y-1 overflow-y-auto pr-1">
-                  {(categories ?? []).map((cat) => {
-                    const isOn = allSelected || activeCategoryIds.has(cat.id);
+                  {(density?.subgroups ?? []).map((sub) => {
+                    const isOn = allSelected || activeSubgroupIds.has(sub.id);
                     return (
                       <div
-                        key={cat.id}
+                        key={sub.id}
                         className="flex items-center justify-between gap-2"
                       >
                         <div className="flex min-w-0 items-center gap-1.5">
                           <span
                             className="size-2.5 shrink-0 rounded-full"
-                            style={{
-                              backgroundColor: cat.displayColor ?? "#38bdf8",
-                            }}
+                            style={{ backgroundColor: sub.color }}
                           />
                           <span className="truncate text-xs text-muted-foreground">
-                            {cat.name}
+                            {sub.name}
                           </span>
                         </div>
                         <Switch
                           checked={isOn}
                           onCheckedChange={(checked) =>
-                            toggleCategory(cat.id, checked)
+                            toggleSubgroup(sub.id, checked)
                           }
-                          aria-label={`Toggle ${cat.name}`}
+                          aria-label={`Toggle ${sub.name}`}
                         />
                       </div>
                     );

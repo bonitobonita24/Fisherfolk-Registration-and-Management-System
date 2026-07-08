@@ -266,46 +266,170 @@ export const dashboardRouter = createTRPCRouter({
       }));
     }),
 
-  // Per-barangay fisherfolk density + activity-category breakdown, for the
-  // dashboard's barangay density map. ACTIVE-only, mirroring
-  // getFisherfolkByBarangay/getCategoryByBarangay for consistency.
-  getBarangayDensity: protectedProcedure.query(async ({ ctx }) => {
-    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-    const tenantId: string = ctx.tenantId;
+  // Per-barangay density + subgroup breakdown, for the dashboard's barangay
+  // density map. Supports four datasets — fisherfolk (ACTIVE, by activity
+  // category), and vessels / ayuda / violations whose geolocation is derived
+  // through the fisherfolk relation (owner / beneficiary / violator barangay).
+  // Returns a uniform { subgroups, barangays } shape the map renders directly.
+  getBarangayDensity: protectedProcedure
+    .input(
+      z
+        .object({
+          dataset: z
+            .enum(["fisherfolk", "vessels", "ayuda", "violations"])
+            .default("fisherfolk"),
+        })
+        .default({ dataset: "fisherfolk" }),
+    )
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId: string = ctx.tenantId;
 
-    const rows = await ctx.db.fisherfolk.findMany({
-      where: { tenantId, status: "ACTIVE" },
-      select: { barangay: true, categoryIds: true },
-    });
+      // Cyclic palette for datasets whose subgroups carry no colour of their own.
+      const PALETTE = [
+        "#38bdf8",
+        "#34d399",
+        "#fbbf24",
+        "#f472b6",
+        "#a78bfa",
+        "#f87171",
+        "#22d3ee",
+        "#a3e635",
+      ];
+      const paletteColor = (i: number): string =>
+        PALETTE[i % PALETTE.length] ?? "#38bdf8";
 
-    const byBarangay = new Map<
-      string,
-      { total: number; byCategory: Map<string, number> }
-    >();
+      // Shared per-barangay aggregator. `total` counts each source record once;
+      // `bySub` breaks it down by subgroup id (a record may still contribute to
+      // multiple subgroups, e.g. a fisherfolk with several categories).
+      type Entry = { total: number; bySub: Map<string, number> };
+      const agg = new Map<string, Entry>();
+      const ensure = (barangay: string): Entry => {
+        let e = agg.get(barangay);
+        if (e == null) {
+          e = { total: 0, bySub: new Map<string, number>() };
+          agg.set(barangay, e);
+        }
+        return e;
+      };
+      const bump = (e: Entry, subId: string): void => {
+        e.bySub.set(subId, (e.bySub.get(subId) ?? 0) + 1);
+      };
 
-    for (const r of rows) {
-      let entry = byBarangay.get(r.barangay);
-      if (entry == null) {
-        entry = { total: 0, byCategory: new Map<string, number>() };
-        byBarangay.set(r.barangay, entry);
-      }
-      entry.total += 1;
-      for (const categoryId of r.categoryIds) {
-        entry.byCategory.set(
-          categoryId,
-          (entry.byCategory.get(categoryId) ?? 0) + 1,
+      let subgroups: { id: string; name: string; color: string }[] = [];
+
+      if (input.dataset === "fisherfolk") {
+        const cats = await ctx.db.category.findMany({
+          where: { tenantId, status: "ACTIVE" },
+          select: { id: true, name: true, displayColor: true },
+          orderBy: { displayOrder: "asc" },
+        });
+        subgroups = cats.map(
+          (c: { id: string; name: string; displayColor: string | null }) => ({
+            id: c.id,
+            name: c.name,
+            color: c.displayColor ?? "#38bdf8",
+          }),
         );
-      }
-    }
 
-    return Array.from(byBarangay.entries()).map(([barangay, entry]) => ({
-      barangay,
-      total: entry.total,
-      byCategory: Array.from(entry.byCategory.entries()).map(
-        ([categoryId, count]) => ({ categoryId, count }),
-      ),
-    }));
-  }),
+        const rows = await ctx.db.fisherfolk.findMany({
+          where: { tenantId, status: "ACTIVE" },
+          select: { barangay: true, categoryIds: true },
+        });
+        for (const r of rows) {
+          const e = ensure(r.barangay);
+          e.total += 1;
+          for (const categoryId of r.categoryIds) bump(e, categoryId);
+        }
+      } else if (input.dataset === "vessels") {
+        const vessels = await ctx.db.vessel.findMany({
+          where: { tenantId },
+          select: {
+            vesselType: true,
+            owners: { select: { barangay: true } },
+          },
+        });
+        const types = new Set<string>();
+        for (const v of vessels) {
+          const barangays = new Set(
+            v.owners
+              .map((o: { barangay: string }) => o.barangay)
+              .filter((b: string) => b != null && b !== ""),
+          );
+          if (barangays.size === 0) continue; // no owner/barangay → skip
+          types.add(v.vesselType);
+          for (const barangay of barangays) {
+            const e = ensure(barangay);
+            e.total += 1;
+            bump(e, v.vesselType);
+          }
+        }
+        subgroups = Array.from(types)
+          .sort()
+          .map((t, i) => ({ id: t, name: t, color: paletteColor(i) }));
+      } else if (input.dataset === "ayuda") {
+        const programs = await ctx.db.ayudaProgram.findMany({
+          where: { tenantId },
+          select: { id: true, title: true },
+          orderBy: { createdAt: "asc" },
+        });
+        subgroups = programs.map(
+          (p: { id: string; title: string }, i: number) => ({
+            id: p.id,
+            name: p.title,
+            color: paletteColor(i),
+          }),
+        );
+
+        const beneficiaries = await ctx.db.ayudaBeneficiary.findMany({
+          where: { tenantId },
+          select: {
+            programId: true,
+            fisherfolk: { select: { barangay: true } },
+          },
+        });
+        for (const b of beneficiaries) {
+          const barangay = b.fisherfolk?.barangay;
+          if (barangay == null || barangay === "") continue;
+          const e = ensure(barangay);
+          e.total += 1;
+          bump(e, b.programId);
+        }
+      } else {
+        // violations — grouped by status (no discrete violation-type field);
+        // only violations linked to a fisherfolk carry a barangay.
+        const violations = await ctx.db.violation.findMany({
+          where: { tenantId, fisherfolkId: { not: null } },
+          select: {
+            status: true,
+            fisherfolk: { select: { barangay: true } },
+          },
+        });
+        const statuses = new Set<string>();
+        for (const v of violations) {
+          const barangay = v.fisherfolk?.barangay;
+          if (barangay == null || barangay === "") continue;
+          statuses.add(v.status);
+          const e = ensure(barangay);
+          e.total += 1;
+          bump(e, v.status);
+        }
+        subgroups = Array.from(statuses)
+          .sort()
+          .map((s, i) => ({ id: s, name: s, color: paletteColor(i) }));
+      }
+
+      const barangays = Array.from(agg.entries()).map(([barangay, e]) => ({
+        barangay,
+        total: e.total,
+        bySubgroup: Array.from(e.bySub.entries()).map(([id, count]) => ({
+          id,
+          count,
+        })),
+      }));
+
+      return { subgroups, barangays };
+    }),
 
   // Admin-only mutation: bulk-reset ACTIVE/RENEWED fisherfolk from prior years
   // to INACTIVE. Idempotent. Called manually by admin; helper path is reusable
@@ -389,4 +513,45 @@ export const dashboardRouter = createTRPCRouter({
         count: g._count._all,
       }));
     }),
+
+  // Per-AyudaProgram beneficiary counts (tenant-scoped). Mirrors
+  // getVesselCategoryBreakdown's style for the dashboard breakdown charts.
+  getAyudaProgramBreakdown: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const programs = await ctx.db.ayudaProgram.findMany({
+      where: { tenantId },
+      select: {
+        title: true,
+        _count: { select: { beneficiaries: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return programs.map(
+      (p: { title: string; _count: { beneficiaries: number } }) => ({
+        program: p.title,
+        count: p._count.beneficiaries,
+      }),
+    );
+  }),
+
+  // Per-status violation counts (tenant-scoped). Violations have no discrete
+  // "type" field, so status is the grouping dimension.
+  getViolationBreakdown: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const groups = await ctx.db.violation.groupBy({
+      by: ["status"],
+      where: { tenantId },
+      _count: { _all: true },
+    });
+
+    return groups.map((g: { status: string; _count: { _all: number } }) => ({
+      type: g.status,
+      count: g._count._all,
+    }));
+  }),
 });
