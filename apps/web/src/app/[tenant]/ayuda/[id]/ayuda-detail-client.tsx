@@ -57,6 +57,13 @@ interface SelectedFisherfolk {
   idNumber: string;
 }
 
+interface SelectedHousehold {
+  id: string;
+  householdNumber: string;
+  headName: string;
+  barangay: string;
+}
+
 function formatDate(value: Date | string | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const date = value instanceof Date ? value : new Date(value);
@@ -80,15 +87,31 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function AddBeneficiaryDialog({ programId }: { programId: string }) {
+function AddBeneficiaryDialog({
+  programId,
+  distributionUnit,
+}: {
+  programId: string;
+  distributionUnit: "FISHERFOLK" | "HOUSEHOLD";
+}) {
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<SelectedFisherfolk | null>(null);
+  const [selectedFisherfolk, setSelectedFisherfolk] =
+    useState<SelectedFisherfolk | null>(null);
+  const [selectedHousehold, setSelectedHousehold] =
+    useState<SelectedHousehold | null>(null);
+
+  const isHouseholdMode = distributionUnit === "HOUSEHOLD";
 
   const fisherfolkListQuery = trpc.fisherfolk.list.useQuery(
     { search, limit: 10 },
-    { enabled: search.trim().length >= 2 },
+    { enabled: !isHouseholdMode && search.trim().length >= 2 },
+  );
+
+  const householdListQuery = trpc.household.list.useQuery(
+    { search, limit: 10 },
+    { enabled: isHouseholdMode && search.trim().length >= 2 },
   );
 
   const add = trpc.ayuda.addBeneficiary.useMutation({
@@ -96,7 +119,8 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
       toast.success("Beneficiary added.");
       setOpen(false);
       setSearch("");
-      setSelected(null);
+      setSelectedFisherfolk(null);
+      setSelectedHousehold(null);
       void utils.ayuda.listBeneficiaries.invalidate({ programId });
       void utils.ayuda.getProgramById.invalidate({ id: programId });
     },
@@ -109,9 +133,24 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
     setOpen(next);
     if (!next) {
       setSearch("");
-      setSelected(null);
+      setSelectedFisherfolk(null);
+      setSelectedHousehold(null);
     }
   }
+
+  function handleAdd() {
+    if (isHouseholdMode) {
+      if (!selectedHousehold) return;
+      add.mutate({ programId, householdId: selectedHousehold.id });
+    } else {
+      if (!selectedFisherfolk) return;
+      add.mutate({ programId, fisherfolkId: selectedFisherfolk.id });
+    }
+  }
+
+  const hasSelection = isHouseholdMode
+    ? selectedHousehold !== null
+    : selectedFisherfolk !== null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -125,20 +164,95 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
         <DialogHeader>
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogDescription>
-            Search for a fisherfolk to enroll in this program.
+            {isHouseholdMode
+              ? "Search for a household to enroll in this program. The household head will be recorded as the beneficiary."
+              : "Search for a fisherfolk to enroll in this program."}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          {selected ? (
+          {isHouseholdMode ? (
+            selectedHousehold ? (
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="gap-1 pr-1">
+                  <span>{selectedHousehold.householdNumber}</span>
+                  <span className="opacity-70">
+                    {selectedHousehold.headName}
+                  </span>
+                  <span className="font-mono text-xs opacity-70">
+                    {selectedHousehold.barangay}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedHousehold(null)}
+                    className="ml-1 rounded hover:bg-muted"
+                    aria-label="Remove household"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              </div>
+            ) : (
+              <>
+                <Input
+                  aria-label="Search households"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search households by number, barangay, or head name…"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Type at least 2 characters to search.
+                </p>
+                {search.trim().length >= 2 && (
+                  <div className="rounded-md border border-border bg-card">
+                    {householdListQuery.isLoading && (
+                      <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Searching…
+                      </div>
+                    )}
+                    {!householdListQuery.isLoading &&
+                      (householdListQuery.data?.items.length ?? 0) === 0 && (
+                        <p className="p-3 text-sm text-muted-foreground">
+                          No households found for &ldquo;{search}&rdquo;.
+                        </p>
+                      )}
+                    {(householdListQuery.data?.items ?? []).map((hh) => (
+                      <button
+                        key={hh.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedHousehold({
+                            id: hh.id,
+                            householdNumber: hh.householdNumber,
+                            headName: hh.head.fullName,
+                            barangay: hh.barangay,
+                          });
+                          setSearch("");
+                        }}
+                        className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted"
+                      >
+                        <span className="font-medium text-foreground">
+                          {hh.householdNumber} — {hh.head.fullName}
+                        </span>
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {hh.barangay}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )
+          ) : selectedFisherfolk ? (
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className="gap-1 pr-1">
-                <span>{selected.fullName}</span>
+                <span>{selectedFisherfolk.fullName}</span>
                 <span className="font-mono text-xs opacity-70">
-                  {selected.idNumber}
+                  {selectedFisherfolk.idNumber}
                 </span>
                 <button
                   type="button"
-                  onClick={() => setSelected(null)}
+                  onClick={() => setSelectedFisherfolk(null)}
                   className="ml-1 rounded hover:bg-muted"
                   aria-label="Remove fisherfolk"
                 >
@@ -149,6 +263,7 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
           ) : (
             <>
               <Input
+                aria-label="Search fisherfolk"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search fisherfolk by name or ID number…"
@@ -175,7 +290,7 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
                       key={ff.id}
                       type="button"
                       onClick={() => {
-                        setSelected({
+                        setSelectedFisherfolk({
                           id: ff.id,
                           fullName: ff.fullName,
                           idNumber: ff.idNumber,
@@ -198,13 +313,7 @@ function AddBeneficiaryDialog({ programId }: { programId: string }) {
           )}
         </div>
         <DialogFooter>
-          <Button
-            onClick={() => {
-              if (!selected) return;
-              add.mutate({ programId, fisherfolkId: selected.id });
-            }}
-            disabled={!selected || add.isPending}
-          >
+          <Button onClick={handleAdd} disabled={!hasSelection || add.isPending}>
             {add.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
@@ -262,6 +371,7 @@ function BeneficiariesTable({
         <TableRow>
           <TableHead>Fisherfolk</TableHead>
           <TableHead>ID Number</TableHead>
+          <TableHead>Household</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Verified By</TableHead>
           <TableHead>Verified At</TableHead>
@@ -280,6 +390,7 @@ function BeneficiariesTable({
               </Link>
             </TableCell>
             <TableCell>{b.fisherfolk?.idNumber ?? "—"}</TableCell>
+            <TableCell>{b.household?.householdNumber ?? "—"}</TableCell>
             <TableCell>
               <StatusBadge status={b.verificationStatus} />
             </TableCell>
@@ -570,7 +681,12 @@ export function AyudaDetailClient({ id, canManage }: Props) {
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle>Beneficiaries</CardTitle>
-            {canAddBeneficiary && <AddBeneficiaryDialog programId={record.id} />}
+            {canAddBeneficiary && (
+              <AddBeneficiaryDialog
+                programId={record.id}
+                distributionUnit={record.distributionUnit}
+              />
+            )}
           </CardHeader>
           <CardContent>
             <BeneficiariesTable programId={record.id} canManage={canManage} />

@@ -22,11 +22,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z
   .object({
     title: z.string().min(1, "Title is required").max(255),
     description: z.string(),
+    distributionUnit: z.enum(["FISHERFOLK", "HOUSEHOLD"]),
   })
   .strict();
 
@@ -48,6 +56,7 @@ export function AyudaFormClient() {
     defaultValues: {
       title: "",
       description: "",
+      distributionUnit: "FISHERFOLK",
     },
   });
 
@@ -69,6 +78,7 @@ export function AyudaFormClient() {
     createMutation.mutate({
       title: values.title.trim(),
       description: trimOpt(values.description),
+      distributionUnit: values.distributionUnit,
     });
   }
 
@@ -115,6 +125,31 @@ export function AyudaFormClient() {
                 <FormDescription>
                   The program starts as a draft. Publish it to begin adding
                   beneficiaries.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="distributionUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Distribution</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select distribution unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="FISHERFOLK">Per fisherfolk</SelectItem>
+                    <SelectItem value="HOUSEHOLD">Per household</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Per household enrolls one member (the household head) on
+                  behalf of the whole household.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

@@ -90,6 +90,9 @@ export const ayudaRouter = createTRPCRouter({
           title: z.string().min(1).max(255),
           description: z.string().optional(),
           filters: z.record(z.unknown()).optional(),
+          distributionUnit: z
+            .enum(["FISHERFOLK", "HOUSEHOLD"])
+            .default("FISHERFOLK"),
         })
         .strict(),
     )
@@ -102,6 +105,7 @@ export const ayudaRouter = createTRPCRouter({
           title: input.title,
           description: input.description,
           filters: input.filters ?? {},
+          distributionUnit: input.distributionUnit,
           createdById: ctx.userId!,
         }),
         select: {
@@ -110,6 +114,7 @@ export const ayudaRouter = createTRPCRouter({
           description: true,
           status: true,
           filters: true,
+          distributionUnit: true,
           beneficiaryCount: true,
           createdAt: true,
         },
@@ -246,8 +251,12 @@ export const ayudaRouter = createTRPCRouter({
             verificationStatus: true,
             verifiedAt: true,
             createdAt: true,
+            householdId: true,
             fisherfolk: {
               select: { id: true, fullName: true, idNumber: true },
+            },
+            household: {
+              select: { id: true, householdNumber: true },
             },
             verifiedBy: { select: { id: true, name: true } },
           },
@@ -263,33 +272,57 @@ export const ayudaRouter = createTRPCRouter({
       z
         .object({
           programId: z.string().cuid(),
-          fisherfolkId: z.string().cuid(),
+          fisherfolkId: z.string().cuid().optional(),
+          householdId: z.string().cuid().optional(),
         })
         .strict(),
     )
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
 
-      const [program, fisherfolk] = await Promise.all([
-        ctx.db.ayudaProgram.findFirst({
-          where: { id: input.programId, tenantId: ctx.tenantId },
-        }),
-        ctx.db.fisherfolk.findFirst({
-          where: { id: input.fisherfolkId, tenantId: ctx.tenantId },
-        }),
-      ]);
-
-      if (!program || !fisherfolk) {
-        throw new TRPCError({ code: "NOT_FOUND" });
-      }
+      const program = await ctx.db.ayudaProgram.findFirst({
+        where: { id: input.programId, tenantId: ctx.tenantId },
+      });
+      if (!program) throw new TRPCError({ code: "NOT_FOUND" });
       if (program.status !== "ACTIVE") {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid input." });
+      }
+
+      let fisherfolkId: string;
+      let householdId: string | undefined;
+
+      if (program.distributionUnit === "HOUSEHOLD") {
+        if (!input.householdId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        const household = await ctx.db.household.findFirst({
+          where: { id: input.householdId, tenantId: ctx.tenantId },
+          select: { id: true, headId: true },
+        });
+        if (!household) throw new TRPCError({ code: "NOT_FOUND" });
+        fisherfolkId = household.headId;
+        householdId = household.id;
+      } else {
+        if (!input.fisherfolkId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        const fisherfolk = await ctx.db.fisherfolk.findFirst({
+          where: { id: input.fisherfolkId, tenantId: ctx.tenantId },
+        });
+        if (!fisherfolk) throw new TRPCError({ code: "NOT_FOUND" });
+        fisherfolkId = input.fisherfolkId;
       }
 
       const existing = await ctx.db.ayudaBeneficiary.findFirst({
         where: {
           programId: input.programId,
-          fisherfolkId: input.fisherfolkId,
+          fisherfolkId,
         },
       });
       if (existing) {
@@ -298,15 +331,17 @@ export const ayudaRouter = createTRPCRouter({
 
       const [record] = await ctx.db.$transaction([
         ctx.db.ayudaBeneficiary.create({
-          data: {
+          data: omitUndefined({
             tenantId: ctx.tenantId,
             programId: input.programId,
-            fisherfolkId: input.fisherfolkId,
-          },
+            fisherfolkId,
+            householdId,
+          }),
           select: {
             id: true,
             verificationStatus: true,
             createdAt: true,
+            householdId: true,
           },
         }),
         ctx.db.ayudaProgram.update({
@@ -324,7 +359,8 @@ export const ayudaRouter = createTRPCRouter({
           entityId: record.id,
           after: {
             programId: input.programId,
-            fisherfolkId: input.fisherfolkId,
+            fisherfolkId,
+            householdId: householdId ?? null,
           } as Record<string, unknown>,
         },
       });
