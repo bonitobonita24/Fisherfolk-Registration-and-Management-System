@@ -76,22 +76,30 @@ async function main() {
 
   console.log(`  ✅ Tenant created: ${tenant.name} (${tenant.slug})`);
 
-  const passwordHash = await bcrypt.hash("ipW+3Km/Wh5DSQYjXVQLM9", 12);
+  // Super-admin identity is environment-driven so staging/prod inject the
+  // universal owner-admin credential at seed time (from a gitignored .env /
+  // the Server-Setups vault) — never committed to git. Local dev falls back
+  // to the documented localhost credential (see CREDENTIALS.md).
+  const superAdminUsername = process.env["SUPERADMIN_USERNAME"] ?? "webmaster@localhost.com";
+  const superAdminEmail = process.env["SUPERADMIN_EMAIL"] ?? superAdminUsername;
+  const superAdminPassword = process.env["SUPERADMIN_PASSWORD"] ?? "C^@F/2#mx5eW";
+  const superAdminName = process.env["SUPERADMIN_NAME"] ?? "System Administrator";
+  const passwordHash = await bcrypt.hash(superAdminPassword, 12);
 
   const webmaster = await prisma.user.upsert({
     where: {
       tenantId_email: {
-        email: "webmaster@frms.local",
+        email: superAdminEmail,
         tenantId: tenant.id,
       },
     },
     update: {},
     create: {
       tenantId: tenant.id,
-      email: "webmaster@frms.local",
-      username: "webmaster",
+      email: superAdminEmail,
+      username: superAdminUsername,
       passwordHash,
-      name: "System Administrator",
+      name: superAdminName,
       role: "super_admin",
       securityVersion: 1,
       status: "ACTIVE",
@@ -135,7 +143,7 @@ async function main() {
   console.log(`  ✅ ${defaultCategories.length} default categories created`);
 
   console.log("\n✅ Seed complete!");
-  console.log("   Login: webmaster@frms.local / [see CREDENTIALS.md]");
+  console.log(`   Login: ${superAdminUsername} / [see CREDENTIALS.md]`);
 }
 
 main()
