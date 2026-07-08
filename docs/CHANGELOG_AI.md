@@ -33,8 +33,19 @@
 - **Key decisions**: kept `MoveMenu` for status changes (no drag-and-drop library added — deferred
   enhancement); Calendar view is hand-built (no calendar dependency added); `sourceEntityType` uses a
   canonical lowercase enum; assignee defaults server-side to the current user when unspecified.
+- **WCAG fix (`5ee77d8`)**: resolved 2 axe findings on `/todo` — (1) dangling Radix Tabs
+  `aria-controls` (view toggle now uses real `<TabsContent>` panels; the All/Assigned filter converted
+  from Tabs to a `role="group"` + `aria-pressed` segmented control); (2) destructive priority/overdue
+  badge contrast (white-on-light-red 2.73:1 → accessible `bg-red-700` white ≈5.9:1 via a shared
+  `URGENT_DESTRUCTIVE_CLASS`, no global theme change).
+- **Google Keep-style cards (`7ecd32c`)**: Kanban tasks restyled as distinct Keep-style note cards
+  (rounded, priority-colored left accent strip, `shadow-sm`→`hover:shadow-md`, roomier column gaps);
+  3 status columns + all behavior preserved. (Owner request mid-build.)
 - **Validation**: typecheck ✅ lint ✅ build ✅; kanbanTask (5) + todo-source (12) tests pass.
-- **Deferred**: full-app Playwright browser QA sweep of the ToDo Kanban/Calendar surfaces (not yet run).
+- **Browser QA (dev :44387)**: `/kanban`→`/todo` redirect; both views render; view toggle + filter;
+  Make-ToDo from a fisherfolk prefills + saves with source link + due date → shows on the record's
+  ToDos section, the board card (due chip + 🔗), and the calendar; **axe WCAG 2.2 AA = 0 violations on
+  both views** (gov hard gate PASS).
 
 ## 2026-07-08 — Household Management feature: full build, 9 tasks (CLAUDE_CODE)
 
