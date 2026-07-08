@@ -474,16 +474,19 @@ model Category {
 }
 
 model KanbanTask {
-  id              String             @id @default(cuid())
-  tenantId        String             @map("tenant_id")
-  assignedToId    String             @map("assigned_to_id")
-  title           String
-  description     String?
-  status          KanbanTaskStatus   @default(TODO)
-  priority        KanbanTaskPriority @default(MEDIUM)
-  sourceCommentId String?            @unique @map("source_comment_id")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
+  id               String             @id @default(cuid())
+  tenantId         String             @map("tenant_id")
+  assignedToId     String             @map("assigned_to_id")
+  title            String
+  description      String?
+  status           KanbanTaskStatus   @default(TODO)
+  priority         KanbanTaskPriority @default(MEDIUM)
+  sourceCommentId  String?            @unique @map("source_comment_id")
+  dueDate          DateTime?          @map("due_date")
+  sourceEntityType String?            @map("source_entity_type")
+  sourceEntityId   String?            @map("source_entity_id")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
 
   tenant        Tenant             @relation(fields: [tenantId], references: [id])
   assignedTo    User               @relation(fields: [assignedToId], references: [id])
@@ -493,6 +496,7 @@ model KanbanTask {
   @@index([tenantId])
   @@index([tenantId, assignedToId])
   @@index([tenantId, status])
+  @@index([tenantId, dueDate])
   @@map("kanban_tasks")
 }
 
