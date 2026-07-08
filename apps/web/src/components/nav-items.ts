@@ -5,7 +5,7 @@ import {
   Ship,
   AlertTriangle,
   FileEdit,
-  KanbanSquare,
+  ListTodo,
   FileText,
   BarChart3,
   Upload,
@@ -106,9 +106,9 @@ export const NAV_GROUPS: NavGroup[] = [
         roles: ["super_admin", "admin", "encoder"],
       },
       {
-        label: "Kanban",
-        icon: KanbanSquare,
-        href: "/kanban",
+        label: "ToDo",
+        icon: ListTodo,
+        href: "/todo",
         roles: ["super_admin", "admin", "encoder"],
       },
       {

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, MoreHorizontal, Plus } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { Loader2, Link2, MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { formatDueDate, isOverdue, sourceEntityLink } from "@/lib/todo-source";
 import {
   Card,
   CardContent,
@@ -40,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
 type KanbanPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
@@ -102,6 +106,48 @@ function priorityBadge(priority: KanbanPriority) {
   }
 }
 
+function DueDateChip({
+  dueDate,
+  status,
+}: {
+  dueDate: Date | string;
+  status: KanbanStatus;
+}) {
+  const overdue = isOverdue(dueDate, status);
+  return (
+    <Badge
+      variant={overdue ? "destructive" : "outline"}
+      className="text-xs font-normal"
+    >
+      {overdue ? "Overdue: " : "Due "}
+      {formatDueDate(dueDate)}
+    </Badge>
+  );
+}
+
+function SourceLink({
+  sourceEntityType,
+  sourceEntityId,
+}: {
+  sourceEntityType: string | null;
+  sourceEntityId: string | null;
+}) {
+  const { tenant } = useParams<{ tenant: string }>();
+  const link = sourceEntityLink(sourceEntityType, sourceEntityId, tenant);
+  if (!link) return null;
+
+  return (
+    <Link
+      href={link.href}
+      onClick={(e) => e.stopPropagation()}
+      className="relative z-10 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+    >
+      <Link2 className="h-3 w-3" aria-hidden="true" />
+      {link.label}
+    </Link>
+  );
+}
+
 function NewTaskDialog() {
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
@@ -110,6 +156,7 @@ function NewTaskDialog() {
   const [priority, setPriority] = useState<KanbanPriority>("MEDIUM");
   const [status, setStatus] = useState<KanbanStatus>("TODO");
   const [assignedToId, setAssignedToId] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
   const usersQuery = trpc.user.list.useQuery(
     { limit: 200 },
@@ -135,6 +182,7 @@ function NewTaskDialog() {
       setPriority("MEDIUM");
       setStatus("TODO");
       setAssignedToId("");
+      setDueDate("");
     }
   }
 
@@ -146,6 +194,7 @@ function NewTaskDialog() {
       description: description.trim() || undefined,
       priority,
       status,
+      dueDate: dueDate ? new Date(dueDate) : undefined,
     });
   }
 
@@ -226,6 +275,16 @@ function NewTaskDialog() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="task-due-date">Due date</Label>
+            <Input
+              id="task-due-date"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
           </div>
 
           <div className="space-y-2">
@@ -322,6 +381,9 @@ function TaskCard({
     description: string | null;
     status: KanbanStatus;
     priority: KanbanPriority;
+    dueDate: Date | string | null;
+    sourceEntityType: string | null;
+    sourceEntityId: string | null;
     createdAt: Date;
     assignedTo: { id: string; name: string | null } | null;
   };
@@ -366,6 +428,17 @@ function TaskCard({
               {task.assignedTo.name}
             </span>
           </p>
+        )}
+        {(task.dueDate !== null || task.sourceEntityType !== null) && (
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {task.dueDate !== null && (
+              <DueDateChip dueDate={task.dueDate} status={task.status} />
+            )}
+            <SourceLink
+              sourceEntityType={task.sourceEntityType}
+              sourceEntityId={task.sourceEntityId}
+            />
+          </div>
         )}
       </CardContent>
     </Card>
@@ -452,6 +525,19 @@ function TaskDetailDialog({
                   <span className="text-muted-foreground">Unassigned</span>
                 )}
               </DetailRow>
+              {task.dueDate !== null && (
+                <DetailRow label="Due date">
+                  <DueDateChip dueDate={task.dueDate} status={task.status} />
+                </DetailRow>
+              )}
+              {task.sourceEntityType !== null && (
+                <DetailRow label="Source">
+                  <SourceLink
+                    sourceEntityType={task.sourceEntityType}
+                    sourceEntityId={task.sourceEntityId}
+                  />
+                </DetailRow>
+              )}
               <DetailRow label="Description">
                 {task.description ? (
                   <span className="whitespace-pre-wrap">{task.description}</span>
@@ -476,11 +562,18 @@ function TaskDetailDialog({
   );
 }
 
-export function KanbanBoardClient({ canManage }: { canManage: boolean }) {
+function KanbanColumns({
+  canManage,
+  assignedToMe,
+}: {
+  canManage: boolean;
+  assignedToMe: boolean;
+}) {
   const utils = trpc.useUtils();
   const { data, isLoading } = trpc.kanbanTask.list.useQuery({
     page: 1,
     limit: 200,
+    assignedToMe: assignedToMe ? true : undefined,
   });
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -503,12 +596,6 @@ export function KanbanBoardClient({ canManage }: { canManage: boolean }) {
 
   return (
     <>
-      {canManage && (
-        <div className="flex justify-end">
-          <NewTaskDialog />
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {COLUMNS.map(({ status, label }) => (
           <div key={status} className="flex flex-col gap-3">
@@ -553,5 +640,48 @@ export function KanbanBoardClient({ canManage }: { canManage: boolean }) {
         }}
       />
     </>
+  );
+}
+
+export function TodoBoardClient({ canManage }: { canManage: boolean }) {
+  const [view, setView] = useState<"kanban" | "calendar">("kanban");
+  const [assignedToMe, setAssignedToMe] = useState(false);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "calendar")}>
+            <TabsList aria-label="ToDo view">
+              <TabsTrigger value="kanban">Kanban</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Tabs
+            value={assignedToMe ? "mine" : "all"}
+            onValueChange={(v) => setAssignedToMe(v === "mine")}
+          >
+            <TabsList aria-label="Task filter">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="mine">Assigned to me</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {canManage && <NewTaskDialog />}
+      </div>
+
+      {view === "kanban" ? (
+        <KanbanColumns canManage={canManage} assignedToMe={assignedToMe} />
+      ) : (
+        <div
+          data-todo-calendar-slot
+          className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground"
+        >
+          Calendar view — coming in the next update.
+        </div>
+      )}
+    </div>
   );
 }
