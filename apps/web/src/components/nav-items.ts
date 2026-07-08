@@ -16,6 +16,7 @@ import {
   UserCog,
   ScrollText,
   HandHeart,
+  Home,
 } from "lucide-react";
 
 export interface NavItem {
@@ -67,6 +68,12 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Fisherfolk",
         icon: Users,
         href: "/fisherfolk",
+        roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"],
+      },
+      {
+        label: "Household",
+        icon: Home,
+        href: "/households",
         roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"],
       },
       {
