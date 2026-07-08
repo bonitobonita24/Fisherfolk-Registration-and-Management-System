@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
 import { FisherfolkActivityTimeline } from "./fisherfolk-activity-timeline";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -408,6 +409,32 @@ export function FisherfolkDetailClient({ id }: Props) {
                       value={record.registrationYear}
                     />
                     <Field label="Remarks" value={record.remarks} />
+                  </div>
+
+                  <Separator />
+
+                  {/* Household membership */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Household
+                    </p>
+                    {record.household ? (
+                      <Link
+                        href={`/${params.tenant}/households/${record.household.id}`}
+                        className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline"
+                      >
+                        {record.household.householdNumber}
+                        <Badge variant="secondary">
+                          {record.household.headId === record.id
+                            ? "Head"
+                            : "Member"}
+                        </Badge>
+                      </Link>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No household
+                      </p>
+                    )}
                   </div>
 
                   <Separator />
