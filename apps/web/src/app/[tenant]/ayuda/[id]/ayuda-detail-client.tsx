@@ -826,11 +826,14 @@ export function AyudaDetailClient({ id, canManage }: Props) {
                   programId={record.id}
                   distributionUnit={record.distributionUnit}
                   canManage={canManage}
-                  onChanged={() =>
+                  onChanged={() => {
                     void utils.ayuda.listBeneficiaries.invalidate({
                       programId: record.id,
-                    })
-                  }
+                    });
+                    void utils.ayuda.getProgramById.invalidate({
+                      id: record.id,
+                    });
+                  }}
                 />
                 <AddBeneficiaryDialog
                   programId={record.id}
