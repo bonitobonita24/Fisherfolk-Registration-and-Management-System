@@ -33,7 +33,8 @@ type ReportType =
   | "voter_eligible"
   | "violations"
   | "vessels"
-  | "family_clusters";
+  | "family_clusters"
+  | "households";
 
 interface ReportFilters {
   barangay?: string;
@@ -58,6 +59,7 @@ const REPORT_LABELS: Record<ReportType, string> = {
   violations: "Violation Report",
   vessels: "Vessel Inventory",
   family_clusters: "Family Clusters",
+  households: "Household Masterlist",
 };
 
 const REPORT_TYPES = Object.keys(REPORT_LABELS) as ReportType[];

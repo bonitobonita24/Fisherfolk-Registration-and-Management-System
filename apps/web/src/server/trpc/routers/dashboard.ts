@@ -554,4 +554,50 @@ export const dashboardRouter = createTRPCRouter({
       count: g._count._all,
     }));
   }),
+
+  // Household counts (tenant-scoped): total, by barangay, and by the head's
+  // activity category. `byCategory` mirrors getDemographics/getCategoryByBarangay's
+  // convention — a household is counted once per category the HEAD belongs to
+  // (not deduplicated across a head's multiple categoryIds), matching how
+  // fisherfolk-by-category stats already treat multi-category members.
+  getHouseholdStats: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const [total, barangayGroups, cats] = await Promise.all([
+      ctx.db.household.count({ where: { tenantId } }),
+      ctx.db.household.groupBy({
+        by: ["barangay"],
+        where: { tenantId },
+        _count: { _all: true },
+        orderBy: { _count: { barangay: "desc" } },
+      }),
+      ctx.db.category.findMany({
+        where: { tenantId },
+        select: { id: true, name: true },
+      }),
+    ]);
+
+    const categoryCounts = await Promise.all(
+      cats.map((c: { id: string; name: string }) =>
+        ctx.db.household.count({
+          where: { tenantId, head: { categoryIds: { has: c.id } } },
+        }),
+      ),
+    );
+
+    return {
+      total,
+      byBarangay: barangayGroups.map(
+        (g: { barangay: string; _count: { _all: number } }) => ({
+          barangay: g.barangay,
+          count: g._count._all,
+        }),
+      ),
+      byCategory: cats.map((c: { id: string; name: string }, i: number) => ({
+        category: c.name,
+        count: categoryCounts[i] ?? 0,
+      })),
+    };
+  }),
 });

@@ -38,6 +38,7 @@ const reportTypeSchema = z.enum([
   "violations",
   "vessels",
   "family_clusters",
+  "households",
 ]);
 
 type ReportType = z.infer<typeof reportTypeSchema>;
@@ -78,6 +79,7 @@ const REPORT_TITLES: Record<ReportType, string> = {
   violations: "Violations Report",
   vessels: "Registered Vessels",
   family_clusters: "Family Clusters",
+  households: "Household Masterlist",
 };
 
 const FISHERFOLK_COLS: Column[] = [
@@ -422,6 +424,58 @@ async function buildReport(
       vesselType: v.vesselType ?? "",
       homeport: v.homeport ?? "",
       status: v.status,
+    }));
+
+    return { title, columns: cols, rows, generatedAt, count: rows.length };
+  }
+
+  // ── households ───────────────────────────────────────────────────────────
+
+  if (type === "households") {
+    const cats = await ctx.db.category.findMany({
+      where: { tenantId },
+      select: { id: true, name: true },
+    });
+    const categoryMap = new Map(cats.map((c) => [c.id, c.name]));
+
+    const householdWhere: Prisma.HouseholdWhereInput = {
+      tenantId,
+      ...(filters.barangay !== undefined ? { barangay: filters.barangay } : {}),
+      ...(filters.categoryId !== undefined
+        ? { head: { categoryIds: { has: filters.categoryId } } }
+        : {}),
+    };
+
+    const households = await ctx.db.household.findMany({
+      where: householdWhere,
+      select: {
+        householdNumber: true,
+        barangay: true,
+        address: true,
+        head: { select: { fullName: true, categoryIds: true } },
+        _count: { select: { members: true } },
+      },
+      orderBy: { householdNumber: "asc" },
+    });
+
+    const cols: Column[] = [
+      { key: "householdNumber", label: "Household Number" },
+      { key: "barangay", label: "Barangay" },
+      { key: "address", label: "Address" },
+      { key: "headName", label: "Head of Household" },
+      { key: "headCategory", label: "Head's Category" },
+      { key: "memberCount", label: "Member Count" },
+    ];
+
+    const rows: Row[] = households.map((h) => ({
+      householdNumber: h.householdNumber,
+      barangay: h.barangay,
+      address: h.address,
+      headName: h.head.fullName,
+      headCategory: h.head.categoryIds
+        .map((id) => categoryMap.get(id) ?? id)
+        .join(", "),
+      memberCount: h._count.members,
     }));
 
     return { title, columns: cols, rows, generatedAt, count: rows.length };

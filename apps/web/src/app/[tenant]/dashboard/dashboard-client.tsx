@@ -109,6 +109,14 @@ const violationTypeConfig = {
   count: { label: "Violations", color: "hsl(var(--chart-5))" },
 } satisfies ChartConfig;
 
+const householdBarangayConfig = {
+  count: { label: "Households", color: "hsl(var(--chart-1))" },
+} satisfies ChartConfig;
+
+const householdCategoryConfig = {
+  count: { label: "Households" },
+} satisfies ChartConfig;
+
 // ── Main client component ─────────────────────────────────────────────────────
 // Wrapped in Suspense because the inner component reads useSearchParams()
 // (year/registration-type filters are now driven by the header — see header.tsx).
@@ -161,6 +169,8 @@ function DashboardClientInner() {
     trpc.dashboard.getAyudaProgramBreakdown.useQuery();
   const { data: violationBreakdown, isLoading: violationLoading } =
     trpc.dashboard.getViolationBreakdown.useQuery();
+  const { data: householdStats, isLoading: householdLoading } =
+    trpc.dashboard.getHouseholdStats.useQuery();
 
   // ── Derived data ────────────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
@@ -178,6 +188,8 @@ function DashboardClientInner() {
       : [];
   const genderTotal = genderData.reduce((sum, d) => sum + d.value, 0);
   const categories = demo?.categories ?? [];
+  const top15HouseholdBarangay = householdStats?.byBarangay.slice(0, 15) ?? [];
+  const householdByCategory = householdStats?.byCategory ?? [];
 
   return (
     <div className="space-y-4">
@@ -623,6 +635,125 @@ function DashboardClientInner() {
                       fill="var(--color-count)"
                       radius={[3, 3, 0, 0]}
                     >
+                      <LabelList
+                        dataKey="count"
+                        position="top"
+                        className="fill-muted-foreground text-xs"
+                      />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── TILE E: Households ───────────────────────────────────────────── */}
+      <Card>
+        <CardHeader className="p-3 pb-2">
+          <CardTitle className="text-sm">Households</CardTitle>
+          <CardDescription className="text-xs">
+            Total registered households, by barangay, and by head&apos;s activity category
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {/* Total households stat */}
+            <div className="flex flex-col justify-center">
+              <p className="mb-1 text-xs font-medium text-muted-foreground">
+                Total Households
+              </p>
+              {householdLoading ? (
+                <Shimmer className="h-[80px] w-full" />
+              ) : (
+                <p className="text-3xl font-bold text-foreground">
+                  {(householdStats?.total ?? 0).toLocaleString()}
+                </p>
+              )}
+            </div>
+            {/* Households by barangay */}
+            <div>
+              <p
+                id="households-barangay-heading"
+                className="mb-1 text-xs font-medium text-muted-foreground"
+              >
+                By barangay (top 15)
+              </p>
+              {householdLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : top15HouseholdBarangay.length === 0 ? (
+                <EmptyState message="No household data yet." />
+              ) : (
+                <ChartContainer
+                  config={householdBarangayConfig}
+                  className="aspect-auto h-[200px] w-full"
+                  role="figure"
+                  aria-labelledby="households-barangay-heading"
+                >
+                  <BarChart
+                    data={top15HouseholdBarangay}
+                    margin={{ top: 4, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="barangay"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={4}
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      interval={0}
+                      tick={{ fontSize: 9 }}
+                    />
+                    <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={[3, 3, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              )}
+            </div>
+            {/* Households by head's activity category */}
+            <div>
+              <p
+                id="households-category-heading"
+                className="mb-1 text-xs font-medium text-muted-foreground"
+              >
+                By head&apos;s category
+              </p>
+              {householdLoading ? (
+                <Shimmer className="h-[200px] w-full" />
+              ) : householdByCategory.length === 0 ? (
+                <EmptyState message="No category data yet." />
+              ) : (
+                <ChartContainer
+                  config={householdCategoryConfig}
+                  className="aspect-auto h-[200px] w-full"
+                  role="figure"
+                  aria-labelledby="households-category-heading"
+                >
+                  <BarChart
+                    data={householdByCategory}
+                    margin={{ top: 12, right: 4, bottom: 4, left: 0 }}
+                  >
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="category"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={6}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <YAxis tickLine={false} axisLine={false} width={28} tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" radius={[3, 3, 0, 0]}>
+                      {householdByCategory.map((row, i) => (
+                        <Cell
+                          key={row.category}
+                          fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length] ?? "hsl(var(--chart-1))"}
+                        />
+                      ))}
                       <LabelList
                         dataKey="count"
                         position="top"
