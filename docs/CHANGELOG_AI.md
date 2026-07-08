@@ -3,6 +3,28 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-09 — M0 full verification sweep + 2 UI fixes (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + general-purpose QA agent)
+**Branch:** feat/household-management
+
+- **Full simulation/verification sweep (GREEN, 0 data mismatches).** Every dashboard tile, chart,
+  analytics visualization, map dataset (fisherfolk/vessels/ayuda/violations), and all 10 report types
+  were cross-checked against DB ground truth (tenant-scoped psql) and against each other. All rendered
+  numbers matched; cross-source consistency holds (fisherfolk 3006, vessels 80, violations 13,
+  households 7, voter-eligible 3000, seniors 649 identical across dashboard/analytics/map/reports).
+  Input→recompute→cleanup verified (create ACTIVE violation → tile+chart 8→9 → delete → 8). 0 console
+  errors. Evidence: test-artifacts/2026-07-09-m0-verification/.
+- **Fix 1 — `/map` dead nav item.** The sidebar "Map" route was an empty stub; the working density map
+  lived only on the Dashboard. Wired the existing self-contained `BarangayDensityMap` client component
+  into `apps/web/src/app/[tenant]/map/page.tsx` (dataset switcher + all 4 datasets now reachable from
+  the Map nav item). Browser-verified.
+- **Fix 2 — analytics Y-axis label clipping.** 4-digit tick labels (Registration Trends, Category
+  Distribution) were clipped by a too-narrow `YAxis width={40}`. Bumped all three affected YAxis to
+  `width={56}` in `analytics-client.tsx`; "3200" now renders fully. Browser-verified. Cosmetic only —
+  data was always correct.
+- typecheck + lint green; dev container rebuilt and both fixes browser-QA'd on :44387.
+
 ## 2026-07-08 — ToDo (Kanban + Calendar) feature: full build, 7 commits (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Sonnet 4.6, spec-executor dispatches)

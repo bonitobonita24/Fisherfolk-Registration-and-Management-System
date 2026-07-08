@@ -133,7 +133,7 @@ export function AnalyticsClient() {
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="year" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={40} />
+                <YAxis tickLine={false} axisLine={false} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   type="monotone"
@@ -171,7 +171,7 @@ export function AnalyticsClient() {
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="bucket" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={40} />
+                <YAxis tickLine={false} axisLine={false} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar
@@ -392,7 +392,7 @@ export function AnalyticsClient() {
                   textAnchor="end"
                   interval={0}
                 />
-                <YAxis tickLine={false} axisLine={false} width={40} />
+                <YAxis tickLine={false} axisLine={false} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="count"
