@@ -44,9 +44,10 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TodoCalendar } from "./todo-calendar";
 
-type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
-type KanbanPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
+export type KanbanPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 const COLUMNS: { status: KanbanStatus; label: string }[] = [
   { status: "TODO", label: "To Do" },
@@ -473,7 +474,7 @@ function DetailRow({
   );
 }
 
-function TaskDetailDialog({
+export function TaskDetailDialog({
   taskId,
   open,
   onOpenChange,
@@ -675,12 +676,7 @@ export function TodoBoardClient({ canManage }: { canManage: boolean }) {
       {view === "kanban" ? (
         <KanbanColumns canManage={canManage} assignedToMe={assignedToMe} />
       ) : (
-        <div
-          data-todo-calendar-slot
-          className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground"
-        >
-          Calendar view — coming in the next update.
-        </div>
+        <TodoCalendar assignedToMe={assignedToMe} />
       )}
     </div>
   );
