@@ -73,6 +73,19 @@ const PRIORITY_OPTIONS: { value: KanbanPriority; label: string }[] = [
   { value: "URGENT", label: "Urgent" },
 ];
 
+/**
+ * Left accent-strip color per priority (Google Keep-style note card cue).
+ * Border-only decoration — never conveys the sole meaning (the priority
+ * badge text is always present alongside it), so this does not depend on
+ * text-contrast ratios.
+ */
+const PRIORITY_ACCENT_CLASS: Record<KanbanPriority, string> = {
+  LOW: "border-l-muted-foreground/30",
+  MEDIUM: "border-l-primary",
+  HIGH: "border-l-orange-500",
+  URGENT: "border-l-red-700 dark:border-l-red-700",
+};
+
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleString("en-PH", {
     dateStyle: "medium",
@@ -400,9 +413,9 @@ function TaskCard({
 }) {
   return (
     <Card
-      className="relative shadow-sm cursor-pointer transition-colors hover:bg-accent"
+      className={`relative rounded-xl border border-border/80 border-l-4 ${PRIORITY_ACCENT_CLASS[task.priority]} bg-card shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md`}
     >
-      <CardHeader className="pb-2 pt-3 px-3">
+      <CardHeader className="pb-1.5 pt-3 px-3.5">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-sm font-medium leading-snug">
             <button
@@ -413,7 +426,7 @@ function TaskCard({
               {task.title}
             </button>
           </CardTitle>
-          <div className="relative z-10 flex items-center gap-1">
+          <div className="relative z-10 flex items-center gap-1 shrink-0">
             {priorityBadge(task.priority)}
             {canManage && (
               <MoveMenu task={task} onMove={onMove} disabled={isMoving} />
@@ -421,22 +434,14 @@ function TaskCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-3 pb-3 space-y-1">
+      <CardContent className="px-3.5 pb-3.5 space-y-2">
         {task.description && (
           <p className="text-xs text-muted-foreground line-clamp-2">
             {task.description}
           </p>
         )}
-        {task.assignedTo?.name && (
-          <p className="text-xs text-muted-foreground">
-            Assignee:{" "}
-            <span className="font-medium text-foreground">
-              {task.assignedTo.name}
-            </span>
-          </p>
-        )}
         {(task.dueDate !== null || task.sourceEntityType !== null) && (
-          <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className="flex flex-wrap items-center gap-2">
             {task.dueDate !== null && (
               <DueDateChip dueDate={task.dueDate} status={task.status} />
             )}
@@ -445,6 +450,14 @@ function TaskCard({
               sourceEntityId={task.sourceEntityId}
             />
           </div>
+        )}
+        {task.assignedTo?.name && (
+          <p className="flex items-center justify-between gap-2 border-t border-border/60 pt-2 text-xs text-muted-foreground">
+            <span>Assignee</span>
+            <span className="font-medium text-foreground">
+              {task.assignedTo.name}
+            </span>
+          </p>
         )}
       </CardContent>
     </Card>
@@ -614,7 +627,7 @@ function KanbanColumns({
               )}
             </div>
 
-            <div className="rounded-lg bg-muted/40 p-2 space-y-2 min-h-[120px]">
+            <div className="rounded-lg bg-muted/40 p-2.5 space-y-3 min-h-[120px]">
               {isLoading ? (
                 <ColumnSkeleton />
               ) : itemsByStatus(status).length === 0 ? (
