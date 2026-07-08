@@ -56,3 +56,30 @@ export const ayudaUploadUpdateSchema = z.object({
   originalFilename: z.string().min(1).optional(),
   fileSize: z.number().int().nonnegative().optional(),
 });
+
+export const FISHERFOLK_STATUS_VALUES = [
+  "NEW",
+  "ACTIVE",
+  "RENEWED",
+  "INACTIVE",
+  "ARCHIVED",
+] as const;
+
+export const ayudaBeneficiaryFilterSchema = z
+  .object({
+    barangays: z.array(z.string().min(1)).optional(),
+    householdIds: z.array(z.string().cuid()).optional(),
+    categoryIds: z.array(z.string()).optional(),
+    ageMin: z.number().int().min(0).max(150).optional(),
+    ageMax: z.number().int().min(0).max(150).optional(),
+    statuses: z.array(z.enum(FISHERFOLK_STATUS_VALUES)).optional(),
+    vesselOwner: z.enum(["yes", "no"]).optional(),
+    vesselTypes: z.array(z.string().min(1)).optional(),
+  })
+  .strict()
+  .refine(
+    (f) => f.ageMin === undefined || f.ageMax === undefined || f.ageMin <= f.ageMax,
+    { message: "ageMin must be ≤ ageMax", path: ["ageMin"] },
+  );
+
+export type AyudaBeneficiaryFilter = z.infer<typeof ayudaBeneficiaryFilterSchema>;
