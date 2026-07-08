@@ -508,3 +508,117 @@ describe.skipIf(!hasDb)(
     });
   },
 );
+
+// ─── Bulk add / bulk remove mutations (M1) ─────────────────────────────────────
+
+describe.skipIf(!hasDb)(
+  "ayuda.addBeneficiaries + ayuda.removeBeneficiaries",
+  () => {
+    it("addBeneficiaries bulk-adds and skips duplicates", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const f1 = await makeFisherfolk(testTenantId);
+      const f2 = await makeFisherfolk(testTenantId);
+      const f3 = await makeFisherfolk(testTenantId);
+      const f4 = await makeFisherfolk(testTenantId);
+
+      const first = await ayudaCaller(testTenantId).addBeneficiaries({
+        programId,
+        fisherfolkIds: [f1.id, f2.id, f3.id],
+      });
+      expect(first).toEqual({ added: 3, skipped: 0 });
+
+      const programAfterFirst = await platformPrisma.ayudaProgram.findUnique({
+        where: { id: programId },
+      });
+      expect(programAfterFirst!.beneficiaryCount).toBe(3);
+
+      const second = await ayudaCaller(testTenantId).addBeneficiaries({
+        programId,
+        fisherfolkIds: [f1.id, f4.id],
+      });
+      expect(second).toEqual({ added: 1, skipped: 1 });
+
+      const programAfterSecond = await platformPrisma.ayudaProgram.findUnique({
+        where: { id: programId },
+      });
+      expect(programAfterSecond!.beneficiaryCount).toBe(4);
+    });
+
+    it("addBeneficiaries rejects non-ACTIVE program", async () => {
+      const program = await ayudaCaller(testTenantId).createProgram({
+        title: `Draft Bulk Program ${RUN}-${Math.random()}`,
+      });
+      const f1 = await makeFisherfolk(testTenantId);
+
+      await expect(
+        ayudaCaller(testTenantId).addBeneficiaries({
+          programId: program.id,
+          fisherfolkIds: [f1.id],
+        }),
+      ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+
+    it("addBeneficiaries HOUSEHOLD mode records head", async () => {
+      const programId = await makeActiveProgram(testTenantId, "HOUSEHOLD");
+      const { householdId, headId } = await makeHousehold(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).addBeneficiaries({
+        programId,
+        householdIds: [householdId],
+      });
+      expect(result).toEqual({ added: 1, skipped: 0 });
+
+      const stored = await platformPrisma.ayudaBeneficiary.findFirst({
+        where: { programId, fisherfolkId: headId },
+      });
+      expect(stored).not.toBeNull();
+      expect(stored!.householdId).toBe(householdId);
+    });
+
+    it("removeBeneficiaries deletes PENDING, decrements count, skips RECEIVED", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const f1 = await makeFisherfolk(testTenantId);
+      const f2 = await makeFisherfolk(testTenantId);
+
+      const b1 = await ayudaCaller(testTenantId).addBeneficiary({
+        programId,
+        fisherfolkId: f1.id,
+      });
+      const b2 = await ayudaCaller(testTenantId).addBeneficiary({
+        programId,
+        fisherfolkId: f2.id,
+      });
+
+      await ayudaCaller(testTenantId).verifyBeneficiary({
+        id: b1.id,
+        verificationStatus: "RECEIVED",
+      });
+
+      const before = await platformPrisma.ayudaProgram.findUnique({
+        where: { id: programId },
+      });
+      expect(before!.beneficiaryCount).toBe(2);
+
+      const result = await ayudaCaller(testTenantId).removeBeneficiaries({
+        programId,
+        beneficiaryIds: [b1.id, b2.id],
+      });
+      expect(result).toEqual({ removed: 1, skipped: 1 });
+
+      const after = await platformPrisma.ayudaProgram.findUnique({
+        where: { id: programId },
+      });
+      expect(after!.beneficiaryCount).toBe(1);
+
+      const receivedStillThere = await platformPrisma.ayudaBeneficiary.findUnique(
+        { where: { id: b1.id } },
+      );
+      expect(receivedStillThere).not.toBeNull();
+
+      const pendingRemoved = await platformPrisma.ayudaBeneficiary.findUnique({
+        where: { id: b2.id },
+      });
+      expect(pendingRemoved).toBeNull();
+    });
+  },
+);

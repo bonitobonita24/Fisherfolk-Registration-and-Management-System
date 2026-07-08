@@ -612,6 +612,182 @@ export const ayudaRouter = createTRPCRouter({
       return record;
     }),
 
+  addBeneficiaries: adminProcedure
+    .input(
+      z
+        .object({
+          programId: z.string().cuid(),
+          fisherfolkIds: z.array(z.string().cuid()).max(5000).optional(),
+          householdIds: z.array(z.string().cuid()).max(5000).optional(),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+
+      const program = await ctx.db.ayudaProgram.findFirst({
+        where: { id: input.programId, tenantId },
+        select: { id: true, distributionUnit: true, status: true },
+      });
+      if (!program) throw new TRPCError({ code: "NOT_FOUND" });
+      if (program.status !== "ACTIVE") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid input." });
+      }
+
+      let targetIds: string[];
+      let householdByHead: Map<string, string> | undefined;
+
+      if (program.distributionUnit === "HOUSEHOLD") {
+        if (input.fisherfolkIds !== undefined || input.householdIds === undefined) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        const households = await ctx.db.household.findMany({
+          where: { id: { in: input.householdIds }, tenantId },
+          select: { id: true, headId: true },
+        });
+        householdByHead = new Map(households.map((h) => [h.headId, h.id]));
+        targetIds = households.map((h) => h.headId);
+      } else {
+        if (input.householdIds !== undefined || input.fisherfolkIds === undefined) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        targetIds = input.fisherfolkIds;
+      }
+
+      targetIds = [...new Set(targetIds)];
+
+      if (targetIds.length === 0) {
+        return { added: 0, skipped: 0 };
+      }
+
+      const existing = await ctx.db.ayudaBeneficiary.findMany({
+        where: {
+          programId: input.programId,
+          tenantId,
+          fisherfolkId: { in: targetIds },
+        },
+        select: { fisherfolkId: true },
+      });
+      const existingIds = new Set(existing.map((b) => b.fisherfolkId));
+
+      const toInsert = targetIds.filter((id) => !existingIds.has(id));
+
+      if (toInsert.length === 0) {
+        return { added: 0, skipped: targetIds.length };
+      }
+
+      const [result] = await ctx.db.$transaction([
+        ctx.db.ayudaBeneficiary.createMany({
+          data: toInsert.map((fisherfolkId) =>
+            omitUndefined({
+              tenantId,
+              programId: input.programId,
+              fisherfolkId,
+              householdId: householdByHead?.get(fisherfolkId),
+            }),
+          ),
+          skipDuplicates: true,
+        }),
+        ctx.db.ayudaProgram.update({
+          where: { id: input.programId },
+          data: { beneficiaryCount: { increment: toInsert.length } },
+        }),
+      ]);
+
+      const added = result.count;
+      const skipped = targetIds.length - added;
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId,
+          userId: ctx.userId!,
+          action: "CREATE",
+          entityType: "AyudaBeneficiary",
+          entityId: input.programId,
+          after: {
+            programId: input.programId,
+            bulk: true,
+            added,
+            skipped,
+          } as Record<string, unknown>,
+        },
+      });
+
+      return { added, skipped };
+    }),
+
+  removeBeneficiaries: adminProcedure
+    .input(
+      z
+        .object({
+          programId: z.string().cuid(),
+          beneficiaryIds: z.array(z.string().cuid()).max(5000),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      const tenantId = ctx.tenantId;
+
+      const program = await ctx.db.ayudaProgram.findFirst({
+        where: { id: input.programId, tenantId },
+        select: { id: true },
+      });
+      if (!program) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const deletable = await ctx.db.ayudaBeneficiary.findMany({
+        where: {
+          id: { in: input.beneficiaryIds },
+          programId: input.programId,
+          tenantId,
+          verificationStatus: "PENDING",
+        },
+        select: { id: true },
+      });
+      const skipped = input.beneficiaryIds.length - deletable.length;
+
+      if (deletable.length === 0) {
+        return { removed: 0, skipped };
+      }
+
+      const deletableIds = deletable.map((d) => d.id);
+
+      await ctx.db.$transaction([
+        ctx.db.ayudaBeneficiary.deleteMany({
+          where: { id: { in: deletableIds } },
+        }),
+        ctx.db.ayudaProgram.update({
+          where: { id: input.programId },
+          data: { beneficiaryCount: { decrement: deletable.length } },
+        }),
+      ]);
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId,
+          userId: ctx.userId!,
+          action: "DELETE",
+          entityType: "AyudaBeneficiary",
+          entityId: input.programId,
+          before: {
+            programId: input.programId,
+            bulk: true,
+            removed: deletable.length,
+            skipped,
+          } as Record<string, unknown>,
+        },
+      });
+
+      return { removed: deletable.length, skipped };
+    }),
+
   verifyBeneficiary: adminProcedure
     .input(
       z
