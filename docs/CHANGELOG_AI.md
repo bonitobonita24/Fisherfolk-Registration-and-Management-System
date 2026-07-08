@@ -3,6 +3,39 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-08 — ToDo (Kanban + Calendar) feature: full build, 7 commits (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Sonnet 4.6, spec-executor dispatches)
+**Branch:** feat/household-management
+**Spec:** docs/superpowers/specs/2026-07-08-todo-kanban-calendar-design.md
+**Plan:** docs/superpowers/plans/2026-07-08-todo-kanban-calendar.md
+
+- **Schema (`cbe79ed`)**: `KanbanTask` extended (nullable, non-destructive migration) with `dueDate`,
+  `sourceEntityType` (fisherfolk|vessel|violation|ayudaProgram), `sourceEntityId`, and a composite
+  index `[tenantId, dueDate]`. Model/table name unchanged (`KanbanTask`/`kanban_tasks`).
+- **Router (`471002a`)**: `kanbanTask` create/update/list extended — `dueDate` + source-entity link
+  fields; in-tenant source-entity validation on create/update; `list` gains `assignedToMe` /
+  `sourceEntityType` / `sourceEntityId` filters; `create` defaults assignee to the current user when
+  omitted. NEW `user.listAssignable` protectedProcedure so non-admins can pick assignees. 5 kanbanTask
+  + 12 todo-source tests.
+- **Helpers (`deb061e`)**: source-entity link + date/month-grid pure helper functions (no calendar
+  library dependency).
+- **Rename + routing (`e2e07b2`)**: Kanban → ToDo rename across UI copy; route moved
+  `/[tenant]/kanban` → `/[tenant]/todo`; `/kanban` now permanently redirects to `/todo`; board cards
+  show a due-date chip (overdue flagged) + 🔗 source-entity link.
+- **Calendar view (`c5fe255`)**: hand-built month-grid Calendar view (no react-day-picker / calendar
+  lib) + a "No Due Date" list; view toggle (Kanban/Calendar) + "All | Assigned to me" filter.
+- **Reusable components (`07302a4`)**: `<MakeTodoDialog>` + `<LinkedTodos>` components, reused across
+  detail pages.
+- **Detail-page wiring (`11914e2`)**: "Make ToDo" action + `<LinkedTodos>` wired into Fisherfolk,
+  Vessel, Violation, and Ayuda detail pages (prefilled titles per spec; button gated by `canManage` on
+  Violation/Ayuda).
+- **Key decisions**: kept `MoveMenu` for status changes (no drag-and-drop library added — deferred
+  enhancement); Calendar view is hand-built (no calendar dependency added); `sourceEntityType` uses a
+  canonical lowercase enum; assignee defaults server-side to the current user when unspecified.
+- **Validation**: typecheck ✅ lint ✅ build ✅; kanbanTask (5) + todo-source (12) tests pass.
+- **Deferred**: full-app Playwright browser QA sweep of the ToDo Kanban/Calendar surfaces (not yet run).
+
 ## 2026-07-08 — Household Management feature: full build, 9 tasks (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Sonnet 4.6, spec-executor dispatches)

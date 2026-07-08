@@ -4,6 +4,35 @@
 
 ---
 
+## ToDo (Kanban + Calendar) — [HOW] locked implementation decisions
+Decision: The standalone Kanban board is reframed as **ToDo**, a feature with two views (Kanban +
+Calendar) over the SAME underlying `KanbanTask` model/table — no rename at the DB layer.
+Sub-decisions:
+  (a) **Kanban→ToDo rename keeps the DB model**: `KanbanTask` / `kanban_tasks` names are unchanged;
+      only UI copy, nav label, and the route path (`/todo`) changed. Avoids a destructive rename
+      migration for a cosmetic/UX change.
+  (b) **Kept `MoveMenu`, no drag-and-drop library added**: status changes on the Kanban board continue
+      via the existing dropdown MoveMenu. Adding a dnd library (e.g. dnd-kit) is a deferred enhancement,
+      not required for this feature to ship.
+  (c) **Hand-built Calendar view, no calendar dependency**: the month-grid Calendar view is built with
+      plain date/month-grid helper functions; no react-day-picker or other calendar library was added.
+      Matches the framework's OSS-first / minimal-dependency posture (Rule 14).
+  (d) **`sourceEntityType` is a canonical lowercase enum**: `fisherfolk | vessel | violation |
+      ayudaProgram`. The router validates the referenced source entity exists in-tenant on both
+      create and update (rejects cross-tenant or non-existent source links).
+  (e) **Assignee defaults to the current user**: `kanbanTask.create` defaults `assignedToId` to the
+      calling user when the caller omits it; `user.listAssignable` (protectedProcedure) lets any
+      authenticated user — not just admins — pick a different assignee from the tenant's user list.
+  (f) **`/kanban` → `/todo` permanent redirect**: the old route path permanently redirects to the new
+      `/todo` route rather than being removed outright, so any bookmarked/old links keep working.
+Rationale: keeps the change additive and non-destructive (no schema rename, no dependency additions),
+reuses proven UI patterns (MoveMenu) instead of introducing new interaction complexity, and gives every
+record type (Fisherfolk/Vessel/Violation/Ayuda) a consistent "Make ToDo" + linked-todos pattern via
+reusable `<MakeTodoDialog>` / `<LinkedTodos>` components.
+Reference: docs/superpowers/specs/2026-07-08-todo-kanban-calendar-design.md
+Locked: yes — do not re-ask. Branch: feat/household-management (commits cbe79ed, 471002a, deb061e,
+e2e07b2, c5fe255, 07302a4, 11914e2).
+
 ## Household Management — [HOW] locked implementation decisions
 Decision: Household is an explicit `Household` model (head Fisherfolk + members; the head is ALSO
 a member — head-is-member invariant enforced by the router on create/update, never violated).

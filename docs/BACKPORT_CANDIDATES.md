@@ -111,6 +111,43 @@
 
 ---
 
+### L. ToDo (Kanban + Calendar) feature — ⏳ DRAFT — awaiting owner application
+- **Shipped (feat/household-management, `cbe79ed`..`11914e2`, 2026-07-08):** the standalone Kanban
+  board is now **ToDo**, with two views over the same `KanbanTask` data:
+  - **Kanban view** (existing board, status changed via the existing MoveMenu dropdown — no
+    drag-and-drop library added).
+  - **Calendar view** — a hand-built month-grid calendar (no calendar dependency added) plus a
+    "No Due Date" list for tasks lacking a due date.
+  - A view toggle (Kanban/Calendar) and an "All | Assigned to me" filter sit above both views.
+  - Tasks can carry an optional **due date** (shown as a chip on cards; overdue tasks are visually
+    flagged) and an optional **source-entity link** back to the record that spawned them — Fisherfolk,
+    Vessel, Violation, or Ayuda Program (🔗 icon deep-links to that record).
+  - Every Fisherfolk, Vessel, Violation, and Ayuda detail page now has a **"Make ToDo"** action
+    (prefilled title referencing the record) and shows its own **linked ToDos** list. On
+    Violation/Ayuda the action is gated behind the same `canManage` permission as other edit actions.
+  - Any authenticated user (not just admins) can be assigned a ToDo via a new assignable-users picker;
+    if no assignee is chosen, the task defaults to the creator.
+  - Route moved from `/[tenant]/kanban` to `/[tenant]/todo`; the old `/kanban` path permanently
+    redirects to `/todo`.
+- **PRODUCT.md drift:** PRODUCT.md currently describes only a standalone "Kanban" board (task
+  management) with no mention of: the Calendar view, due dates, source-entity linking from other
+  records, or the "Make ToDo" pattern on Fisherfolk/Vessel/Violation/Ayuda.
+- **Proposed back-port:** Add or extend an **Operations / Task Management** section (or the existing
+  Kanban entity description, wherever PRODUCT.md currently documents the Kanban board) describing:
+  (1) the feature is now called **ToDo**, offering a Kanban view and a Calendar (month-grid) view over
+  the same task data; (2) tasks may have an optional due date (shown as an overdue-flagged chip) and an
+  optional link back to a source record (Fisherfolk/Vessel/Violation/Ayuda Program); (3) every
+  Fisherfolk/Vessel/Violation/Ayuda detail page can spawn a ToDo linked to that record and displays its
+  own linked ToDos; (4) any user may be assigned a ToDo (not admin-only), defaulting to the creator.
+  Recommend anchoring this in whichever section currently documents the Kanban board (likely near
+  Core Flows / a dedicated "Task Management (Kanban)" subsection) and, if a Data Entities list exists,
+  extending the `KanbanTask`/Kanban entity description with `dueDate` + `sourceEntityType` +
+  `sourceEntityId`.
+- **Locked decisions reference:** DECISIONS_LOG.md "ToDo (Kanban + Calendar) — [HOW] locked
+  implementation decisions".
+
+---
+
 ## Not a PRODUCT.md item (flagged for awareness, no back-port)
 - **Komodo deploy model:** DECISIONS_LOG "Komodo Deployment Model" still describes the **V27 poll-based
   auto-update**; the framework has since moved to **V32.13 CI → Docker Hub → Komodo-API** push deploy.

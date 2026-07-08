@@ -2,6 +2,35 @@
 
 ## Current State (2026-07-08)
 
+Branch `feat/household-management` — **ToDo (Kanban + Calendar) feature COMPLETE, 7 commits shipped**:
+schema (`cbe79ed`), router+assignable-users (`471002a`), helpers (`deb061e`), Kanban→ToDo rename+routing
+(`e2e07b2`), Calendar month-grid view (`c5fe255`), reusable `<MakeTodoDialog>`/`<LinkedTodos>`
+(`07302a4`), detail-page wiring on Fisherfolk/Vessel/Violation/Ayuda (`11914e2`). typecheck ✅ lint ✅
+build ✅; kanbanTask (5) + todo-source (12) tests pass. Spec:
+`docs/superpowers/specs/2026-07-08-todo-kanban-calendar-design.md`, plan:
+`docs/superpowers/plans/2026-07-08-todo-kanban-calendar.md`. **Not yet done**: full-app Playwright
+browser QA sweep of the `/todo` Kanban/Calendar surfaces; branch not yet merged to `main` (owner-gated
+per HARD HOLD); `docs/PRODUCT.md` back-port drafted in `docs/BACKPORT_CANDIDATES.md` (candidate L)
+awaiting owner application (Rule 1).
+
+### Completed this session (ToDo Kanban+Calendar governance docs, 2026-07-08)
+
+- **`docs/CHANGELOG_AI.md`** (updated) — appended a consolidated entry summarizing all 7 ToDo feature
+  commits, attributed CLAUDE_CODE.
+- **`docs/DECISIONS_LOG.md`** (updated) — appended `ToDo (Kanban + Calendar) — [HOW] locked
+  implementation decisions` section (DB model unchanged on rename, kept MoveMenu, hand-built calendar,
+  lowercase sourceEntityType enum + in-tenant validation, assignee defaults to current user,
+  /kanban→/todo redirect).
+- **`docs/BACKPORT_CANDIDATES.md`** (updated) — appended candidate L (ToDo Kanban+Calendar, DRAFT,
+  awaiting owner application) proposing new PRODUCT.md content under an Operations/Task-Management
+  section (or extending the existing Kanban entity description).
+- **`docs/STATE.md`** (this file) — current-state block updated to reflect the ToDo feature complete
+  on feat/household-management.
+
+---
+
+## Prior State (2026-07-08, superseded above)
+
 Branch `feat/household-management` — **Household Management feature COMPLETE, all 9 tasks shipped**:
 schema (`4b0995e`), router (`6e1da3a`), nav+list (`e83493d`), create wizard (`de6a42a`), detail/edit
 (`fd572d0`), membership badge (`1a3eb7a`), ayuda per-household (`5132016`), dashboard+reports counts
