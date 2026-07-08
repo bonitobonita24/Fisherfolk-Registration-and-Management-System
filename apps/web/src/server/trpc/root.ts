@@ -8,6 +8,7 @@ import { commentRouter } from "./routers/comment";
 import { dashboardRouter } from "./routers/dashboard";
 import { editRequestRouter } from "./routers/editRequest";
 import { fisherfolkRouter } from "./routers/fisherfolk";
+import { householdRouter } from "./routers/household";
 import { idTemplateRouter } from "./routers/idTemplate";
 import { idPrintRouter } from "./routers/idPrint";
 import { kanbanTaskRouter } from "./routers/kanbanTask";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   dashboard: dashboardRouter,
   editRequest: editRequestRouter,
   fisherfolk: fisherfolkRouter,
+  household: householdRouter,
   import: importRouter,
   idTemplate: idTemplateRouter,
   idPrint: idPrintRouter,
