@@ -7,7 +7,12 @@ import { Loader2, Link2, MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
-import { formatDueDate, isOverdue, sourceEntityLink } from "@/lib/todo-source";
+import {
+  formatDueDate,
+  isOverdue,
+  sourceEntityLink,
+  URGENT_DESTRUCTIVE_CLASS,
+} from "@/lib/todo-source";
 import {
   Card,
   CardContent,
@@ -43,7 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TodoCalendar } from "./todo-calendar";
 
 export type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
@@ -100,7 +105,7 @@ function priorityBadge(priority: KanbanPriority) {
       );
     case "URGENT":
       return (
-        <Badge variant="destructive" className="text-xs">
+        <Badge className={`text-xs ${URGENT_DESTRUCTIVE_CLASS}`}>
           Urgent
         </Badge>
       );
@@ -117,8 +122,8 @@ function DueDateChip({
   const overdue = isOverdue(dueDate, status);
   return (
     <Badge
-      variant={overdue ? "destructive" : "outline"}
-      className="text-xs font-normal"
+      variant={overdue ? undefined : "outline"}
+      className={`text-xs font-normal ${overdue ? URGENT_DESTRUCTIVE_CLASS : ""}`}
     >
       {overdue ? "Overdue: " : "Due "}
       {formatDueDate(dueDate)}
@@ -650,34 +655,52 @@ export function TodoBoardClient({ canManage }: { canManage: boolean }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "calendar")}>
+      <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "calendar")}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <TabsList aria-label="ToDo view">
               <TabsTrigger value="kanban">Kanban</TabsTrigger>
               <TabsTrigger value="calendar">Calendar</TabsTrigger>
             </TabsList>
-          </Tabs>
 
-          <Tabs
-            value={assignedToMe ? "mine" : "all"}
-            onValueChange={(v) => setAssignedToMe(v === "mine")}
-          >
-            <TabsList aria-label="Task filter">
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="mine">Assigned to me</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            <div
+              role="group"
+              aria-label="Task filter"
+              className="inline-flex items-center rounded-md border bg-muted p-1"
+            >
+              <Button
+                type="button"
+                variant={!assignedToMe ? "default" : "ghost"}
+                size="sm"
+                aria-pressed={!assignedToMe}
+                onClick={() => setAssignedToMe(false)}
+                className="h-7 px-3 text-xs shadow-none"
+              >
+                All
+              </Button>
+              <Button
+                type="button"
+                variant={assignedToMe ? "default" : "ghost"}
+                size="sm"
+                aria-pressed={assignedToMe}
+                onClick={() => setAssignedToMe(true)}
+                className="h-7 px-3 text-xs shadow-none"
+              >
+                Assigned to me
+              </Button>
+            </div>
+          </div>
+
+          {canManage && <NewTaskDialog />}
         </div>
 
-        {canManage && <NewTaskDialog />}
-      </div>
-
-      {view === "kanban" ? (
-        <KanbanColumns canManage={canManage} assignedToMe={assignedToMe} />
-      ) : (
-        <TodoCalendar assignedToMe={assignedToMe} />
-      )}
+        <TabsContent value="kanban" className="mt-4">
+          <KanbanColumns canManage={canManage} assignedToMe={assignedToMe} />
+        </TabsContent>
+        <TabsContent value="calendar" className="mt-4">
+          <TodoCalendar assignedToMe={assignedToMe} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -9,6 +9,16 @@ export type SourceEntityType =
   | "violation"
   | "ayudaProgram";
 
+/**
+ * WCAG 2.2 AA-safe treatment for "urgent" / "overdue" indicators on the ToDo
+ * surfaces. The default shadcn `destructive` variant (white text on
+ * `--destructive`) measures ~2.73:1 here, below the 4.5:1 text-contrast
+ * requirement. This fixed dark-red background + white text passes in both
+ * light and dark mode without touching the global `--destructive` token.
+ */
+export const URGENT_DESTRUCTIVE_CLASS =
+  "border-transparent bg-red-700 text-white hover:bg-red-700/90 dark:bg-red-700 dark:text-white dark:hover:bg-red-700/90";
+
 export const SOURCE_ENTITY_LABELS: Record<SourceEntityType, string> = {
   fisherfolk: "Fisherfolk",
   vessel: "Vessel",

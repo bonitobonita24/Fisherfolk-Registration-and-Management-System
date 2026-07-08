@@ -10,6 +10,7 @@ import {
   monthMatrix,
   sameDay,
   startOfDay,
+  URGENT_DESTRUCTIVE_CLASS,
   WEEKDAY_LABELS,
 } from "@/lib/todo-source";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -234,7 +235,7 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
                                     }`}
                                     className={`truncate rounded px-1 py-0.5 text-left text-[10px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                                       overdue
-                                        ? "bg-destructive/15 text-destructive"
+                                        ? URGENT_DESTRUCTIVE_CLASS
                                         : "bg-primary/10 text-primary"
                                     }`}
                                   >

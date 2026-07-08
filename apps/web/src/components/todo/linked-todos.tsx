@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { trpc } from "@/lib/trpc/client";
-import { formatDueDate, isOverdue } from "@/lib/todo-source";
+import {
+  formatDueDate,
+  isOverdue,
+  URGENT_DESTRUCTIVE_CLASS,
+} from "@/lib/todo-source";
 import type { SourceEntityType } from "@/lib/todo-source";
 import {
   Card,
@@ -90,8 +94,8 @@ export function LinkedTodos({
                       </Badge>
                       {task.dueDate !== null && (
                         <Badge
-                          variant={overdue ? "destructive" : "outline"}
-                          className="text-xs font-normal"
+                          variant={overdue ? undefined : "outline"}
+                          className={`text-xs font-normal ${overdue ? URGENT_DESTRUCTIVE_CLASS : ""}`}
                         >
                           {overdue ? "Overdue: " : "Due "}
                           {formatDueDate(task.dueDate)}
