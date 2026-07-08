@@ -3,6 +3,36 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-09 — M1 Ayuda beneficiary mass-selection multi-filter (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor workers, plan-first-dispatch)
+**Branch:** feat/household-management (UNPUSHED — HARD HOLD)
+
+Bulk beneficiary enrollment for Ayuda programs by mix-and-match multi-filtering. 7 facets (barangay,
+household, category, age range, registration status, vessel-owner is/isn't, vessel type), AND across
+facets / OR within a facet. Add-all-matching + add-selected + bulk-remove (PENDING only) + existing
+single add/remove preserved. Respects program `distributionUnit` (HOUSEHOLD mode filters on the head,
+records the head — consistent with the household feature).
+
+- `3dca6f6` — shared `ayudaBeneficiaryFilterSchema` + `AyudaBeneficiaryFilter` + `FISHERFOLK_STATUS_VALUES` (`@frms/shared/schemas`).
+- `75b50c7` — `ayuda.filterFacetOptions` + `ayuda.searchEligibleBeneficiaries` (mode-aware, `alreadyEnrolled` exclusion, `matchingIds` cap 5000) + exported `buildFisherfolkFilterWhere` helper + 16 DB-gated tests (also fixed pre-existing test-isolation + teardown FK bugs found in-flight).
+- `3f7552d` — `ayuda.addBeneficiaries` + `ayuda.removeBeneficiaries` bulk mutations + 4 DB-gated tests.
+- `f25c800` — `BulkFilterDialog` multi-facet bulk-add UI (shadcn only, WCAG-labelled controls).
+- `c136ae5` — wired dialog + bulk-remove (per-row checkboxes, RECEIVED disabled, AlertDialog confirm) into program detail.
+- `62f3e32` — fix: dialog `onChanged` also invalidates `getProgramById` so the BENEFICIARIES stat card live-updates after bulk add (caught in browser QA).
+
+**Verification (PM, ground-truth cross-checked):** dev rebuilt :44387; tenant-scoped psql pre-computed
+the expected eligible counts → UI matched EXACTLY: `{barangay:Lazareto}` = **372**, `{vesselOwner:yes}`
+= **61**, default eligible **2,938** (3006−68). Bulk add toast "2 added, 0 skipped"; count decrements
+as added rows leave the eligible set; bulk-remove "N removed, 0 skipped" with RECEIVED disabled; count
+restored to 68. HOUSEHOLD program shows household columns. **0 console errors. axe WCAG 2.2 AA = 0
+violations** on the dialog AND the checkbox-enabled table (gov hard gate PASS). Full `test`/`typecheck`/
+`lint`/`build` green (282 tests). Evidence: `test-artifacts/2026-07-09-m1-ayuda-verification/`.
+
+Spec: `docs/superpowers/specs/2026-07-09-ayuda-mass-selection-multi-filter-design.md`; plan:
+`docs/superpowers/plans/2026-07-09-ayuda-mass-selection-multi-filter.md`. PRODUCT.md back-port drafted
+as candidate M (Rule 1 — owner applies).
+
 ## 2026-07-09 — M0 full verification sweep + 2 UI fixes (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + general-purpose QA agent)

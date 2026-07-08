@@ -228,3 +228,24 @@
     **AyudaBeneficiary** entity to add `householdId (nullable)`.
 - **Recommended section:** primarily **### Fisherfolk Registration** (new Household Management
   subsection) + **### Ayuda Programs** + **## Data Entities**.
+
+---
+
+## Candidate M — Ayuda beneficiary mass-selection multi-filter (2026-07-09, M1)
+
+- **Status:** drafted by CLAUDE_CODE (Full Auto), awaiting owner application (Rule 1 — PRODUCT.md is human-only).
+- **Feature shipped:** branch `feat/household-management`, commits `3dca6f6`→`62f3e32` (UNPUSHED).
+- **Proposed PRODUCT.md additions:**
+  - Under **### Ayuda Programs**, add:
+    > Staff can bulk-enroll beneficiaries via a **Filter & Bulk Add** tool that mix-and-match filters
+    > fisherfolk by any combination of: barangay, household, category, age range, registration status,
+    > vessel-owner (is / isn't), and vessel type (AND across facets, multiple values within a facet).
+    > They can **add all matching** or **add a selected subset** in one action, **bulk-remove** pending
+    > beneficiaries (confirmed/received distributions cannot be bulk-removed), and still add/remove
+    > individuals manually. The filter respects the program's Distribution Unit — in Household mode it
+    > filters on and enrolls the household head. Bulk operations are capped at 5000 targets per action.
+  - No **Data Entities** change required (reuses existing Fisherfolk/Vessel/Household/AyudaBeneficiary
+    fields; no schema migration in M1).
+- **Recommended section:** **### Ayuda Programs**.
+- **Deferred (logged, not built):** persisting a saved/named filter into the existing unused
+  `AyudaProgram.filters` Json field (DECISIONS_LOG M1 (e)).

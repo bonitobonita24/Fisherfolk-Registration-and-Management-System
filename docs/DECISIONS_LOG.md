@@ -659,6 +659,40 @@ Rationale: No prior-year snapshot mechanism exists in the repo. Owner must confi
 strategy before a real % comparison can be surfaced.
 Locked: yes
 
+### Ayuda mass-selection multi-filter (M1, 2026-07-09) — [HOW] locked (CLAUDE_CODE, owner asleep / Full Auto)
+
+#### (a) HOUSEHOLD-mode filter operates on the household HEAD
+Decision: For HOUSEHOLD-`distributionUnit` programs the 7-facet filter matches on the head fisherfolk's
+attributes; the recorded beneficiary is the head. FISHERFOLK mode filters/selects fisherfolk directly.
+Rationale: One code path (filter fisherfolk → project to head in HH mode); consistent with the household
+feature's "household category = head's category" and the existing single-add HOUSEHOLD branch; honours
+`@@unique([programId, fisherfolkId])` collapse on head id.
+Locked: yes
+
+#### (b) Bulk remove deletes PENDING beneficiaries only
+Decision: `removeBeneficiaries` deletes only `verificationStatus === "PENDING"` rows; RECEIVED/CANCELLED
+are skipped (and their checkboxes disabled in the UI).
+Rationale: Never destroy a confirmed distribution record via a bulk action. Destructive-safety.
+Locked: yes
+
+#### (c) Bulk audit-log actions reuse the closed AuditAction enum
+Decision: bulk add logs `action: "CREATE"`, bulk remove `action: "DELETE"`, both with `bulk: true` +
+added/removed/skipped counts in the metadata payload (entityId = programId).
+Rationale: `AuditAction` is a closed Prisma enum; invented `AYUDA_BULK_*` values would fail at the DB
+layer. Metadata preserves the distinguishable bulk trail.
+Locked: yes
+
+#### (d) "Add all matching" capped at 5000 targets
+Decision: `matchingIds`/bulk mutations cap at 5000 with a `matchingTruncated` flag surfaced in the UI.
+Rationale: Bounds a pathological bulk op; FMO dataset (~3006) never approaches it.
+Locked: yes
+
+#### (e) Persisting the filter into AyudaProgram.filters Json — deferred (not this milestone)
+Decision: the existing unused `AyudaProgram.filters` Json field is NOT wired up in M1; saved/named
+filter presets are out of scope.
+Rationale: YAGNI for the mass-select flow; revisit if the owner wants reusable saved filters.
+Locked: no (candidate follow-up)
+
 #### (g) WCAG 2.2 AA hard gate covers all new surfaces (gov/LGU)
 Decision: S6 runs a full axe WCAG 2.2 AA audit on every new surface (year select, registration-type
 filter, group tiles, lower-chart tiles). All violations found in S6 are fixed in-session — none

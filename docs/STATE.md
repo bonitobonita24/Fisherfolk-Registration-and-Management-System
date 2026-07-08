@@ -1,6 +1,19 @@
 # FRMS — Project State
 
-## Current State (2026-07-08)
+## Current State (2026-07-09) — overnight feature batch (Full Auto)
+
+Branch `feat/household-management` (UNPUSHED, HARD HOLD) now also carries the 2026-07-09 batch:
+- **M0** — full verification sweep GREEN + 2 UI fixes (`21db3e3`).
+- **M1 — Ayuda beneficiary mass-selection multi-filter COMPLETE + verified** (`3dca6f6`→`62f3e32`, 6
+  commits + spec + plan). 7-facet mix-and-match bulk enrollment, add-all/add-selected/bulk-remove,
+  distributionUnit-aware. Browser-QA'd on rebuilt dev :44387 with DB-cross-checked counts (Lazareto=372,
+  vessel-owner=61 matched exactly); axe WCAG 2.2 AA = 0 violations; 282 tests + build green. Back-port
+  drafted as candidate M. See CHANGELOG_AI 2026-07-09 M1 entry.
+- **NEXT (queued, reboot per milestone):** M2 Fish Catch activity (BFAR spec ready at
+  `docs/superpowers/specs/2026-07-09-fish-catch-research.md`), M3 fish-catch charts, M4 universal Report
+  hub, M5 showcase updates.
+
+## Prior State (2026-07-08)
 
 Branch `feat/household-management` — **ToDo (Kanban + Calendar) feature COMPLETE, 7 commits shipped**:
 schema (`cbe79ed`), router+assignable-users (`471002a`), helpers (`deb061e`), Kanban→ToDo rename+routing
