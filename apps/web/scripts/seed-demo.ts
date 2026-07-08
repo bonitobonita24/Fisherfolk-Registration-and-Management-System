@@ -176,6 +176,84 @@ async function main(): Promise<void> {
     }
     console.log(`✅  Vessels: ${vesselCreated} ensured (DEMO-MFVR-*).`);
 
+    // ── Households (demo grouping — 1 head + 2-4 members per household) ────────
+    // Only pulls fisherfolk with householdId === null so re-runs never steal
+    // people already assigned to a household (idempotent), and each household
+    // number is checked before creation so re-runs never duplicate a number.
+    const HOUSEHOLDS_TARGET = 6;
+    const existingHouseholdCount = await prisma.household.count({ where: { tenantId } });
+    let householdCreated = 0;
+    const demoHouseholdIds: string[] = [];
+
+    if (existingHouseholdCount < HOUSEHOLDS_TARGET) {
+      const unassigned = await prisma.fisherfolk.findMany({
+        where: { tenantId, householdId: null },
+        select: { id: true, barangay: true, address: true },
+        orderBy: { idNumber: "asc" },
+        take: 200,
+      });
+
+      let cursor = 0;
+      let sequence = existingHouseholdCount + 1;
+      const toCreate = HOUSEHOLDS_TARGET - existingHouseholdCount;
+
+      for (let h = 0; h < toCreate; h++) {
+        const groupSize = randInt(3, 5); // 1 head + 2-4 members
+        if (cursor + groupSize > unassigned.length) break; // not enough left to form a group
+
+        const group = unassigned.slice(cursor, cursor + groupSize);
+        cursor += groupSize;
+        const head = group[0]!;
+        const members = group.slice(1);
+
+        let created: { id: string } | null = null;
+        let attempts = 0;
+        while (attempts < 8 && !created) {
+          const householdNumber = `HH-${String(sequence).padStart(4, "0")}`;
+          const exists = await prisma.household.findUnique({
+            where: { tenantId_householdNumber: { tenantId, householdNumber } },
+            select: { id: true },
+          });
+          if (exists) {
+            sequence++;
+            attempts++;
+            continue;
+          }
+          created = await prisma.$transaction(async (tx) => {
+            const household = await tx.household.create({
+              data: {
+                tenantId,
+                householdNumber,
+                headId: head.id,
+                barangay: head.barangay,
+                address: head.address,
+                notes: "Demonstration household seeded for testing.",
+                createdById: actor.id,
+              },
+              select: { id: true },
+            });
+            await tx.fisherfolk.update({
+              where: { id: head.id },
+              data: { householdId: household.id },
+            });
+            if (members.length > 0) {
+              await tx.fisherfolk.updateMany({
+                where: { id: { in: members.map((m) => m.id) }, tenantId },
+                data: { householdId: household.id },
+              });
+            }
+            return household;
+          });
+          sequence++;
+        }
+        if (created) {
+          demoHouseholdIds.push(created.id);
+          householdCreated++;
+        }
+      }
+    }
+    console.log(`✅  Households: ${householdCreated} created (target ${HOUSEHOLDS_TARGET}, HH-****).`);
+
     // ── Ayuda programs + beneficiaries ──────────────────────────────────────────
     const PROGRAMS = [
       { title: "Fuel Subsidy 2026 (Demo)", status: "ACTIVE" as const },
@@ -234,6 +312,65 @@ async function main(): Promise<void> {
       });
       console.log(`✅  Ayuda "${p.title}": ${total} beneficiaries (${recvTotal} received).`);
     }
+
+    // ── Ayuda: per-household demo program (distributionUnit = HOUSEHOLD) ───────
+    const PER_HOUSEHOLD_TITLE = "Per Household Relief (Demo)";
+    let perHouseholdProgram = await prisma.ayudaProgram.findFirst({
+      where: { tenantId, title: PER_HOUSEHOLD_TITLE },
+    });
+    if (!perHouseholdProgram) {
+      perHouseholdProgram = await prisma.ayudaProgram.create({
+        data: {
+          tenantId,
+          title: PER_HOUSEHOLD_TITLE,
+          description: "Demonstration per-household ayuda program seeded for testing.",
+          filters: {},
+          status: "ACTIVE",
+          distributionUnit: "HOUSEHOLD",
+          createdById: actor.id,
+        },
+      });
+    }
+    const allHouseholds = await prisma.household.findMany({
+      where: { tenantId },
+      select: { id: true, headId: true },
+      take: 50,
+    });
+    let householdBenefCreated = 0;
+    for (const hh of allHouseholds) {
+      const before = await prisma.ayudaBeneficiary.findUnique({
+        where: { programId_fisherfolkId: { programId: perHouseholdProgram.id, fisherfolkId: hh.headId } },
+      });
+      const isReceived = rng() < 0.6;
+      await prisma.ayudaBeneficiary.upsert({
+        where: { programId_fisherfolkId: { programId: perHouseholdProgram.id, fisherfolkId: hh.headId } },
+        update: {},
+        create: {
+          tenantId,
+          programId: perHouseholdProgram.id,
+          fisherfolkId: hh.headId,
+          householdId: hh.id,
+          verificationStatus: isReceived ? "RECEIVED" : "PENDING",
+          ...(isReceived ? { verifiedById: actor.id, verifiedAt: new Date() } : {}),
+        },
+      });
+      if (!before) householdBenefCreated++;
+    }
+    const totalHH = await prisma.ayudaBeneficiary.count({ where: { programId: perHouseholdProgram.id } });
+    const recvHH = await prisma.ayudaBeneficiary.count({
+      where: { programId: perHouseholdProgram.id, verificationStatus: "RECEIVED" },
+    });
+    await prisma.ayudaProgram.update({
+      where: { id: perHouseholdProgram.id },
+      data: {
+        beneficiaryCount: totalHH,
+        verifiedCount: recvHH,
+        notReceivedCount: totalHH - recvHH,
+      },
+    });
+    console.log(
+      `✅  Ayuda "${PER_HOUSEHOLD_TITLE}": ${totalHH} household beneficiaries (${recvHH} received), ${householdBenefCreated} new.`,
+    );
 
     // ── Violations ──────────────────────────────────────────────────────────────
     const existingDemoViolations = await prisma.violation.count({
