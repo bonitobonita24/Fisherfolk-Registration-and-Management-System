@@ -7,6 +7,8 @@ import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
+import { LinkedTodos } from "@/components/todo/linked-todos";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -556,6 +558,13 @@ export function AyudaDetailClient({ id, canManage }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {canManage && (
+            <MakeTodoDialog
+              sourceEntityType="ayudaProgram"
+              sourceEntityId={id}
+              defaultTitle={`Ayuda schedule: ${record.title}`}
+            />
+          )}
           {canManage && record.status === "DRAFT" && (
             <Button
               size="sm"
@@ -693,6 +702,9 @@ export function AyudaDetailClient({ id, canManage }: Props) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Linked ToDos */}
+      <LinkedTodos sourceEntityType="ayudaProgram" sourceEntityId={id} />
     </div>
   );
 }

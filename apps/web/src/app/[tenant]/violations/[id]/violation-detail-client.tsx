@@ -7,6 +7,8 @@ import { ArrowLeft, ImageOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
+import { LinkedTodos } from "@/components/todo/linked-todos";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -165,6 +167,13 @@ export function ViolationDetailClient({ id, canManage }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {canManage && (
+            <MakeTodoDialog
+              sourceEntityType="violation"
+              sourceEntityId={id}
+              defaultTitle={`Follow up: ${record.subject}`}
+            />
+          )}
           <StatusBadge
                 status={record.status}
                 color={record.status === "ACTIVE" ? "red" : "green"}
@@ -380,6 +389,9 @@ export function ViolationDetailClient({ id, canManage }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Linked ToDos */}
+      <LinkedTodos sourceEntityType="violation" sourceEntityId={id} />
 
       {record.status === "LIFTED" && (
         <Card>

@@ -7,6 +7,8 @@ import { ArrowLeft, ImageOff } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
+import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
+import { LinkedTodos } from "@/components/todo/linked-todos";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -124,7 +126,14 @@ export function VesselDetailClient({ id }: Props) {
             <p className="text-sm text-muted-foreground">{record.mfvrNumber}</p>
           </div>
         </div>
-        <StatusBadge status={record.status} />
+        <div className="flex items-center gap-2.5">
+          <MakeTodoDialog
+            sourceEntityType="vessel"
+            sourceEntityId={id}
+            defaultTitle={`Follow up / missing data: ${record.mfvrNumber}`}
+          />
+          <StatusBadge status={record.status} />
+        </div>
       </div>
 
       {/* Identification — media on the left (compact), fields on the right */}
@@ -344,6 +353,9 @@ export function VesselDetailClient({ id }: Props) {
             )}
           </CardContent>
         </Card>
+
+        {/* Linked ToDos */}
+        <LinkedTodos sourceEntityType="vessel" sourceEntityId={id} />
       </div>
     </div>
   );

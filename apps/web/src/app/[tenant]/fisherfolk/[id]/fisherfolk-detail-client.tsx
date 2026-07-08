@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
 import { FisherfolkActivityTimeline } from "./fisherfolk-activity-timeline";
+import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
+import { LinkedTodos } from "@/components/todo/linked-todos";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -291,6 +293,11 @@ export function FisherfolkDetailClient({ id }: Props) {
             <Separator orientation="vertical" className="mx-0.5 h-6" />
           )}
 
+          <MakeTodoDialog
+            sourceEntityType="fisherfolk"
+            sourceEntityId={id}
+            defaultTitle={`Follow up / missing data: ${record.fullName}`}
+          />
           <Button asChild variant="outline" size="sm">
             <Link href={`/${params.tenant}/fisherfolk/${id}/edit`}>
               <Pencil className="mr-2 h-4 w-4" />
@@ -622,9 +629,10 @@ export function FisherfolkDetailClient({ id }: Props) {
           </div>
         </div>
 
-        {/* RIGHT — activity timeline slot (S4) */}
-        <aside aria-label="Activity timeline">
+        {/* RIGHT — activity timeline + linked todos */}
+        <aside aria-label="Activity timeline" className="space-y-6">
           <FisherfolkActivityTimeline id={id} />
+          <LinkedTodos sourceEntityType="fisherfolk" sourceEntityId={id} />
         </aside>
       </div>
     </div>
