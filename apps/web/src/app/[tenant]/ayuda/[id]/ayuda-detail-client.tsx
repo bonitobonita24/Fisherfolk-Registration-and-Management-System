@@ -9,8 +9,10 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
 import { LinkedTodos } from "@/components/todo/linked-todos";
+import { BulkFilterDialog } from "./bulk-filter-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -18,6 +20,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -336,6 +349,10 @@ function BeneficiariesTable({
 }) {
   const params = useParams<{ tenant: string }>();
   const utils = trpc.useUtils();
+  const [selectedBeneficiaryIds, setSelectedBeneficiaryIds] = useState<
+    Set<string>
+  >(new Set());
+  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
   const { data, isLoading } = trpc.ayuda.listBeneficiaries.useQuery({
     programId,
     page: 1,
@@ -353,6 +370,21 @@ function BeneficiariesTable({
     },
   });
 
+  const removeBeneficiaries = trpc.ayuda.removeBeneficiaries.useMutation({
+    onSuccess: (result) => {
+      toast.success(
+        `${result.removed} removed, ${result.skipped} skipped.`,
+      );
+      setSelectedBeneficiaryIds(new Set());
+      setRemoveConfirmOpen(false);
+      void utils.ayuda.listBeneficiaries.invalidate({ programId });
+      void utils.ayuda.getProgramById.invalidate({ id: programId });
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to remove beneficiaries.");
+    },
+  });
+
   if (isLoading) {
     return (
       <p className="text-sm text-muted-foreground">Loading beneficiaries…</p>
@@ -367,82 +399,180 @@ function BeneficiariesTable({
     );
   }
 
+  const removableItems = items.filter(
+    (b) => b.verificationStatus === "PENDING",
+  );
+  const allRemovableSelected =
+    removableItems.length > 0 &&
+    removableItems.every((b) => selectedBeneficiaryIds.has(b.id));
+
+  function toggleSelectAll(checked: boolean) {
+    setSelectedBeneficiaryIds(
+      checked ? new Set(removableItems.map((b) => b.id)) : new Set(),
+    );
+  }
+
+  function toggleSelectOne(id: string, checked: boolean) {
+    setSelectedBeneficiaryIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Fisherfolk</TableHead>
-          <TableHead>ID Number</TableHead>
-          <TableHead>Household</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Verified By</TableHead>
-          <TableHead>Verified At</TableHead>
-          {canManage && <TableHead className="text-right">Actions</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {items.map((b) => (
-          <TableRow key={b.id}>
-            <TableCell className="font-medium">
-              <Link
-                href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
-                className="text-primary hover:underline"
-              >
-                {b.fisherfolk.fullName}
-              </Link>
-            </TableCell>
-            <TableCell>{b.fisherfolk?.idNumber ?? "—"}</TableCell>
-            <TableCell>{b.household?.householdNumber ?? "—"}</TableCell>
-            <TableCell>
-              <StatusBadge status={b.verificationStatus} />
-            </TableCell>
-            <TableCell>{b.verifiedBy?.name ?? "—"}</TableCell>
-            <TableCell>{formatDate(b.verifiedAt)}</TableCell>
+    <div className="space-y-3">
+      {canManage && selectedBeneficiaryIds.size > 0 && (
+        <div className="flex items-center justify-end">
+          <AlertDialog
+            open={removeConfirmOpen}
+            onOpenChange={setRemoveConfirmOpen}
+          >
+            <AlertDialogTrigger asChild>
+              <Button size="sm" variant="destructive">
+                Remove selected ({selectedBeneficiaryIds.size})
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Remove selected beneficiaries?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove {selectedBeneficiaryIds.size} pending
+                  beneficiar
+                  {selectedBeneficiaryIds.size !== 1 ? "ies" : "y"} from this
+                  program. Confirmed distributions cannot be removed. This
+                  action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={removeBeneficiaries.isPending}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={removeBeneficiaries.isPending}
+                  onClick={() =>
+                    removeBeneficiaries.mutate({
+                      programId,
+                      beneficiaryIds: [...selectedBeneficiaryIds],
+                    })
+                  }
+                >
+                  {removeBeneficiaries.isPending ? "Removing…" : "Remove"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
+      <Table>
+        <TableHeader>
+          <TableRow>
             {canManage && (
-              <TableCell className="text-right">
-                {b.verificationStatus === "PENDING" ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={verify.isPending}
-                      >
-                        Verify
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() =>
-                          verify.mutate({
-                            id: b.id,
-                            verificationStatus: "RECEIVED",
-                          })
-                        }
-                      >
-                        Mark Received
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          verify.mutate({
-                            id: b.id,
-                            verificationStatus: "CANCELLED",
-                          })
-                        }
-                      >
-                        Cancel
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
-                )}
-              </TableCell>
+              <TableHead className="w-10">
+                <Checkbox
+                  aria-label="Select all removable beneficiaries"
+                  checked={allRemovableSelected}
+                  disabled={removableItems.length === 0}
+                  onCheckedChange={(checked) =>
+                    toggleSelectAll(checked === true)
+                  }
+                />
+              </TableHead>
             )}
+            <TableHead>Fisherfolk</TableHead>
+            <TableHead>ID Number</TableHead>
+            <TableHead>Household</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Verified By</TableHead>
+            <TableHead>Verified At</TableHead>
+            {canManage && <TableHead className="text-right">Actions</TableHead>}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {items.map((b) => {
+            const isRemovable = b.verificationStatus === "PENDING";
+            return (
+              <TableRow key={b.id}>
+                {canManage && (
+                  <TableCell>
+                    <Checkbox
+                      aria-label={`Select ${b.fisherfolk.fullName}`}
+                      checked={selectedBeneficiaryIds.has(b.id)}
+                      disabled={!isRemovable}
+                      title={
+                        isRemovable
+                          ? undefined
+                          : "Confirmed distribution — cannot bulk-remove"
+                      }
+                      onCheckedChange={(checked) =>
+                        toggleSelectOne(b.id, checked === true)
+                      }
+                    />
+                  </TableCell>
+                )}
+                <TableCell className="font-medium">
+                  <Link
+                    href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    {b.fisherfolk.fullName}
+                  </Link>
+                </TableCell>
+                <TableCell>{b.fisherfolk?.idNumber ?? "—"}</TableCell>
+                <TableCell>{b.household?.householdNumber ?? "—"}</TableCell>
+                <TableCell>
+                  <StatusBadge status={b.verificationStatus} />
+                </TableCell>
+                <TableCell>{b.verifiedBy?.name ?? "—"}</TableCell>
+                <TableCell>{formatDate(b.verifiedAt)}</TableCell>
+                {canManage && (
+                  <TableCell className="text-right">
+                    {b.verificationStatus === "PENDING" ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={verify.isPending}
+                          >
+                            Verify
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              verify.mutate({
+                                id: b.id,
+                                verificationStatus: "RECEIVED",
+                              })
+                            }
+                          >
+                            Mark Received
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              verify.mutate({
+                                id: b.id,
+                                verificationStatus: "CANCELLED",
+                              })
+                            }
+                          >
+                            Cancel
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                )}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -691,10 +821,22 @@ export function AyudaDetailClient({ id, canManage }: Props) {
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle>Beneficiaries</CardTitle>
             {canAddBeneficiary && (
-              <AddBeneficiaryDialog
-                programId={record.id}
-                distributionUnit={record.distributionUnit}
-              />
+              <div className="flex items-center gap-2">
+                <BulkFilterDialog
+                  programId={record.id}
+                  distributionUnit={record.distributionUnit}
+                  canManage={canManage}
+                  onChanged={() =>
+                    void utils.ayuda.listBeneficiaries.invalidate({
+                      programId: record.id,
+                    })
+                  }
+                />
+                <AddBeneficiaryDialog
+                  programId={record.id}
+                  distributionUnit={record.distributionUnit}
+                />
+              </div>
             )}
           </CardHeader>
           <CardContent>
