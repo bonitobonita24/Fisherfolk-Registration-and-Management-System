@@ -150,3 +150,44 @@
     nullable) and `domainVerifiedAt`.
 - **Note:** when the first custom domain is onboarded, the CORS-origins line under **## Security
   Requirements** (line ~448) and any absolute-URL builders should account for the tenant's domain.
+
+### K. Household Management — new feature (2026-07-08) ⏳ DRAFT — awaiting owner application
+> **Status: ⏳ DRAFT.** Feature is shipped on branch `feat/household-management` (unmerged, all 9
+> tasks complete — see docs/STATE.md + docs/CHANGELOG_AI.md 2026-07-08 entry). This candidate is
+> NOT yet applied to PRODUCT.md — Rule 1 (human-only edit) applies; the owner reviews and applies,
+> defers, or logs `spec-divergent: <reason>` in DECISIONS_LOG.md.
+- **Decision (locked):** DECISIONS_LOG "Household Management — [HOW] locked implementation
+  decisions" (2026-07-08). Explicit `Household` model grouping a head Fisherfolk + members (head is
+  also a member); household category for counts = head's category; HH-#### per-tenant numbering;
+  ayuda `distributionUnit` set at program-creation time only; no backfill of existing fisherfolk
+  (new households only, going forward); delete unlinks members without deleting fisherfolk records.
+- **Shipped (branch `feat/household-management`, unmerged):** `Household` model + `Fisherfolk.householdId`
+  + `AyudaProgram.distributionUnit` (FISHERFOLK|HOUSEHOLD) + `AyudaBeneficiary.householdId`
+  (migration, `4b0995e`); `household` tRPC router (`6e1da3a`); `/households` list (`e83493d`),
+  `/households/new` 3-step create wizard (`de6a42a`), `/households/[id]` detail/edit (`fd572d0`);
+  household membership badge on fisherfolk detail (`1a3eb7a`); ayuda program create form Distribution
+  Unit select + household-beneficiary picker (`5132016`); dashboard `getHouseholdStats` + Households
+  tile/charts + "Household Masterlist" report type (`2e2eadd`); guarded demo seed (`3d1897a`).
+- **PRODUCT.md drift:** no mention of Household anywhere in the spec.
+- **Proposed back-port text:**
+  - Under **### Fisherfolk Registration** (or a new subsection immediately after it, e.g.
+    "### Household Management"), add:
+    > Fisherfolk may be grouped into a **Household** (head + members; the head is always also a
+    > member). Households are created explicitly by staff — existing fisherfolk are NOT
+    > auto-grouped or backfilled; only newly-created households exist going forward. A household's
+    > category (for counts/reporting) is the head's fisherfolk category. Households are auto-numbered
+    > `HH-####` per tenant. Deleting a household unlinks its members (fisherfolk records are
+    > preserved, never deleted). Managed under a new **RECORDS → Households** list/create-wizard/
+    > detail-edit flow, with a membership badge shown on the fisherfolk profile.
+  - Under **### Ayuda Programs**, add:
+    > Ayuda programs choose a **Distribution Unit** at creation time: `Fisherfolk` (existing
+    > per-person beneficiary counting) or `Household` (one beneficiary record per household, keyed
+    > to the household head). This setting is fixed once the program is created (no edit-program
+    > form exists); duplicate-household selection is blocked in the household-mode beneficiary picker.
+  - Under **## Data Entities**, add a new **Household** entity: `id, tenantId, code (HH-#### per
+    tenant), headFisherfolkId, members (relation to Fisherfolk, head included), createdAt, updatedAt,
+    createdBy, updatedBy`; update **Fisherfolk** entity to add `householdId (nullable, relation)`;
+    update **AyudaProgram** entity to add `distributionUnit (Fisherfolk, Household)`; update
+    **AyudaBeneficiary** entity to add `householdId (nullable)`.
+- **Recommended section:** primarily **### Fisherfolk Registration** (new Household Management
+  subsection) + **### Ayuda Programs** + **## Data Entities**.

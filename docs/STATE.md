@@ -1,6 +1,33 @@
 # FRMS — Project State
 
-## Current State (2026-07-05)
+## Current State (2026-07-08)
+
+Branch `feat/household-management` — **Household Management feature COMPLETE, all 9 tasks shipped**:
+schema (`4b0995e`), router (`6e1da3a`), nav+list (`e83493d`), create wizard (`de6a42a`), detail/edit
+(`fd572d0`), membership badge (`1a3eb7a`), ayuda per-household (`5132016`), dashboard+reports counts
+(`2e2eadd`), demo seed (`3d1897a`). typecheck ✅ lint ✅ build ✅; household + ayuda tests pass (12)
+against dev DB; demo seed verified idempotent on dev. Spec: `docs/superpowers/specs/2026-07-08-household-management-design.md`,
+plan: `docs/superpowers/` (9-task plan, referenced in memory `project_household_build_0708`).
+**Not yet done**: full-app Playwright browser QA sweep of the new `/households` surfaces; branch not
+yet merged to `main` (owner-gated per HARD HOLD); `docs/PRODUCT.md` back-port drafted in
+`docs/BACKPORT_CANDIDATES.md` (candidate K) awaiting owner application (Rule 1).
+
+### Completed this session (Household Management governance docs, 2026-07-08)
+
+- **`docs/CHANGELOG_AI.md`** (updated) — appended a single consolidated entry summarizing all 9
+  Household Management tasks with commit SHAs, attributed CLAUDE_CODE.
+- **`docs/DECISIONS_LOG.md`** (updated) — appended `Household Management — [HOW] locked implementation
+  decisions` section (category-for-counts = head's, head-is-member invariant, HH-#### numbering,
+  ayuda distributionUnit set at creation only, no backfill, delete unlinks members).
+- **`docs/BACKPORT_CANDIDATES.md`** (updated) — appended candidate K (Household Management, DRAFT,
+  awaiting owner application) proposing new PRODUCT.md content under Fisherfolk Registration /
+  Ayuda Programs / Data Entities.
+- **`docs/STATE.md`** (this file) — current-state block updated to reflect feat/household-management
+  branch + all 9 tasks complete.
+
+---
+
+## Prior State (2026-07-05, superseded above)
 
 Branch `swarm/dashboard-redesign` is the active feature branch for the SET-2 Dashboard Redesign wave.
 SD ✅ complete. **S1 ✅ complete** (schema index). **S2 ✅ complete** (registration lifecycle backend). **S3 ✅ complete** (top-section UI). **S4 ✅ complete** (group tiles). **S5 ✅ complete** (lower charts → 3 grouped Card tiles; typecheck ✅ lint ✅ build ✅). **S6 ✅ complete** (QA/WCAG gate). PRODUCT.md untouched. AdminCN Reskin wave (swarm/admincn-reskin) is fully remediated and dev-verified; merge is owner-gated.

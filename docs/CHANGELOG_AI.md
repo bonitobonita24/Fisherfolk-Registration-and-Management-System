@@ -3,6 +3,36 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-08 — Household Management feature: full build, 9 tasks (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Sonnet 4.6, spec-executor dispatches)
+**Branch:** feat/household-management
+**Spec:** docs/superpowers/specs/2026-07-08-household-management-design.md
+
+- **Task 1 (schema, `4b0995e`)**: NEW `Household` model (head Fisherfolk + members; head is also a
+  member) + `Fisherfolk.householdId` + `AyudaProgram.distributionUnit` (FISHERFOLK|HOUSEHOLD) +
+  `AyudaBeneficiary.householdId`. Migration applied non-destructively to dev.
+- **Task 2 (router, `6e1da3a`)**: NEW `household` tRPC router — `list`/`getById`/`create`/`update`/
+  `remove`/`availableFisherfolk`, all tenant-scoped; HH-#### auto-numbering per tenant; head-is-member
+  invariant enforced; `remove` unlinks members (does not delete fisherfolk). 12 tests.
+- **Task 3 (nav + list, `e83493d`)**: `/households` list page added under RECORDS sidebar section.
+- **Task 4 (wizard, `de6a42a`)**: `/households/new` 3-step create wizard (head → members → review).
+- **Task 5 (detail/edit, `fd572d0`)**: `/households/[id]` detail/edit page — add/remove member, change
+  head, edit fields, delete (with unlink confirmation).
+- **Task 6 (membership badge, `1a3eb7a`)**: Household membership badge added to fisherfolk detail page.
+  Added shadcn AlertDialog primitive + `@radix-ui/react-alert-dialog` dependency.
+- **Task 7 (ayuda per-household, `5132016`)**: Ayuda program create form gains a Distribution Unit
+  select (Fisherfolk/Household); HOUSEHOLD-mode beneficiary picker lists households and records the
+  household head as the beneficiary with `householdId` set; duplicate-household selection blocked.
+  No edit-program form exists in the codebase, so `distributionUnit` is set at creation time only.
+- **Task 8 (dashboard + reports, `2e2eadd`)**: NEW `getHouseholdStats` dashboard procedure + Households
+  tile/charts (by barangay, by head's category); NEW "Household Masterlist" report type.
+- **Task 9 (demo seed, `3d1897a`)**: Guarded demo household seed added to `seed-demo.ts`
+  (`ALLOW_DEMO_SEED` only; dev/demo only, no staging/prod backfill per data-seeding policy);
+  verified idempotent on dev.
+- **Validation**: typecheck ✅ lint ✅ build ✅; household + ayuda tests pass (12) against dev DB.
+- **Deferred**: full-app Playwright browser QA sweep of the new `/households` surfaces (not yet run).
+
 ## 2026-07-05 — SET-2 Dashboard Redesign S6: QA/WCAG gate — axe clean, dark-mode verified (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Spec-Driven Swarm Worker S6, swarm/dashboard-redesign)

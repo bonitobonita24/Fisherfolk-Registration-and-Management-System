@@ -4,6 +4,34 @@
 
 ---
 
+## Household Management — [HOW] locked implementation decisions
+Decision: Household is an explicit `Household` model (head Fisherfolk + members; the head is ALSO
+a member — head-is-member invariant enforced by the router on create/update, never violated).
+Sub-decisions:
+  (a) **Household category for counts** = the head's fisherfolk category. A household has no
+      independent category field; dashboard/report groupings use `head.categories`.
+  (b) **Head-is-member invariant**: creating/updating a household always includes the head in the
+      members set; the router rejects a members list that omits the head. Removing the head requires
+      first designating a new head (change-head flow), never a bare removal.
+  (c) **HH-#### auto-numbering**, per tenant (parallel to the existing FF-#### / MFV-#### schemes).
+      Sequential per-tenant counter, no cross-tenant sharing.
+  (d) **Ayuda `distributionUnit`** (FISHERFOLK|HOUSEHOLD) is set ONLY at ayuda-program creation time.
+      No edit-program form exists in the codebase, so distributionUnit is immutable after creation
+      for the life of the program (provisional — revisit if an edit-program feature is ever built).
+  (e) **No backfill** of existing fisherfolk into households. Only NEW household records (created
+      going forward) exist; the 3,000+ imported/legacy fisherfolk remain un-householded unless an
+      admin manually creates a household for them. Dummy/demo household data exists ONLY in local
+      dev + demo per the standing data-seeding policy (docs/DATA_SEEDING_POLICY.md) — never
+      generated for staging/prod.
+  (f) **Delete household unlinks, never deletes**: removing a Household clears `Fisherfolk.householdId`
+      on all its former members; the fisherfolk records themselves are untouched.
+Rationale: keeps household semantics additive/opt-in over the existing fisherfolk-centric data model,
+avoids retroactive data mutation on 3,000+ live records, and matches the ayuda distribution model
+already locked (per-fisherfolk vs per-household beneficiary counting).
+Reference: docs/superpowers/specs/2026-07-08-household-management-design.md
+Locked: yes — do not re-ask. Branch: feat/household-management (commits 4b0995e, 6e1da3a, e83493d,
+de6a42a, fd572d0, 1a3eb7a, 5132016, 2e2eadd, 3d1897a).
+
 ## Anti-Thrashing Enforcement Mechanism
 Decision: UserPromptSubmit hook in .claude/settings.json (mechanical injection),
 NOT CLAUDE.md rule alone (advisory).
