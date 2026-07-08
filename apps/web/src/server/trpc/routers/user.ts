@@ -64,6 +64,17 @@ export const userRouter = createTRPCRouter({
       return { items, total, page, limit };
     }),
 
+  listAssignable: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+    return ctx.db.user.findMany({
+      where: { tenantId: ctx.tenantId, status: "ACTIVE" },
+      take: 500,
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, username: true },
+    });
+  }),
+
   getById: adminProcedure
     .input(z.object({ id: z.string().cuid() }).strict())
     .query(async ({ ctx, input }) => {

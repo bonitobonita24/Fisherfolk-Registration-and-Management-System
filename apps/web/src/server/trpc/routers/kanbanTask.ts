@@ -3,11 +3,45 @@ import { z } from "zod";
 
 import {
   kanbanTaskCreateSchema,
+  kanbanTaskSourceEntityTypeSchema,
   kanbanTaskUpdateSchema,
 } from "@frms/shared/schemas";
 
 import { omitUndefined } from "../../lib/prisma-input";
+import type { TRPCContext } from "../context";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+
+type SourceEntityType = z.infer<typeof kanbanTaskSourceEntityTypeSchema>;
+
+async function assertSourceEntityExists(
+  db: TRPCContext["db"],
+  tenantId: string,
+  sourceEntityType: SourceEntityType,
+  sourceEntityId: string,
+) {
+  const where = { id: sourceEntityId, tenantId };
+  let found: unknown = null;
+  switch (sourceEntityType) {
+    case "fisherfolk":
+      found = await db.fisherfolk.findFirst({ where });
+      break;
+    case "vessel":
+      found = await db.vessel.findFirst({ where });
+      break;
+    case "violation":
+      found = await db.violation.findFirst({ where });
+      break;
+    case "ayudaProgram":
+      found = await db.ayudaProgram.findFirst({ where });
+      break;
+  }
+  if (found === null || found === undefined) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Source record not found",
+    });
+  }
+}
 
 export const kanbanTaskRouter = createTRPCRouter({
   list: protectedProcedure
@@ -19,19 +53,33 @@ export const kanbanTaskRouter = createTRPCRouter({
           status: z.enum(["TODO", "IN_PROGRESS", "DONE"]).optional(),
           priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
           assignedToId: z.string().optional(),
+          assignedToMe: z.boolean().optional(),
+          sourceEntityType: kanbanTaskSourceEntityTypeSchema.optional(),
+          sourceEntityId: z.string().optional(),
         })
         .strict(),
     )
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-      const { page, limit, status, priority, assignedToId } = input;
+      const {
+        page,
+        limit,
+        status,
+        priority,
+        assignedToId,
+        assignedToMe,
+        sourceEntityType,
+        sourceEntityId,
+      } = input;
       const skip = (page - 1) * limit;
 
       const where = omitUndefined({
         tenantId: ctx.tenantId,
         status,
         priority,
-        assignedToId,
+        assignedToId: assignedToMe === true ? ctx.userId : assignedToId,
+        sourceEntityType,
+        sourceEntityId,
       });
 
       const [items, total] = await Promise.all([
@@ -46,6 +94,9 @@ export const kanbanTaskRouter = createTRPCRouter({
             description: true,
             status: true,
             priority: true,
+            dueDate: true,
+            sourceEntityType: true,
+            sourceEntityId: true,
             createdAt: true,
             assignedTo: { select: { id: true, name: true } },
           },
@@ -78,9 +129,19 @@ export const kanbanTaskRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
 
+      if (input.sourceEntityType && input.sourceEntityId) {
+        await assertSourceEntityExists(
+          ctx.db,
+          ctx.tenantId,
+          input.sourceEntityType,
+          input.sourceEntityId,
+        );
+      }
+
       return ctx.db.kanbanTask.create({
         data: omitUndefined({
           ...input,
+          assignedToId: input.assignedToId ?? ctx.userId,
           tenantId: ctx.tenantId,
         }),
       });
@@ -102,6 +163,15 @@ export const kanbanTaskRouter = createTRPCRouter({
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
       const { id: _ignored, ...updateData } = input.data;
+
+      if (updateData.sourceEntityType && updateData.sourceEntityId) {
+        await assertSourceEntityExists(
+          ctx.db,
+          ctx.tenantId,
+          updateData.sourceEntityType,
+          updateData.sourceEntityId,
+        );
+      }
 
       return ctx.db.kanbanTask.update({
         where: { id: input.id },
