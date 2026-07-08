@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FRMS — Feature Showcase</title>
+<meta name="description" content="Fisherfolk Registration & Management System — full feature showcase, Calapan City Fisheries Management Office." />
+<style>
+  /* ============================================================
+     FRMS Feature Showcase — design tokens
+     Echoes the live app: near-black surfaces, amber/orange accent,
+     teal active-state, rounded pill badges, shadcn-style cards.
+     ============================================================ */
+  :root{
+    --bg: #0a0a0b;
+    --bg-elevated: #131315;
+    --surface: #17171a;
+    --surface-2: #1d1d21;
+    --border: #2a2a2f;
+    --border-soft: #232327;
+    --text: #f2f2f3;
+    --text-muted: #a3a3ab;
+    --text-faint: #6f6f78;
+    --accent: #f97316;
+    --accent-2: #fb923c;
+    --accent-soft: rgba(249,115,22,0.14);
+    --teal: #14b8a6;
+    --teal-soft: rgba(20,184,166,0.14);
+    --blue: #3b82f6;
+    --blue-soft: rgba(59,130,246,0.14);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-md: 0 8px 24px -8px rgba(0,0,0,0.55);
+    --shadow-lg: 0 24px 64px -16px rgba(0,0,0,0.65);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --space-9: 96px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+
+  :root[data-theme="light"], :root:not([data-theme="dark"]) {}
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]){
+      --bg: #f7f7f5;
+      --bg-elevated: #ffffff;
+      --surface: #ffffff;
+      --surface-2: #f1f1ee;
+      --border: #e4e4e0;
+      --border-soft: #ececea;
+      --text: #17171a;
+      --text-muted: #55555d;
+      --text-faint: #8a8a92;
+      --accent: #ea6a17;
+      --accent-2: #d95e10;
+      --accent-soft: rgba(234,106,23,0.10);
+      --teal: #0f9488;
+      --teal-soft: rgba(15,148,136,0.10);
+      --blue: #2563eb;
+      --blue-soft: rgba(37,99,235,0.10);
+      --shadow-sm: 0 1px 2px rgba(20,20,15,0.06);
+      --shadow-md: 0 8px 24px -10px rgba(20,20,15,0.14);
+      --shadow-lg: 0 24px 64px -20px rgba(20,20,15,0.20);
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg: #f7f7f5;
+    --bg-elevated: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1f1ee;
+    --border: #e4e4e0;
+    --border-soft: #ececea;
+    --text: #17171a;
+    --text-muted: #55555d;
+    --text-faint: #8a8a92;
+    --accent: #ea6a17;
+    --accent-2: #d95e10;
+    --accent-soft: rgba(234,106,23,0.10);
+    --teal: #0f9488;
+    --teal-soft: rgba(15,148,136,0.10);
+    --blue: #2563eb;
+    --blue-soft: rgba(37,99,235,0.10);
+    --shadow-sm: 0 1px 2px rgba(20,20,15,0.06);
+    --shadow-md: 0 8px 24px -10px rgba(20,20,15,0.14);
+    --shadow-lg: 0 24px 64px -20px rgba(20,20,15,0.20);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"]{
+    --bg: #0a0a0b; --bg-elevated:#131315; --surface:#17171a; --surface-2:#1d1d21;
+    --border:#2a2a2f; --border-soft:#232327; --text:#f2f2f3; --text-muted:#a3a3ab; --text-faint:#6f6f78;
+    --accent:#f97316; --accent-2:#fb923c; --accent-soft: rgba(249,115,22,0.14);
+    --teal:#14b8a6; --teal-soft: rgba(20,184,166,0.14); --blue:#3b82f6; --blue-soft: rgba(59,130,246,0.14);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+  ::selection{background:var(--accent-soft); color:var(--text);}
+
+  /* ---------- Top nav ---------- */
+  .topnav{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; gap:var(--space-5);
+    padding:var(--space-3) var(--space-5);
+    background:color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter:saturate(160%) blur(14px);
+    -webkit-backdrop-filter:saturate(160%) blur(14px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .topnav .brand{
+    display:flex; align-items:center; gap:var(--space-2);
+    font-weight:700; letter-spacing:-0.01em; font-size:15px;
+    flex:0 0 auto; white-space:nowrap;
+  }
+  .brand-mark{
+    width:26px; height:26px; border-radius:8px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; box-shadow:var(--shadow-sm);
+  }
+  .toc{
+    display:flex; gap:var(--space-1); overflow-x:auto;
+    scrollbar-width:none; flex:1 1 auto;
+    -ms-overflow-style:none;
+  }
+  .toc::-webkit-scrollbar{display:none;}
+  .toc a{
+    white-space:nowrap; text-decoration:none;
+    font-size:13px; font-weight:500; color:var(--text-muted);
+    padding:var(--space-2) var(--space-3); border-radius:999px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .toc a:hover{ color:var(--text); background:var(--surface-2); }
+
+  .theme-toggle{
+    flex:0 0 auto; appearance:none; border:1px solid var(--border);
+    background:var(--surface); color:var(--text);
+    width:34px; height:34px; border-radius:999px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .theme-toggle:hover{ background:var(--surface-2); transform:translateY(-1px); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; padding:var(--space-9) var(--space-5) var(--space-8);
+    overflow:hidden; isolation:isolate;
+    border-bottom:1px solid var(--border-soft);
+  }
+  .hero::before{
+    content:""; position:absolute; inset:-20% -10% auto -10%; height:640px; z-index:-1;
+    background:
+      radial-gradient(560px 320px at 18% 12%, var(--accent-soft), transparent 65%),
+      radial-gradient(480px 320px at 82% 0%, var(--teal-soft), transparent 60%);
+    filter:blur(0px);
+  }
+  .hero-inner{ max-width:980px; margin:0 auto; text-align:center; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:var(--space-2);
+    font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent); background:var(--accent-soft);
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    padding:6px 14px; border-radius:999px; margin-bottom:var(--space-5);
+  }
+  .hero h1{
+    font-size:clamp(2.1rem, 5vw, 3.4rem); line-height:1.06; letter-spacing:-0.03em;
+    margin:0 0 var(--space-4); font-weight:800;
+  }
+  .hero h1 .accent-word{
+    background:linear-gradient(120deg, var(--accent), var(--accent-2) 60%, var(--teal));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.lede{
+    font-size:clamp(1rem, 1.6vw, 1.2rem); color:var(--text-muted);
+    max-width:680px; margin:0 auto var(--space-2);
+  }
+  .hero p.sub{ font-size:14px; color:var(--text-faint); margin:0 0 var(--space-6); }
+
+  .stat-strip{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:var(--space-2);
+    max-width:900px; margin:0 auto;
+  }
+  .stat-chip{
+    display:flex; align-items:baseline; gap:6px;
+    background:var(--surface); border:1px solid var(--border);
+    padding:10px 16px; border-radius:999px; box-shadow:var(--shadow-sm);
+    font-size:13px; color:var(--text-muted);
+  }
+  .stat-chip strong{ color:var(--text); font-size:14px; font-weight:700; }
+
+  /* ---------- Sections ---------- */
+  .section{
+    max-width:1180px; margin:0 auto; padding:var(--space-8) var(--space-5);
+    border-bottom:1px solid var(--border-soft);
+    scroll-margin-top:70px;
+  }
+  .section:last-of-type{ border-bottom:none; }
+  .section-head{
+    display:flex; align-items:center; gap:var(--space-4); margin-bottom:var(--space-2);
+  }
+  .badge-num{
+    flex:0 0 auto; width:44px; height:44px; border-radius:var(--radius-sm);
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-weight:700; font-size:14px; color:var(--accent);
+  }
+  .section-head h2{ font-size:clamp(1.4rem,2.4vw,1.9rem); margin:0; letter-spacing:-0.02em; }
+  .section-desc{ color:var(--text-muted); margin:0 0 var(--space-6); max-width:680px; font-size:14.5px; }
+
+  /* Foundations band */
+  .foundations{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4);
+  }
+  .foundation-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md);
+    padding:var(--space-5); box-shadow:var(--shadow-sm);
+  }
+  .foundation-card .ficon{
+    width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; margin-bottom:var(--space-3);
+  }
+  .foundation-card h3{ margin:0 0 var(--space-2); font-size:16px; letter-spacing:-0.01em; }
+  .foundation-card p{ margin:0 0 var(--space-3); color:var(--text-muted); font-size:13.5px; }
+  .foundation-card ul{ margin:0; padding-left:1.1em; color:var(--text-muted); font-size:13px; }
+  .foundation-card li{ margin-bottom:4px; }
+
+  /* Card grid */
+  .card-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:var(--space-5);
+  }
+  .card-grid.wide{ grid-template-columns:1fr; }
+  article.card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+    overflow:hidden; box-shadow:var(--shadow-sm);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    display:flex; flex-direction:column;
+  }
+  article.card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:color-mix(in srgb, var(--accent) 30%, var(--border)); }
+
+  .card-media{
+    padding:var(--space-4) var(--space-4) 0;
+    background:
+      radial-gradient(360px 160px at 30% 0%, var(--accent-soft), transparent 70%),
+      var(--bg-elevated);
+    display:flex; flex-direction:column; gap:var(--space-2);
+  }
+  .shot{
+    all:unset; cursor:zoom-in; display:block; border-radius:var(--radius-md) var(--radius-md) 0 0;
+    overflow:hidden; border:1px solid var(--border-soft); border-bottom:none;
+    box-shadow:var(--shadow-sm); position:relative;
+  }
+  .shot img{ width:100%; height:auto; display:block; }
+  .shot::after{
+    content:"⤢ view"; position:absolute; right:8px; bottom:8px;
+    font-size:10.5px; font-weight:600; letter-spacing:.03em; text-transform:uppercase;
+    color:#fff; background:rgba(0,0,0,0.55); padding:4px 8px; border-radius:6px;
+    opacity:0; transition:opacity .15s ease;
+  }
+  .shot:hover::after{ opacity:1; }
+  .shot-row{ display:flex; gap:var(--space-2); padding-bottom:var(--space-2); }
+  .shot-row .shot{ flex:1; border-radius:var(--radius-sm); border-bottom:1px solid var(--border-soft); }
+  .shot-row .shot::after{ content:"⤢"; }
+
+  .card-body{ padding:var(--space-5); display:flex; flex-direction:column; gap:var(--space-3); flex:1; }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); }
+  .card-head h3{ margin:0; font-size:17px; letter-spacing:-0.01em; }
+  .tag{
+    font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    padding:4px 9px; border-radius:999px; white-space:nowrap; flex:0 0 auto;
+  }
+  .tag.new{ color:var(--teal); background:var(--teal-soft); border:1px solid color-mix(in srgb, var(--teal) 35%, transparent); }
+  .purpose{ margin:0; color:var(--text-muted); font-size:13.5px; }
+  .purpose b{ color:var(--text); font-weight:600; }
+  ul.feature-list{ margin:0; padding-left:1.15em; font-size:13px; color:var(--text-muted); display:flex; flex-direction:column; gap:5px; }
+  ul.feature-list li::marker{ color:var(--accent); }
+  ul.feature-list li b{ color:var(--text); font-weight:600; }
+
+  /* Footer */
+  footer{
+    padding:var(--space-8) var(--space-5) var(--space-9);
+    text-align:center; color:var(--text-faint); font-size:13px;
+  }
+  footer strong{ color:var(--text-muted); }
+  footer .foot-tag{
+    display:inline-block; margin-top:var(--space-3); font-size:12px;
+    color:var(--teal); background:var(--teal-soft); padding:6px 14px; border-radius:999px;
+  }
+
+  /* Lightbox */
+  #lightbox{
+    position:fixed; inset:0; background:rgba(6,6,8,0.88); backdrop-filter:blur(6px);
+    display:none; align-items:center; justify-content:center; z-index:100; padding:var(--space-6);
+    cursor:zoom-out;
+  }
+  #lightbox.open{ display:flex; }
+  #lightbox img{
+    max-width:min(1200px, 92vw); max-height:88vh; border-radius:var(--radius-md);
+    box-shadow:var(--shadow-lg); border:1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Responsive */
+  @media (max-width: 860px){
+    .foundations{ grid-template-columns:1fr; }
+    .card-grid{ grid-template-columns:1fr; }
+    .topnav{ gap:var(--space-3); padding:var(--space-2) var(--space-4); }
+    .hero{ padding:var(--space-8) var(--space-4) var(--space-7); }
+  }
+  @media (max-width: 480px){
+    .stat-chip{ font-size:12px; padding:8px 12px; }
+    .section{ padding:var(--space-7) var(--space-4); }
+    .card-body{ padding:var(--space-4); }
+  }
+
+  /* Print */
+  @media print{
+    .topnav, .theme-toggle, #lightbox{ display:none !important; }
+    body{ background:#fff; color:#111; }
+    article.card{ break-inside:avoid; box-shadow:none; border:1px solid #ccc; }
+    .hero::before{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand"><span class="brand-mark">🐟</span> FRMS</div>
+  <div class="toc">
+    <a href="#foundations">Foundations</a>
+    <a href="#overview">Overview</a>
+    <a href="#records">Records</a>
+    <a href="#operations">Operations</a>
+    <a href="#administration">Administration</a>
+    <a href="#platform">Platform</a>
+  </div>
+  <button class="theme-toggle" id="themeToggle" type="button" title="Toggle light / dark" aria-label="Toggle theme">◐</button>
+</nav>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">● Internal Feature Reference</span>
+    <h1>FRMS — <span class="accent-word">Fisherfolk Registration</span> &amp; Management System</h1>
+    <p class="lede">The digital backbone for registering, tracking, and supporting every fisherfolk, household, vessel, and aid program in the municipality — in one governed, auditable platform.</p>
+    <p class="sub">Built for the Calapan City Fisheries Management Office (FMO) — Local Government Unit deployment</p>
+    <div class="stat-strip">
+      <span class="stat-chip"><strong>3,000+</strong>&nbsp;fisherfolk registered</span>
+      <span class="stat-chip"><strong>5</strong>&nbsp;core record types</span>
+      <span class="stat-chip"><strong>18+</strong>&nbsp;modules</span>
+      <span class="stat-chip"><strong>WCAG 2.2 AA</strong>&nbsp;compliant</span>
+      <span class="stat-chip"><strong>Multi-tenant</strong>&nbsp;architecture</span>
+      <span class="stat-chip"><strong>62</strong>&nbsp;barangays mapped</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ PLATFORM FOUNDATIONS ============ -->
+  <section class="section" id="foundations">
+    <div class="section-head"><span class="badge-num">00</span><h2>Platform Foundations</h2></div>
+    <p class="section-desc">Cross-cutting capabilities every module inherits — security, identity, and accessibility are not features bolted on, they're the ground floor.</p>
+
+    <div class="foundations">
+      <div class="foundation-card">
+        <div class="ficon" style="background:var(--accent-soft); color:var(--accent);">🏛️</div>
+        <h3>Multi-tenant SaaS</h3>
+        <p>One platform, many Local Government Units — each sees only its own data.</p>
+        <ul>
+          <li>Per-municipality data isolation (tenant-scoped, L1–L6 security model)</li>
+          <li>Tenant-as-subdirectory routing by default</li>
+          <li>Optional custom-domain masking per tenant</li>
+        </ul>
+      </div>
+      <div class="foundation-card">
+        <div class="ficon" style="background:var(--teal-soft); color:var(--teal);">🔐</div>
+        <h3>Authentication &amp; Roles</h3>
+        <p>Every action is tied to a known, permissioned identity.</p>
+        <ul>
+          <li>Username/password login (bcrypt-12 hashing)</li>
+          <li>"Remember me" — 30-day persistent session</li>
+          <li>5 roles: super_admin, admin, encoder, viewer, bantay_dagat</li>
+          <li>Role-based menus and permissions throughout</li>
+        </ul>
+      </div>
+      <div class="foundation-card">
+        <div class="ficon" style="background:var(--blue-soft); color:var(--blue);">🎛️</div>
+        <h3>Accessibility &amp; Theming</h3>
+        <p>Designed to meet government accessibility standards, not just look good.</p>
+        <ul>
+          <li>WCAG 2.2 AA — government hard gate</li>
+          <li>Light &amp; dark mode, system-aware</li>
+          <li>Per-tenant accent color theming</li>
+          <li>shadcn/ui component system, fully responsive</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card-grid" style="margin-top:var(--space-5); grid-template-columns:1fr; max-width:560px;">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/00-login.png"><img src="assets/00-login.png" alt="FRMS login screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Sign-in</h3></div>
+          <p class="purpose">Purpose: <b>the front door</b> — a clean, tenant-branded login gate.</p>
+          <ul class="feature-list">
+            <li>Username-based login, bcrypt-12 password hashing</li>
+            <li>"Remember me" 30-day session</li>
+            <li>Tenant-scoped credential check (suspended tenants are blocked here)</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 1 — OVERVIEW ============ -->
+  <section class="section" id="overview">
+    <div class="section-head"><span class="badge-num">01</span><h2>Overview</h2></div>
+    <p class="section-desc">The command-center views — what's happening across the whole registry, right now.</p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/01-dashboard.png"><img src="assets/01-dashboard.png" alt="Dashboard screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Dashboard</h3></div>
+          <p class="purpose">Purpose: <b>at-a-glance operational picture</b> of the whole fishery registry.</p>
+          <ul class="feature-list">
+            <li>KPI stat tiles across all record types</li>
+            <li>Fisherfolk-by-category chart</li>
+            <li>By-barangay breakdown</li>
+            <li>Registration-trend chart</li>
+            <li>Vessels / violations / ayuda aggregate charts</li>
+            <li><b>Households tile</b> — total, by barangay, and by head's category</li>
+            <li>Data-completeness panel</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/25-notifications.png"><img src="assets/25-notifications.png" alt="Notifications screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Notifications</h3></div>
+          <p class="purpose">Purpose: keep staff <b>aware of what needs attention</b>.</p>
+          <ul class="feature-list">
+            <li>In-app notification center</li>
+            <li>Unread bell with live count</li>
+            <li>Deep-links straight to the related record</li>
+            <li>Edit-request and workflow alerts</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/02-analytics.png"><img src="assets/02-analytics.png" alt="Analytics screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Analytics</h3></div>
+          <p class="purpose">Purpose: <b>deeper data exploration</b> beyond the dashboard summary.</p>
+          <ul class="feature-list">
+            <li>Richer Recharts visualizations over live data</li>
+            <li>Category, barangay, and time-based breakdowns</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/03-map.png"><img src="assets/03-map.png" alt="Map screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Map</h3></div>
+          <p class="purpose">Purpose: see the fishery <b>geographically</b>.</p>
+          <ul class="feature-list">
+            <li>Barangay density heatmap (MapLibre + CARTO basemap) over all 62 Calapan barangays</li>
+            <li>Dataset switcher: Fisherfolk / Vessels / Ayuda / Violations</li>
+            <li>Per-category toggles</li>
+            <li>Centroid-weighted heat + per-barangay count marks</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 2 — RECORDS ============ -->
+  <section class="section" id="records">
+    <div class="section-head"><span class="badge-num">02</span><h2>Records</h2></div>
+    <p class="section-desc">The core registry — the people, households, vessels, cases, and aid that FRMS exists to track.</p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/04-fisherfolk-list.png"><img src="assets/04-fisherfolk-list.png" alt="Fisherfolk masterlist" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/05-fisherfolk-detail.png"><img src="assets/05-fisherfolk-detail.png" alt="Fisherfolk detail profile" loading="lazy"></button>
+            <button class="shot" data-full="assets/06-fisherfolk-register.png"><img src="assets/06-fisherfolk-register.png" alt="Fisherfolk registration wizard" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Fisherfolk</h3></div>
+          <p class="purpose">Purpose: the <b>master registry</b> of municipal fisherfolk.</p>
+          <ul class="feature-list">
+            <li>Searchable / filterable masterlist (3,000+ records, paginated)</li>
+            <li>Multi-step registration wizard</li>
+            <li>Rich profile detail — photo, signature, QR, demographics</li>
+            <li>6-category classification badges</li>
+            <li>Registration lifecycle + "ID released" status</li>
+            <li>Renewal history</li>
+            <li>Related vessels / violations / ayuda</li>
+            <li>Household-membership badge (HH-####, Head/Member) linking to the household</li>
+            <li>Activity timeline</li>
+            <li>File attachments</li>
+            <li>"Make ToDo" quick action</li>
+            <li>Format-agnostic legacy-ID preservation</li>
+            <li>Edits route through the Edit-Request approval workflow</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/07-households-list.png"><img src="assets/07-households-list.png" alt="Household list" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/08-household-wizard.png"><img src="assets/08-household-wizard.png" alt="Household creation wizard" loading="lazy"></button>
+            <button class="shot" data-full="assets/09-household-detail.png"><img src="assets/09-household-detail.png" alt="Household detail" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Household</h3><span class="tag new">New · 2026-07</span></div>
+          <p class="purpose">Purpose: group fisherfolk into <b>households</b> (head + members) for household-level aid &amp; reporting.</p>
+          <ul class="feature-list">
+            <li>Explicit Household records with a designated head who is also a member</li>
+            <li>Auto HH-#### numbering per municipality</li>
+            <li>List shows head, member count, barangay, and the head's category</li>
+            <li>3-step create wizard: pick head → add members → review &amp; save</li>
+            <li>Detail page — add/remove members, change head, edit barangay/address/notes, delete</li>
+            <li>Deleting a household unlinks members — it never deletes people</li>
+            <li>Powers per-household ayuda distribution and household dashboard counts</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/10-vessels-list.png"><img src="assets/10-vessels-list.png" alt="Vessel list" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/11-vessel-detail.png"><img src="assets/11-vessel-detail.png" alt="Vessel detail" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Vessels</h3></div>
+          <p class="purpose">Purpose: register and track <b>fishing vessels</b>.</p>
+          <ul class="feature-list">
+            <li>Vessel registration — MFVR number + specifications</li>
+            <li>Searchable list</li>
+            <li>Detail view with photos, specifications, owner (fisherfolk) link, related records</li>
+            <li>"Make ToDo" quick action</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/12-violations-list.png"><img src="assets/12-violations-list.png" alt="Violations list" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/13-violation-detail.png"><img src="assets/13-violation-detail.png" alt="Violation detail" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Violations</h3></div>
+          <p class="purpose">Purpose: log and follow <b>fishery-law violations</b> (Bantay Dagat).</p>
+          <ul class="feature-list">
+            <li>File-violation form</li>
+            <li>Status workflow: Active → Lifted / Resolved</li>
+            <li>Evidence file attachments</li>
+            <li>Violator linked to a fisherfolk record OR entered as free text</li>
+            <li>Lift / resolve actions</li>
+            <li>"Make ToDo" for follow-ups</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/14-ayuda-list.png"><img src="assets/14-ayuda-list.png" alt="Ayuda list" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/15-ayuda-detail.png"><img src="assets/15-ayuda-detail.png" alt="Ayuda detail" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Ayuda</h3></div>
+          <p class="purpose">Purpose: manage <b>government aid / relief programs</b> for fisherfolk.</p>
+          <ul class="feature-list">
+            <li>Aid programs with Draft → Published → Closed lifecycle</li>
+            <li>Beneficiary management</li>
+            <li>Distribution-unit toggle — per-fisherfolk OR per-household</li>
+            <li>Household mode records the head as beneficiary, one per household, dedup-guarded</li>
+            <li>Supporting file attachments</li>
+            <li>"Make ToDo" quick action</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3 — OPERATIONS ============ -->
+  <section class="section" id="operations">
+    <div class="section-head"><span class="badge-num">03</span><h2>Operations</h2></div>
+    <p class="section-desc">The day-to-day workflows that keep the registry accurate, actionable, and up to date.</p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/18-edit-requests.png"><img src="assets/18-edit-requests.png" alt="Edit Requests screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Edit Requests</h3></div>
+          <p class="purpose">Purpose: <b>safe, auditable edits</b> to registry data.</p>
+          <ul class="feature-list">
+            <li>Encoders submit an edit request</li>
+            <li>Admins approve or reject</li>
+            <li>In-app + email notifications (SMS-ready)</li>
+            <li>Full change tracking</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/16-todo-kanban.png"><img src="assets/16-todo-kanban.png" alt="ToDo Kanban board" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/17-todo-calendar.png"><img src="assets/17-todo-calendar.png" alt="ToDo Calendar view" loading="lazy"></button>
+            <button class="shot" data-full="assets/todo-kanban-keep-cards.png"><img src="assets/todo-kanban-keep-cards.png" alt="ToDo card detail styling" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>ToDo — Kanban + Calendar</h3><span class="tag new">New · 2026-07</span></div>
+          <p class="purpose">Purpose: a <b>shared team task board</b> tied to the actual records — ayuda dates, violation follow-ups, missing-data reminders.</p>
+          <ul class="feature-list">
+            <li>Kanban view — Google-Keep-style cards across To Do / In Progress / Done columns</li>
+            <li>Move menu, priority accent, due-date chip with overdue flagging</li>
+            <li>🔗 link back to the source record on each card</li>
+            <li>Calendar month-grid view with a "No Due Date" list</li>
+            <li>"All / Assigned to me" filter</li>
+            <li>"Make ToDo" button on Fisherfolk, Vessel, Violation &amp; Ayuda pages — pre-fills a context title and links back to that record</li>
+            <li>Each record page lists its linked todos</li>
+            <li>Assignee defaults to the creator</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/19-reports.png"><img src="assets/19-reports.png" alt="Reports screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Reports</h3></div>
+          <p class="purpose">Purpose: produce <b>official lists &amp; summaries</b>.</p>
+          <ul class="feature-list">
+            <li>9+ report types, including a Household Masterlist</li>
+            <li>Filter by barangay / category</li>
+            <li>Excel export</li>
+            <li>Print-ready output</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/20-import.png"><img src="assets/20-import.png" alt="Data Import screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Data Import</h3></div>
+          <p class="purpose">Purpose: bring <b>legacy &amp; bulk data</b> into FRMS cleanly.</p>
+          <ul class="feature-list">
+            <li>Excel/spreadsheet import wizard — upload → preview → commit</li>
+            <li>Incremental import</li>
+            <li>Barangay alias mapping</li>
+            <li>Duplicate detection</li>
+            <li>Photo / signature import with auto-linking</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/21-id-generator.png"><img src="assets/21-id-generator.png" alt="ID Generator screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>ID Generator</h3></div>
+          <p class="purpose">Purpose: issue <b>fisherfolk ID cards</b>.</p>
+          <ul class="feature-list">
+            <li>Template-driven ID card generation with QR</li>
+            <li>Batch generation</li>
+            <li>Visual ID-template designer (in Settings)</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4 — ADMINISTRATION ============ -->
+  <section class="section" id="administration">
+    <div class="section-head"><span class="badge-num">04</span><h2>Administration</h2></div>
+    <p class="section-desc">Keeping the municipality's own workspace accountable and configured to its needs.</p>
+
+    <div class="card-grid">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/24-audit-log.png"><img src="assets/24-audit-log.png" alt="Audit Log screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Audit Log</h3></div>
+          <p class="purpose">Purpose: <b>accountability</b>.</p>
+          <ul class="feature-list">
+            <li>Full audit trail of actions with per-agent attribution</li>
+            <li>Searchable</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/23-user-management.png"><img src="assets/23-user-management.png" alt="User Management screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>User Management</h3></div>
+          <p class="purpose">Purpose: manage <b>staff accounts</b> per municipality.</p>
+          <ul class="feature-list">
+            <li>Create users</li>
+            <li>Assign roles</li>
+            <li>Reset passwords</li>
+            <li>Activate / deactivate accounts</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/22-settings.png"><img src="assets/22-settings.png" alt="Settings screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Settings</h3></div>
+          <p class="purpose">Purpose: configure the <b>municipality's workspace</b>.</p>
+          <ul class="feature-list">
+            <li>Per-tenant accent-color theme editor</li>
+            <li>Barangay alias management</li>
+            <li>ID-template designer</li>
+            <li>Other tenant preferences</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 5 — PLATFORM ============ -->
+  <section class="section" id="platform">
+    <div class="section-head"><span class="badge-num">05</span><h2>Platform <span style="font-weight:400; color:var(--text-faint); font-size:0.6em;">(super-admin)</span></h2></div>
+    <p class="section-desc">The layer above any single municipality — running FRMS as a platform for many LGUs.</p>
+
+    <div class="card-grid" style="grid-template-columns:1fr; max-width:640px;">
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/26-platform-tenants.png"><img src="assets/26-platform-tenants.png" alt="Platform Tenants screen" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Platform › Tenants</h3></div>
+          <p class="purpose">Purpose: run FRMS as a <b>multi-LGU platform</b>.</p>
+          <ul class="feature-list">
+            <li>Create a tenant + provision its admin</li>
+            <li>Activate / deactivate tenants — suspended-tenant login is blocked</li>
+            <li>Custom-domain onboarding</li>
+            <li>Drill into a tenant's own user management</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>FRMS</strong> · Calapan City Fisheries Management Office · internal feature reference · generated 2026-07-09</p>
+  <span class="foot-tag">✦ Household Management and ToDo (Kanban + Calendar) are the newest additions</span>
+</footer>
+
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<script>
+  (function(){
+    "use strict";
+    // Theme toggle
+    var root = document.documentElement;
+    var btn = document.getElementById('themeToggle');
+    var stored = null;
+    try { stored = localStorage.getItem('frms-showcase-theme'); } catch(e){}
+    if (stored === 'light' || stored === 'dark') { root.setAttribute('data-theme', stored); }
+    function currentIsDark(){
+      var attr = root.getAttribute('data-theme');
+      if (attr === 'dark') return true;
+      if (attr === 'light') return false;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    if (btn) {
+      btn.addEventListener('click', function(){
+        var next = currentIsDark() ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('frms-showcase-theme', next); } catch(e){}
+      });
+    }
+
+    // Lightbox
+    var lb = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    document.querySelectorAll('.shot').forEach(function(el){
+      el.addEventListener('click', function(){
+        var full = el.getAttribute('data-full');
+        var img = el.querySelector('img');
+        lbImg.src = full || (img ? img.src : '');
+        lbImg.alt = img ? img.alt : '';
+        lb.classList.add('open');
+      });
+    });
+    if (lb) {
+      lb.addEventListener('click', function(){ lb.classList.remove('open'); lbImg.src=''; });
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') { lb.classList.remove('open'); lbImg.src=''; }
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>
