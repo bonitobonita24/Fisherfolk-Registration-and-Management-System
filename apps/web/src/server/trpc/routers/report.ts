@@ -13,6 +13,7 @@ import type { Prisma } from "@frms/db";
 
 import { adminProcedure, createTRPCRouter, protectedProcedure } from "../trpc";
 import type { TRPCContext } from "../context";
+import { domainReportProcedures } from "./report/domain-procedures";
 
 // ---------------------------------------------------------------------------
 // Input schemas
@@ -50,7 +51,7 @@ type ReportType = z.infer<typeof reportTypeSchema>;
 type Column = { key: string; label: string };
 type Row = Record<string, string | number>;
 
-type ReportResult = {
+export type ReportResult = {
   title: string;
   columns: Column[];
   rows: Row[];
@@ -492,9 +493,9 @@ async function buildReport(
 // Excel builder (admin-only)
 // ---------------------------------------------------------------------------
 
-async function buildExcel(
+export async function buildExcel(
   report: ReportResult,
-  type: ReportType,
+  filenameHint: string,
 ): Promise<{ filename: string; base64: string }> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Report");
@@ -525,7 +526,7 @@ async function buildExcel(
 
   const base64 = buf.toString("base64");
   const dateStr = new Date().toISOString().slice(0, 10);
-  const filename = `${type}_${dateStr}.xlsx`;
+  const filename = `${filenameHint}_${dateStr}.xlsx`;
 
   return { filename, base64 };
 }
@@ -574,4 +575,10 @@ export const reportRouter = createTRPCRouter({
       );
       return buildExcel(report, input.type);
     }),
+
+  // ── Universal Report Hub (M4 T5) ──────────────────────────────────────────
+  // Domain-driven procedures (fisherfolk/household/vessel/violation/ayuda/
+  // fish-catch) live in ./report/domain-procedures.ts to keep this file under
+  // the dispatch line-budget. Spread in — same router, same auth guards.
+  ...domainReportProcedures,
 });

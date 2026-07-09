@@ -21,7 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc/client";
+import { ReportHub } from "./report-hub";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type ReportType =
@@ -143,7 +145,13 @@ export function ReportsClient() {
   }
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="standard" className="space-y-6">
+      <TabsList className="print:hidden">
+        <TabsTrigger value="standard">Standard Reports</TabsTrigger>
+        <TabsTrigger value="hub">Report Hub</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="standard" className="space-y-6">
       {/* ── Print-only government header ──────────────────────────────────── */}
       <div className="hidden print:block mb-6 text-center space-y-0.5">
         <p className="text-sm font-semibold">Republic of the Philippines</p>
@@ -317,6 +325,11 @@ export function ReportsClient() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </TabsContent>
+
+      <TabsContent value="hub" className="space-y-6">
+        <ReportHub />
+      </TabsContent>
+    </Tabs>
   );
 }

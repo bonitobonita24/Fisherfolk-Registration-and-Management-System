@@ -6,7 +6,22 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
-_(none open — all owner `[WHAT]` decisions resolved as of 2026-06-30)_
+- [] 2026-07-09 — **M4 Universal Report Hub — product-grain defaults (non-blocking).** The Full-Auto
+  loop built the Report Hub with sensible technical defaults; each below is a `[WHAT]` the owner may
+  flip. None blocked the build.
+  1. **Browser-PDF path:** "PDF export" = the existing `window.print()` → "Save as PDF" flow (no new
+     server-PDF dependency). Flip only if a true server-rendered PDF is required.
+  2. **Time-series bucket granularity:** monthly buckets for violation / ayuda / fish-catch over-time
+     charts. Flip to weekly/yearly if preferred.
+  3. **Household size-distribution bands:** 1, 2–3, 4–5, 6+. Flip if the FMO uses official bands.
+  4. **Ayuda report grain:** reports over `AyudaBeneficiary` rows (ledger-useful), not program-level
+     summary. Flip if a program-level roll-up is wanted instead.
+  5. **Default scope with no facet selected:** unfiltered / tenant-wide (respects existing Viewer+ gate).
+     Confirm no extra per-role PII-scope restriction is required.
+  - Back-port of the whole Report Hub feature to `docs/PRODUCT.md` is a further owner `[WHAT]`
+    (Rule 1) — batched with the other M1/M2/M3 back-port candidates.
+
+_(all prior owner `[WHAT]` decisions resolved as of 2026-06-30)_
 
 ## Resolved
 
