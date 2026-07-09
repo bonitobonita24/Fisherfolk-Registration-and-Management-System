@@ -352,7 +352,6 @@
     <a href="#records">Records</a>
     <a href="#operations">Operations</a>
     <a href="#administration">Administration</a>
-    <a href="#platform">Platform</a>
   </div>
   <button class="theme-toggle" id="themeToggle" type="button" title="Toggle light / dark" aria-label="Toggle theme"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8Z"/></svg></button>
 </nav>
@@ -364,11 +363,9 @@
     <p class="lede">The digital backbone for registering, tracking, and supporting every fisherfolk, household, vessel, and aid program in the municipality — in one governed, auditable platform.</p>
     <p class="sub">Built for the Calapan City Fisheries Management Office (FMO) — Local Government Unit deployment</p>
     <div class="stat-strip">
-      <span class="stat-chip"><strong>3,000+</strong>&nbsp;fisherfolk registered</span>
       <span class="stat-chip"><strong>6</strong>&nbsp;core record types</span>
       <span class="stat-chip"><strong>20+</strong>&nbsp;modules</span>
       <span class="stat-chip"><strong>WCAG 2.2 AA</strong>&nbsp;compliant</span>
-      <span class="stat-chip"><strong>Multi-tenant</strong>&nbsp;architecture</span>
       <span class="stat-chip"><strong>62</strong>&nbsp;barangays mapped</span>
     </div>
   </div>
@@ -382,16 +379,6 @@
     <p class="section-desc">Cross-cutting capabilities every module inherits — security, identity, and accessibility are not features bolted on, they're the ground floor.</p>
 
     <div class="foundations">
-      <div class="foundation-card">
-        <div class="ficon" style="background:var(--accent-soft); color:var(--accent);"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></div>
-        <h3>Multi-tenant SaaS</h3>
-        <p>One platform, many Local Government Units — each sees only its own data.</p>
-        <ul>
-          <li>Per-municipality data isolation (tenant-scoped, L1–L6 security model)</li>
-          <li>Tenant-as-subdirectory routing by default</li>
-          <li>Optional custom-domain masking per tenant</li>
-        </ul>
-      </div>
       <div class="foundation-card">
         <div class="ficon" style="background:var(--teal-soft); color:var(--teal);"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><circle cx="12" cy="15.5" r="1.2"/></svg></div>
         <h3>Authentication &amp; Roles</h3>
@@ -410,7 +397,7 @@
         <ul>
           <li>WCAG 2.2 AA — government hard gate</li>
           <li>Light &amp; dark mode, system-aware</li>
-          <li>Per-tenant accent color theming</li>
+          <li>Per-LGU accent color theming</li>
           <li>shadcn/ui component system, fully responsive</li>
         </ul>
       </div>
@@ -423,11 +410,11 @@
         </div>
         <div class="card-body">
           <div class="card-head"><h3>Sign-in</h3></div>
-          <p class="purpose">Purpose: <b>the front door</b> — a clean, tenant-branded login gate.</p>
+          <p class="purpose">Purpose: <b>the front door</b> — a clean, LGU-branded login gate.</p>
           <ul class="feature-list">
             <li>Username-based login, bcrypt-12 password hashing</li>
             <li>"Remember me" 30-day session</li>
-            <li>Tenant-scoped credential check (suspended tenants are blocked here)</li>
+            <li>Secure credential check (suspended accounts are blocked here)</li>
           </ul>
         </div>
       </article>
@@ -525,7 +512,7 @@
           <div class="card-head"><h3>Fisherfolk</h3></div>
           <p class="purpose">Purpose: the <b>master registry</b> of municipal fisherfolk.</p>
           <ul class="feature-list">
-            <li>Searchable / filterable masterlist (3,000+ records, paginated)</li>
+            <li>Searchable / filterable masterlist (paginated)</li>
             <li>Multi-step registration wizard</li>
             <li>Rich profile detail — photo, signature, QR, demographics</li>
             <li>6-category classification badges</li>
@@ -812,34 +799,10 @@
           <div class="card-head"><h3>Settings</h3></div>
           <p class="purpose">Purpose: configure the <b>municipality's workspace</b>.</p>
           <ul class="feature-list">
-            <li>Per-tenant accent-color theme editor</li>
+            <li>Per-LGU accent-color theme editor</li>
             <li>Barangay alias management</li>
             <li>ID-template designer</li>
-            <li>Other tenant preferences</li>
-          </ul>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- ============ SECTION 5 — PLATFORM ============ -->
-  <section class="section" id="platform">
-    <div class="section-head"><span class="badge-num">05</span><h2>Platform <span style="font-weight:400; color:var(--text-faint); font-size:0.6em;">(super-admin)</span></h2></div>
-    <p class="section-desc">The layer above any single municipality — running FRMS as a platform for many LGUs.</p>
-
-    <div class="card-grid" style="grid-template-columns:1fr; max-width:640px;">
-      <article class="card">
-        <div class="card-media">
-          <button class="shot" data-full="assets/26-platform-tenants.png"><img src="assets/26-platform-tenants.png" alt="Platform Tenants screen" loading="lazy"></button>
-        </div>
-        <div class="card-body">
-          <div class="card-head"><h3>Platform › Tenants</h3></div>
-          <p class="purpose">Purpose: run FRMS as a <b>multi-LGU platform</b>.</p>
-          <ul class="feature-list">
-            <li>Create a tenant + provision its admin</li>
-            <li>Activate / deactivate tenants — suspended-tenant login is blocked</li>
-            <li>Custom-domain onboarding</li>
-            <li>Drill into a tenant's own user management</li>
+            <li>Other LGU preferences</li>
           </ul>
         </div>
       </article>
