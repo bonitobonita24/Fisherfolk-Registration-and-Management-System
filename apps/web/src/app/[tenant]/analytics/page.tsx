@@ -1,4 +1,4 @@
-import { AnalyticsClient } from "./analytics-client";
+import { AnalyticsTabs } from "./analytics-tabs";
 
 export default function AnalyticsPage() {
   return (
@@ -7,7 +7,7 @@ export default function AnalyticsPage() {
       <p className="text-muted-foreground">
         Visual analytics and demographic intelligence dashboards.
       </p>
-      <AnalyticsClient />
+      <AnalyticsTabs />
     </div>
   );
 }
