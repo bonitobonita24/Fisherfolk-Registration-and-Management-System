@@ -365,8 +365,8 @@
     <p class="sub">Built for the Calapan City Fisheries Management Office (FMO) — Local Government Unit deployment</p>
     <div class="stat-strip">
       <span class="stat-chip"><strong>3,000+</strong>&nbsp;fisherfolk registered</span>
-      <span class="stat-chip"><strong>5</strong>&nbsp;core record types</span>
-      <span class="stat-chip"><strong>18+</strong>&nbsp;modules</span>
+      <span class="stat-chip"><strong>6</strong>&nbsp;core record types</span>
+      <span class="stat-chip"><strong>20+</strong>&nbsp;modules</span>
       <span class="stat-chip"><strong>WCAG 2.2 AA</strong>&nbsp;compliant</span>
       <span class="stat-chip"><strong>Multi-tenant</strong>&nbsp;architecture</span>
       <span class="stat-chip"><strong>62</strong>&nbsp;barangays mapped</span>
@@ -610,18 +610,44 @@
           <button class="shot" data-full="assets/14-ayuda-list.png"><img src="assets/14-ayuda-list.png" alt="Ayuda list" loading="lazy"></button>
           <div class="shot-row">
             <button class="shot" data-full="assets/15-ayuda-detail.png"><img src="assets/15-ayuda-detail.png" alt="Ayuda detail" loading="lazy"></button>
+            <button class="shot" data-full="assets/31-ayuda-bulk-filter.png"><img src="assets/31-ayuda-bulk-filter.png" alt="Ayuda bulk-selection multi-filter dialog" loading="lazy"></button>
           </div>
         </div>
         <div class="card-body">
-          <div class="card-head"><h3>Ayuda</h3></div>
+          <div class="card-head"><h3>Ayuda</h3><span class="tag new">New · 2026-07</span></div>
           <p class="purpose">Purpose: manage <b>government aid / relief programs</b> for fisherfolk.</p>
           <ul class="feature-list">
             <li>Aid programs with Draft → Published → Closed lifecycle</li>
-            <li>Beneficiary management</li>
             <li>Distribution-unit toggle — per-fisherfolk OR per-household</li>
             <li>Household mode records the head as beneficiary, one per household, dedup-guarded</li>
-            <li>Supporting file attachments</li>
-            <li>"Make ToDo" quick action</li>
+            <li><b>Bulk beneficiary mass-selection</b> — a mix-and-match multi-filter dialog to enroll many at once</li>
+            <li>Filter by <b>any combination</b> of barangay, household, category, age range, registration status, vessel-owner, and vessel type</li>
+            <li>Live "N matching" count → add ALL matching in one action, add selected, or bulk-remove (pending only)</li>
+            <li>Distribution-unit aware — household programs filter on the household head</li>
+            <li>Manual add/remove of individuals still available; supporting file attachments; "Make ToDo" quick action</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/27-fish-catch-list.png"><img src="assets/27-fish-catch-list.png" alt="Fish Catch activity list" loading="lazy"></button>
+          <div class="shot-row">
+            <button class="shot" data-full="assets/28-fish-catch-detail.png"><img src="assets/28-fish-catch-detail.png" alt="Fish Catch record detail with species composition" loading="lazy"></button>
+            <button class="shot" data-full="assets/29-fish-catch-analytics.png"><img src="assets/29-fish-catch-analytics.png" alt="Fish Catch analytics charts" loading="lazy"></button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Fish Catch</h3><span class="tag new">New · 2026-07</span></div>
+          <p class="purpose">Purpose: record <b>catch-landing activity</b> (BFAR / NSAP-aligned) tagged to a registered fisherfolk &amp; vessel — the basis for municipal capture &amp; CPUE reporting.</p>
+          <ul class="feature-list">
+            <li>Catch-landing records — date, fishing ground (barangay), gear/method, trip &amp; effort hours, disposition, value</li>
+            <li>Per-species composition — common &amp; scientific name and quantity (kg) per species</li>
+            <li>17 Philippine gear types &amp; 7 disposition types, auto <b>FC-YYYY-####</b> reference numbers</li>
+            <li>Each catch linked to a fisherfolk (and optional vessel); listed on the fisherfolk's profile</li>
+            <li><b>Fish Catch analytics tab</b> — catch (kg) &amp; value over time, with CPUE trend lines</li>
+            <li>Composition charts — by species, by gear, by barangay / fishing ground</li>
+            <li>Top fishers &amp; top vessels by catch; CPUE (catch-per-unit-effort) computed at query time</li>
           </ul>
         </div>
       </article>
@@ -686,6 +712,24 @@
             <li>Filter by barangay / category</li>
             <li>Excel export</li>
             <li>Print-ready output</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-media">
+          <button class="shot" data-full="assets/30-report-hub.png"><img src="assets/30-report-hub.png" alt="Universal Report Hub" loading="lazy"></button>
+        </div>
+        <div class="card-body">
+          <div class="card-head"><h3>Report Hub</h3><span class="tag new">New · 2026-07</span></div>
+          <p class="purpose">Purpose: a <b>universal report builder</b> — filter ANY data domain, then produce charts and/or a ledger export for external use.</p>
+          <ul class="feature-list">
+            <li>Pick 1 of <b>6 domains</b> — fisherfolk, household, vessel, violation, ayuda, fish-catch</li>
+            <li>Mix-and-match <b>faceted filters</b> (the same facets as ayuda mass-selection where relevant)</li>
+            <li><b>Ledger</b>-style columnar table — a clean tabular export for external purposes</li>
+            <li>2–3 auto-generated charts per domain, alongside the ledger</li>
+            <li>Excel export (admin), print, and browser-PDF output</li>
+            <li>Ships as a new tab beside the existing report types — the classic flow is untouched</li>
           </ul>
         </div>
       </article>
@@ -806,7 +850,7 @@
 
 <footer>
   <p><strong>FRMS</strong> · Calapan City Fisheries Management Office · internal feature reference · generated 2026-07-09</p>
-  <span class="foot-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-1px;"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></svg> Household Management and ToDo (Kanban + Calendar) are the newest additions</span>
+  <span class="foot-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:-1px;"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></svg> Fish Catch activity &amp; analytics, the universal Report Hub, and Ayuda bulk mass-selection are the newest additions</span>
 </footer>
 
 <div id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged screenshot">
