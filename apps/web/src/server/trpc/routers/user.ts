@@ -256,7 +256,12 @@ export const userRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  resetPassword: superAdminProcedure
+  // adminProcedure (not superAdminProcedure): after the tenant-manager role split
+  // (2026-07-09) the LGU top account is role `admin`, and it must be able to reset
+  // its own staff's passwords. Safe: hard-scoped to ctx.tenantId below, and
+  // super_admins live on the separate `platform` tenant so an LGU admin can never
+  // target one (no privilege escalation).
+  resetPassword: adminProcedure
     .input(
       z
         .object({
