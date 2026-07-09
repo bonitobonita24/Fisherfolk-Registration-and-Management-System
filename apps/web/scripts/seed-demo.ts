@@ -125,10 +125,14 @@ async function main(): Promise<void> {
     if (!tenant) throw new Error(`Tenant not found: ${tenantSlug}`);
     const tenantId = tenant.id;
 
-    // Acting user for createdBy/filedBy — prefer a super_admin, else any user.
+    // Acting user for createdBy/filedBy — prefer an admin/super_admin, else any
+    // user. NOTE: since the 2026-07-09 role split the LGU tenant's top account
+    // is role `admin` (super_admin lives on the separate `platform` tenant), so
+    // we match both roles here.
     const actor =
-      (await prisma.user.findFirst({ where: { tenantId, role: "super_admin" } })) ??
-      (await prisma.user.findFirst({ where: { tenantId } }));
+      (await prisma.user.findFirst({
+        where: { tenantId, role: { in: ["super_admin", "admin"] } },
+      })) ?? (await prisma.user.findFirst({ where: { tenantId } }));
     if (!actor) throw new Error(`No user found for tenant ${tenantSlug} — cannot attribute demo data.`);
 
     // Linking pool of existing fisherfolk.
