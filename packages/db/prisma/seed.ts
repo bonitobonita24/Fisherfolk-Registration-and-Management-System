@@ -51,7 +51,6 @@ async function main() {
         "Personas",
         "Putingtubig",
         "Salong",
-        "San Rafael",
         "Silonay",
         "Suqui",
         "Tawiran",
