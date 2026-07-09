@@ -21,7 +21,23 @@ conductor's to decide and never lands here.
   - Back-port of the whole Report Hub feature to `docs/PRODUCT.md` is a further owner `[WHAT]`
     (Rule 1) — batched with the other M1/M2/M3 back-port candidates.
 
-_(all prior owner `[WHAT]` decisions resolved as of 2026-06-30)_
+- [] 2026-07-09 — **Overnight batch M1–M3 — PRODUCT.md back-ports + Fish Catch product follow-ups
+  (non-blocking).** The Full-Auto loop shipped M1–M5 with sensible technical defaults; each below is a
+  `[WHAT]` for the owner. None blocked the build; all code is local/UNPUSHED on `feat/household-management`.
+  1. **PRODUCT.md back-port (Rule 1) — batch all at once:** M1 Ayuda mass-selection multi-filter (=
+     back-port **candidate M**, DECISIONS_LOG), M2 Fish Catch activity, M3 Fish Catch analytics, M4 Report
+     Hub. PRODUCT.md is human-only — owner back-ports, defers, or logs `spec-divergent`.
+  2. **Fish Catch — Species master table + Settings CRUD (optional):** M2 shipped free-text `commonName`
+     + `COMMON_FISH_SPECIES` datalist (no master table). Add a normalized Species model + Settings CRUD if
+     the FMO wants a controlled species vocabulary. Flip = a new small feature, not a fix.
+  3. **ToDo ↔ Fish Catch source-linking (optional):** add `fishCatch` to the ToDo `SourceEntityType` so
+     a "Make ToDo" button can link to a fish-catch record (skipped on the M2 detail page). Small additive wire-up.
+  4. **App-wide hover color-contrast theme pass (🟡 pre-existing, NOT an M4 regression):** outline buttons'
+     `hover:bg-accent` teal-on-white measures ~3.59:1 (< WCAG 4.5:1) on hover only. App-wide theme issue —
+     candidate for a dedicated theme/contrast pass, owner-scheduled.
+
+_(all prior owner `[WHAT]` decisions resolved as of 2026-06-30; the two 2026-07-09 items above are the
+only open follow-ups — both non-blocking, batch outcome ✅ COMPLETE)_
 
 ## Resolved
 
