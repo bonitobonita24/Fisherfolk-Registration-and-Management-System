@@ -188,3 +188,45 @@ export const EntityType = {
   AYUDA_BENEFICIARY: "AYUDA_BENEFICIARY",
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
+
+export const GearType = {
+  GILL_NET: "GILL_NET",
+  HOOK_AND_LINE: "HOOK_AND_LINE",
+  HANDLINE: "HANDLINE",
+  LONGLINE: "LONGLINE",
+  FISH_CORRAL: "FISH_CORRAL",
+  FISH_TRAP: "FISH_TRAP",
+  BEACH_SEINE: "BEACH_SEINE",
+  RING_NET: "RING_NET",
+  CAST_NET: "CAST_NET",
+  LIFT_NET: "LIFT_NET",
+  SCOOP_NET: "SCOOP_NET",
+  SPEAR_GUN: "SPEAR_GUN",
+  FISH_POT: "FISH_POT",
+  CRAB_LIFT_NET: "CRAB_LIFT_NET",
+  SQUID_JIG: "SQUID_JIG",
+  GLEANING: "GLEANING",
+  OTHER: "OTHER",
+} as const;
+export type GearType = (typeof GearType)[keyof typeof GearType];
+
+export const CatchDisposition = {
+  SOLD: "SOLD",
+  HOME_CONSUMED: "HOME_CONSUMED",
+  BARTERED: "BARTERED",
+  DRIED_PROCESSED: "DRIED_PROCESSED",
+  SHARED_GIVEN: "SHARED_GIVEN",
+  DISCARDED: "DISCARDED",
+  MIXED: "MIXED",
+} as const;
+export type CatchDisposition =
+  (typeof CatchDisposition)[keyof typeof CatchDisposition];
+
+export const FishCatchSource = {
+  FMO_ENUMERATOR: "FMO_ENUMERATOR",
+  SELF_REPORT: "SELF_REPORT",
+  NSAP_SAMPLING: "NSAP_SAMPLING",
+  IMPORT: "IMPORT",
+} as const;
+export type FishCatchSource =
+  (typeof FishCatchSource)[keyof typeof FishCatchSource];

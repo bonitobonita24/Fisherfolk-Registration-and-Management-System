@@ -13,3 +13,4 @@ export * from "./notification";
 export * from "./ayuda";
 export * from "./id-template";
 export * from "./id-print";
+export * from "./fish-catch";

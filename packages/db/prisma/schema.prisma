@@ -156,6 +156,43 @@ enum CommentTicketStatus {
   RESOLVED
 }
 
+enum GearType {
+  GILL_NET
+  HOOK_AND_LINE
+  HANDLINE
+  LONGLINE
+  FISH_CORRAL
+  FISH_TRAP
+  BEACH_SEINE
+  RING_NET
+  CAST_NET
+  LIFT_NET
+  SCOOP_NET
+  SPEAR_GUN
+  FISH_POT
+  CRAB_LIFT_NET
+  SQUID_JIG
+  GLEANING
+  OTHER
+}
+
+enum CatchDisposition {
+  SOLD
+  HOME_CONSUMED
+  BARTERED
+  DRIED_PROCESSED
+  SHARED_GIVEN
+  DISCARDED
+  MIXED
+}
+
+enum FishCatchSource {
+  FMO_ENUMERATOR
+  SELF_REPORT
+  NSAP_SAMPLING
+  IMPORT
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model Tenant {
@@ -205,6 +242,8 @@ model Tenant {
   registrationRenewals RegistrationRenewal[]
   idPrintBatches       IDPrintBatch[]
   households           Household[]
+  fishCatches          FishCatch[]
+  fishCatchSpecies     FishCatchSpecies[]
 
   @@map("tenants")
 }
@@ -247,6 +286,9 @@ model User {
   idReleasedFisherfolk  Fisherfolk[]          @relation("FisherfolkIdReleasedBy")
   idPrintBatches        IDPrintBatch[]        @relation("IDPrintBatchPrintedBy")
   createdHouseholds     Household[]           @relation("HouseholdCreatedBy")
+  fishCatchesRecorded   FishCatch[]           @relation("FishCatchRecordedBy")
+  fishCatchesCreated    FishCatch[]           @relation("FishCatchCreatedBy")
+  fishCatchesUpdated    FishCatch[]           @relation("FishCatchUpdatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -298,6 +340,7 @@ model Fisherfolk {
   renewals           RegistrationRenewal[]
   household          Household?            @relation("HouseholdMembers", fields: [householdId], references: [id])
   headOf             Household?            @relation("HouseholdHead")
+  fishCatches        FishCatch[]           @relation("FisherfolkFishCatches")
 
   @@unique([tenantId, idNumber])
   @@index([tenantId])
@@ -336,11 +379,12 @@ model Vessel {
   createdById               String?      @map("created_by_id")
   updatedById               String?      @map("updated_by_id")
 
-  tenant     Tenant       @relation(fields: [tenantId], references: [id])
-  createdBy  User?        @relation("VesselCreatedBy", fields: [createdById], references: [id])
-  updatedBy  User?        @relation("VesselUpdatedBy", fields: [updatedById], references: [id])
-  owners     Fisherfolk[] @relation("FisherfolkVessels")
-  violations Violation[]  @relation("VesselViolations")
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  createdBy   User?        @relation("VesselCreatedBy", fields: [createdById], references: [id])
+  updatedBy   User?        @relation("VesselUpdatedBy", fields: [updatedById], references: [id])
+  owners      Fisherfolk[] @relation("FisherfolkVessels")
+  violations  Violation[]  @relation("VesselViolations")
+  fishCatches FishCatch[]  @relation("VesselFishCatches")
 
   @@unique([tenantId, mfvrNumber])
   @@index([tenantId])
@@ -767,4 +811,73 @@ model IDPrintBatch {
   @@index([tenantId])
   @@index([tenantId, printedAt])
   @@map("id_print_batches")
+}
+
+model FishCatch {
+  id                    String            @id @default(cuid())
+  tenantId              String            @map("tenant_id")
+  referenceNo           String            @map("reference_no")
+  fisherfolkId          String            @map("fisherfolk_id")
+  vesselId              String?           @map("vessel_id")
+  landingDate           DateTime          @map("landing_date") @db.Date
+  landingTime           String?           @map("landing_time")
+  departureAt           DateTime?         @map("departure_at")
+  returnAt              DateTime?         @map("return_at")
+  fishingGroundBarangay String?           @map("fishing_ground_barangay")
+  fishingGroundLabel    String?           @map("fishing_ground_label")
+  fmaCode               String?           @map("fma_code")
+  gearType              GearType          @map("gear_type")
+  gearDetail            String?           @map("gear_detail")
+  gearUnits             Int?              @map("gear_units")
+  fishingHours          Decimal?          @map("fishing_hours") @db.Decimal(8, 2)
+  numTrips              Int               @default(1) @map("num_trips")
+  numFishers            Int?              @map("num_fishers")
+  totalCatchKg          Decimal           @map("total_catch_kg") @db.Decimal(10, 2)
+  estimatedValuePhp     Decimal?          @map("estimated_value_php") @db.Decimal(12, 2)
+  disposition           CatchDisposition?
+  remarks               String?
+  source                FishCatchSource   @default(FMO_ENUMERATOR)
+  recordedById          String?           @map("recorded_by_id")
+  createdById           String?           @map("created_by_id")
+  updatedById           String?           @map("updated_by_id")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  updatedAt             DateTime          @updatedAt @map("updated_at")
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id])
+  fisherfolk Fisherfolk         @relation("FisherfolkFishCatches", fields: [fisherfolkId], references: [id])
+  vessel     Vessel?            @relation("VesselFishCatches", fields: [vesselId], references: [id])
+  recordedBy User?              @relation("FishCatchRecordedBy", fields: [recordedById], references: [id])
+  createdBy  User?              @relation("FishCatchCreatedBy", fields: [createdById], references: [id])
+  updatedBy  User?              @relation("FishCatchUpdatedBy", fields: [updatedById], references: [id])
+  species    FishCatchSpecies[]
+
+  @@unique([tenantId, referenceNo])
+  @@index([tenantId])
+  @@index([tenantId, landingDate])
+  @@index([tenantId, fisherfolkId])
+  @@index([tenantId, gearType])
+  @@map("fish_catches")
+}
+
+model FishCatchSpecies {
+  id             String            @id @default(cuid())
+  tenantId       String            @map("tenant_id")
+  fishCatchId    String            @map("fish_catch_id")
+  commonName     String            @map("common_name")
+  scientificName String?           @map("scientific_name")
+  weightKg       Decimal           @map("weight_kg") @db.Decimal(10, 2)
+  quantityPcs    Int?              @map("quantity_pcs")
+  pricePerKgPhp  Decimal?          @map("price_per_kg_php") @db.Decimal(10, 2)
+  valuePhp       Decimal?          @map("value_php") @db.Decimal(12, 2)
+  disposition    CatchDisposition?
+  avgLengthCm    Decimal?          @map("avg_length_cm") @db.Decimal(6, 2)
+  sizeClass      String?           @map("size_class")
+  createdAt      DateTime          @default(now()) @map("created_at")
+
+  fishCatch FishCatch @relation(fields: [fishCatchId], references: [id], onDelete: Cascade)
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@index([fishCatchId])
+  @@map("fish_catch_species")
 }

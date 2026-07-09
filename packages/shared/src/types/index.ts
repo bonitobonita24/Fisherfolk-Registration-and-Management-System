@@ -73,4 +73,10 @@ export type {
   IDTemplateUpdateInput,
 } from "./id-template";
 
+export type {
+  FishCatchListItem,
+  FishCatchDetail,
+  FishCatchSpeciesLine,
+} from "./fish-catch";
+
 export * from "./enums";

@@ -13,6 +13,9 @@ import {
   Gender,
   CivilStatus,
   EntityType,
+  GearType,
+  CatchDisposition,
+  FishCatchSource,
 } from "../types/enums";
 
 export const USER_ROLES = Object.values(UserRole);
@@ -29,6 +32,11 @@ export const AYUDA_BENEFICIARY_STATUSES = Object.values(AyudaBeneficiaryStatus);
 export const GENDERS = Object.values(Gender);
 export const CIVIL_STATUSES = Object.values(CivilStatus);
 export const ENTITY_TYPES = Object.values(EntityType);
+export const GEAR_TYPES = Object.values(GearType);
+export const CATCH_DISPOSITIONS = Object.values(CatchDisposition);
+export const FISH_CATCH_SOURCES = Object.values(FishCatchSource);
+
+export * from "./fish-species";
 
 export const PAGINATION_DEFAULTS = {
   DEFAULT_PAGE: 1,

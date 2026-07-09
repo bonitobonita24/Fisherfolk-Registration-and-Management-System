@@ -129,6 +129,17 @@ export const fisherfolkRouter = createTRPCRouter({
               renewedBy: { select: { name: true, email: true } },
             },
           },
+          fishCatches: {
+            orderBy: { landingDate: "desc" },
+            take: 5,
+            select: {
+              id: true,
+              referenceNo: true,
+              landingDate: true,
+              gearType: true,
+              totalCatchKg: true,
+            },
+          },
           idReleasedBy: { select: { name: true, email: true } },
           household: {
             select: { id: true, householdNumber: true, headId: true },
@@ -136,7 +147,13 @@ export const fisherfolkRouter = createTRPCRouter({
         },
       });
       if (!record) throw new TRPCError({ code: "NOT_FOUND" });
-      return record;
+      return {
+        ...record,
+        fishCatches: record.fishCatches.map((fc) => ({
+          ...fc,
+          totalCatchKg: Number(fc.totalCatchKg),
+        })),
+      };
     }),
 
   searchForDuplicates: encoderProcedure

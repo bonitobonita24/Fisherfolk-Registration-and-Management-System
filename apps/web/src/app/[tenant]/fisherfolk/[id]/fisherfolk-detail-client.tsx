@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { GEAR_TYPE_LABELS } from "@frms/shared/constants";
 
 interface Props {
   id: string;
@@ -512,8 +513,8 @@ export function FisherfolkDetailClient({ id }: Props) {
             </CardContent>
           </Card>
 
-          {/* Related records — compact 3-up grid */}
-          <div className="grid gap-6 lg:grid-cols-3">
+          {/* Related records — compact 2x2 grid */}
+          <div className="grid gap-6 lg:grid-cols-2">
             {/* Registered Vessels */}
             <Card>
               <CardHeader>
@@ -620,6 +621,47 @@ export function FisherfolkDetailClient({ id }: Props) {
                           </p>
                         </div>
                         <StatusBadge status={b.verificationStatus} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Fish Catches */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Fish Catches</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {record.fishCatches.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No fish catches on record.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-border">
+                    {record.fishCatches.map((fc) => (
+                      <li
+                        key={fc.id}
+                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                      >
+                        <div className="min-w-0">
+                          <Link
+                            href={`/${params.tenant}/fish-catches/${fc.id}`}
+                            className="text-sm font-medium text-foreground hover:underline"
+                          >
+                            {fc.referenceNo}
+                          </Link>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(fc.landingDate).toLocaleDateString(
+                              "en-PH",
+                            )}{" "}
+                            &middot; {GEAR_TYPE_LABELS[fc.gearType]}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-sm text-muted-foreground">
+                          {fc.totalCatchKg.toLocaleString()} kg
+                        </span>
                       </li>
                     ))}
                   </ul>

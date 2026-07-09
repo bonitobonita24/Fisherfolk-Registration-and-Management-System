@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Users,
   Ship,
+  Fish,
   AlertTriangle,
   FileEdit,
   ListTodo,
@@ -80,6 +81,12 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Vessels",
         icon: Ship,
         href: "/vessels",
+        roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"],
+      },
+      {
+        label: "Fish Catches",
+        icon: Fish,
+        href: "/fish-catches",
         roles: ["super_admin", "admin", "encoder", "viewer", "bantay_dagat"],
       },
       {

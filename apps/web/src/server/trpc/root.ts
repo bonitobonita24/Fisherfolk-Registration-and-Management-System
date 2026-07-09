@@ -7,6 +7,7 @@ import { categoryRouter } from "./routers/category";
 import { commentRouter } from "./routers/comment";
 import { dashboardRouter } from "./routers/dashboard";
 import { editRequestRouter } from "./routers/editRequest";
+import { fishCatchRouter } from "./routers/fishCatch";
 import { fisherfolkRouter } from "./routers/fisherfolk";
 import { householdRouter } from "./routers/household";
 import { idTemplateRouter } from "./routers/idTemplate";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   comment: commentRouter,
   dashboard: dashboardRouter,
   editRequest: editRequestRouter,
+  fishCatch: fishCatchRouter,
   fisherfolk: fisherfolkRouter,
   household: householdRouter,
   import: importRouter,
