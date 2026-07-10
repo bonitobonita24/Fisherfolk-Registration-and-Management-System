@@ -82,3 +82,29 @@
   recommendation adopted as provisional default; owner may flip): (1) bypass = missing photo/signature
   + any currently-empty required field (changing populated fields always needs approval); (2) new
   EditRequest per submit, rejection history via query. Locked (provisional) in DECISIONS_LOG.
+
+---
+
+## PD-005 — RBAC: custom-role permission-matrix + role-builder UI scope 🟤
+- **Opened:** 2026-07-10 (Full-Auto M3 RBAC 3-tier retrofit)
+- **Context:** M3 lands the fleet 3-tier backbone (tenant_manager / tenant_superadmin / tenant_admin
+  + domain roles). The fleet standard also defines a data-driven CUSTOM-role layer below tenant_admin:
+  a `feature_registry`, a `role_permissions(tenant_id, role_id, feature_key, view, write, update, delete)`
+  matrix, a `hasPermission()` resolver wired at tRPC + route middleware + sidebar, and a
+  tenant_superadmin-only role-builder screen.
+- **Decision needed:** Is the custom-role matrix + role-builder in scope for FRMS now, or deferred?
+  It is a large, self-contained milestone; FRMS currently ships fixed domain roles that meet LGU needs.
+- **Recommendation (agent [HOW] lean):** DEFER to a later milestone — ship the 3-tier backbone +
+  two-way succession first (Chunks B/C), which is the auth-critical core. Build the matrix only if/when
+  a tenant needs bespoke roles. No code until owner confirms scope.
+- **Status:** ⏸ DEFERRED — awaiting owner [WHAT]. Un-gated RBAC work (Chunks B/C/D) proceeds without it.
+
+## PD-006 — Remote push / staging / prod promotion for the RBAC + v0.9.0 work 🟤
+- **Opened:** 2026-07-10
+- **Context:** All 2026-07-10 work (v0.9.0 versioning, RBAC retrofit) is LOCAL commits on
+  `feat/household-management` under HARD HOLD. Branch is far ahead of origin/main; local main 4 ahead
+  of origin. An RBAC enum migration + a data import both touch auth/PII.
+- **Decision needed:** When (and in what order) to push to origin/main → staging (data-first gate) →
+  prod. Prod is NEVER automatic (deploy-discipline). RBAC migrations must rehearse on staging with a
+  prod-data copy before any prod promotion.
+- **Status:** ⏸ DEFERRED — no push/deploy without explicit owner word ("push to staging"/"go live").
