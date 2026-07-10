@@ -97,14 +97,29 @@
 - **Recommendation (agent [HOW] lean):** DEFER to a later milestone — ship the 3-tier backbone +
   two-way succession first (Chunks B/C), which is the auth-critical core. Build the matrix only if/when
   a tenant needs bespoke roles. No code until owner confirms scope.
-- **Status:** ⏸ DEFERRED — awaiting owner [WHAT]. Un-gated RBAC work (Chunks B/C/D) proceeds without it.
+- **Status:** ✅ **APPROVED by owner 2026-07-11** ("do all the deferred on next session reboot loop").
+  BUILD the custom-role system: `feature_registry` + `role_permissions(tenant_id, role_id, feature_key,
+  view, write, update, delete)` matrix + `hasPermission()` resolver wired at tRPC (`matrixProcedure`) +
+  route middleware (deny-by-default) + sidebar nav filter + a `tenant_superadmin`-only role-builder
+  screen (shadcn only, WCAG 2.2 AA gate). Guardrails: custom roles ≤ tenant_admin ceiling; NEVER grant
+  Billing/User-Management; only tenant_superadmin/tenant_manager may create/edit/assign. plan-first-dispatch,
+  TDD, LOCAL commits only (its own remote push rides PD-006). Large — expect multiple reboot chunks.
 
 ## PD-006 — Remote push / staging / prod promotion for the RBAC + v0.9.0 work 🟤
 - **Opened:** 2026-07-10
-- **Context:** All 2026-07-10 work (v0.9.0 versioning, RBAC retrofit) is LOCAL commits on
-  `feat/household-management` under HARD HOLD. Branch is far ahead of origin/main; local main 4 ahead
-  of origin. An RBAC enum migration + a data import both touch auth/PII.
-- **Decision needed:** When (and in what order) to push to origin/main → staging (data-first gate) →
-  prod. Prod is NEVER automatic (deploy-discipline). RBAC migrations must rehearse on staging with a
-  prod-data copy before any prod promotion.
-- **Status:** ⏸ DEFERRED — no push/deploy without explicit owner word ("push to staging"/"go live").
+- **Context:** All 2026-07-10/11 work (v0.9.0 versioning, RBAC 3-tier A–D, data import, M4 merge) is
+  LOCAL commits on main under HARD HOLD — local main is 56+ ahead of origin/main. RBAC enum migration +
+  PII data import both touch auth/PII.
+- **Status:** ✅ **APPROVED by owner 2026-07-11** ("do all the deferred"). Execute AFTER all local work
+  (PRODUCT.md back-ports + vault reseed + PD-005 matrix) is committed to main, so the pushed build is
+  complete. SEQUENCE (deploy-discipline + staging data-first gate — never skip, never deploy red):
+  1. Push local `main` → `origin/main` (triggers staging auto-deploy, "Model A").
+  2. **Staging data-first gate** (`deploy/staging-refresh-and-deploy.sh` if present, else
+     `~/.claude/rules/staging-refresh-gate.md`): refresh staging DB from a PROD copy FIRST → pull
+     candidate image → `prisma migrate deploy` (the RBAC partial-unique + rename migrations rehearse on
+     prod-shaped data) → bring up → health-verify GREEN.
+  3. Only on staging GREEN → **manual prod promotion** (re-tag verified build → prod channel → deploy →
+     verify prod domain). Back up prod DB first. NEVER auto.
+  4. Demo (`*-demo`) is separate — push only if owner asks; migrate-but-never-reseed.
+  ⚠ Prod is the highest-risk, outward-facing step — if staging is NOT green, HALT and re-surface, do not
+  force prod. Tag the release `v0.9.0` → `v0.9.0-rc.1` on staging, drop suffix on prod promotion.
