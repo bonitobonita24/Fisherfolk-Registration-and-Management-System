@@ -5,6 +5,7 @@ import { importRouter } from "./routers/import";
 import { ayudaRouter } from "./routers/ayuda";
 import { categoryRouter } from "./routers/category";
 import { commentRouter } from "./routers/comment";
+import { customRoleRouter } from "./routers/customRole";
 import { dashboardRouter } from "./routers/dashboard";
 import { editRequestRouter } from "./routers/editRequest";
 import { fishCatchRouter } from "./routers/fishCatch";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   ayuda: ayudaRouter,
   category: categoryRouter,
   comment: commentRouter,
+  customRole: customRoleRouter,
   dashboard: dashboardRouter,
   editRequest: editRequestRouter,
   fishCatch: fishCatchRouter,
