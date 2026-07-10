@@ -167,8 +167,21 @@ export function Sidebar({
           </div>
         ) : (
           !isCollapsed && (
-            <div className="shrink-0 border-t border-border p-2.5 text-[10px] text-muted-foreground">
-              FRMS · {tenantSlug}
+            <div className="shrink-0 space-y-1 border-t border-border p-2.5 text-[10px] text-muted-foreground">
+              <p>
+                FRMS · {tenantSlug}
+                {process.env.NEXT_PUBLIC_APP_VERSION ? (
+                  <> · v{process.env.NEXT_PUBLIC_APP_VERSION}</>
+                ) : null}
+              </p>
+              <a
+                href="https://www.powerbyteitsolutions.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-sm transition-colors hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Developed by Powerbyte IT Solutions
+              </a>
             </div>
           )
         )}

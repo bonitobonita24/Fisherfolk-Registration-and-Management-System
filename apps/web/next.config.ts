@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 import path from "path";
+import { readFileSync } from "fs";
+
+// App version — sourced from this package.json at build time and exposed to the
+// client as NEXT_PUBLIC_APP_VERSION so the sidebar footer can render it
+// (design-defaults Entry 3: version tag + white-label credit).
+const appVersion = (
+  JSON.parse(
+    readFileSync(path.join(__dirname, "package.json"), "utf8"),
+  ) as { version: string }
+).version;
 
 // NOTE: Content-Security-Policy is intentionally NOT set here. Next.js bakes
 // `headers()` at BUILD time, but the CSP `img-src` needs the object-storage
@@ -22,6 +32,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+  },
   outputFileTracingRoot: path.join(__dirname, "../../"),
   transpilePackages: ["@frms/shared", "@frms/db", "@frms/ui"],
   serverExternalPackages: ["isomorphic-dompurify", "@prisma/client", "bcryptjs"],
