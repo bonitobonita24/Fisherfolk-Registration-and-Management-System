@@ -18,6 +18,7 @@ import {
   ScrollText,
   HandHeart,
   Home,
+  ShieldCheck,
 } from "lucide-react";
 import { hasPermission, type Actor, type FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -219,6 +220,16 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Settings",
         icon: Settings,
         href: "/settings",
+        minRoles: ["tenant_manager", "tenant_superadmin"] as UserRole[],
+      },
+      {
+        // Not a FeatureKey by design — PD-005 Chunk 7 Role Builder. Only
+        // tenant_superadmin (and platform tenant_manager) may create/edit/
+        // assign custom roles, per tenant-rbac-standard.md §4 Guardrails.
+        // Fixed role fallback only, same as User Management / Settings.
+        label: "Role Builder",
+        icon: ShieldCheck,
+        href: "/settings/roles",
         minRoles: ["tenant_manager", "tenant_superadmin"] as UserRole[],
       },
     ],

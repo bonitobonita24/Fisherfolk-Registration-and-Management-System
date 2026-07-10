@@ -59,6 +59,7 @@ export const tenantUserRouter = createTRPCRouter({
             role: true,
             status: true,
             createdAt: true,
+            customRoleId: true,
           },
         }),
         platformPrisma.user.count({ where }),

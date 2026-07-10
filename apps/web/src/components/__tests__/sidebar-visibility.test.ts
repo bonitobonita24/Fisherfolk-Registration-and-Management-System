@@ -87,9 +87,10 @@ describe("canSeeNavItem — viewer: view-able on every feature, never the owner-
     }
   });
 
-  it("does NOT see User Management or Settings (role fallback excludes viewer)", () => {
+  it("does NOT see User Management, Settings, or Role Builder (role fallback excludes viewer)", () => {
     expect(labels).not.toContain("User Management");
     expect(labels).not.toContain("Settings");
+    expect(labels).not.toContain("Role Builder");
   });
 });
 
@@ -117,6 +118,7 @@ describe("canSeeNavItem — encoder: only its operational write+update features"
     "Audit Log",
     "User Management",
     "Settings",
+    "Role Builder",
   ];
 
   it.each(expectedVisible)("sees %s", (label) => {
@@ -146,6 +148,7 @@ describe("canSeeNavItem — bantay_dagat: enforcement-scoped view+write subset",
     "Notifications",
     "User Management",
     "Settings",
+    "Role Builder",
   ];
 
   it.each(expectedVisible)("sees %s", (label) => {
@@ -180,9 +183,10 @@ describe("canSeeNavItem — custom role (matrix): deny-by-default, only the gran
     expect(labels).not.toContain("Household");
   });
 
-  it("never sees User Management or Settings — those can never be matrix-gated", () => {
+  it("never sees User Management, Settings, or Role Builder — those can never be matrix-gated", () => {
     expect(labels).not.toContain("User Management");
     expect(labels).not.toContain("Settings");
+    expect(labels).not.toContain("Role Builder");
   });
 });
 
