@@ -249,3 +249,27 @@
 - **Recommended section:** **### Ayuda Programs**.
 - **Deferred (logged, not built):** persisting a saved/named filter into the existing unused
   `AyudaProgram.filters` Json field (DECISIONS_LOG M1 (e)).
+
+---
+
+## Candidate N — 3-Tier Tenant RBAC role names (2026-07-11, M3)
+
+- **Status:** drafted by CLAUDE_CODE (Full Auto), awaiting owner application (Rule 1 — PRODUCT.md is human-only).
+- **Feature shipped:** branch `feat/household-management`, RBAC retrofit Chunks A–C
+  (`e8265ec` / `ad5817a` / `2426039`, UNPUSHED). Full [HOW] locked in DECISIONS_LOG "3-Tier Tenant RBAC".
+- **Stale text:** PRODUCT.md line 44 currently reads
+  `- Role-based access control (Super Admin, Admin, Encoder, Viewer, Bantay Dagat)` — the enum values
+  were renamed on 2026-07-11.
+- **Proposed PRODUCT.md replacement:**
+  > - Role-based access control — 3-tier tenant standard: **Tenant Manager** (platform, manages all
+  >   tenants), **Tenant Superadmin** (the tenant owner — one per tenant), **Tenant Admin** (day-to-day
+  >   admin, excluded from User Management + Tenant Settings), plus domain roles **Encoder**, **Viewer**,
+  >   **Bantay Dagat**. Tenant ownership transfers via two-way succession (platform break-glass reassign
+  >   + self-service owner transfer); the owner role is assignable only through succession.
+- **Also touches:** line 231 "### User Management (Super Admin)" → "(Tenant Superadmin)"; line 185/188
+  "(Admin and Super Admin only)" / "(Admin only …)" wording — owner may re-word these to the new tier
+  names when back-porting (functional behavior unchanged; naming only).
+- **Recommended section:** **## Features → RBAC bullet (line 44)** + the User Management / Ayuda /
+  Reports role-label mentions.
+- **Deferred (logged, not built):** the data-driven custom-role permission-matrix + role-builder UI
+  (PENDING_DECISIONS PD-005).

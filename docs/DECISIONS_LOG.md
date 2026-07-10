@@ -698,3 +698,83 @@ Decision: S6 runs a full axe WCAG 2.2 AA audit on every new surface (year select
 filter, group tiles, lower-chart tiles). All violations found in S6 are fixed in-session — none
 deferred. Governing: ui-rules.md R13 + privacy.md (V32.9) + Rule 33 (gov/LGU app, DICT MC 004).
 Locked: yes
+
+---
+
+## 3-Tier Tenant RBAC (Milestone 3, 2026-07-11) — [HOW] locked (CLAUDE_CODE, Full Auto)
+Retrofit of FRMS onto the fleet-wide 3-tier tenant RBAC standard
+(`~/.claude/rules/tenant-rbac-standard.md`), dev-first, LOCAL commits only under HARD HOLD.
+Shipped as Chunks A–C on `feat/household-management` (`e8265ec` / `ad5817a` / `2426039`).
+
+#### (a) Enum rename is data-preserving — never DROP/CREATE
+Decision: the three system tiers were introduced by renaming existing `UserRole` values in place —
+`super_admin`→`tenant_manager`, `admin`→`tenant_superadmin`, plus a NEW `tenant_admin` value —
+via `ALTER TYPE "UserRole" RENAME VALUE …` (×2) + `ADD VALUE` in migration
+`20260710120000_tenant_rbac_3tier_rename`. No DML, no downtime; existing user rows kept their
+renamed role automatically (dev: tenant_manager=1, tenant_superadmin=8, encoder=1, viewer=3).
+Rationale: DROP/CREATE would lose every user's role (MG-proven). Domain roles
+(`encoder`/`viewer`/`bantay_dagat`) are unchanged and sit below `tenant_admin`.
+Locked: yes
+
+#### (b) FRMS platform-tenant deviation — `tenant_manager` carries a NON-null tenant_id
+Decision: unlike the fleet standard (`tenant_manager.tenant_id = NULL`), FRMS's platform manager
+belongs to a real dedicated **`platform` tenant** (non-null `tenant_id`). Consequence: platform ops
+resolve tenant-guarded models through **`platformPrisma`**, NOT `ctx.db` (which throws "Tenant
+context not set" at runtime — passes tsc + isolated tests, fails live). The one-owner partial-unique
+index therefore exempts the manager via its **role predicate** (`role='tenant_superadmin'`), not via
+the standard's `tenant_id IS NOT NULL` clause; the clause is kept as a fleet-standard guard and the
+deviation is documented in the migration SQL.
+Rationale: FRMS was built NULL-tenant-free before the standard existed; a real platform tenant is
+less invasive than re-architecting to NULL-based tenancy.
+Locked: yes
+
+#### (c) One owner per tenant — DB-enforced by a partial-unique index (migration-only)
+Decision: `CREATE UNIQUE INDEX one_tenant_superadmin_per_tenant ON users(tenant_id) WHERE
+role='tenant_superadmin' AND tenant_id IS NOT NULL` (migration `20260710130000`), preceded by a
+generic `row_number()` window-function normalization that demotes every non-oldest owner per tenant
+to `tenant_admin` (dev: only calapan-city had 2 → calapanadmin demoted; webmaster@localhost kept as
+oldest). Applied via `migrate deploy`, never `migrate dev`.
+⚠ **[WATCH] Prisma cannot represent a partial-unique index in schema.prisma** → a future
+`migrate dev` may propose DROPping this index as drift. **Never accept the autogen DROP** — keep the
+index migration-only (MG-proven footgun).
+Rationale: DB is the only trustworthy place to enforce "exactly one owner"; app-layer checks race.
+Locked: yes
+
+#### (d) Two-way owner succession is mandatory (both directions built + tested)
+Decision: ownership is always recoverable AND transferable, via two procedures, each doing
+**demote-current-owner → promote-new-owner in that order** (the partial-unique index is non-deferred;
+promote-first trips 23505 mid-transaction):
+  - Platform break-glass **`tenant.reassignOwner`** (`tenantManagerProcedure`, `platformPrisma`) —
+    reassigns a tenant's owner; NOT_FOUND on bad tenant/user, BAD_REQUEST on deactivated/already-owner.
+  - Self-service **`user.transferOwnership`** (`tenantSuperadminProcedure`, `$transaction`) — owner
+    promotes a target and demotes self; body-guarded so a platform `tenant_manager` can't self-transfer.
+Both bump `securityVersion` (logs affected sessions out) and write an audit row.
+Rationale: an owner may leave; the platform must be able to recover, and owners must be able to hand off.
+Locked: yes
+
+#### (e) Owner role is reachable ONLY via succession — never via create/updateRole
+Decision: `user.create` and `user.updateRole` zod enums **exclude `tenant_superadmin`**; the assignable
+in-tenant set is `tenant_admin / encoder / viewer / bantay_dagat`. A tenant_admin or owner can no
+longer mint a second owner through ordinary user management.
+Rationale: attack-informed (BFLA / privilege-escalation) — removes the only runtime path that could
+trip the one-owner index, so 23505 is structurally unreachable outside succession.
+Locked: yes
+
+#### (f) Succession audits reuse the closed AuditAction enum
+Decision: `AuditAction` is a fixed Prisma enum with no REASSIGN/TRANSFER value → succession events log
+`action: "UPDATE"` with a descriptive `after` payload naming the previous/new owner.
+Rationale: inventing enum values would fail at the DB layer (same class as the Ayuda-bulk decision above).
+Locked: yes
+
+#### (g) `tenant_admin` is the capability ceiling; custom-role matrix deferred
+Decision: `tenant_admin` is broad tenant admin minus User Management + Tenant Settings, and is the
+ceiling for any future custom role. The data-driven custom-role permission-matrix + role-builder UI
+(feature_registry + role_permissions CRUD + `hasPermission` 3-surface enforcement) is **DEFERRED** to a
+later milestone (see PENDING_DECISIONS PD-005).
+Locked: yes (matrix layer deferred, not cancelled)
+
+#### (h) PRODUCT.md back-port deferred (Rule 1 human-only)
+Decision: PRODUCT.md line 44 still lists the OLD role names (`Super Admin, Admin, Encoder, Viewer,
+Bantay Dagat`). Under Rule 1 (PRODUCT.md is human-edited only) this back-port is surfaced as a
+candidate in BACKPORT_CANDIDATES.md, not auto-applied.
+Locked: yes (deferred to human back-port)

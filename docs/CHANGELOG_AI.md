@@ -3,6 +3,41 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-11 — M3 3-Tier Tenant RBAC retrofit (Chunks A–D) (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor workers, plan-first-dispatch)
+**Branch:** feat/household-management (UNPUSHED — HARD HOLD, LOCAL only)
+
+Retrofit FRMS onto the fleet 3-tier tenant RBAC standard (`~/.claude/rules/tenant-rbac-standard.md`),
+dev-first. Enum renamed in place (data-preserving), one-owner-per-tenant DB-enforced, two-way owner
+succession built + tested. Full [HOW] locked in DECISIONS_LOG "3-Tier Tenant RBAC".
+
+- `e8265ec` — **Chunk A** data-preserving enum rename: `ALTER TYPE "UserRole" RENAME VALUE`
+  `super_admin`→`tenant_manager`, `admin`→`tenant_superadmin`, `ADD VALUE tenant_admin`
+  (migration `20260710120000`). `superAdminProcedure`→`tenantManagerProcedure`; new
+  `tenantSuperadminProcedure`; `adminProcedure`/`encoderProcedure` widened with `tenant_admin`.
+  3rd canonical seed account `admin@admin.com` (`tenant_admin`). Tests 309/309.
+- `ad5817a` — **Chunk B** one-owner-per-tenant: window-function normalize (demote non-oldest owners)
+  + `CREATE UNIQUE INDEX one_tenant_superadmin_per_tenant … WHERE role='tenant_superadmin' AND
+  tenant_id IS NOT NULL` (migration `20260710130000`, applied via `migrate deploy`). Dup-owner
+  UPDATE → 23505 (rolled back). ⚠ [WATCH] Prisma can't represent partial-unique → keep migration-only.
+- `2426039` — **Chunk C** two-way owner succession: platform `tenant.reassignOwner`
+  (tenantManagerProcedure, platformPrisma) + self-service `user.transferOwnership`
+  (tenantSuperadminProcedure, $transaction); both demote-current→promote-new (index non-deferred),
+  bump `securityVersion`, audit `UPDATE`. `user.create`/`updateRole` enums drop `tenant_superadmin`
+  (owner reachable only via succession — BFLA hardening). NEW `tenant-succession.test.ts` 11/11 LIVE;
+  full suite 320/320, tsc 0, lint clean.
+- **Chunk D (this entry)** — doc back-port: DECISIONS_LOG "3-Tier Tenant RBAC" (a–h), CREDENTIALS.md
+  (3-tier accounts + role-rename table + FRMS platform-tenant deviation), Security_Checklist §21
+  (items 2.6–2.12), BACKPORT_CANDIDATES Candidate N (PRODUCT.md role names — Rule 1 human-only,
+  surfaced not applied), this CHANGELOG entry, IMPLEMENTATION_MAP RBAC status.
+
+**Verification (PM, ground-truth):** Chunk C tests exercised LIVE against dev DB (DATABASE_URL exported,
+not skipped) — 11/11 succession cases + full 320/320. tsc 7/7, lint 5/5. FRMS platform-tenant deviation
+(`tenant_manager` NON-null tenant_id → platformPrisma) documented in migration SQL + DECISIONS_LOG (b).
+🔲 Deferred to M4 rebuild: 3-tier login-matrix Visual QA (needs running dev container; backend-only, no
+succession UI yet). Custom-role matrix + role-builder → PD-005. Remote push → PD-006.
+
 ## 2026-07-09 — M1 Ayuda beneficiary mass-selection multi-filter (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor workers, plan-first-dispatch)

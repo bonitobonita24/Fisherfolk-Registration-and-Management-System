@@ -58,6 +58,35 @@
        → Secure Code Generation: INPUT VALIDATION item 5
 ```
 
+### §21 — TENANT RBAC 3-TIER STANDARD (2026-07-11 retrofit — fleet standard)
+```
+□ 2.6  Three FIXED system tiers exist at the top of UserRole and are enforced in code, never
+       stored as editable data: tenant_manager (platform) / tenant_superadmin (tenant owner) /
+       tenant_admin (child admin). Domain roles (encoder/viewer/bantay_dagat) sit below.
+       → ~/.claude/rules/tenant-rbac-standard.md §1 ; DECISIONS_LOG "3-Tier Tenant RBAC" (a)
+□ 2.7  Exactly ONE tenant_superadmin per tenant — DB-enforced by the partial-unique index
+       one_tenant_superadmin_per_tenant. Migration-only (Prisma can't represent it — [WATCH]:
+       never accept an autogen DROP on `migrate dev`).
+       VERIFY: grep -rn "one_tenant_superadmin_per_tenant" packages/db/prisma/migrations/
+□ 2.8  FRMS deviation: tenant_manager carries a NON-null tenant_id (the `platform` tenant) →
+       platform-scoped ops use platformPrisma, NEVER ctx.db (ctx.db throws "Tenant context not
+       set" at RUNTIME — tsc + isolated tests do NOT catch it).
+       VERIFY: grep -rn "tenantManagerProcedure" src/server/ — each tenant-model access uses platformPrisma
+□ 2.9  Owner role reachable ONLY via succession — user.create / user.updateRole zod enums MUST
+       exclude tenant_superadmin (assignable set = tenant_admin/encoder/viewer/bantay_dagat).
+       VERIFY: grep -rn "tenant_superadmin" src/server/**/user.ts — must NOT appear in create/updateRole input enums
+□ 2.10 Two-way succession exists + tested: platform tenant.reassignOwner (break-glass) AND
+       self-service user.transferOwnership — both demote-current THEN promote-new (index is
+       non-deferred), both bump securityVersion + write an audit row.
+       VERIFY: test file apps/web/src/server/__tests__/tenant-succession.test.ts passes (11 cases)
+□ 2.11 tenant_admin is the capability ceiling; it is EXCLUDED from User Management + Tenant
+       Settings (those stay tenant_superadmin / tenant_manager only). Any future custom role
+       must be ≤ tenant_admin and may NEVER grant Billing or User Management.
+□ 2.12 Canonical accounts live ONLY in the SOPS+age vault
+       (Server-Setups/secrets/universal-login-credentials.enc.yaml) — never pasted into the repo
+       or a free/public LLM tier. Seed passwords come from env vars, never hardcoded.
+```
+
 ---
 
 ## SECTION 3 — MULTI-TENANT ISOLATION (L1–L6)
