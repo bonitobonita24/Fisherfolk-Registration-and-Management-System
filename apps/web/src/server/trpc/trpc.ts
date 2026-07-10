@@ -3,9 +3,11 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { runWithTenant } from "@frms/db";
+import { hasPermission, type FeatureKey, type PermissionAction } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
 
 import { rateLimiters } from "../lib/rate-limit";
+import { resolveActorMatrix } from "../rbac/resolve";
 import type { TRPCContext } from "./context";
 
 const t = initTRPC.context<TRPCContext>().create({
@@ -106,3 +108,25 @@ export const tenantManagerProcedure = protectedProcedure.use(
 export const tenantSuperadminProcedure = protectedProcedure.use(
   requireRole("tenant_manager", "tenant_superadmin"),
 );
+
+/**
+ * matrixProcedure(feature, action) — PD-005 Chunk 3 data-driven authorization
+ * factory. Built on `protectedProcedure` (inherits session enforcement +
+ * `runWithTenant`), resolves the caller's effective `Actor` (fixed tier, or
+ * domain-role preset, or an assigned custom-role `PermissionMatrix` — see
+ * `../rbac/resolve.ts`), and denies with `FORBIDDEN` unless
+ * `hasPermission()` grants `action` on `feature`. Deny-by-default: any
+ * resolver miss or missing grant throws, never silently passes through.
+ *
+ * Use this instead of `adminProcedure`/`encoderProcedure` on any router
+ * whose authorization should follow the tenant-rbac-standard matrix
+ * (custom roles ≤ tenant_admin ceiling) rather than a fixed role list.
+ */
+export const matrixProcedure = (feature: FeatureKey, action: PermissionAction) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    const actor = await resolveActorMatrix(ctx);
+    if (!hasPermission(actor, feature, action)) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    return next({ ctx });
+  });

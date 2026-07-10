@@ -14,14 +14,19 @@ import { buildQRPayload } from "@/lib/qr-code";
 
 import { omitUndefined } from "../../lib/prisma-input";
 import {
-  adminProcedure,
   createTRPCRouter,
   encoderProcedure,
-  protectedProcedure,
+  matrixProcedure,
 } from "../trpc";
 
 export const fisherfolkRouter = createTRPCRouter({
-  list: protectedProcedure
+  // PD-005 Chunk 3 pilot: list/getById/getActivity/create/update/archive run
+  // through matrixProcedure() (custom-role matrix aware). The remaining
+  // procedures (searchForDuplicates, generateNextIdNumber, completeRecord,
+  // renew, markIdReleased) are intentionally left on the fixed-tier
+  // encoderProcedure for this chunk — out of scope, migrate in a later
+  // chunk.
+  list: matrixProcedure("fisherfolk", "view")
     .input(
       z
         .object({
@@ -80,7 +85,7 @@ export const fisherfolkRouter = createTRPCRouter({
       return { items, total, page, limit };
     }),
 
-  getById: protectedProcedure
+  getById: matrixProcedure("fisherfolk", "view")
     .input(z.object({ id: z.string().cuid() }).strict())
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
@@ -293,7 +298,7 @@ export const fisherfolkRouter = createTRPCRouter({
       return { idNumber, year, sequence: nextSeq };
     }),
 
-  create: encoderProcedure
+  create: matrixProcedure("fisherfolk", "write")
     .input(fisherfolkCreateSchema)
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
@@ -346,7 +351,16 @@ export const fisherfolkRouter = createTRPCRouter({
       return record;
     }),
 
-  update: adminProcedure
+  // RECONCILIATION (PD-005 Chunk 3): this procedure was `adminProcedure`
+  // (tenant_manager/superadmin/tenant_admin only — encoder excluded).
+  // Adopting matrixProcedure("fisherfolk","update") WIDENS access to
+  // `encoder`, whose DOMAIN_ROLE_PRESETS grant (packages/shared/src/rbac/
+  // permissions.ts) is write+update+no-delete on fisherfolk — deliberately
+  // authored that way in Chunk 2 to match nav-items.ts (encoder already
+  // sees the Fisherfolk section). `viewer`/`bantay_dagat` stay denied
+  // (view-only preset). This is an intentional alignment with the
+  // tenant-rbac-standard matrix, not an accidental widening.
+  update: matrixProcedure("fisherfolk", "update")
     .input(fisherfolkUpdateSchema)
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
@@ -437,7 +451,7 @@ export const fisherfolkRouter = createTRPCRouter({
       return updated;
     }),
 
-  archive: adminProcedure
+  archive: matrixProcedure("fisherfolk", "delete")
     .input(z.object({ id: z.string().cuid() }).strict())
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
@@ -570,7 +584,7 @@ export const fisherfolkRouter = createTRPCRouter({
       return updated;
     }),
 
-  getActivity: protectedProcedure
+  getActivity: matrixProcedure("fisherfolk", "view")
     .input(fisherfolkActivityQuerySchema)
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
