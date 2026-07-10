@@ -6,6 +6,7 @@ import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
+  tenantSuperadminProcedure,
 } from "../trpc";
 
 export const userRouter = createTRPCRouter({
@@ -129,7 +130,7 @@ export const userRouter = createTRPCRouter({
           username: z.string().min(3).max(50),
           email: z.string().email(),
           password: z.string().min(8),
-          role: z.enum(["tenant_superadmin", "tenant_admin", "encoder", "viewer", "bantay_dagat"]),
+          role: z.enum(["tenant_admin", "encoder", "viewer", "bantay_dagat"]),
         })
         .strict(),
     )
@@ -187,7 +188,7 @@ export const userRouter = createTRPCRouter({
       z
         .object({
           id: z.string().cuid(),
-          role: z.enum(["tenant_superadmin", "tenant_admin", "encoder", "viewer", "bantay_dagat"]),
+          role: z.enum(["tenant_admin", "encoder", "viewer", "bantay_dagat"]),
         })
         .strict(),
     )
@@ -306,5 +307,72 @@ export const userRouter = createTRPCRouter({
       });
 
       return { success: true };
+    }),
+
+  transferOwnership: tenantSuperadminProcedure
+    .input(z.object({ newOwnerId: z.string().cuid() }).strict())
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      if (ctx.role !== "tenant_superadmin") {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      if (input.newOwnerId === ctx.userId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You are already the owner.",
+        });
+      }
+
+      const newOwner = await ctx.db.user.findFirst({
+        where: { id: input.newOwnerId, tenantId: ctx.tenantId },
+      });
+      if (!newOwner) throw new TRPCError({ code: "NOT_FOUND" });
+      if (newOwner.status !== "ACTIVE") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot transfer ownership to a deactivated user.",
+        });
+      }
+
+      await ctx.db.$transaction(async (tx) => {
+        // Demote self FIRST, then promote the new owner — the
+        // one_tenant_superadmin_per_tenant partial-unique index is not
+        // deferred, so promoting first would trip a 23505 violation.
+        await tx.user.update({
+          where: { id: ctx.userId! },
+          data: {
+            role: "tenant_admin",
+            securityVersion: { increment: 1 },
+          },
+        });
+
+        await tx.user.update({
+          where: { id: newOwner.id },
+          data: {
+            role: "tenant_superadmin",
+            securityVersion: { increment: 1 },
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            tenantId: ctx.tenantId!,
+            userId: ctx.userId!,
+            action: "UPDATE",
+            entityType: "User",
+            entityId: newOwner.id,
+            before: {
+              previousOwnerId: ctx.userId,
+            } as unknown as Record<string, unknown>,
+            after: {
+              transferredOwnership: true,
+              newOwnerId: newOwner.id,
+              previousOwnerId: ctx.userId,
+            } as unknown as Record<string, unknown>,
+          },
+        });
+      });
+
+      return { newOwnerId: newOwner.id, previousOwnerId: ctx.userId! };
     }),
 });

@@ -191,6 +191,84 @@ export const tenantRouter = createTRPCRouter({
       };
     }),
 
+  reassignOwner: tenantManagerProcedure
+    .input(
+      z
+        .object({
+          tenantId: z.string().cuid(),
+          newOwnerId: z.string().cuid(),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const tenant = await platformPrisma.tenant.findUnique({
+        where: { id: input.tenantId },
+        select: { id: true },
+      });
+      if (!tenant) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const newOwner = await platformPrisma.user.findFirst({
+        where: { id: input.newOwnerId, tenantId: input.tenantId },
+      });
+      if (!newOwner) throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (newOwner.status !== "ACTIVE") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Cannot assign a deactivated user as owner.",
+        });
+      }
+
+      if (newOwner.role === "tenant_superadmin") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User is already the tenant owner.",
+        });
+      }
+
+      const currentOwner = await platformPrisma.user.findFirst({
+        where: { tenantId: input.tenantId, role: "tenant_superadmin" },
+      });
+
+      await platformPrisma.$transaction(async (tx) => {
+        if (currentOwner) {
+          await tx.user.update({
+            where: { id: currentOwner.id },
+            data: { role: "tenant_admin", securityVersion: { increment: 1 } },
+          });
+        }
+
+        await tx.user.update({
+          where: { id: newOwner.id },
+          data: { role: "tenant_superadmin", securityVersion: { increment: 1 } },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            tenantId: input.tenantId,
+            userId: ctx.userId!,
+            action: "UPDATE",
+            entityType: "User",
+            entityId: newOwner.id,
+            before: {
+              previousOwnerId: currentOwner?.id ?? null,
+            },
+            after: {
+              reassignedOwner: true,
+              newOwnerId: newOwner.id,
+              previousOwnerId: currentOwner?.id ?? null,
+            },
+          },
+        });
+      });
+
+      return {
+        tenantId: input.tenantId,
+        newOwnerId: newOwner.id,
+        previousOwnerId: currentOwner?.id ?? null,
+      };
+    }),
+
   setStatus: tenantManagerProcedure
     .input(
       z
