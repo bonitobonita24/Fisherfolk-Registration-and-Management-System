@@ -55,7 +55,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   const { role, tenantSlug, tenantId } = session.user;
 
   if (pathname === "/") {
-    if (role === "super_admin") {
+    if (role === "tenant_manager") {
       return NextResponse.redirect(new URL("/platform/tenants", req.url));
     }
     if (tenantSlug) {
@@ -66,9 +66,9 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Platform routes — super_admin only
+  // Platform routes — tenant_manager only
   if (pathname.startsWith("/platform")) {
-    if (role !== "super_admin") {
+    if (role !== "tenant_manager") {
       return NextResponse.redirect(new URL("/login", req.url));
     }
     return NextResponse.next();

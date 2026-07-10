@@ -15,7 +15,7 @@ export default async function PlatformLayout({
     redirect("/login");
   }
 
-  if (session.user.role !== "super_admin") {
+  if (session.user.role !== "tenant_manager") {
     redirect(`/${session.user.tenantSlug}/dashboard`);
   }
 

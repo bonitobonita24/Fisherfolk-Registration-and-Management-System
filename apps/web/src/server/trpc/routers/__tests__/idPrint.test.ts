@@ -43,7 +43,7 @@ let testTemplateId: string;
 function makeCtx(
   tenantId: string,
   userId: string,
-  role: "admin" | "encoder" | "viewer" = "encoder",
+  role: "tenant_superadmin" | "encoder" | "viewer" = "encoder",
 ): TRPCContext {
   return {
     session: {
@@ -61,7 +61,7 @@ function makeCtx(
 
 const callerFactory = createCallerFactory(idPrintRouter);
 
-const callerAs = (tenantId: string, userId: string, role: "admin" | "encoder" | "viewer" = "encoder") =>
+const callerAs = (tenantId: string, userId: string, role: "tenant_superadmin" | "encoder" | "viewer" = "encoder") =>
   callerFactory(makeCtx(tenantId, userId, role));
 
 async function createFisherfolk(

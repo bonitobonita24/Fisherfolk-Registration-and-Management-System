@@ -91,3 +91,4 @@ test-artifacts/
 
 # Seed export cache (contains real PII — never commit)
 .seed-cache/
+.tempfiles/

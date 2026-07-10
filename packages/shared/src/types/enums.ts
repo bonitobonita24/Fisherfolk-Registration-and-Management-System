@@ -56,8 +56,9 @@ export const AuditAction = {
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 
 export const UserRole = {
-  SUPER_ADMIN: "super_admin",
-  ADMIN: "admin",
+  TENANT_MANAGER: "tenant_manager",
+  TENANT_SUPERADMIN: "tenant_superadmin",
+  TENANT_ADMIN: "tenant_admin",
   ENCODER: "encoder",
   VIEWER: "viewer",
   BANTAY_DAGAT: "bantay_dagat",

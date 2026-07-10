@@ -38,7 +38,7 @@ let testUserId: string;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function makeCtx(tenantId: string, role: "encoder" | "admin" | "viewer" = "encoder"): TRPCContext {
+function makeCtx(tenantId: string, role: "encoder" | "tenant_superadmin" | "viewer" = "encoder"): TRPCContext {
   return {
     session: {
       user: { id: testUserId, name: "Test Encoder", email: "encoder@local" },
@@ -54,7 +54,7 @@ function makeCtx(tenantId: string, role: "encoder" | "admin" | "viewer" = "encod
 }
 
 const callerFactory = createCallerFactory(fisherfolkRouter);
-const caller = (tenantId: string, role: "encoder" | "admin" | "viewer" = "encoder") =>
+const caller = (tenantId: string, role: "encoder" | "tenant_superadmin" | "viewer" = "encoder") =>
   callerFactory(makeCtx(tenantId, role));
 
 async function createTestFisherfolk(tenantId: string, overrides: Record<string, unknown> = {}) {

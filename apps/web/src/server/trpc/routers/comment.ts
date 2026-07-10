@@ -81,8 +81,9 @@ export const commentRouter = createTRPCRouter({
 
       if (
         existing.authorId !== ctx.userId &&
-        ctx.role !== "admin" &&
-        ctx.role !== "super_admin"
+        ctx.role !== "tenant_superadmin" &&
+        ctx.role !== "tenant_admin" &&
+        ctx.role !== "tenant_manager"
       ) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }

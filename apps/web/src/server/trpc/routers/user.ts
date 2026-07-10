@@ -17,7 +17,14 @@ export const userRouter = createTRPCRouter({
           limit: z.number().int().min(1).max(200).default(50),
           search: z.string().optional(),
           role: z
-            .enum(["super_admin", "admin", "encoder", "viewer", "bantay_dagat"])
+            .enum([
+              "tenant_manager",
+              "tenant_superadmin",
+              "tenant_admin",
+              "encoder",
+              "viewer",
+              "bantay_dagat",
+            ])
             .optional(),
           status: z.enum(["ACTIVE", "DEACTIVATED"]).optional(),
         })
@@ -122,7 +129,7 @@ export const userRouter = createTRPCRouter({
           username: z.string().min(3).max(50),
           email: z.string().email(),
           password: z.string().min(8),
-          role: z.enum(["admin", "encoder", "viewer", "bantay_dagat"]),
+          role: z.enum(["tenant_superadmin", "tenant_admin", "encoder", "viewer", "bantay_dagat"]),
         })
         .strict(),
     )
@@ -180,7 +187,7 @@ export const userRouter = createTRPCRouter({
       z
         .object({
           id: z.string().cuid(),
-          role: z.enum(["admin", "encoder", "viewer", "bantay_dagat"]),
+          role: z.enum(["tenant_superadmin", "tenant_admin", "encoder", "viewer", "bantay_dagat"]),
         })
         .strict(),
     )

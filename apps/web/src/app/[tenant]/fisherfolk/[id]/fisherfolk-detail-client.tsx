@@ -141,7 +141,10 @@ export function FisherfolkDetailClient({ id }: Props) {
 
   const role = me?.role;
   const canAct =
-    role === "encoder" || role === "admin" || role === "super_admin";
+    role === "encoder" ||
+    role === "tenant_admin" ||
+    role === "tenant_superadmin" ||
+    role === "tenant_manager";
   const hasActiveViolation = record.violations.some(
     (v) => v.status === "ACTIVE",
   );
@@ -216,7 +219,7 @@ export function FisherfolkDetailClient({ id }: Props) {
           </div>
         </div>
 
-        {/* Action buttons area — encoder/admin/super_admin only */}
+        {/* Action buttons area — encoder/tenant_admin/tenant_superadmin/tenant_manager only */}
         <div className="flex flex-wrap items-center justify-end gap-2.5">
           {canAct && (
             <>

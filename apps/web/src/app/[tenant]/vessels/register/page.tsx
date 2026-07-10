@@ -13,7 +13,12 @@ export default async function VesselRegisterPage({
   const session = await auth();
   const role = session?.user.role;
 
-  if (role !== "super_admin" && role !== "admin" && role !== "encoder") {
+  if (
+    role !== "tenant_manager" &&
+    role !== "tenant_superadmin" &&
+    role !== "tenant_admin" &&
+    role !== "encoder"
+  ) {
     const { tenant } = await params;
     redirect(`/${tenant}/vessels`);
   }

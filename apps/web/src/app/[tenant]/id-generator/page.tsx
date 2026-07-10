@@ -13,7 +13,8 @@ export default async function IdGeneratorPage({
   const { tenant } = await params;
   const session = await auth();
   const role = session?.user?.role;
-  const isAdmin = role === "super_admin" || role === "admin";
+  const isAdmin =
+    role === "tenant_manager" || role === "tenant_superadmin" || role === "tenant_admin";
 
   return (
     <div className="space-y-6">

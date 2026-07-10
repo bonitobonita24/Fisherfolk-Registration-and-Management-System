@@ -45,7 +45,7 @@ function makeCtx(tenantId: string): TRPCContext {
       expires: new Date(Date.now() + 3_600_000).toISOString(),
     } as unknown as Session,
     userId: testUserId,
-    role: "admin",
+    role: "tenant_superadmin",
     tenantId,
     tenantSlug: SLUG_A,
     db: prisma,
@@ -147,7 +147,7 @@ beforeAll(async () => {
       username: `ayuda-hh-admin-${RUN}`,
       passwordHash: "not-real",
       name: "Test Admin",
-      role: "admin",
+      role: "tenant_superadmin",
     },
   });
   testUserId = user.id;

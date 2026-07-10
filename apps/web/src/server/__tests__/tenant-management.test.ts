@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────────
  * The `tenantGuardExtension` throws "Tenant context not set" for any
  * non-system model operation when no runWithTenant() ALS context is active.
- * super_admin has tenantId=null, so protectedProcedure skips runWithTenant —
+ * tenant_manager has tenantId=null, so protectedProcedure skips runWithTenant —
  * meaning ctx.db (guarded `prisma`) would fail on `User.create` / `User.findFirst`.
  * trpc.ts explicitly notes: "those callers should use platformPrisma".
  * Tests use `platformPrisma as unknown as typeof prisma` to match the intended
@@ -23,7 +23,7 @@ import bcrypt from "bcryptjs";
 import type { Session } from "next-auth";
 
 // platformPrisma: unguarded PrismaClient — bypasses the tenantGuardExtension.
-// Required for super_admin operations that have no tenant ALS context.
+// Required for tenant_manager operations that have no tenant ALS context.
 import { platformPrisma } from "@frms/db";
 import type { ExtendedPrismaClient } from "@frms/db";
 
@@ -52,7 +52,7 @@ const hasDb = Boolean(process.env.DATABASE_URL);
 beforeAll(async () => {
   if (!hasDb) return;
   const sa = await platformPrisma.user.findFirstOrThrow({
-    where: { role: "super_admin" },
+    where: { role: "tenant_manager" },
     select: { id: true },
   });
   superAdminId = sa.id;
@@ -61,8 +61,8 @@ beforeAll(async () => {
 /**
  * Builds a TRPCContext that satisfies superAdminProcedure:
  *   • session + userId non-null  (enforceAuth)
- *   • role === "super_admin"     (requireRole)
- *   • tenantId === null          (super_admin has no tenant; protectedProcedure
+ *   • role === "tenant_manager"  (requireRole)
+ *   • tenantId === null          (tenant_manager has no tenant; protectedProcedure
  *                                 skips runWithTenant → no ALS context)
  *   • db = platformPrisma        (unguarded; see module-level comment)
  */
@@ -73,7 +73,7 @@ function makeCtx(): TRPCContext {
       expires: new Date(Date.now() + 3_600_000).toISOString(),
     } as unknown as Session,
     userId: superAdminId,
-    role: "super_admin",
+    role: "tenant_manager",
     tenantId: null,
     tenantSlug: null,
     // Cast: platformPrisma is unguarded PrismaClient; ctx.db type is the extended
@@ -155,7 +155,7 @@ describe.skipIf(!hasDb)("tenant.create", () => {
     });
     expect(user).not.toBeNull();
     expect(user!.username).toBe(adminUsername);
-    expect(user!.role).toBe("admin");
+    expect(user!.role).toBe("tenant_superadmin");
     expect(user!.status).toBe("ACTIVE");
     expect(user!.tenantId).toBe(result.id);
     expect(user!.email).toBe(`${adminUsername}@${tenantSlug}.local`);

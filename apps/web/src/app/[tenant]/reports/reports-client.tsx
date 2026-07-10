@@ -87,7 +87,10 @@ export function ReportsClient() {
   const [dateTo, setDateTo] = useState("");
   const [applied, setApplied] = useState<AppliedQuery | null>(null);
 
-  const canExport = me?.role === "admin" || me?.role === "super_admin";
+  const canExport =
+    me?.role === "tenant_superadmin" ||
+    me?.role === "tenant_manager" ||
+    me?.role === "tenant_admin";
 
   // ── Report query (only fires after Generate) ───────────────────────────────
   const { data: report, isLoading: reportLoading } =

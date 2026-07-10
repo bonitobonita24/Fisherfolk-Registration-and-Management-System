@@ -42,7 +42,7 @@ let testViewerId: string;
 function makeCtx(
   tenantId: string,
   userId: string,
-  role: "admin" | "encoder" | "viewer" = "admin",
+  role: "tenant_superadmin" | "encoder" | "viewer" = "tenant_superadmin",
 ): TRPCContext {
   return {
     session: {
@@ -60,7 +60,7 @@ function makeCtx(
 
 const callerFactory = createCallerFactory(idTemplateRouter);
 
-const callerAs = (tenantId: string, userId: string, role: "admin" | "encoder" | "viewer" = "admin") =>
+const callerAs = (tenantId: string, userId: string, role: "tenant_superadmin" | "encoder" | "viewer" = "tenant_superadmin") =>
   callerFactory(makeCtx(tenantId, userId, role));
 
 const MINIMAL_ELEMENTS = [] as const;
@@ -126,7 +126,7 @@ beforeAll(async () => {
       username: `admin-${RUN}`,
       passwordHash: "not-real",
       name: "Test Admin",
-      role: "admin",
+      role: "tenant_superadmin",
     },
   });
   testAdminId = admin.id;
@@ -168,7 +168,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
 
   describe("create", () => {
     it("creates a template and writes CREATE audit log", async () => {
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const result = await caller.create({
         name: "My Template",
@@ -209,7 +209,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("update", () => {
     it("updates a template and writes UPDATE audit log with before/after", async () => {
       const template = await createTemplate(testTenantAId, testAdminId);
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const result = await caller.update({
         id: template.id,
@@ -229,7 +229,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
 
     it("NOT_FOUND for cross-tenant update (tenant isolation)", async () => {
       const templateB = await createTemplate(testTenantBId, testAdminId);
-      const callerA = callerAs(testTenantAId, testAdminId, "admin");
+      const callerA = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await expect(
         callerA.update({ id: templateB.id, data: { id: templateB.id, name: "Hack" } }),
@@ -250,7 +250,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("archive", () => {
     it("sets status ARCHIVED and writes UPDATE audit log with before/after", async () => {
       const template = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const result = await caller.archive({ id: template.id });
       expect(result.status).toBe("ARCHIVED");
@@ -276,7 +276,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("delete", () => {
     it("deletes template and writes DELETE audit log with only before", async () => {
       const template = await createTemplate(testTenantAId, testAdminId);
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await caller.delete({ id: template.id });
 
@@ -303,7 +303,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("duplicate", () => {
     it("produces a copy named '<name> (copy)' with status ARCHIVED", async () => {
       const source = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE", name: "Original" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const copy = await caller.duplicate({ id: source.id });
 
@@ -319,7 +319,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
         name: "Active Template",
         templateType: "VESSEL",
       });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await caller.duplicate({ id: source.id });
 
@@ -331,7 +331,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
 
     it("writes CREATE audit log for the duplicate", async () => {
       const source = await createTemplate(testTenantAId, testAdminId, { name: "AuditMe" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const copy = await caller.duplicate({ id: source.id });
 
@@ -345,7 +345,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
 
     it("NOT_FOUND for cross-tenant duplicate (tenant isolation)", async () => {
       const templateB = await createTemplate(testTenantBId, testAdminId);
-      const callerA = callerAs(testTenantAId, testAdminId, "admin");
+      const callerA = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await expect(callerA.duplicate({ id: templateB.id })).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
@@ -369,7 +369,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
         status: "ARCHIVED",
         name: "New Active",
       });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const result = await caller.setActive({ id: target.id });
       expect(result.status).toBe("ACTIVE");
@@ -385,7 +385,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
     it("writes UPDATE audit logs for the activated AND the demoted template", async () => {
       const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
       const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await caller.setActive({ id: target.id });
 
@@ -411,7 +411,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
         templateType: "VESSEL",
       });
       const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await caller.setActive({ id: target.id });
 
@@ -421,7 +421,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
 
     it("NOT_FOUND for cross-tenant setActive (tenant isolation)", async () => {
       const templateB = await createTemplate(testTenantBId, testAdminId);
-      const callerA = callerAs(testTenantAId, testAdminId, "admin");
+      const callerA = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
       await expect(callerA.setActive({ id: templateB.id })).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
 
@@ -437,7 +437,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("single-active invariant (create/update)", () => {
     it("create with status ACTIVE archives the previously active template of the same type", async () => {
       const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       const created = await caller.create({
         name: `Fresh-${Date.now()}`,
@@ -460,7 +460,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
     it("update to status ACTIVE archives the previously active template of the same type", async () => {
       const oldActive = await createTemplate(testTenantAId, testAdminId, { status: "ACTIVE" });
       const target = await createTemplate(testTenantAId, testAdminId, { status: "ARCHIVED" });
-      const caller = callerAs(testTenantAId, testAdminId, "admin");
+      const caller = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await caller.update({ id: target.id, data: { id: target.id, status: "ACTIVE" } });
 
@@ -480,7 +480,7 @@ describe.skipIf(!hasDb)("idTemplate router — audit log + RBAC", () => {
   describe("getById cross-tenant isolation", () => {
     it("NOT_FOUND when reading another tenant's template", async () => {
       const templateB = await createTemplate(testTenantBId, testAdminId);
-      const callerA = callerAs(testTenantAId, testAdminId, "admin");
+      const callerA = callerAs(testTenantAId, testAdminId, "tenant_superadmin");
 
       await expect(callerA.getById({ id: templateB.id })).rejects.toMatchObject({ code: "NOT_FOUND" });
     });

@@ -95,20 +95,24 @@ async function main() {
 
   console.log(`  ✅ Platform tenant ready: ${platformTenant.slug}`);
 
-  // ── Accounts (role split — owner-set 2026-07-09) ──────────────────────────
-  //  • APP ADMIN (webmaster) → role `admin`, belongs to the LGU tenant. Runs
-  //    the FRMS app; has NO /platform access. Identity is env-driven via the
-  //    SUPERADMIN_* vars (historical name kept to avoid churn) — staging/prod
-  //    inject the universal owner-admin cred; local dev falls back to the
-  //    documented localhost cred.
-  //  • TENANT MANAGER (tenantadmin) → role `super_admin`, belongs to the
+  // ── Accounts (3-tier RBAC — owner-set 2026-07-10) ──────────────────────────
+  //  • TENANT SUPERADMIN (webmaster) → role `tenant_superadmin`, belongs to the
+  //    LGU tenant. Runs the FRMS app; has NO /platform access. Identity is
+  //    env-driven via the SUPERADMIN_* vars (historical name kept to avoid
+  //    churn) — staging/prod inject the universal owner-admin cred; local dev
+  //    falls back to the documented localhost cred.
+  //  • TENANT MANAGER (tenantadmin) → role `tenant_manager`, belongs to the
   //    `platform` tenant. The SOLE platform/tenant manager (/platform/tenants).
   //    Identity is env-driven via TENANTADMIN_*. The real prod-grade password
   //    lives ONLY in the gitignored .env.* — the default literal below is a
   //    throwaway local placeholder, never the real secret.
-  //  Both upserts set `role` on UPDATE so existing rows are corrected on reseed.
+  //  • TENANT ADMIN (admin) → role `tenant_admin`, belongs to the LGU tenant.
+  //    First child admin under the tenant superadmin — no Billing/User-Mgmt.
+  //    Identity is env-driven via SEED_TENANT_ADMIN_* (same pattern as the
+  //    other two accounts); local dev falls back to a dev-only placeholder.
+  //  All three upserts set `role` on UPDATE so existing rows are corrected on reseed.
 
-  // App admin (LGU) — role `admin`
+  // Tenant superadmin (LGU) — role `tenant_superadmin`
   const appAdminUsername = process.env["SUPERADMIN_USERNAME"] ?? "webmaster@localhost.com";
   const appAdminEmail = process.env["SUPERADMIN_EMAIL"] ?? appAdminUsername;
   const appAdminPassword = process.env["SUPERADMIN_PASSWORD"] ?? "C^@F/2#mx5eW";
@@ -120,7 +124,7 @@ async function main() {
     update: {
       username: appAdminUsername,
       passwordHash: appAdminHash,
-      role: "admin",
+      role: "tenant_superadmin",
       name: appAdminName,
       status: "ACTIVE",
     },
@@ -130,15 +134,15 @@ async function main() {
       username: appAdminUsername,
       passwordHash: appAdminHash,
       name: appAdminName,
-      role: "admin",
+      role: "tenant_superadmin",
       securityVersion: 1,
       status: "ACTIVE",
     },
   });
 
-  console.log(`  ✅ App admin (role=admin) ready: ${webmaster.username}`);
+  console.log(`  ✅ Tenant superadmin (role=tenant_superadmin) ready: ${webmaster.username}`);
 
-  // Tenant manager (platform) — role `super_admin`
+  // Tenant manager (platform) — role `tenant_manager`
   const tenantAdminUsername = process.env["TENANTADMIN_USERNAME"] ?? "tenantadmin@localhost.com";
   const tenantAdminEmail = process.env["TENANTADMIN_EMAIL"] ?? tenantAdminUsername;
   const tenantAdminPassword = process.env["TENANTADMIN_PASSWORD"] ?? "TenantAdmin_LocalDevOnly_ChangeMe";
@@ -150,7 +154,7 @@ async function main() {
     update: {
       username: tenantAdminUsername,
       passwordHash: tenantAdminHash,
-      role: "super_admin",
+      role: "tenant_manager",
       name: tenantAdminName,
       status: "ACTIVE",
     },
@@ -160,13 +164,43 @@ async function main() {
       username: tenantAdminUsername,
       passwordHash: tenantAdminHash,
       name: tenantAdminName,
-      role: "super_admin",
+      role: "tenant_manager",
       securityVersion: 1,
       status: "ACTIVE",
     },
   });
 
-  console.log(`  ✅ Tenant manager (role=super_admin) ready: ${tenantAdmin.username}`);
+  console.log(`  ✅ Tenant manager (role=tenant_manager) ready: ${tenantAdmin.username}`);
+
+  // Tenant admin (LGU) — role `tenant_admin`
+  const lguAdminUsername = process.env["SEED_TENANT_ADMIN_USERNAME"] ?? "admin";
+  const lguAdminEmail = process.env["SEED_TENANT_ADMIN_EMAIL"] ?? "admin@admin.com";
+  const lguAdminPassword = process.env["SEED_TENANT_ADMIN_PASSWORD"] ?? "TenantAdmin_LocalDevOnly_ChangeMe";
+  const lguAdminName = process.env["SEED_TENANT_ADMIN_NAME"] ?? "LGU Admin";
+  const lguAdminHash = await bcrypt.hash(lguAdminPassword, 12);
+
+  const lguAdmin = await prisma.user.upsert({
+    where: { tenantId_email: { email: lguAdminEmail, tenantId: tenant.id } },
+    update: {
+      username: lguAdminUsername,
+      passwordHash: lguAdminHash,
+      role: "tenant_admin",
+      name: lguAdminName,
+      status: "ACTIVE",
+    },
+    create: {
+      tenantId: tenant.id,
+      email: lguAdminEmail,
+      username: lguAdminUsername,
+      passwordHash: lguAdminHash,
+      name: lguAdminName,
+      role: "tenant_admin",
+      securityVersion: 1,
+      status: "ACTIVE",
+    },
+  });
+
+  console.log(`  ✅ Tenant admin (role=tenant_admin) ready: ${lguAdmin.username}`);
 
   const defaultCategories = [
     { name: "Boat Owner/Operator", slug: "boat-owner-operator", description: "Owner or operator of a registered fishing vessel", displayOrder: 1 },
@@ -203,8 +237,9 @@ async function main() {
   console.log(`  ✅ ${defaultCategories.length} default categories created`);
 
   console.log("\n✅ Seed complete!");
-  console.log(`   App login (admin):       ${appAdminUsername} / [see CREDENTIALS.md]`);
-  console.log(`   Tenant mgr (super_admin): ${tenantAdminUsername} / [see CREDENTIALS.md]`);
+  console.log(`   Tenant superadmin:        ${appAdminUsername} / [see CREDENTIALS.md]`);
+  console.log(`   Tenant manager (platform):${tenantAdminUsername} / [see CREDENTIALS.md]`);
+  console.log(`   Tenant admin (LGU):       ${lguAdmin.username} / [see CREDENTIALS.md]`);
 }
 
 main()

@@ -65,7 +65,7 @@ const enforceAuth = t.middleware(({ ctx, next }) => {
  * middleware step so the enforceAuth narrowing (userId/session non-null)
  * propagates to downstream router code via tRPC's chained ctx inference.
  * runWithTenant sets the AsyncLocalStorage that the Prisma tenant-guard
- * extension reads; no-op when ctx.tenantId is null (e.g. super_admin
+ * extension reads; no-op when ctx.tenantId is null (e.g. tenant_manager
  * pre-tenant routes — guarded queries from such a context will still
  * throw, which is correct; those callers should use platformPrisma).
  */
@@ -87,13 +87,22 @@ export const requireRole = (...allowedRoles: UserRole[]) =>
   });
 
 export const adminProcedure = protectedProcedure.use(
-  requireRole("super_admin", "admin"),
+  requireRole("tenant_manager", "tenant_superadmin", "tenant_admin"),
 );
 
 export const encoderProcedure = protectedProcedure.use(
-  requireRole("super_admin", "admin", "encoder"),
+  requireRole(
+    "tenant_manager",
+    "tenant_superadmin",
+    "tenant_admin",
+    "encoder",
+  ),
 );
 
-export const superAdminProcedure = protectedProcedure.use(
-  requireRole("super_admin"),
+export const tenantManagerProcedure = protectedProcedure.use(
+  requireRole("tenant_manager"),
+);
+
+export const tenantSuperadminProcedure = protectedProcedure.use(
+  requireRole("tenant_manager", "tenant_superadmin"),
 );

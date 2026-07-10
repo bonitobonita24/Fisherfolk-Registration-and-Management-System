@@ -8,7 +8,7 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  if (session.user.role === "super_admin") {
+  if (session.user.role === "tenant_manager") {
     redirect("/platform/tenants");
   }
 

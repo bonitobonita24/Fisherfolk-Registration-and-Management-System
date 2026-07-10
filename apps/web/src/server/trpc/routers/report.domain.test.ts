@@ -47,7 +47,7 @@ let otherTenantFfId: string; // seeded fisherfolk in tenant B (isolation probe)
 function makeCtx(
   tenantId: string,
   userId: string,
-  role: "admin" | "viewer" = "admin",
+  role: "tenant_superadmin" | "viewer" = "tenant_superadmin",
 ): TRPCContext {
   return {
     session: {
@@ -69,11 +69,11 @@ const householdCallerFactory = createCallerFactory(householdRouter);
 const reportCaller = (
   tenantId: string,
   userId: string,
-  role: "admin" | "viewer" = "admin",
+  role: "tenant_superadmin" | "viewer" = "tenant_superadmin",
 ) => reportCallerFactory(makeCtx(tenantId, userId, role));
 
 const householdCaller = (tenantId: string, userId: string) =>
-  householdCallerFactory(makeCtx(tenantId, userId, "admin"));
+  householdCallerFactory(makeCtx(tenantId, userId, "tenant_superadmin"));
 
 const TARGET_BARANGAY = `RptTargetBrgy-${RUN}`;
 const OTHER_BARANGAY = `RptOtherBrgy-${RUN}`;
@@ -161,7 +161,7 @@ beforeAll(async () => {
       username: `rpt-admin-${RUN}`,
       passwordHash: "not-real",
       name: "Test Admin A",
-      role: "admin",
+      role: "tenant_superadmin",
     },
   });
   testUserAId = userA.id;
@@ -185,7 +185,7 @@ beforeAll(async () => {
       username: `rpt-admin-b-${RUN}`,
       passwordHash: "not-real",
       name: "Test Admin B",
-      role: "admin",
+      role: "tenant_superadmin",
     },
   });
   testUserBId = userB.id;

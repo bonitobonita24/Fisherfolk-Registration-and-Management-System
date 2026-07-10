@@ -13,7 +13,7 @@ export default async function NewAyudaProgramPage({
   const session = await auth();
   const role = session?.user.role;
 
-  if (role !== "super_admin" && role !== "admin") {
+  if (role !== "tenant_manager" && role !== "tenant_superadmin" && role !== "tenant_admin") {
     const { tenant } = await params;
     redirect(`/${tenant}/ayuda`);
   }

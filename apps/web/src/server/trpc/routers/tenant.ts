@@ -9,7 +9,7 @@ import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
-  superAdminProcedure,
+  tenantManagerProcedure,
 } from "../trpc";
 
 export const tenantRouter = createTRPCRouter({
@@ -103,7 +103,7 @@ export const tenantRouter = createTRPCRouter({
       return updated;
     }),
 
-  create: superAdminProcedure
+  create: tenantManagerProcedure
     .input(
       z
         .object({
@@ -158,7 +158,7 @@ export const tenantRouter = createTRPCRouter({
             email: `${admin.username}@${slug}.local`,
             name: admin.fullName,
             passwordHash,
-            role: "admin",
+            role: "tenant_superadmin",
             status: "ACTIVE",
             tenantId: tenant.id,
           },
@@ -191,7 +191,7 @@ export const tenantRouter = createTRPCRouter({
       };
     }),
 
-  setStatus: superAdminProcedure
+  setStatus: tenantManagerProcedure
     .input(
       z
         .object({
@@ -231,7 +231,7 @@ export const tenantRouter = createTRPCRouter({
       return { id: updated.id, status: updated.status };
     }),
 
-  list: superAdminProcedure
+  list: tenantManagerProcedure
     .input(
       z
         .object({

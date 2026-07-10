@@ -125,13 +125,13 @@ async function main(): Promise<void> {
     if (!tenant) throw new Error(`Tenant not found: ${tenantSlug}`);
     const tenantId = tenant.id;
 
-    // Acting user for createdBy/filedBy — prefer an admin/super_admin, else any
-    // user. NOTE: since the 2026-07-09 role split the LGU tenant's top account
-    // is role `admin` (super_admin lives on the separate `platform` tenant), so
-    // we match both roles here.
+    // Acting user for createdBy/filedBy — prefer a tenant_admin/tenant_superadmin,
+    // else any user. NOTE: since the 2026-07-09 role split the LGU tenant's top
+    // account is role `tenant_superadmin` (tenant_manager lives on the separate
+    // `platform` tenant), so we match both roles here.
     const actor =
       (await prisma.user.findFirst({
-        where: { tenantId, role: { in: ["super_admin", "admin"] } },
+        where: { tenantId, role: { in: ["tenant_manager", "tenant_superadmin"] } },
       })) ?? (await prisma.user.findFirst({ where: { tenantId } }));
     if (!actor) throw new Error(`No user found for tenant ${tenantSlug} — cannot attribute demo data.`);
 

@@ -51,8 +51,9 @@ enum AuditAction {
 }
 
 enum UserRole {
-  super_admin
-  admin
+  tenant_manager
+  tenant_superadmin
+  tenant_admin
   encoder
   viewer
   bantay_dagat

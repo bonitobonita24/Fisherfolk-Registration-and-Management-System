@@ -40,8 +40,8 @@ async function main() {
 
   const tenantId = tenant.id;
 
-  const uploader = await prisma.user.findFirst({ where: { tenantId, role: "super_admin" } });
-  if (!uploader) throw new Error("No super_admin user found for tenant 'calapan-city'.");
+  const uploader = await prisma.user.findFirst({ where: { tenantId, role: "tenant_manager" } });
+  if (!uploader) throw new Error("No tenant_manager user found for tenant 'calapan-city'.");
 
   const uploadedById = uploader.id;
 

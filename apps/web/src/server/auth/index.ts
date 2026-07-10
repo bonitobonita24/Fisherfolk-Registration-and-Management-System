@@ -57,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const passwordValid = await bcrypt.compare(password, user.passwordHash);
         if (!passwordValid) return null;
 
-        if (user.role !== "super_admin") {
+        if (user.role !== "tenant_manager") {
           if (!user.tenantId) return null;
           if (tenantSlug && user.tenant?.slug !== tenantSlug) return null;
         }

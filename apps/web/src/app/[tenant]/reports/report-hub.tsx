@@ -109,7 +109,10 @@ function FacetCheckboxGroup({
 // ── Main component ────────────────────────────────────────────────────────────
 export function ReportHub() {
   const { data: me } = trpc.user.me.useQuery();
-  const canExport = me?.role === "admin" || me?.role === "super_admin";
+  const canExport =
+    me?.role === "tenant_superadmin" ||
+    me?.role === "tenant_manager" ||
+    me?.role === "tenant_admin";
 
   const [domain, setDomain] = useState<ReportDomain>("fisherfolk");
   const [barangays, setBarangays] = useState<string[]>([]);

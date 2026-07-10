@@ -20,7 +20,7 @@ export default async function IdTemplateSettingsPage({
   const { tenant } = await params;
   const session = await auth();
   const role = session?.user?.role;
-  const isAdmin = role === "super_admin" || role === "admin";
+  const isAdmin = role === "tenant_manager" || role === "tenant_superadmin";
 
   if (!isAdmin) {
     return (

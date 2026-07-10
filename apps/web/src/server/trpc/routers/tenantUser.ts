@@ -4,10 +4,10 @@ import { z } from "zod";
 
 import { platformPrisma } from "@frms/db";
 
-import { createTRPCRouter, superAdminProcedure } from "../trpc";
+import { createTRPCRouter, tenantSuperadminProcedure } from "../trpc";
 
 export const tenantUserRouter = createTRPCRouter({
-  list: superAdminProcedure
+  list: tenantSuperadminProcedure
     .input(
       z
         .object({
@@ -16,7 +16,7 @@ export const tenantUserRouter = createTRPCRouter({
           limit: z.number().int().min(1).max(100).default(20),
           search: z.string().optional(),
           role: z
-            .enum(["admin", "encoder", "viewer", "bantay_dagat"])
+            .enum(["tenant_admin", "encoder", "viewer", "bantay_dagat"])
             .optional(),
           status: z.enum(["ACTIVE", "DEACTIVATED"]).optional(),
         })
@@ -67,14 +67,14 @@ export const tenantUserRouter = createTRPCRouter({
       return { items, total, page, limit, tenant };
     }),
 
-  create: superAdminProcedure
+  create: tenantSuperadminProcedure
     .input(
       z
         .object({
           tenantId: z.string().cuid(),
           name: z.string().min(1),
           username: z.string().min(3).max(50),
-          role: z.enum(["admin", "encoder", "viewer", "bantay_dagat"]),
+          role: z.enum(["tenant_admin", "encoder", "viewer", "bantay_dagat"]),
           password: z.string().min(12),
         })
         .strict(),
@@ -143,7 +143,7 @@ export const tenantUserRouter = createTRPCRouter({
       return user;
     }),
 
-  resetPassword: superAdminProcedure
+  resetPassword: tenantSuperadminProcedure
     .input(
       z
         .object({
@@ -185,7 +185,7 @@ export const tenantUserRouter = createTRPCRouter({
       return { id: userId };
     }),
 
-  setStatus: superAdminProcedure
+  setStatus: tenantSuperadminProcedure
     .input(
       z
         .object({
@@ -205,11 +205,11 @@ export const tenantUserRouter = createTRPCRouter({
 
       if (
         status === "DEACTIVATED" &&
-        user.role === "admin" &&
+        user.role === "tenant_superadmin" &&
         user.status === "ACTIVE"
       ) {
         const activeAdminCount = await platformPrisma.user.count({
-          where: { tenantId, role: "admin", status: "ACTIVE" },
+          where: { tenantId, role: "tenant_superadmin", status: "ACTIVE" },
         });
         if (activeAdminCount <= 1) {
           throw new TRPCError({

@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc/client";
 
-type Role = "admin" | "encoder" | "viewer" | "bantay_dagat";
+type Role = "tenant_admin" | "encoder" | "viewer" | "bantay_dagat";
 
 const ROLES: { value: Role; label: string }[] = [
-  { value: "admin", label: "Admin" },
+  { value: "tenant_admin", label: "Admin" },
   { value: "encoder", label: "Encoder" },
   { value: "viewer", label: "Viewer" },
   { value: "bantay_dagat", label: "Bantay Dagat" },

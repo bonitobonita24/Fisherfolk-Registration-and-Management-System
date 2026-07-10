@@ -17,7 +17,10 @@ export default async function FishCatchesPage({
   const session = await auth();
   const role = session?.user.role;
   const canRegister =
-    role === "super_admin" || role === "admin" || role === "encoder";
+    role === "tenant_manager" ||
+    role === "tenant_superadmin" ||
+    role === "tenant_admin" ||
+    role === "encoder";
 
   return (
     <div className="space-y-6">

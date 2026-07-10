@@ -99,7 +99,7 @@ export async function notifyUsers(
 }
 
 /**
- * Returns user IDs with role super_admin or admin for the given tenant.
+ * Returns user IDs with role tenant_superadmin or tenant_admin for the given tenant.
  * Used to target admin recipients without the caller needing to query users.
  */
 export async function getTenantAdminUserIds(
@@ -109,7 +109,7 @@ export async function getTenantAdminUserIds(
   const admins = await db.user.findMany({
     where: {
       tenantId,
-      role: { in: ["super_admin", "admin"] },
+      role: { in: ["tenant_superadmin", "tenant_admin"] },
       status: "ACTIVE",
     },
     select: { id: true },

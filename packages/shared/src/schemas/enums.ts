@@ -72,8 +72,9 @@ export const auditActionSchema = z.enum([
 ]);
 
 export const userRoleSchema = z.enum([
-  UserRole.SUPER_ADMIN,
-  UserRole.ADMIN,
+  UserRole.TENANT_MANAGER,
+  UserRole.TENANT_SUPERADMIN,
+  UserRole.TENANT_ADMIN,
   UserRole.ENCODER,
   UserRole.VIEWER,
   UserRole.BANTAY_DAGAT,

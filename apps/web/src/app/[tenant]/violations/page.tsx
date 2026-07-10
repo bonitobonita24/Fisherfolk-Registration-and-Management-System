@@ -14,7 +14,10 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
   const { tenant } = await params;
   const session = await auth();
   const role = session?.user.role;
-  const canManage = role === "super_admin" || role === "admin";
+  const canManage =
+    role === "tenant_manager" ||
+    role === "tenant_superadmin" ||
+    role === "tenant_admin";
 
   return (
     <div className="space-y-6">

@@ -46,7 +46,7 @@ beforeAll(async () => {
       username: `rl-${RUN}`,
       passwordHash: "x",
       name: "RL User",
-      role: "admin",
+      role: "tenant_superadmin",
     },
   });
   testUserId = user.id;
