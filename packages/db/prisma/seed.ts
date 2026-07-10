@@ -1,7 +1,58 @@
-import { PrismaClient } from "@prisma/client";
+import { FeatureKey, PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+/**
+ * Custom-role permission-matrix feature registry (PD-005 Chunk 1).
+ * See ~/.claude/rules/tenant-rbac-standard.md §4.
+ *
+ * The standard allows the feature registry to be either a DB table or a
+ * compile-time enum — here it is the Prisma `FeatureKey` enum itself, so
+ * there are no rows to insert. This "seed" step is therefore a NO-OP
+ * verification, not a write: it asserts the registry is exactly the expected
+ * FRMS feature set and — the structural guardrail — that `billing` and
+ * `user_management` can never appear (those permissions are exclusive to the
+ * fixed tenant_superadmin / tenant_manager tiers, never a custom role).
+ * Running this twice is a pure read + assert, so it is trivially idempotent.
+ */
+function verifyFeatureRegistry(): void {
+  const expected = [
+    "fisherfolk",
+    "households",
+    "vessels",
+    "fish_catches",
+    "violations",
+    "ayuda",
+    "edit_requests",
+    "kanban",
+    "reports",
+    "analytics",
+    "map",
+    "notifications",
+    "id_generator",
+    "import",
+    "audit_log",
+    "data_management",
+  ].sort();
+  // Widen to string[] for the guardrail check below — TS already proves
+  // "billing"/"user_management" aren't valid FeatureKey members at compile
+  // time; the runtime check guards against a future enum edit reintroducing
+  // them without updating this registry's expected list.
+  const actual: string[] = Object.values(FeatureKey).sort();
+
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    throw new Error(
+      `FeatureKey registry drift detected — expected [${expected.join(", ")}] but got [${actual.join(", ")}]`,
+    );
+  }
+  if (actual.includes("billing") || actual.includes("user_management")) {
+    throw new Error(
+      "FeatureKey registry violates the RBAC guardrail: billing/user_management must never be gateable.",
+    );
+  }
+  console.log(`  ✅ FeatureKey registry verified (${actual.length} features, no billing/user_management)`);
+}
 
 async function main() {
   console.log("🌱 Seeding database...");
@@ -235,6 +286,8 @@ async function main() {
   }
 
   console.log(`  ✅ ${defaultCategories.length} default categories created`);
+
+  verifyFeatureRegistry();
 
   console.log("\n✅ Seed complete!");
   console.log(`   Tenant superadmin:        ${appAdminUsername} / [see CREDENTIALS.md]`);

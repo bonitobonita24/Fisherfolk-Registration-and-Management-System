@@ -19,7 +19,8 @@
     "db:seed-qa": "tsx scripts/seed-qa-demo.ts",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@frms/storage": "workspace:*",
@@ -31,6 +32,8 @@
     "@types/node": "^25.6.0",
     "prisma": "^6.2.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.6"
   }
 }

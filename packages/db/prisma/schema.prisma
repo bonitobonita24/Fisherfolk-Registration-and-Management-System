@@ -194,6 +194,30 @@ enum FishCatchSource {
   IMPORT
 }
 
+// Custom-role permission-matrix — gateable feature registry (PD-005 Chunk 1).
+// See ~/.claude/rules/tenant-rbac-standard.md §4. Deliberately EXCLUDES
+// `billing` and `user_management` — those stay exclusive to the fixed
+// tenant_superadmin / tenant_manager tiers and must be structurally
+// impossible to grant through a custom role's permission matrix.
+enum FeatureKey {
+  fisherfolk
+  households
+  vessels
+  fish_catches
+  violations
+  ayuda
+  edit_requests
+  kanban
+  reports
+  analytics
+  map
+  notifications
+  id_generator
+  import
+  audit_log
+  data_management
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model Tenant {
@@ -245,6 +269,7 @@ model Tenant {
   households           Household[]
   fishCatches          FishCatch[]
   fishCatchSpecies     FishCatchSpecies[]
+  customRoles          CustomRole[]
 
   @@map("tenants")
 }
@@ -260,10 +285,15 @@ model User {
   status          UserStatus @default(ACTIVE)
   avatarUrl       String?    @map("avatar_url")
   securityVersion Int        @default(1) @map("security_version")
+  // Optional data-driven custom role (PD-005 Chunk 1 — tenant-rbac-standard.md
+  // §4). Independent of the fixed `role` tier; the effective permission
+  // ceiling for a custom-role user is still capped at tenant_admin.
+  customRoleId    String?    @map("custom_role_id")
   createdAt       DateTime   @default(now()) @map("created_at")
   updatedAt       DateTime   @updatedAt @map("updated_at")
 
   tenant                Tenant                @relation(fields: [tenantId], references: [id])
+  customRole            CustomRole?           @relation(fields: [customRoleId], references: [id])
   auditLogs             AuditLog[]
   comments              Comment[]
   kanbanTasks           KanbanTask[]
@@ -881,4 +911,50 @@ model FishCatchSpecies {
   @@index([tenantId])
   @@index([fishCatchId])
   @@map("fish_catch_species")
+}
+
+// ─── Custom-role permission-matrix (PD-005 Chunk 1) ────────────────────────
+// Data-driven layer BELOW the fixed 3-tier system roles (tenant_manager /
+// tenant_superadmin / tenant_admin — see enum UserRole). A tenant_superadmin
+// (or platform tenant_manager) may define custom roles scoped to their own
+// tenant; each role's capabilities are STRICTLY ≤ the tenant_admin ceiling
+// and can NEVER grant billing or user-management (those FeatureKey values do
+// not exist — see enum FeatureKey above). See
+// ~/.claude/rules/tenant-rbac-standard.md §4 for the full spec.
+model CustomRole {
+  id          String   @id @default(cuid())
+  tenantId    String   @map("tenant_id")
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissions RolePermission[]
+  users       User[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@map("custom_roles")
+}
+
+// One row per (role, feature) — a STRICT CRUD split: `write` = create-only,
+// `update` = edit-only, `delete` is its own column. A custom role can be as
+// narrow as view-only on a single feature.
+model RolePermission {
+  id         String     @id @default(cuid())
+  tenantId   String     @map("tenant_id")
+  roleId     String     @map("role_id")
+  featureKey FeatureKey @map("feature_key")
+  view       Boolean    @default(false)
+  write      Boolean    @default(false)
+  update     Boolean    @default(false)
+  delete     Boolean    @default(false)
+
+  role CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, featureKey])
+  @@index([tenantId, roleId])
+  @@map("role_permissions")
 }
