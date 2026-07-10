@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_GROUPS } from "@/components/nav-items";
+import { NAV_GROUPS, canSeeNavItem } from "@/components/nav-items";
 import { Ship, ChevronLeft, ChevronRight } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -12,10 +12,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import type { Actor, PermissionMatrix } from "@frms/shared/rbac";
+import type { UserRole } from "@frms/shared/types";
 
 interface SidebarProps {
   tenantSlug: string;
-  role: string;
+  role: UserRole;
+  /**
+   * Present only for a custom-role user (PD-005 — the matrix does not yet
+   * ride the session; every caller passes `undefined` today). When it
+   * arrives, custom-role users filter correctly with no further change
+   * here — see `canSeeNavItem` in nav-items.ts.
+   */
+  matrix?: PermissionMatrix;
   onNavigate?: () => void;
   isCollapsed?: boolean;
   onToggle?: () => void;
@@ -24,11 +33,13 @@ interface SidebarProps {
 export function Sidebar({
   tenantSlug,
   role,
+  matrix,
   onNavigate,
   isCollapsed = false,
   onToggle,
 }: SidebarProps) {
   const pathname = usePathname();
+  const actor: Actor = matrix ? { role, matrix } : { role };
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -86,7 +97,7 @@ export function Sidebar({
         <ScrollArea className="flex-1">
           <nav className={cn("py-2", isCollapsed ? "px-1.5" : "px-2")}>
             {NAV_GROUPS.map((group) => {
-              const items = group.items.filter((i) => i.roles.includes(role));
+              const items = group.items.filter((i) => canSeeNavItem(actor, i));
               if (items.length === 0) return null;
 
               return (

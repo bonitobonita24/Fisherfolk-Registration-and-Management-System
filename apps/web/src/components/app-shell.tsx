@@ -10,10 +10,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import type { UserRole } from "@frms/shared/types";
 
 interface AppShellProps {
   tenantSlug: string;
-  role: string;
+  role: UserRole;
   userName: string;
   children: React.ReactNode;
 }
