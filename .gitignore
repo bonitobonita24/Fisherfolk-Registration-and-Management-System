@@ -85,6 +85,7 @@ tests/visual/diff/
 /*.png
 /*.jpeg
 /*.jpg
+/screenshots/
 
 # QA / test evidence (local only)
 test-artifacts/
