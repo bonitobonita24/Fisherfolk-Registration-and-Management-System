@@ -3,6 +3,35 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-11 — FMO masterlist data import + missing-asset backfill (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor, plan-first-dispatch)
+**Scope:** dev DB only (owner-requested import of `.tempfiles/` — gitignored, PII; NOT committed).
+
+Imported the owner's "Complete Masterlist.xlsx" (15 real rows) + linked photos/signatures, and
+backfilled previously-missing assets onto existing records. New reusable tool
+`apps/web/scripts/import-tempfiles.ts` (mirrors `link-fmo-assets.ts`; reuses the app's own
+`parseImportWorkbook` + `buildValidationReport` + `storeImportedAsset` — no field-mapping reimpl).
+3 phases, `--dry` supported, PM-verified dry→live→DB.
+
+- **Phase 1 (masterlist import, INCREMENTAL upsert):** 14 NEW fisherfolk created on `calapan-city`
+  + 1 existing updated (`03-175205000-06086`), 0 skipped/errors. Fisherfolk total 3006 → **3020**.
+  Field mapping, barangay normalization, category mapping, QR payload all via the app's validated path.
+- **Phase 2 (masterlist assets):** 15 photos + 15 signatures compressed (sharp) + uploaded to MinIO
+  `frms-dev` + keyed. All 15 records now carry photo + signature + qrCode.
+- **Phase 3 (missingpix backfill, FILL-ONLY-IF-NULL):** 9 photos + 3 signatures backfilled onto
+  existing records; 1 photo + 7 signatures correctly SKIPPED (already present — never overwritten);
+  0 not-found/errors.
+- **Data-quality fix:** 2 new records imported with barangay "San Rafael" (former name) → normalized
+  to "Salong" per the locked 2026-07-10 consolidation decision; added a durable `barangay_aliases`
+  entry `San Rafael → Salong` so future imports auto-normalize. Verified 0 "San Rafael" remain.
+
+**Verification (PM, ground-truth):** dry-run counts matched independent psql pre-computation exactly;
+live run errors=0 across all 42 asset uploads; DB confirms total=3020, all 15 masterlist records with
+both assets + QR, all 10 backfill targets with both assets (skips preserved). MinIO object keys in
+canonical `{tenantId}/fisherfolk-{photo,signature}/{hash}.{jpg,png}` form. 🔲 Visual render QA of the
+new records' photos folds into the M4 merge browser QA (needs running dev container).
+
 ## 2026-07-11 — M3 3-Tier Tenant RBAC retrofit (Chunks A–D) (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor workers, plan-first-dispatch)
