@@ -8,6 +8,15 @@ import { prisma, platformPrisma } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
 import { authConfig } from "./config";
+import { loadCustomRoleView } from "../rbac/mint";
+
+/** The 3 fixed system tiers — mirrors resolve.ts FIXED_TIER_ROLES. Never
+ * carry a `customRoleId`, so `loadCustomRoleView` is never called for them. */
+const FIXED_TIER_ROLES: ReadonlySet<UserRole> = new Set([
+  "tenant_manager",
+  "tenant_superadmin",
+  "tenant_admin",
+]);
 
 const loginSchema = z.object({
   username: z.string().min(1),
@@ -64,6 +73,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (user.tenant?.status === "SUSPENDED") return null;
 
+        // Mint the custom-role "view" feature set (PD-005 Chunk 4). Fixed
+        // tiers never carry a customRoleId — skip the DB round trip and
+        // attach nothing (undefined), matching resolve.ts's short-circuit.
+        const customView = FIXED_TIER_ROLES.has(user.role)
+          ? undefined
+          : await loadCustomRoleView(platformPrisma, user.id, user.tenantId ?? "");
+
         return {
           id: user.id,
           username: user.username,
@@ -74,6 +90,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantSlug: user.tenant?.slug ?? null,
           securityVersion: user.securityVersion,
           rememberMe,
+          customView,
         };
       },
     }),
@@ -112,6 +129,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantId: token.tenantId as string | null,
           tenantSlug: token.tenantSlug as string | null,
           securityVersion: token.securityVersion as number,
+          customView: token.customView,
         },
       };
     },

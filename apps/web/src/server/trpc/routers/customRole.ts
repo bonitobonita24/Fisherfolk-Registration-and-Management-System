@@ -314,6 +314,14 @@ export const customRoleRouter = createTRPCRouter({
           permissionsAfter = rows.map(([featureKey, grant]) => ({ featureKey, ...grant }));
         }
 
+        // Bump securityVersion for every user currently assigned this role
+        // — an edited matrix must invalidate their existing session, same
+        // reasoning as assignToUser above.
+        await tx.user.updateMany({
+          where: { customRoleId: id, tenantId },
+          data: { securityVersion: { increment: 1 } },
+        });
+
         await tx.auditLog.create({
           data: {
             tenantId,
@@ -356,6 +364,15 @@ export const customRoleRouter = createTRPCRouter({
       }
 
       await platformPrisma.$transaction(async (tx) => {
+        // Defense-in-depth against a TOCTOU race with the `assignedCount`
+        // guard above: bump securityVersion for anyone still pointing at
+        // this role (should be none) BEFORE the role row is gone, so a
+        // straggler's stale customView can never survive the delete.
+        await tx.user.updateMany({
+          where: { customRoleId: id, tenantId },
+          data: { securityVersion: { increment: 1 } },
+        });
+
         await tx.rolePermission.deleteMany({ where: { roleId: id, tenantId } });
         await tx.customRole.delete({ where: { id } });
 
@@ -412,7 +429,11 @@ export const customRoleRouter = createTRPCRouter({
       await platformPrisma.$transaction(async (tx) => {
         await tx.user.update({
           where: { id: userId },
-          data: { customRoleId },
+          // Bump securityVersion so the target user's existing session is
+          // invalidated on next read (V28 hardening, index.ts session
+          // callback) — a customView change must not persist stale in an
+          // already-minted JWT/session.
+          data: { customRoleId, securityVersion: { increment: 1 } },
         });
 
         await tx.auditLog.create({

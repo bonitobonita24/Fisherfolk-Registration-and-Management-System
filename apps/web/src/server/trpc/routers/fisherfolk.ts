@@ -303,7 +303,7 @@ export const fisherfolkRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
       const tenantId = ctx.tenantId;
-      const userId = ctx.userId!;
+      const userId = ctx.userId;
 
       const existing = await ctx.db.fisherfolk.findFirst({
         where: { idNumber: input.idNumber, tenantId },
@@ -373,13 +373,13 @@ export const fisherfolkRouter = createTRPCRouter({
 
       const updated = await ctx.db.fisherfolk.update({
         where: { id },
-        data: omitUndefined({ ...data, updatedById: ctx.userId! }),
+        data: omitUndefined({ ...data, updatedById: ctx.userId }),
       });
 
       await ctx.db.auditLog.create({
         data: {
           tenantId: ctx.tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "UPDATE",
           entityType: "Fisherfolk",
           entityId: id,
@@ -463,13 +463,13 @@ export const fisherfolkRouter = createTRPCRouter({
 
       const updated = await ctx.db.fisherfolk.update({
         where: { id: input.id },
-        data: { status: "ARCHIVED", updatedById: ctx.userId! },
+        data: { status: "ARCHIVED", updatedById: ctx.userId },
       });
 
       await ctx.db.auditLog.create({
         data: {
           tenantId: ctx.tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "UPDATE",
           entityType: "Fisherfolk",
           entityId: input.id,

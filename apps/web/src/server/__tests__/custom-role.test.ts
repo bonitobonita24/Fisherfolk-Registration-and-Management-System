@@ -22,6 +22,7 @@ import type { Session } from "next-auth";
 import { platformPrisma, prisma } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
+import { loadCustomRoleView } from "../rbac/mint";
 import type { TRPCContext } from "../trpc/context";
 import { customRoleRouter } from "../trpc/routers/customRole";
 import { createCallerFactory } from "../trpc/trpc";
@@ -253,23 +254,61 @@ describe.skipIf(!hasDb)("customRole — update", () => {
     });
     expect(audit).toBeTruthy();
   });
+
+  it("bumps securityVersion for every user currently assigned the edited role", async () => {
+    const c = caller(superadminUserId, "tenant_superadmin");
+    const role = await c.create({
+      tenantId,
+      name: `UpdateBump-${RUN}`,
+      permissions: [{ featureKey: "map", view: true, write: false, update: false, delete: false }],
+    });
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: role.id });
+
+    const before = await platformPrisma.user.findUniqueOrThrow({
+      where: { id: encoderUserId },
+      select: { securityVersion: true },
+    });
+
+    await c.update({
+      tenantId,
+      id: role.id,
+      permissions: [{ featureKey: "map", view: true, write: true, update: false, delete: false }],
+    });
+
+    const after = await platformPrisma.user.findUniqueOrThrow({
+      where: { id: encoderUserId },
+      select: { securityVersion: true },
+    });
+    expect(after.securityVersion).toBe(before.securityVersion + 1);
+
+    // Cleanup.
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: null });
+  });
 });
 
 describe.skipIf(!hasDb)("customRole — assignToUser", () => {
-  it("assigns to an encoder user", async () => {
+  it("assigns to an encoder user; bumps securityVersion", async () => {
     const c = caller(superadminUserId, "tenant_superadmin");
     const role = await c.create({ tenantId, name: `Assignable-${RUN}`, permissions: [] });
+
+    const before = await platformPrisma.user.findUniqueOrThrow({
+      where: { id: encoderUserId },
+      select: { securityVersion: true },
+    });
 
     const result = await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: role.id });
     expect(result.customRoleId).toBe(role.id);
 
     const user = await platformPrisma.user.findUniqueOrThrow({
       where: { id: encoderUserId },
-      select: { customRoleId: true, role: true },
+      select: { customRoleId: true, role: true, securityVersion: true },
     });
     expect(user.customRoleId).toBe(role.id);
     // Overlay design: the fixed role enum is untouched.
     expect(user.role).toBe("encoder");
+    // PD-005 Chunk 4 — assigning a custom role must invalidate the user's
+    // existing session (V28 securityVersion check).
+    expect(user.securityVersion).toBe(before.securityVersion + 1);
 
     const audit = await platformPrisma.auditLog.findFirst({
       where: { tenantId, entityType: "User", entityId: encoderUserId, action: "UPDATE" },
@@ -334,5 +373,54 @@ describe.skipIf(!hasDb)("customRole — platformPrisma/guarded-prisma boundary",
   it("a tenant_superadmin caller (real tenantId) never throws 'Tenant context not set'", async () => {
     const c = caller(superadminUserId, "tenant_superadmin");
     await expect(c.list({ tenantId })).resolves.toBeInstanceOf(Array);
+  });
+});
+
+describe.skipIf(!hasDb)("loadCustomRoleView — PD-005 Chunk 4 mint helper", () => {
+  it("no customRoleId → null (falls back to domain-role preset)", async () => {
+    const view = await loadCustomRoleView(platformPrisma, viewerUserId, tenantId);
+    expect(view).toBeNull();
+  });
+
+  it("active custom role → the FeatureKeys with view: true", async () => {
+    const c = caller(superadminUserId, "tenant_superadmin");
+    const role = await c.create({
+      tenantId,
+      name: `MintActive-${RUN}`,
+      permissions: [
+        { featureKey: "fisherfolk", view: true, write: true, update: false, delete: false },
+        { featureKey: "vessels", view: false, write: true, update: false, delete: false },
+        { featureKey: "map", view: true, write: false, update: false, delete: false },
+      ],
+    });
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: role.id });
+
+    const view = await loadCustomRoleView(platformPrisma, encoderUserId, tenantId);
+    expect(view).not.toBeNull();
+    expect(view).toEqual(expect.arrayContaining(["fisherfolk", "map"]));
+    expect(view).not.toContain("vessels");
+
+    // Cleanup.
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: null });
+  });
+
+  it("inactive/deactivated custom role → [] (fail closed, views nothing)", async () => {
+    const c = caller(superadminUserId, "tenant_superadmin");
+    const role = await c.create({
+      tenantId,
+      name: `MintInactive-${RUN}`,
+      permissions: [
+        { featureKey: "fisherfolk", view: true, write: false, update: false, delete: false },
+      ],
+    });
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: role.id });
+    await platformPrisma.customRole.update({ where: { id: role.id }, data: { isActive: false } });
+
+    const view = await loadCustomRoleView(platformPrisma, encoderUserId, tenantId);
+    expect(view).toEqual([]);
+
+    // Cleanup — reactivate and unassign so it can still be deleted later
+    // (not strictly required, but keeps this test isolated).
+    await c.assignToUser({ tenantId, userId: encoderUserId, customRoleId: null });
   });
 });

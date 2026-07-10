@@ -2,6 +2,9 @@ import type { NextAuthConfig, Session } from "next-auth";
 import { encode as defaultEncode } from "next-auth/jwt";
 
 import type { UserRole } from "@frms/shared/types";
+// Type-only import — erased at compile time, so this stays EDGE-SAFE (no
+// runtime/Prisma code from `@frms/shared/rbac` ever enters this bundle).
+import type { FeatureKey } from "@frms/shared/rbac";
 
 declare module "next-auth" {
   interface Session {
@@ -14,6 +17,14 @@ declare module "next-auth" {
       tenantId: string | null;
       tenantSlug: string | null;
       securityVersion: number;
+      /**
+       * Custom-role "view" feature set (PD-005 Chunk 4) — minted at sign-in
+       * by `authorize()`. `undefined` for fixed-tier users (no custom role
+       * possible); `null` for domain-role users with no `customRoleId`
+       * assigned; `FeatureKey[]` (possibly empty — deactivated role) for a
+       * domain-role user with a custom role attached.
+       */
+      customView?: FeatureKey[] | null | undefined;
     };
   }
   interface User {
@@ -27,6 +38,8 @@ declare module "next-auth" {
     securityVersion: number;
     /** "Remember me" choice captured at sign-in (Credentials `authorize`). */
     rememberMe?: boolean;
+    /** See `Session.user.customView` above. */
+    customView?: FeatureKey[] | null | undefined;
   }
 }
 
@@ -34,6 +47,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     /** Carried from `User.rememberMe` on sign-in; drives session/cookie lifetime. */
     rememberMe?: boolean;
+    /** Carried from `User.customView` on sign-in — see `Session.user.customView`. */
+    customView?: FeatureKey[] | null | undefined;
   }
 }
 
@@ -105,6 +120,7 @@ export const authConfig = {
         token.tenantSlug = user.tenantSlug;
         token.securityVersion = user.securityVersion;
         token.rememberMe = user.rememberMe ?? false;
+        token.customView = user.customView;
       }
       return token;
     },
@@ -119,6 +135,7 @@ export const authConfig = {
           tenantId: token.tenantId as string | null,
           tenantSlug: token.tenantSlug as string | null,
           securityVersion: token.securityVersion as number,
+          customView: token.customView,
         },
       };
     },

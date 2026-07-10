@@ -6,6 +6,9 @@ import {
   storageOriginFromEnv,
 } from "@/lib/security-headers";
 import { parseCustomDomainMap, resolveTenantRoute } from "@/lib/tenant-routing";
+import { canAccessRouteSegment } from "@/lib/route-feature-map";
+import type { Actor, FeatureKey } from "@frms/shared/rbac";
+import type { UserRole } from "@frms/shared/types";
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
 
@@ -39,6 +42,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       role?: string;
       tenantSlug?: string | null;
       tenantId?: string | null;
+      customView?: FeatureKey[] | null;
     };
   } | null;
 
@@ -52,7 +56,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.redirect(loginUrl);
   }
 
-  const { role, tenantSlug, tenantId } = session.user;
+  const { role, tenantSlug, tenantId, customView } = session.user;
 
   if (pathname === "/") {
     if (role === "tenant_manager") {
@@ -83,6 +87,37 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
         new URL(`/${tenantSlug}/dashboard`, req.url),
       );
     }
+
+    // Feature-level deny-by-default gate (surface #2 — see route-feature-map.ts).
+    // A custom-role actor's `matrix` is built from the JWT-minted `customView`
+    // (view-only, matches how sidebar nav filtering already treats it). A
+    // fixed-tier/plain-domain-role actor carries no `matrix` — hasPermission()
+    // falls back to that role's DOMAIN_ROLE_PRESETS, so legacy sessions with no
+    // `customView` claim are never locked out by this gate.
+    const actor: Actor = {
+      role: role as UserRole,
+      ...(customView && customView.length > 0
+        ? {
+            matrix: Object.fromEntries(
+              customView.map((feature) => [
+                feature,
+                { view: true, write: false, update: false, delete: false },
+              ]),
+            ),
+          }
+        : {}),
+    };
+
+    if (!canAccessRouteSegment(actor, pathname)) {
+      if (!tenantSlug) {
+        // No tenant to redirect to — fall through rather than risk a loop.
+        return NextResponse.next();
+      }
+      return NextResponse.redirect(
+        new URL(`/${tenantSlug}/dashboard`, req.url),
+      );
+    }
+
     return NextResponse.next();
   }
 
