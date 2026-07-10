@@ -6,7 +6,6 @@ import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
-  superAdminProcedure,
 } from "../trpc";
 
 export const userRouter = createTRPCRouter({
