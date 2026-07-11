@@ -3,7 +3,18 @@ name: Docker Build & Publish
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '.cline/**'
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
+
+# NOTE (staging deploy is GATED — data-first, owner-set 2026-07-11):
+# This job BUILDS + PUSHES the image only (tags: latest, staging-latest, sha-<short>).
+# It does NOT auto-deploy staging. Staging is deployed ONLY via
+# `deploy/staging-refresh-and-deploy.sh` so the prod→staging data refresh always runs
+# BEFORE the new image + migrations. Keep the staging Komodo stack's auto_update OFF.
+# Production promotion stays a separate, explicit manual step. See ~/.claude/rules/staging-refresh-gate.md.
 
 concurrency:
   group: docker-${{ github.ref }}
