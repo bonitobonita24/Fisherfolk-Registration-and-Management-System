@@ -41,7 +41,14 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 ### Authentication & Access
 - Login with email/password
-- Role-based access control (Super Admin, Admin, Encoder, Viewer, Bantay Dagat)
+- Role-based access control — 3-tier tenant standard: **Tenant Manager** (platform, manages all
+  tenants), **Tenant Superadmin** (the tenant owner — one per tenant), **Tenant Admin** (day-to-day
+  admin, excluded from User Management + Tenant Settings), plus domain roles **Encoder**, **Viewer**,
+  **Bantay Dagat**. Tenant ownership transfers via two-way succession (platform break-glass reassign
+  + self-service owner transfer); the owner role is assignable only through succession.
+- Beyond the fixed tiers, a **tenant_superadmin-only Role Builder** defines data-driven **custom
+  roles** via a per-feature permission matrix (view/write/update/delete), capped at the Tenant Admin
+  ceiling (PD-005, shipped)
 - Per-tenant user management
 - PWA install prompt for Bantay Dagat mobile use
 
@@ -55,6 +62,16 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Image auto-compression on upload (reduce to viewable quality in kilobytes)
 - Category icons render as **font-independent lucide SVG icons** (mapped per category name, colored-dot fallback) or an uploaded custom image — displayed on registration form and ID cards. (The emoji render path was dropped: seeded emoji showed as missing-glyph boxes on LGU workstations lacking an emoji font.)
 - Records with empty required fields (incl. missing photo/signature) allow direct fill-in without admin approval; editing an already-populated field still requires approval (PD-004, provisional)
+
+### Household Management
+- Fisherfolk may be grouped into a **Household** (head + members; the head is always also a
+  member). Households are created explicitly by staff — existing fisherfolk are NOT auto-grouped
+  or backfilled; only newly-created households exist going forward.
+- A household's category (for counts/reporting) is the head's fisherfolk category.
+- Households are auto-numbered `HH-####` per tenant.
+- Deleting a household unlinks its members (fisherfolk records are preserved, never deleted).
+- Managed under **RECORDS → Households**: list, create-wizard, detail-edit flow.
+- A household membership badge is shown on the fisherfolk profile.
 
 ### Daily Operations (sub-tab under Fisherfolk)
 - Today's registrations, renewals, and updates with timestamps
@@ -140,11 +157,21 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Ticket-type comments for items needing confirmation
 - Visible to all roles on the profile
 
-### Kanban Task Board
-- Personal task board per user
+### ToDo (Kanban + Calendar)
+- Personal task board per user, now called **ToDo**, offering two views over the same task data:
+  - **Kanban view** — columns (To Do, In Progress, Done), status changed via a MoveMenu dropdown
+  - **Calendar view** — a month-grid calendar, plus a "No Due Date" list for tasks lacking a due date
+- A view toggle (Kanban/Calendar) and an "All | Assigned to me" filter sit above both views
 - Tasks created from comments, mentions, or manually
-- Drag-and-drop columns (To Do, In Progress, Done)
-- Assignable to self or from @mention context
+- Optional **due date** per task (shown as a chip; overdue tasks are visually flagged)
+- Optional **source-entity link** back to the record that spawned the task — Fisherfolk, Vessel,
+  Violation, or Ayuda Program (🔗 icon deep-links to that record)
+- Every Fisherfolk, Vessel, Violation, and Ayuda detail page has a **"Make ToDo"** action (prefilled
+  title referencing the record) and shows its own **linked ToDos** list. On Violation/Ayuda the
+  action is gated behind the same `canManage` permission as other edit actions
+- Any authenticated user (not just admins) can be assigned a ToDo via an assignable-users picker;
+  defaults to the creator if unassigned
+- Route: `/[tenant]/todo` (the old `/[tenant]/kanban` path permanently redirects to `/todo`)
 
 ### Dashboard (rich analytics hub — charts belong here, not Reports)
 - Restructured KPI cards with parent + children layout:
@@ -182,12 +209,23 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Left sidebar: report type selector with descriptions
 - Comprehensive filter panel: Status (All/New/Renewed/Active/Inactive), Barangay, Category, Year, Date range
 - Live matching record count + preview table
-- Generate as PDF or Excel (Admin and Super Admin only)
+- Generate as PDF or Excel (Tenant Admin and Tenant Superadmin only)
 - Print-friendly layout for LGU presentations and Ayuda distribution lists
 
-### Ayuda Programs (standalone sidebar module — Admin only creation)
+### Ayuda Programs (standalone sidebar module — Tenant Admin only creation)
 - Create program: Title, Description, Date/time created
+- Choose a **Distribution Unit** at creation time: `Fisherfolk` (existing per-person beneficiary
+  counting) or `Household` (one beneficiary record per household, keyed to the household head).
+  This setting is fixed once the program is created (no edit-program form exists); duplicate-
+  household selection is blocked in the household-mode beneficiary picker.
 - Define beneficiary criteria with mix-and-match filters: Status, Barangay (multi-select), Category (multi-select), Age range (from/to), Sex
+- **Filter & Bulk Add**: staff can bulk-enroll beneficiaries via a mix-and-match filter tool over
+  any combination of barangay, household, category, age range, registration status, vessel-owner
+  (is/isn't), and vessel type (AND across facets, multiple values within a facet). Staff can **add
+  all matching** or **add a selected subset** in one action, **bulk-remove** pending beneficiaries
+  (confirmed/received distributions cannot be bulk-removed), and still add/remove individuals
+  manually. The filter respects the program's Distribution Unit — in Household mode it filters on
+  and enrolls the household head. Bulk operations are capped at 5000 targets per action.
 - Preview matching beneficiary count and list before saving
 - Generated master list table with blank columns: REMARKS, SIGNATURE, DATE RECEIVED
 - Print master list with official government header
@@ -206,11 +244,11 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Every creation, edit, update, request logged with timestamp + user + IP
 - Per-fisherfolk change history (field-level diff)
 - Per-vessel change history
-- Global activity log (Admin/Super Admin: bird's eye view of all user actions)
+- Global activity log (Tenant Admin/Tenant Superadmin: bird's eye view of all user actions)
 - Per-user activity log
 - Log retention: permanent (no auto-deletion)
 
-### Tenant Settings (Admin) — tabbed: General / Categories / Violations / Email / Barangay Aliases
+### Tenant Settings (Tenant Superadmin) — tabbed: General / Categories / Violations / Email / Barangay Aliases
 - **General**: LGU name, registration year, mayor name + signature upload for ID printing, **Theme editor** — configurable **primary + secondary accent colors** per tenant (free color pickers, live preview, save, reset-to-default). App is always-dark (no light mode); the accent pair is decoupled (primary ≠ secondary). Current palette + defaults live in docs/DESIGN.md.
 - **Categories**: Full CRUD management of fisherfolk categories
   - Add new category: name, description, display color
@@ -228,13 +266,13 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - **Barangay Aliases**: admin CRUD for the tenant-editable typo-normalization map (e.g. `Comunal`→`Communal`, `Nag-Iba 1`→`Nag-Iba I`) applied by the Data Import wizard and registration normalization (see Data Management & Normalization Standards)
 - Barangay list management
 
-### User Management (Super Admin)
+### User Management (Tenant Superadmin)
 - Create/edit/deactivate user accounts per tenant
-- Assign roles
+- Assign roles (including data-driven custom roles via the Role Builder — PD-005)
 - View per-user activity logs
-- System-level deletion (Super Admin only)
+- System-level deletion (Tenant Manager only)
 
-### Data Import (Admin only — bulk migration tool)
+### Data Import (Tenant Admin only — bulk migration tool)
 - 5-step wizard: Upload Excel → Upload Photos → Upload Signatures → Preview & Validate → Import
 - **Step 1 — Upload Excel**: accepts cleaned .xlsx with standard columns (ID NUMBER, FULL NAME, DATE OF BIRTH, ADDRESS, SEX, IMAGE, SIGNATURE, RSBSA #, CATEGORY, CONTACT NUMBER, REMARKS)
   - Pre-upload validation: duplicate ID detection (keeps record with most data), date format correction (auto-fix to MM/DD/YYYY), contact number normalization (canonical `09xxxxxxxxx`), category matching against tenant config, required field checks
@@ -258,7 +296,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
   - Status set to "Active" for all imported members
   - Incomplete records (no photo/sig) available in Daily Operations for completion
   - Import report + error log downloadable
-- Access: Admin only, located at /[tenant]/import under System menu
+- Access: Tenant Admin only, located at /[tenant]/import under System menu
 - Use case: initial data migration from Excel-based systems, yearly batch uploads from other LGU offices
 
 ### Data Management & Normalization Standards (adopted from the production FMO reporting tool)
@@ -293,15 +331,22 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 | Role | Can do | Cannot do |
 |------|--------|-----------|
-| Super Admin | Everything: manage all tenants, create/delete tenants, system-level deletion, manage all users across tenants, view all logs, configure system settings, all Admin capabilities | No restrictions |
-| Admin | Register/renew/edit fisherfolk and vessels, approve/reject edit requests, lift violations, manage users within own tenant, view all charts and reports, export reports (PDF/Excel), configure tenant settings (SMTP, mayor name, accent color, categories with icons, barangay list, violation subjects), view all audit logs within tenant, trigger yearly renewal cycle, manage ID templates and generation, create and manage Ayuda programs with verification | System-level deletion, tenant creation/deletion, cross-tenant access |
-| Encoder | Register new fisherfolk and vessels, renew existing (with field updates, no approval needed), view records, submit edit requests (cannot edit directly except incomplete records missing photo/signature), generate and print IDs from approved templates, post comments with @mentions, manage personal Kanban tasks, view own activity log, use Daily Operations board | Direct editing outside renewal (except incomplete records), approve/reject requests, lift violations, export reports, view other users' logs, access tenant settings, delete records, create ID templates, create Ayuda programs |
+| Tenant Manager | Platform-level (not tenant-scoped): manage all tenants, create/suspend tenants, reassign a tenant's owner (break-glass), system-level deletion, cross-tenant admin + audit, all Tenant Superadmin capabilities on any tenant | No restrictions |
+| Tenant Superadmin | Full control within own tenant (the tenant owner — one per tenant): register/renew/edit fisherfolk and vessels, approve/reject edit requests, lift violations, manage users within own tenant (create/edit/deactivate, assign roles, build custom roles via Role Builder), view all charts and reports, export reports (PDF/Excel), configure tenant settings (SMTP, mayor name, accent colors, categories with icons, barangay list, violation subjects), view all audit logs within tenant, trigger yearly renewal cycle, manage ID templates and generation, create and manage Ayuda programs with verification, transfer ownership to another user | System-level deletion, tenant creation/deletion, cross-tenant access |
+| Tenant Admin | Day-to-day tenant admin: register/renew/edit fisherfolk and vessels, approve/reject edit requests, lift violations, view all charts and reports, export reports (PDF/Excel), configure Categories/Violations/Barangay Aliases, trigger yearly renewal cycle, manage ID templates and generation, create and manage Ayuda programs with verification, bulk Data Import | User Management, Billing, Tenant Settings (General/SMTP/accent colors), system-level deletion, tenant creation/deletion, cross-tenant access |
+| Encoder | Register new fisherfolk and vessels, renew existing (with field updates, no approval needed), view records, submit edit requests (cannot edit directly except incomplete records missing photo/signature), generate and print IDs from approved templates, post comments with @mentions, manage personal ToDo tasks, view own activity log, use Daily Operations board | Direct editing outside renewal (except incomplete records), approve/reject requests, lift violations, export reports, view other users' logs, access tenant settings, delete records, create ID templates, create Ayuda programs |
 | Viewer | View all charts and dashboards, search records (read-only), post comments with @mentions, view printable reports on-screen (no export) | Create/edit/delete records, submit edit requests, file violations, generate IDs, export reports, access logs or settings |
-| Bantay Dagat | Search fisherfolk/vessel via QR scan or search, file violation reports with evidence, view only violations they personally filed, request Admin to lift violations | View other Bantay Dagat's violations, create/edit records, approve/reject anything, view charts/dashboards, export reports, access settings or logs |
+| Bantay Dagat | Search fisherfolk/vessel via QR scan or search, file violation reports with evidence, view only violations they personally filed, request a Tenant Admin/Tenant Superadmin to lift violations | View other Bantay Dagat's violations, create/edit records, approve/reject anything, view charts/dashboards, export reports, access settings or logs |
+
+Beyond these fixed tiers, a **tenant_superadmin-only Role Builder** defines data-driven custom
+roles below the Tenant Admin ceiling via a per-feature permission matrix (view/write/update/delete);
+custom roles may never grant User Management or Billing (PD-005, shipped).
 
 ## Data Entities
 
-**Fisherfolk**: id, tenantId, idNumber (unique per tenant), fullName, lastName, firstName, middleName, suffix, dateOfBirth, sex, address, barangay, contactNumber, rsbsaNumber, categories (array of category IDs with icons), photo (compressed image path), signature (compressed image path), qrCode (auto-generated, encodes profile URL), status (New, Active, Renewed, Inactive, Inactive-Violation, Archived), dateJoined, registrationYear, remarks, linkedVessels (relation), violations (relation), comments (relation), editRequests (relation), ayudaRecords (relation), createdAt, updatedAt, createdBy, updatedBy
+**Fisherfolk**: id, tenantId, idNumber (unique per tenant), fullName, lastName, firstName, middleName, suffix, dateOfBirth, sex, address, barangay, contactNumber, rsbsaNumber, categories (array of category IDs with icons), photo (compressed image path), signature (compressed image path), qrCode (auto-generated, encodes profile URL), status (New, Active, Renewed, Inactive, Inactive-Violation, Archived), dateJoined, registrationYear, remarks, householdId (nullable, relation to Household), linkedVessels (relation), violations (relation), comments (relation), editRequests (relation), ayudaRecords (relation), createdAt, updatedAt, createdBy, updatedBy
+
+**Household**: id, tenantId, code (auto-generated `HH-####` per tenant), headFisherfolkId (relation to Fisherfolk), members (relation to Fisherfolk, head included), createdAt, updatedAt, createdBy, updatedBy
 
 **Vessel**: id, tenantId, mfvrNumber (unique per tenant), vesselName, vesselType (Motorized, Non-Motorized), hullMaterial (Wood, Fiberglass, Composite), placeBuilt, yearBuilt, registeredLength, registeredBreadth, registeredDepth, grossTonnage, netTonnage, engineMake, engineSerialNumber, horsepower, homeport, fishingGearClassification (array), vesselPhoto (compressed image path), qrCode (auto-generated, encodes vessel profile URL), status (Active, Impounded, Inactive, Archived), linkedOwners (relation to Fisherfolk), violations (relation), createdAt, updatedAt, createdBy, updatedBy
 
@@ -313,19 +358,19 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 
 **AuditLog**: id, tenantId, userId, action (CREATE, UPDATE, DELETE, REQUEST, APPROVE, REJECT, RENEW, VIOLATION_FILED, VIOLATION_LIFTED, LOGIN, EXPORT), entityType, entityId, changes (JSON diff), ipAddress, userAgent, createdAt
 
-**User**: id, tenantId, email, name, role (SuperAdmin, Admin, Encoder, Viewer, BantayDagat), status (Active, Deactivated), avatarUrl, createdAt, updatedAt
+**User**: id, tenantId (nullable — null for platform Tenant Manager accounts), email, name, role (tenant_manager, tenant_superadmin, tenant_admin, encoder, viewer, bantay_dagat), customRoleId (nullable, relation to a data-driven custom role — PD-005), status (Active, Deactivated), avatarUrl, createdAt, updatedAt
 
 **Tenant**: id, slug (URL path: calapan, naujan, etc.), name, logoUrl, mayorName, mayorSignatureUrl, accentColor (hex, default #4F8EF7), primaryColor (hex, default #F97316), secondaryColor (hex, default #1E3A5F), smtpHost, smtpPort, smtpUser, smtpPassword (encrypted), smtpFrom, barangayList (array), violationSubjects (array), currentRegistrationYear, customDomain (unique, nullable — tenant's own masked domain), domainVerifiedAt (timestamp, nullable — set when the custom domain's DNS + TLS is verified and activated), status (Active, Suspended), createdAt, updatedAt
 
 **Category**: id, tenantId, name, description, slug (auto-generated), displayColor (hex), iconType (emoji, image), iconEmoji (nullable), iconImageUrl (nullable, compressed), displayOrder (integer), status (Active, Disabled), memberCount (computed), createdAt, updatedAt
 
-**KanbanTask**: id, tenantId, assignedTo (userId), title, description, status (Todo, InProgress, Done), sourceCommentId (nullable), createdAt, updatedAt
+**KanbanTask** (ToDo — Kanban + Calendar views): id, tenantId, assignedTo (userId), title, description, status (Todo, InProgress, Done), sourceCommentId (nullable), dueDate (nullable — drives Calendar view + overdue flag), sourceEntityType (nullable — Fisherfolk, Vessel, Violation, AyudaProgram), sourceEntityId (nullable — the linked record from "Make ToDo"), createdAt, updatedAt
 
 **Notification**: id, tenantId, userId, type (EditRequestPending, EditRequestApproved, EditRequestRejected, ViolationFiled, ViolationLifted, MentionedInComment, TaskAssigned, AyudaDistribution), title, message, entityType, entityId, isRead, createdAt
 
-**AyudaProgram**: id, tenantId, title, description, filters (JSON: {status, barangays[], categories[], ageFrom, ageTo, sex}), beneficiaryCount (computed), status (Active, Distributing, Completed), verifiedCount, notReceivedCount, createdBy, createdAt, updatedAt
+**AyudaProgram**: id, tenantId, title, description, distributionUnit (Fisherfolk, Household — fixed at creation), filters (JSON: {status, barangays[], categories[], ageFrom, ageTo, sex}), beneficiaryCount (computed), status (Active, Distributing, Completed), verifiedCount, notReceivedCount, createdBy, createdAt, updatedAt
 
-**AyudaBeneficiary**: id, programId, fisherfolkId, verificationStatus (Unchecked, Received, NotReceived), verifiedBy (nullable), verifiedAt (nullable), createdAt
+**AyudaBeneficiary**: id, programId, fisherfolkId, householdId (nullable — set when the program's distributionUnit is Household), verificationStatus (Unchecked, Received, NotReceived), verifiedBy (nullable), verifiedAt (nullable), createdAt
 
 **AyudaUpload**: id, programId, uploadType (SignedSheet, EventPhoto), filePath (compressed), originalFilename, fileSize, uploadedBy, uploadedAt
 
@@ -373,7 +418,7 @@ Docker Hub:   enabled — hub_repo: bonitobonita24/frms
 | 18 | Ayuda Program Detail | Mobile Ready | Master list, verification, uploads |
 | 19 | Ayuda Program Create | Mobile Ready | Filter builder, preview |
 | 20 | Reports (List Generator) | Mobile Ready | Filter + generate PDF/Excel |
-| 21 | Kanban Task Board | Mobile Ready | Drag-and-drop |
+| 21 | ToDo Board (Kanban + Calendar) | Mobile Ready | View toggle, drag-free status change |
 | 22 | Audit Logs | Mobile Ready | Data table |
 | 23 | User Management | Mobile Ready | Admin settings |
 | 24 | Data Import Wizard | Mobile Ready | Admin bulk migration, desktop workflow |
@@ -418,28 +463,33 @@ Custom domains (optional, per tenant): a tenant may point their own domain (CNAM
 /[tenant]/scanner               QR scanner (camera + manual search)
 /[tenant]/violations            Violation records list
 /[tenant]/violations/new        New violation form (with QR scan entry)
-/[tenant]/requests              Edit request queue (Admin)
+/[tenant]/requests              Edit request queue (Tenant Admin/Tenant Superadmin)
 /[tenant]/ids                   ID generation (Select & Print + Template Editor + PVC Layout)
 /[tenant]/ayuda                 Ayuda programs list
 /[tenant]/ayuda/new             Create new Ayuda program
 /[tenant]/ayuda/[id]            Ayuda program detail (master list, verification, uploads)
+/[tenant]/households            Households list
+/[tenant]/households/new        Create new household (3-step wizard)
+/[tenant]/households/[id]       Household detail / edit
 /[tenant]/reports               Reports list generator
-/[tenant]/kanban                Kanban task board
+/[tenant]/todo                  ToDo board (Kanban + Calendar views; /[tenant]/kanban redirects here)
 /[tenant]/notifications         Notification center
-/[tenant]/logs                  Activity / audit logs (Admin+)
-/[tenant]/settings              Tenant settings (General / Categories / Violations / Email)
-/[tenant]/users                 User management (Admin+)
-/[tenant]/import                Data import wizard (Admin — bulk migration)
+/[tenant]/logs                  Activity / audit logs (Tenant Admin+)
+/[tenant]/settings              Tenant settings (General / Categories / Violations / Email / Barangay Aliases)
+/[tenant]/settings/roles        Custom-role permission-matrix builder (Tenant Superadmin only — PD-005)
+/[tenant]/users                 User management (Tenant Superadmin)
+/[tenant]/import                Data import wizard (Tenant Admin — bulk migration)
 /[tenant]/profile               My profile / account settings
 /[tenant]/scan/[id]             QR redirect: opens fisherfolk profile
 /[tenant]/scan/vessel/[mfvr]    QR redirect: opens vessel profile
-/admin                          Super Admin: tenant management, cross-tenant overview
+/admin                          Tenant Manager: tenant management, cross-tenant overview
 
 ## Access Control
 Public routes:    /, /login
 Protected routes: /[tenant]/* (require login + tenant membership)
-Admin-only:       /[tenant]/requests, /[tenant]/logs, /[tenant]/settings, /[tenant]/users, /[tenant]/import, /[tenant]/ids (template editor tab), /[tenant]/ayuda/new
-Super Admin only: /admin, system-level deletion actions
+Tenant Admin+:     /[tenant]/requests, /[tenant]/logs, /[tenant]/import, /[tenant]/ids (template editor tab), /[tenant]/ayuda/new
+Tenant Superadmin only: /[tenant]/settings, /[tenant]/settings/roles, /[tenant]/users
+Tenant Manager only: /admin, system-level deletion actions
 
 ## Data Sensitivity
 PII stored:       Yes — full name, date of birth, address, contact number, RSBSA number, photos, signatures

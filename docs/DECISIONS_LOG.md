@@ -778,3 +778,34 @@ Decision: PRODUCT.md line 44 still lists the OLD role names (`Super Admin, Admin
 Bantay Dagat`). Under Rule 1 (PRODUCT.md is human-edited only) this back-port is surfaced as a
 candidate in BACKPORT_CANDIDATES.md, not auto-applied.
 Locked: yes (deferred to human back-port)
+
+## 2026-07-11 — PRODUCT.md back-port: Candidates K/L/M/N applied (Rule 1 waiver — owner-approved)
+Decision: owner APPROVED back-porting BACKPORT_CANDIDATES.md Candidates K, L, M, N into
+docs/PRODUCT.md (PD-005/PD-006 owner-approval precedent, mirroring the A–J/J Rule 1 waiver of
+2026-06-30). All four candidates were previously ⏳ DRAFT/awaiting-application; the shipped code
+already implements each. Applied LOCAL-only (not committed by this session — commit is a separate
+owner-triggered step per HARD HOLD).
+- **Candidate K (Household Management):** added a `### Household Management` subsection (after
+  Fisherfolk Registration) + a Distribution Unit paragraph under `### Ayuda Programs` + a new
+  `Household` Data Entity + `householdId` on Fisherfolk/AyudaBeneficiary + `distributionUnit` on
+  AyudaProgram.
+- **Candidate L (ToDo — Kanban + Calendar):** renamed `### Kanban Task Board` to `### ToDo (Kanban +
+  Calendar)` describing the Kanban/Calendar view toggle, due dates, source-entity linking, "Make
+  ToDo," and the any-user-assignable picker; `KanbanTask` entity extended with `dueDate`,
+  `sourceEntityType`, `sourceEntityId`; `/[tenant]/kanban` → `/[tenant]/todo` route noted.
+- **Candidate M (Ayuda mass-selection multi-filter):** added a "Filter & Bulk Add" paragraph under
+  `### Ayuda Programs` (barangay/household/category/age/status/vessel-owner/vessel-type filters,
+  add-all/add-selected/bulk-remove, 5000-target cap, Distribution-Unit-aware). No Data Entities change.
+- **Candidate N (3-Tier Tenant RBAC role names):** renamed the RBAC bullet (line 44) and every
+  formal role-gating reference (Roles+Permissions matrix, Data Entities `User.role` enum +
+  `customRoleId`, Access Control route map, Tenant Settings/User Management/Data Import/Reports/
+  Audit Logging section headers) from the old `Super Admin/Admin/SuperAdmin/BantayDagat` naming to
+  the shipped 3-tier standard: **Tenant Manager** (platform) / **Tenant Superadmin** (tenant owner)
+  / **Tenant Admin** (day-to-day, excluded from User Mgmt + Tenant Settings), plus domain roles
+  Encoder/Viewer/Bantay Dagat; noted two-way succession + the tenant_superadmin-only custom-role
+  Role Builder (PD-005, shipped) as an additional capability below the fixed tiers.
+Note: informal narrative mentions of "Admin" in Core User Flows prose (flows #3, #5, #7, #8, #11,
+#13), the Mobile Needs table notes column, and entity relation field labels (e.g. `liftedBy (Admin
+user, nullable)`) were intentionally left as-is — out of the assigned rename scope (grep-verified:
+zero remaining `Super Admin` / `SuperAdmin` / `BantayDagat` one-word matches).
+Attribution: CLAUDE_CODE. Locked: yes.

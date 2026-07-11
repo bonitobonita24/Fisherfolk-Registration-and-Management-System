@@ -111,7 +111,11 @@
 
 ---
 
-### L. ToDo (Kanban + Calendar) feature — ⏳ DRAFT — awaiting owner application
+### L. ToDo (Kanban + Calendar) feature — ✅ APPLIED 2026-07-11
+> **Status: ✅ APPLIED to PRODUCT.md 2026-07-11** (owner approved; Rule 1 waived — see
+> DECISIONS_LOG.md 2026-07-11 entry). `### Kanban Task Board` renamed to
+> `### ToDo (Kanban + Calendar)`; `KanbanTask` entity extended with `dueDate`,
+> `sourceEntityType`, `sourceEntityId`; `/[tenant]/kanban` → `/[tenant]/todo` route noted.
 - **Shipped (feat/household-management, `cbe79ed`..`11914e2`, 2026-07-08):** the standalone Kanban
   board is now **ToDo**, with two views over the same `KanbanTask` data:
   - **Kanban view** (existing board, status changed via the existing MoveMenu dropdown — no
@@ -188,11 +192,10 @@
 - **Note:** when the first custom domain is onboarded, the CORS-origins line under **## Security
   Requirements** (line ~448) and any absolute-URL builders should account for the tenant's domain.
 
-### K. Household Management — new feature (2026-07-08) ⏳ DRAFT — awaiting owner application
-> **Status: ⏳ DRAFT.** Feature is shipped on branch `feat/household-management` (unmerged, all 9
-> tasks complete — see docs/STATE.md + docs/CHANGELOG_AI.md 2026-07-08 entry). This candidate is
-> NOT yet applied to PRODUCT.md — Rule 1 (human-only edit) applies; the owner reviews and applies,
-> defers, or logs `spec-divergent: <reason>` in DECISIONS_LOG.md.
+### K. Household Management — new feature (2026-07-08) ✅ APPLIED 2026-07-11
+> **Status: ✅ APPLIED to PRODUCT.md 2026-07-11** (owner approved; Rule 1 waived — see
+> DECISIONS_LOG.md 2026-07-11 entry). New `### Household Management` subsection + Ayuda
+> Distribution-Unit paragraph + `Household` Data Entity + `householdId`/`distributionUnit` fields added.
 - **Decision (locked):** DECISIONS_LOG "Household Management — [HOW] locked implementation
   decisions" (2026-07-08). Explicit `Household` model grouping a head Fisherfolk + members (head is
   also a member); household category for counts = head's category; HH-#### per-tenant numbering;
@@ -233,7 +236,7 @@
 
 ## Candidate M — Ayuda beneficiary mass-selection multi-filter (2026-07-09, M1)
 
-- **Status:** drafted by CLAUDE_CODE (Full Auto), awaiting owner application (Rule 1 — PRODUCT.md is human-only).
+- **Status:** ✅ APPLIED to PRODUCT.md 2026-07-11 (owner approved; Rule 1 waived — see DECISIONS_LOG.md 2026-07-11 entry). "Filter & Bulk Add" paragraph added under `### Ayuda Programs`.
 - **Feature shipped:** branch `feat/household-management`, commits `3dca6f6`→`62f3e32` (UNPUSHED).
 - **Proposed PRODUCT.md additions:**
   - Under **### Ayuda Programs**, add:
@@ -254,7 +257,7 @@
 
 ## Candidate N — 3-Tier Tenant RBAC role names (2026-07-11, M3)
 
-- **Status:** drafted by CLAUDE_CODE (Full Auto), awaiting owner application (Rule 1 — PRODUCT.md is human-only).
+- **Status:** ✅ APPLIED to PRODUCT.md 2026-07-11 (owner approved; Rule 1 waived — see DECISIONS_LOG.md 2026-07-11 entry). RBAC bullet, Roles+Permissions matrix, User entity, Access Control route map, and all formal role-gating section headers renamed to the 3-tier standard (Tenant Manager / Tenant Superadmin / Tenant Admin).
 - **Feature shipped:** branch `feat/household-management`, RBAC retrofit Chunks A–C
   (`e8265ec` / `ad5817a` / `2426039`, UNPUSHED). Full [HOW] locked in DECISIONS_LOG "3-Tier Tenant RBAC".
 - **Stale text:** PRODUCT.md line 44 currently reads

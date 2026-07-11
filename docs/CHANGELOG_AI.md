@@ -976,3 +976,28 @@ as candidate M (Rule 1 — owner applies).
 - Files modified:  apps/web/src/server/trpc/routers/fisherfolk.ts (INACTIVE guard on renew mutation); apps/web/src/server/trpc/routers/__tests__/fisherfolk.test.ts (2 new TDD tests + 3 existing tests updated to use INACTIVE status); apps/web/src/server/trpc/routers/dashboard.ts (getStats year param + new counts; resetAnnualRegistrations adminProcedure; getFisherfolkCategoryBreakdown; getVesselCategoryBreakdown); apps/web/src/app/[tenant]/dashboard/dashboard-client.tsx (2-line KPI title/field update).
 - Code-review:     Medium effort. 3 CONFIRMED findings fixed in-session: (1) getFisherfolkCategoryBreakdown ALL branch used empty statusFilter {} — fixed to {status:{in:["NEW","RENEWED","ACTIVE"]}} to exclude INACTIVE/ARCHIVED; (2) getVesselCategoryBreakdown had dead year input param (Vessel has no registrationYear per D3) — param removed; (3) sequential tenant lookup latency — noted, non-blocking, deferred.
 - Verification:    pnpm --filter web typecheck ✅; pnpm --filter web lint ✅; pnpm --filter web test ✅ (178 passed / 62 skipped — DB-integration tests skip without DATABASE_URL). PRODUCT.md untouched (Rule 1).
+
+## 2026-07-11 — PRODUCT.md back-port: Candidates K/L/M/N applied (Rule 1 waiver — owner-approved)
+- Agent:           CLAUDE_CODE (spec-executor dispatch)
+- Why:             Owner APPROVED (PD-005/PD-006 owner-approval precedent) back-porting the four
+                   remaining OPEN candidates in docs/BACKPORT_CANDIDATES.md (K, L, M, N — A–J/J were
+                   already applied 2026-06-30) so PRODUCT.md matches already-shipped code: Household
+                   Management (feat/household-management), the ToDo Kanban+Calendar rename, the Ayuda
+                   mass-selection multi-filter, and the shipped 3-tier RBAC role names
+                   (tenant_manager / tenant_superadmin / tenant_admin).
+- Files modified:  docs/PRODUCT.md (K: new `### Household Management` subsection + Ayuda
+                   Distribution-Unit paragraph + Household entity + householdId/distributionUnit
+                   fields; L: `### Kanban Task Board` → `### ToDo (Kanban + Calendar)` + KanbanTask
+                   entity dueDate/sourceEntityType/sourceEntityId; M: Ayuda "Filter & Bulk Add"
+                   paragraph; N: RBAC bullet, Roles+Permissions matrix (+ new Tenant Admin row),
+                   User entity role enum + customRoleId, Access Control route map, and every formal
+                   role-gating section header renamed Super Admin/Admin/SuperAdmin/BantayDagat →
+                   Tenant Manager/Tenant Superadmin/Tenant Admin); docs/DECISIONS_LOG.md (appended
+                   2026-07-11 back-port decision entry); docs/BACKPORT_CANDIDATES.md (K/L/M/N marked
+                   ✅ APPLIED 2026-07-11).
+- Verification:    grep -n "Super Admin\|SuperAdmin\|BantayDagat" docs/PRODUCT.md → 0 matches (old
+                   formal role literals fully removed). Informal narrative "Admin" mentions in Core
+                   User Flows prose / Mobile Needs notes / entity relation-field labels intentionally
+                   left unchanged (out of assigned rename scope — informal shorthand, not a formal
+                   role-gating reference). LOCAL edits only — not committed (owner HARD HOLD; commit
+                   is a separate, later step).
