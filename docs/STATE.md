@@ -1,5 +1,26 @@
 # FRMS — Project State
 
+## Current State (2026-07-11) — STAGING STOOD UP + GREEN · PD-006 origin push
+
+- **Origin push COMPLETE**: local main (65 commits) + tag `v0.9.0` → `origin/main` (`eeb9577`), then
+  deploy commit `bada32f`. **0 ahead of origin.** CI green; image `bonitobonita24/frms:staging-latest`
+  (multi-arch) on Docker Hub.
+- **STAGING LIVE + VERIFIED GREEN** → https://frms-staging.powerbyte.app
+  - `/api/health` 200 · `/login` 200 · **3-tier login QA ALL PASS** (tenant_superadmin / tenant_manager /
+    tenant_admin, correct session roles).
+  - Stack `/etc/komodo/stacks/frms-staging` (proj `frms_staging`) on Powerbyte-Hostinger (72.62.74.203).
+    Ports DB 5437 / Redis 6384 / MinIO 9012-13. DNS `frms-staging`(+`-storage`) → VPS.
+  - SOPS `Server-Setups/secrets/frms-staging-app.enc.env`; 5 migrations applied (incl RBAC 3-tier);
+    3 canonical `staging_prod` accounts seeded from vault; **no real PII** (Rule 33). Turnstile test keys.
+  - `deploy/staging-refresh-and-deploy.sh` added (data-first gate, first-run guard until `frms_prod` exists).
+- **Vault reseed = VERIFY-ONLY** (owner choice) — keys confirmed present, no live cred rotated.
+- **PROD (FMO) untouched** — manual promotion only; no `frms_prod` stack yet.
+- Open items = deferred owner `[WHAT]`s only (PRODUCT.md back-ports M1–M5 + Cand N, Report-Hub grain
+  flips, optional follow-ups, prod promotion, vault reseed to deployed apps). See PENDING_DECISIONS.md +
+  memory `project_staging_standup_0711`. Tests 893/893 green, tsc+lint clean.
+
+---
+
 ## Current State (2026-07-09) — overnight feature batch (Full Auto)
 
 Branch `feat/household-management` (UNPUSHED, HARD HOLD) now also carries the 2026-07-09 batch:
