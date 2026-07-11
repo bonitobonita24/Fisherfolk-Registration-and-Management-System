@@ -1,6 +1,23 @@
 # FRMS — Project State
 
-## Current State (2026-07-11) — STAGING STOOD UP + GREEN · PD-006 origin push
+## Current State (2026-07-12) — 🚀 PRODUCTION LIVE + GREEN (PD-006 fully executed, Full Auto)
+
+- **PROD STOOD UP & VERIFIED** → https://frms.powerbyte.app (owner-approved target: Powerbyte-Hostinger,
+  real official masterlist). `/api/health` **200**; **superadmin login QA PASS**; dashboard renders
+  **3,016 official fisherfolk** + demographics/analytics + full RBAC nav (Role Builder) + footer `v0.9.0`.
+  - Image `bonitobonita24/frms:latest` = `:prod-sha-6b0fd31` (promoted from verified `staging-latest`).
+  - Stack `/etc/komodo/stacks/frms-prod` (proj `frms_prod`) — postgres/valkey/minio, ports DB **5438** /
+    Redis **6385** / MinIO **9014-15**; bucket `frms-prod` (download). 16 migrations applied.
+  - Secrets `Server-Setups/secrets/frms-prod-app.enc.env` (SOPS+age, `ca8ef8f`). DNS `frms`(proxied)+
+    `frms-storage`(DNS-only) → 72.62.74.203. 3 canonical `staging_prod` accounts + real masterlist seeded.
+  - Vault: dev/staging/prod/demo all on the canonical universal-login scheme → **vault reseed satisfied**.
+  - Deferred (optional, non-blocking): real photos/signatures upload (3,016 missing — text-only by design);
+    CSP whitelist for Cloudflare Insights beacon; PRODUCT.md back-ports (Rule 1 — human-only).
+- Open items now = **owner-only** PRODUCT.md back-ports + product-grain preference flips. See PD-006 (resolved).
+
+---
+
+## Prior State (2026-07-11) — STAGING STOOD UP + GREEN · PD-006 origin push
 
 - **Origin push COMPLETE**: local main (65 commits) + tag `v0.9.0` → `origin/main` (`eeb9577`), then
   deploy commit `bada32f`. **0 ahead of origin.** CI green; image `bonitobonita24/frms:staging-latest`

@@ -123,3 +123,17 @@
   4. Demo (`*-demo`) is separate — push only if owner asks; migrate-but-never-reseed.
   ⚠ Prod is the highest-risk, outward-facing step — if staging is NOT green, HALT and re-surface, do not
   force prod. Tag the release `v0.9.0` → `v0.9.0-rc.1` on staging, drop suffix on prod promotion.
+- **✅ RESOLVED / EXECUTED 2026-07-12 (Full Auto).** Owner confirmed prod target via AskUserQuestion:
+  **host = Powerbyte-Hostinger → `frms.powerbyte.app`** (+ `frms-storage.powerbyte.app`); **data = real
+  official masterlist**. First-time prod standup completed end-to-end:
+  1. Image `bonitobonita24/frms:latest` + `:prod-sha-6b0fd31` promoted from verified `staging-latest`.
+  2. Prod secrets `frms-prod-app.enc.env` minted (SOPS+age) → Server-Setups `ca8ef8f`. Ports DB5438/
+     REDIS6385/MinIO9014-15.
+  3. Cloudflare DNS: `frms.powerbyte.app` (proxied) + `frms-storage.powerbyte.app` (DNS-only) → 72.62.74.203.
+  4. VPS stack `/etc/komodo/stacks/frms-prod` (proj `frms_prod`) — postgres/valkey/minio + `frms-prod`
+     bucket (download policy). 16 migrations applied; 3 canonical `staging_prod` accounts seeded.
+  5. **Real masterlist seeded: 3,016 official fisherfolk** (seed-remote.sh prod, rc=0, 0 skipped).
+  6. App `prod-sha-6b0fd31` deployed. **`/api/health` 200; superadmin login QA PASS; dashboard renders
+     3,016 records + full RBAC nav + footer v0.9.0.** Data-first gate N/A (no prior prod to refresh from).
+  - Deferred (optional, NON-blocking): real photos/signatures upload (3,016 missing — text-only import
+    by design); CSP whitelist for Cloudflare Insights beacon (benign console error). Prod = the v0.9.0 line.
