@@ -48,6 +48,7 @@ enum AuditAction {
   VIOLATION_LIFTED
   LOGIN
   EXPORT
+  MEDIA_DOWNLOAD
 }
 
 enum UserRole {

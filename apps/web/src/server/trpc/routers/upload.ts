@@ -2,8 +2,12 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
+  generateStorageKey,
   getFileDownloadUrl,
+  getStorageBackend,
+  getTelegramBotToken,
   isAllowedMimeType,
+  uploadDocumentToTelegram,
   uploadFile,
 } from "@frms/storage";
 
@@ -77,6 +81,72 @@ export const uploadRouter = createTRPCRouter({
         });
       }
 
+      // T4 — Telegram-backed write path (see docs/plans/telegram-storage-migration-plan.md
+      // §2/§10 T4). @frms/storage stays prisma-free, so the MediaObject ledger row is
+      // written here, at the app layer, from the enriched Telegram upload result.
+      if (getStorageBackend() === "telegram") {
+        const tenant = await ctx.db.tenant.findUnique({
+          where: { id: ctx.tenantId },
+          select: { telegramChannelId: true },
+        });
+        const chatId =
+          tenant?.telegramChannelId ?? process.env["TELEGRAM_DEFAULT_CHANNEL_ID"];
+
+        if (!chatId) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Telegram channel not configured.",
+          });
+        }
+
+        const key = generateStorageKey(
+          ctx.tenantId,
+          input.entityType,
+          input.originalFilename,
+        );
+
+        let messageId: number;
+        let fileId: string;
+        try {
+          const result = await uploadDocumentToTelegram({
+            botToken: getTelegramBotToken(),
+            chatId,
+            bytes: new Uint8Array(buffer),
+            filename: input.originalFilename,
+            mimeType: input.mimeType,
+          });
+          messageId = result.messageId;
+          fileId = result.fileId;
+        } catch {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Upload failed.",
+          });
+        }
+
+        await ctx.db.mediaObject.create({
+          data: {
+            tenantId: ctx.tenantId,
+            storageKey: key,
+            entityType: input.entityType,
+            backend: "telegram",
+            telegramChatId: chatId,
+            telegramFileId: fileId,
+            telegramMessageId: BigInt(messageId),
+            sizeBytes: buffer.length,
+            mimeType: input.mimeType,
+            migratedAt: new Date(),
+          },
+        });
+
+        return {
+          key,
+          sizeBytes: buffer.length,
+          mimeType: input.mimeType,
+          downloadUrl: `/api/media?key=${encodeURIComponent(key)}`,
+        };
+      }
+
       let uploaded;
       try {
         uploaded = await uploadFile({
@@ -116,6 +186,19 @@ export const uploadRouter = createTRPCRouter({
     .input(z.object({ key: z.string().min(1) }).strict())
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      // T6 — dual-read: prefer the MediaObject ledger (Telegram-backed media),
+      // fall back to the presigned S3/MinIO url for pre-migration objects.
+      const mo = await ctx.db.mediaObject.findUnique({
+        where: {
+          tenantId_storageKey: { tenantId: ctx.tenantId, storageKey: input.key },
+        },
+        select: { backend: true, telegramFileId: true },
+      });
+
+      if (mo?.backend === "telegram" && mo.telegramFileId) {
+        return { url: `/api/media?key=${encodeURIComponent(input.key)}` };
+      }
 
       try {
         const url = await getFileDownloadUrl(input.key, ctx.tenantId, 3600);

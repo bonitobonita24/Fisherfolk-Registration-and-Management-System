@@ -42,4 +42,6 @@ export const rateLimiters = {
   api: rateLimit({ interval: 60_000, limit: 100 }),
   // File upload endpoints — conservative
   upload: rateLimit({ interval: 60_000, limit: 20 }),
+  // Media/asset download endpoints (e.g. Telegram-backed proxy) — moderate
+  mediaDownload: rateLimit({ interval: 60_000, limit: 120 }),
 };
