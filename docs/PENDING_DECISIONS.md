@@ -137,3 +137,19 @@
      3,016 records + full RBAC nav + footer v0.9.0.** Data-first gate N/A (no prior prod to refresh from).
   - Deferred (optional, NON-blocking): real photos/signatures upload (3,016 missing — text-only import
     by design); CSP whitelist for Cloudflare Insights beacon (benign console error). Prod = the v0.9.0 line.
+
+## PD-007 — Telegram photo backfill: full upload + PROD cutover 🟤 (OWNER-GATED prod data op)
+- **Opened:** 2026-07-14 (Telegram-storage migration Path A).
+- **Context:** M1 (ledger schema), M2 (`/api/media` serve + upload plumbing), and M3 (backfill tool) are DONE +
+  verified + committed LOCAL (main 4 ahead of origin, HARD HOLD). Dry-run proved demo MinIO→Telegram byte-identical
+  on real data. Prod currently has 3,016 fisherfolk with NO photos (text-only seed); the ~5,988 real photo/sig/vessel
+  objects live in demo MinIO. Getting them into prod (Telegram-backed) is a PRODUCTION DATA IMPORT + a prod code deploy.
+- **Decision needed (explicit owner "push to production"):** authorize the full prod cutover — because it (a) pushes
+  M2/M1 code to prod via the deploy pipeline, and (b) uploads ~5,988 real fisherfolk PII photos to Telegram permanently
+  (RA 10173 — owner-accepted temp measure until AWS-S3-when-funded), and (c) writes to the prod DB (Fisherfolk.photo +
+  MediaObject rows).
+- **Sequence when authorized:** push→staging data-first gate→prod deploy · add TELEGRAM_BOT_TOKEN+CHANNEL_ID to prod
+  SOPS env · check prod DB role RLS attrs (append `?options=-c row_security=off` if non-BYPASSRLS) · Phase A full upload
+  (~100+ min) · back up prod DB · Phase B `apply-prod --confirm` (match by id_number/mfvrNumber) · verify `/api/media`
+  renders prod photos. Then M5 (MinIO reclaim + docs).
+- **Status:** ⏳ OPEN — awaiting explicit owner go. All un-gated migration work is complete; this is the only remaining step.
