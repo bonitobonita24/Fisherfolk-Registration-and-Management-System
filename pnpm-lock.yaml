@@ -281,6 +281,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.700.0
+        version: 3.1041.0
       '@frms/storage':
         specifier: workspace:*
         version: link:../storage
