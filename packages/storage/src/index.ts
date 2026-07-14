@@ -18,3 +18,20 @@ export {
   type UploadInput,
   type UploadResult,
 } from "./upload";
+
+export {
+  uploadDocumentToTelegram,
+  fetchTelegramFileBytes,
+  getTelegramBotToken,
+  type TelegramUploadResult,
+} from "./telegram";
+
+export {
+  S3Adapter,
+  TelegramAdapter,
+  resolveBackend,
+  getStorageBackend,
+  type StorageAdapter,
+  type StorageBackend,
+  type TelegramUploadInput,
+} from "./adapter";

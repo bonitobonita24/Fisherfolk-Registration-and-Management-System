@@ -1,6 +1,30 @@
 # FRMS — Project State
 
-## Current State (2026-07-12) — 🚀 PRODUCTION LIVE + GREEN (PD-006 fully executed, Full Auto)
+## Current State (2026-07-14) — 🔨 Telegram-Storage Migration (Path A) — Milestone 1 IN PROGRESS
+
+Owner approved **Path A**: migrate fisherfolk media (photos + signatures) off self-hosted MinIO onto
+**Telegram-bot storage** (the Marine-Guardian pattern), executing the 11-task plan in
+`docs/plans/telegram-storage-migration-plan.md`.
+
+- **M1 Foundation (T1–T3):**
+  - **T1 schema** ✅ PM-verified — `MediaObject` ledger + `Tenant.telegramChannelId`, additive migration
+    `20260714093659_add_media_object_ledger` (CREATE TABLE + one ADD COLUMN; **no domain-field churn** —
+    `Fisherfolk.photo/signature`, `Vessel.vesselPhoto` untouched).
+  - **T2 Telegram lib** ✅ PM-verified — `packages/storage/src/telegram.ts` (copied from MG, prisma-free) +
+    10 vitest unit tests green (`uploadDocumentToTelegram` / `fetchTelegramFileBytes` / 429-retry / token).
+  - **T3 storage adapter** — dispatched (StorageAdapter interface + S3Adapter + TelegramAdapter + `resolveBackend()`).
+- **Also this session:** CSP fix `fa11f27` (Cloudflare Insights beacon whitelist) — LOCAL main, un-pushed, rides next deploy.
+- **T8 migration byte source** = dev/demo MinIO (~2,979 photos) per owner. Owner to provision Telegram bot + channel before M3.
+- **HARD HOLD** — all work LOCAL commits only; no staging/prod deploy and no Telegram upload without explicit owner word.
+
+evidence:
+  contract: "M1 foundation acceptance: @frms/storage Telegram lib unit tests all green, and the T1 MediaObject migration is additive-only (existing domain media fields untouched)."
+  check_command: "pnpm --filter @frms/storage test  # + cd packages/db && prisma validate"
+  captured_output: "vitest v3.2.6 — src/__tests__/telegram.test.ts (10 tests) — Test Files 1 passed (1), Tests 10 passed (10). prisma: 'The schema at prisma/schema.prisma is valid'; media_objects table + tenants.telegram_channel_id present, fisherfolk.photo/signature/vessel_photo unchanged."
+
+---
+
+## Prior State (2026-07-12) — 🚀 PRODUCTION LIVE + GREEN (PD-006 fully executed, Full Auto)
 
 - **PROD STOOD UP & VERIFIED** → https://frms.powerbyte.app (owner-approved target: Powerbyte-Hostinger,
   real official masterlist). `/api/health` **200**; **superadmin login QA PASS**; dashboard renders

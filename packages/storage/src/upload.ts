@@ -26,6 +26,11 @@ export interface UploadResult {
   bucket: string;
   sizeBytes: number;
   mimeType: string;
+  /** Present only when the upload was served by TelegramAdapter (see adapter.ts / T3). */
+  backend?: "telegram" | "minio" | "s3";
+  telegramFileId?: string;
+  telegramMessageId?: number;
+  telegramChatId?: string;
 }
 
 export async function uploadFile(input: UploadInput): Promise<UploadResult> {

@@ -246,6 +246,10 @@ model Tenant {
   violationSubjects       String[]     @map("violation_subjects")
   currentRegistrationYear Int          @map("current_registration_year")
   status                  TenantStatus @default(ACTIVE)
+  // Optional per-tenant Telegram channel override for media storage. When
+  // null, uploads/reads resolve to TELEGRAM_DEFAULT_CHANNEL_ID instead. See
+  // docs/plans/telegram-storage-migration-plan.md §3.
+  telegramChannelId       String?      @map("telegram_channel_id")
   createdAt               DateTime     @default(now()) @map("created_at")
   updatedAt               DateTime     @updatedAt @map("updated_at")
 
@@ -270,6 +274,7 @@ model Tenant {
   fishCatches          FishCatch[]
   fishCatchSpecies     FishCatchSpecies[]
   customRoles          CustomRole[]
+  mediaObjects         MediaObject[]
 
   @@map("tenants")
 }
@@ -957,4 +962,34 @@ model RolePermission {
   @@unique([roleId, featureKey])
   @@index([tenantId, roleId])
   @@map("role_permissions")
+}
+
+// ─── Telegram-storage media ledger ──────────────────────────────────────────
+// The key→Telegram file-id map. Domain models (Fisherfolk.photo/signature,
+// Vessel.vesselPhoto, etc.) keep holding the opaque storageKey string
+// unchanged; this ledger maps that key to the Telegram document backing it
+// so the domain models and their queries never need telegram_* columns.
+// See docs/plans/telegram-storage-migration-plan.md §4.
+model MediaObject {
+  id                String    @id @default(cuid())
+  tenantId          String    @map("tenant_id")
+  storageKey        String    @map("storage_key")
+  entityType        String    @map("entity_type")
+  backend           String    @default("telegram")
+  telegramChatId    String?   @map("telegram_chat_id")
+  telegramFileId    String?   @map("telegram_file_id")
+  telegramMessageId BigInt?   @map("telegram_message_id")
+  sizeBytes         Int?      @map("size_bytes")
+  mimeType          String?   @map("mime_type")
+  migratedAt        DateTime? @map("migrated_at")
+  minioReclaimedAt  DateTime? @map("minio_reclaimed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, storageKey])
+  @@index([tenantId])
+  @@index([tenantId, backend])
+  @@map("media_objects")
 }
