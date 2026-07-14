@@ -28,6 +28,14 @@ export function storageOriginFromEnv(): string {
 // otherwise widening this gov app's egress surface.
 const MAP_CDN = "https://*.cartocdn.com";
 
+// Cloudflare Web Analytics ("Insights") is auto-injected by the CF proxy on the
+// production zone. Its beacon script loads from static.cloudflareinsights.com and
+// POSTs RUM data to cloudflareinsights.com/cdn-cgi/rum. Both origins are scoped
+// explicitly (script-src + connect-src) so the beacon works without widening the
+// policy to a blanket https:. Inert on non-proxied envs (nothing loads the script).
+const CF_INSIGHTS_SCRIPT = "https://static.cloudflareinsights.com";
+const CF_INSIGHTS_BEACON = "https://cloudflareinsights.com";
+
 /** Build the CSP string, optionally allowing images from `storageOrigin`. */
 export function buildContentSecurityPolicy(storageOrigin: string): string {
   const imgSrc = ["img-src 'self' data: blob:", storageOrigin, MAP_CDN]
@@ -35,7 +43,7 @@ export function buildContentSecurityPolicy(storageOrigin: string): string {
     .join(" ");
   return [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com ${CF_INSIGHTS_SCRIPT}`,
     // MapLibre GL spawns its renderer worker from a blob: URL; without an
     // explicit worker-src it falls back to script-src (no blob:) and the map
     // worker is blocked.
@@ -43,7 +51,7 @@ export function buildContentSecurityPolicy(storageOrigin: string): string {
     "style-src 'self' 'unsafe-inline'",
     imgSrc,
     "font-src 'self'",
-    `connect-src 'self' ${MAP_CDN}`,
+    `connect-src 'self' ${MAP_CDN} ${CF_INSIGHTS_BEACON}`,
     "frame-src 'self' https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
   ].join("; ");
