@@ -21,6 +21,7 @@ export {
 
 export {
   uploadDocumentToTelegram,
+  resendDocumentToTelegram,
   fetchTelegramFileBytes,
   getTelegramBotToken,
   type TelegramUploadResult,

@@ -22,6 +22,8 @@
 
 import { createHash } from "node:crypto";
 
+import { resendDocumentToTelegram } from "@frms/storage";
+
 import type { Manifest, ManifestEntry } from "./manifest";
 
 // ---------------------------------------------------------------------------
@@ -228,6 +230,157 @@ export async function applyToProd(opts: ApplyToProdOptions): Promise<ApplyToProd
     await upsertProdMediaObject(prisma, prodTenantId, newKey, entry, manifest.chatId);
     result.updated++;
     log(`updated fisherfolk.${targetField}: idNumber=${entry.idNumber} -> ${newKey}`);
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// applyToDev
+// ---------------------------------------------------------------------------
+
+export interface DevFisherfolkRow {
+  id: string;
+  photo: string | null;
+  signature: string | null;
+}
+
+export interface DevApplyPrismaClient {
+  mediaObject: {
+    upsert(args: MediaObjectUpsertArgs): Promise<unknown>;
+  };
+  fisherfolk: {
+    findUnique(args: {
+      where: { tenantId_idNumber: { tenantId: string; idNumber: string } };
+    }): Promise<DevFisherfolkRow | null>;
+    update(args: { where: { id: string }; data: Record<string, unknown> }): Promise<unknown>;
+  };
+}
+
+export interface ApplyToDevOptions {
+  prisma: DevApplyPrismaClient;
+  manifest: Manifest;
+  /** The local-dev tenant whose fisherfolk rows are being filled. */
+  tenantId: string;
+  /** The dedicated dev Telegram channel — assets are re-sent here, never to the manifest's source channel. */
+  chatId: string;
+  botToken: string;
+  /** Delay (ms) between resends, to stay well under Telegram rate limits. Default 1500. */
+  throttleMs?: number;
+  /** Cap the number of entries processed (useful for a first smoke run). */
+  limit?: number;
+  log?: (msg: string) => void;
+}
+
+export interface ApplyToDevResult {
+  matched: number;
+  filled: number;
+  resent: number;
+  skippedNoMatch: number;
+  skippedAlready: number;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Phase B (dev path, Approach A): re-sends each fisherfolk-photo /
+ * fisherfolk-signature asset from the manifest's source Telegram channel
+ * into a DEDICATED dev channel (by `file_id`, so Telegram copies the file
+ * server-side — no byte re-upload), then writes the dev media_objects
+ * ledger row and fills the matching dev fisherfolk's photo/signature field
+ * ONLY if it is currently null. Vessel-photo entries are skipped — local
+ * dev carries no vessel data. Resumable: an entry whose target field is
+ * already set is skipped without re-sending.
+ */
+export async function applyToDev(opts: ApplyToDevOptions): Promise<ApplyToDevResult> {
+  const {
+    prisma,
+    manifest,
+    tenantId,
+    chatId,
+    botToken,
+    throttleMs = 1500,
+    limit,
+    log = () => {},
+  } = opts;
+
+  const result: ApplyToDevResult = {
+    matched: 0,
+    filled: 0,
+    resent: 0,
+    skippedNoMatch: 0,
+    skippedAlready: 0,
+  };
+
+  let processed = 0;
+  for (const entry of manifest.entries) {
+    if (limit !== undefined && processed >= limit) {
+      break;
+    }
+
+    if (entry.entityType === "vessel-photo") {
+      continue;
+    }
+
+    if (entry.idNumber === null) {
+      result.skippedNoMatch++;
+      log(`skip (no idNumber on entry): recordId=${entry.recordId}`);
+      continue;
+    }
+
+    const fisherfolk = await prisma.fisherfolk.findUnique({
+      where: { tenantId_idNumber: { tenantId, idNumber: entry.idNumber } },
+    });
+    if (fisherfolk === null) {
+      result.skippedNoMatch++;
+      log(`skip (no dev fisherfolk match): idNumber=${entry.idNumber}`);
+      continue;
+    }
+    result.matched++;
+
+    const targetField = entry.entityType === "fisherfolk-photo" ? "photo" : "signature";
+    const currentValue = fisherfolk[targetField];
+    if (currentValue !== null && currentValue !== "") {
+      result.skippedAlready++;
+      log(`skip (${targetField} already set): idNumber=${entry.idNumber}`);
+      continue;
+    }
+
+    const { messageId, fileId } = await resendDocumentToTelegram({
+      botToken,
+      chatId,
+      fileId: entry.telegramFileId,
+      caption: `${tenantId} · ${entry.entityType} · ${entry.idNumber}`,
+      // Long unattended run over a flaky IPv6 route — retry transient network
+      // errors generously so a single ETIMEDOUT never aborts the whole backfill.
+      maxRetries: 10,
+    });
+    result.resent++;
+
+    const newKey = mintProdKey(tenantId, entry.entityType, entry);
+    const fields = mediaObjectFieldsFromEntry(entry, chatId);
+    fields["telegramMessageId"] = BigInt(messageId);
+    fields["telegramFileId"] = fileId;
+
+    await prisma.mediaObject.upsert({
+      where: { tenantId_storageKey: { tenantId, storageKey: newKey } },
+      create: { tenantId, storageKey: newKey, ...fields },
+      update: fields,
+    });
+
+    await prisma.fisherfolk.update({
+      where: { id: fisherfolk.id },
+      data: { [targetField]: newKey },
+    });
+    result.filled++;
+    log(`filled dev fisherfolk.${targetField}: idNumber=${entry.idNumber} -> ${newKey}`);
+
+    processed++;
+    if (throttleMs > 0) {
+      await sleep(throttleMs);
+    }
   }
 
   return result;

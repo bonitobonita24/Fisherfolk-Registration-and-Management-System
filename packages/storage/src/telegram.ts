@@ -58,10 +58,17 @@ interface TelegramDocument {
   file_size?: number;
 }
 
+interface TelegramVideo {
+  file_id: string;
+  file_unique_id: string;
+  file_size?: number;
+}
+
 interface TelegramMessage {
   message_id: number;
   document?: TelegramDocument;
   photo?: TelegramPhotoSize[];
+  video?: TelegramVideo;
 }
 
 interface TelegramSendDocumentResponse {
@@ -172,6 +179,91 @@ function sleep(ms: number): Promise<void> {
 function backoffMs(attempt: number, hintMs: number): number {
   const floor = BASE_BACKOFF_MS * 2 ** attempt;
   return Math.min(Math.max(hintMs, floor), MAX_BACKOFF_MS);
+}
+
+// ---------------------------------------------------------------------------
+// resendDocumentToTelegram
+// ---------------------------------------------------------------------------
+
+/**
+ * Re-send a file that already exists in Telegram (identified by `fileId`)
+ * into a different chat, without re-uploading any bytes. Telegram's
+ * `sendDocument` accepts a previously-issued `file_id` as the `document`
+ * field value and copies the file server-side into the target chat — this
+ * is the mechanism the dev-channel backfill (`apply-dev`) relies on to
+ * cheaply populate a dedicated local-dev Telegram channel from assets
+ * already uploaded to a different (prod/demo) channel.
+ *
+ * Mirrors `uploadDocumentToTelegram`'s error handling, plus retry on HTTP
+ * 429 honouring Telegram's `retry_after` hint (same backoff scheme as
+ * `fetchTelegramFileBytes`).
+ */
+export async function resendDocumentToTelegram(params: {
+  botToken: string;
+  chatId: string;
+  fileId: string;
+  caption?: string;
+  maxRetries?: number;
+}): Promise<TelegramUploadResult> {
+  const { botToken, chatId, fileId, caption, maxRetries = MAX_TELEGRAM_RETRIES } = params;
+
+  const url = `https://api.telegram.org/bot${botToken}/sendDocument`;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const form = new URLSearchParams();
+    form.set("chat_id", chatId);
+    form.set("document", fileId);
+    if (caption !== undefined && caption !== "") {
+      form.set("caption", caption);
+    }
+
+    let json: TelegramSendDocumentResponse & {
+      error_code?: number;
+      parameters?: { retry_after?: number };
+    };
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: form,
+      });
+      json = (await res.json()) as typeof json;
+    } catch (err) {
+      // Transient network failure (e.g. ETIMEDOUT from a flaky IPv6 route).
+      // Retry with backoff — the Telegram HTTP call itself never happened, so
+      // this cannot double-send.
+      if (attempt < maxRetries) {
+        await sleep(backoffMs(attempt, 0));
+        continue;
+      }
+      throw new Error(
+        `Telegram sendDocument (resend) network error after ${String(maxRetries)} retries for file_id "${fileId}": ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    if (json.ok && json.result !== undefined) {
+      const messageId = json.result.message_id;
+      const resentFileId =
+        json.result.document?.file_id ??
+        json.result.photo?.at(-1)?.file_id ??
+        json.result.video?.file_id ??
+        fileId;
+      return { messageId, fileId: resentFileId };
+    }
+
+    if (json.error_code === 429 && attempt < maxRetries) {
+      await sleep(backoffMs(attempt, (json.parameters?.retry_after ?? 0) * 1000));
+      continue;
+    }
+
+    throw new Error(
+      `Telegram sendDocument (resend) failed: ${json.description ?? "unknown error"}`,
+    );
+  }
+
+  throw new Error(
+    `Telegram sendDocument (resend) rate-limited (429) after ${String(maxRetries)} retries for file_id "${fileId}"`,
+  );
 }
 
 /**
