@@ -120,6 +120,7 @@ export async function uploadDocumentToTelegram(params: {
   filename: string;
   mimeType?: string;
   caption?: string;
+  maxRetries?: number;
 }): Promise<TelegramUploadResult> {
   const {
     botToken,
@@ -128,34 +129,61 @@ export async function uploadDocumentToTelegram(params: {
     filename,
     mimeType = "application/octet-stream",
     caption,
+    maxRetries = MAX_TELEGRAM_RETRIES,
   } = params;
 
-  const form = new FormData();
-  form.append("chat_id", chatId);
-  if (caption !== undefined && caption !== "") {
-    form.append("caption", caption);
-  }
-  // Do NOT set Content-Type manually — fetch sets the multipart boundary automatically.
-  form.append("document", new Blob([bytes], { type: mimeType }), filename);
-
   const url = `https://api.telegram.org/bot${botToken}/sendDocument`;
-  const res = await fetch(url, { method: "POST", body: form });
 
-  const json = (await res.json()) as TelegramSendDocumentResponse;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const form = new FormData();
+    form.append("chat_id", chatId);
+    if (caption !== undefined && caption !== "") {
+      form.append("caption", caption);
+    }
+    // Do NOT set Content-Type manually — fetch sets the multipart boundary automatically.
+    form.append("document", new Blob([bytes], { type: mimeType }), filename);
 
-  if (!json.ok || json.result === undefined) {
+    let json: TelegramSendDocumentResponse & {
+      error_code?: number;
+      parameters?: { retry_after?: number };
+    };
+    try {
+      const res = await fetch(url, { method: "POST", body: form });
+      json = (await res.json()) as typeof json;
+    } catch (err) {
+      // Transient network failure (e.g. ETIMEDOUT on a flaky IPv6 route). The
+      // send never reached Telegram, so retrying cannot double-upload.
+      if (attempt < maxRetries) {
+        await sleep(backoffMs(attempt, 0));
+        continue;
+      }
+      throw new Error(
+        `Telegram sendDocument network error after ${String(maxRetries)} retries: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    if (json.ok && json.result !== undefined) {
+      const messageId = json.result.message_id;
+      const fileId =
+        json.result.document?.file_id ??
+        json.result.photo?.at(-1)?.file_id ??
+        "";
+      return { messageId, fileId };
+    }
+
+    if (json.error_code === 429 && attempt < maxRetries) {
+      await sleep(backoffMs(attempt, (json.parameters?.retry_after ?? 0) * 1000));
+      continue;
+    }
+
     throw new Error(
       `Telegram sendDocument failed: ${json.description ?? "unknown error"}`,
     );
   }
 
-  const messageId = json.result.message_id;
-  const fileId =
-    json.result.document?.file_id ??
-    json.result.photo?.at(-1)?.file_id ??
-    "";
-
-  return { messageId, fileId };
+  throw new Error(
+    `Telegram sendDocument rate-limited (429) after ${String(maxRetries)} retries`,
+  );
 }
 
 // ---------------------------------------------------------------------------

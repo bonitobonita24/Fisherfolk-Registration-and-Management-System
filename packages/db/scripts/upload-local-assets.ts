@@ -275,6 +275,8 @@ export async function runUploadLocalAssets(
       filename: basename(asset.filePath),
       mimeType: asset.mimeType,
       caption: `${tenantId} · ${asset.entityType} · ${asset.idNumber}`,
+      // Flaky-IPv6 route on this host — retry transient timeouts generously.
+      maxRetries: 10,
     });
 
     const mediaObjectFields = {
