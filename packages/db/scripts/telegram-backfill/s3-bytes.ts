@@ -35,8 +35,16 @@ export async function getObjectBytes(
   s3: S3Client,
   bucket: string,
   key: string,
+  abortSignal?: AbortSignal,
 ): Promise<Buffer> {
-  const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  // Passing an AbortSignal into the SDK request lets a per-item timeout
+  // actually tear down a hung socket (rather than merely losing the race and
+  // leaking the connection). The @smithy AbortSignal shape is structurally
+  // compatible with the global AbortSignal returned by AbortSignal.timeout().
+  const res = await s3.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+    abortSignal !== undefined ? { abortSignal } : {},
+  );
   const body: unknown = res.Body;
 
   if (body === undefined) {

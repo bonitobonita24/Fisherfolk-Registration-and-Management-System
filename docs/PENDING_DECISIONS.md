@@ -138,7 +138,7 @@
   - Deferred (optional, NON-blocking): real photos/signatures upload (3,016 missing — text-only import
     by design); CSP whitelist for Cloudflare Insights beacon (benign console error). Prod = the v0.9.0 line.
 
-## PD-007 — Telegram photo backfill: full upload + PROD cutover 🟤 (OWNER-GATED prod data op)
+## PD-007 — Telegram photo backfill: full upload + PROD cutover ✅ RESOLVED 2026-07-16 (was OWNER-GATED prod data op)
 - **Opened:** 2026-07-14 (Telegram-storage migration Path A).
 - **Context:** M1 (ledger schema), M2 (`/api/media` serve + upload plumbing), and M3 (backfill tool) are DONE +
   verified + committed LOCAL (main 4 ahead of origin, HARD HOLD). Dry-run proved demo MinIO→Telegram byte-identical
@@ -152,4 +152,10 @@
   SOPS env · check prod DB role RLS attrs (append `?options=-c row_security=off` if non-BYPASSRLS) · Phase A full upload
   (~100+ min) · back up prod DB · Phase B `apply-prod --confirm` (match by id_number/mfvrNumber) · verify `/api/media`
   renders prod photos. Then M5 (MinIO reclaim + docs).
-- **Status:** ⏳ OPEN — awaiting explicit owner go. All un-gated migration work is complete; this is the only remaining step.
+- **Status:** ✅ RESOLVED 2026-07-16 — owner authorized the prod cutover; executed end-to-end.
+- **Resolution / evidence:**
+  - Code deploy + `TELEGRAM_BOT_TOKEN`+`CHANNEL_ID` in prod SOPS env + `/api/media` read path: DONE & verified live (prior session, 2026-07-14).
+  - **Phase A upload:** 5,988/5,988 objects in Telegram (bot @frms_assets_bot, channel `-1004351286489`), manifest `.backfill/manifest.json`.
+  - **Phase B `apply-prod --confirm`** (2026-07-16, tenant `calapan-city` `cmrgkv64y0000gmr71qraaj7i`): **matched=5,970 · updated=5,970 · skippedAlreadySet=0 · skippedUnmatched=18** (the 18 = demo-only `DEMO-QA-*` fisherfolk + `DEMO-MFVR-*` vessels absent from the real masterlist — expected). Operation is null-only fill (never overwrites) → purely additive, no prod-data-loss risk.
+  - **Prod DB verified:** 2,979 fisherfolk photos + 2,991 signatures set = 5,970 fields; `media_objects` = 5,970 rows all `backend=telegram` (fully reconciles). 37 real fisherfolk remain photo-null (no source asset existed — nothing to link).
+- **Remaining (own follow-ups, NOT part of PD-007's gate):** M5 demo-MinIO reclaim is **HELD** — the demo stack was never cut over to Telegram (no ledger, no `STORAGE_BACKEND`/`TELEGRAM` env on `frms_demo`); reclaiming would 404 demo photos. Tracked as a separate owner-gated demo cutover (see M5 note).

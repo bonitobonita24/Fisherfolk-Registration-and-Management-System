@@ -67,6 +67,7 @@ async function cmdUpload(args: string[]): Promise<void> {
   const limitArg = getArg(args, "limit");
   const entityArg = getArg(args, "entity") as BackfillEntityType | undefined;
   const resume = hasFlag(args, "resume");
+  const throttleArg = getArg(args, "throttle");
   const chatId = getArg(args, "chat") ?? process.env["TELEGRAM_DEFAULT_CHANNEL_ID"] ?? "";
   if (chatId === "") {
     throw new Error("Missing --chat and TELEGRAM_DEFAULT_CHANNEL_ID is unset");
@@ -89,6 +90,11 @@ async function cmdUpload(args: string[]): Promise<void> {
     limit: limitArg !== undefined ? Number(limitArg) : undefined,
     entityFilter: entityArg,
     existing,
+    throttleMs: throttleArg !== undefined ? Number(throttleArg) : undefined,
+    // Incremental persistence: write the manifest after every upload so a
+    // mid-run crash is fully resumable and never re-uploads (no duplicate
+    // permanent Telegram messages).
+    onProgress: (m) => saveManifest(outPath, m),
     log: (msg) => console.log(msg),
   });
 

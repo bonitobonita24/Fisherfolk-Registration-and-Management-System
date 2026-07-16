@@ -93,3 +93,6 @@ test-artifacts/
 # Seed export cache (contains real PII — never commit)
 .seed-cache/
 .tempfiles/
+
+# Telegram-backfill manifest (maps id_number → Telegram file_id — real PII; never commit)
+.backfill/
