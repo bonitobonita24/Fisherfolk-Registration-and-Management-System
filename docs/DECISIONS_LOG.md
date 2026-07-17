@@ -809,3 +809,23 @@ Note: informal narrative mentions of "Admin" in Core User Flows prose (flows #3,
 user, nullable)`) were intentionally left as-is — out of the assigned rename scope (grep-verified:
 zero remaining `Super Admin` / `SuperAdmin` / `BantayDagat` one-word matches).
 Attribution: CLAUDE_CODE. Locked: yes.
+
+---
+
+## PRODUCT.md back-port — Fish Catch (M2/M3) + Universal Report Hub (M4) — [WHAT] applied
+Decision: On owner's explicit "do all 3 gated items" directive (2026-07-17, Full Auto), the
+already-built-and-verified M2 Fish Catch activity, M3 Fish Catch analytics, and M4 Universal Report
+Hub features (batch 2026-07-09, branch `feat/household-management`, since merged to main) were
+back-ported into `docs/PRODUCT.md`:
+  (a) New **### Fish Catch (catch-landing & effort tracking)** module section (M2 activity + M3
+      analytics tabs) inserted between Dashboard and Reports.
+  (b) **Universal Report Hub** paragraph appended to the **### Reports** section (6-domain faceted
+      ledger+charts tab; the 9 fixed official-header report types unchanged).
+  (c) New **FishCatch** + **FishCatchSpecies** entries under **## Data Entities** (fields transcribed
+      from the shipped Prisma schema — code won over the 8-day-old draft memory).
+  (d) Removed the now-stale `- No fish catch reporting or harvest tracking` line from **## Out of Scope**.
+Rationale: PRODUCT.md is human-owned (Rule 1); the owner waived Rule 1 for this back-port (precedent:
+the 2026-06-30 "Rule 1 waiver (extended)" and the 2026-07-11 M1/N waivers). Where the pre-drafted
+candidate text and the shipped code diverged, the **code won** (entity fields taken from
+`packages/db/prisma/schema.prisma`, analytics/report shapes from the shipped routers).
+Locked: yes

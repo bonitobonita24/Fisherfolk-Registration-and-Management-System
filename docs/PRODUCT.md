@@ -198,6 +198,15 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Asset-coverage tracking: counts of records **missing photo** / **missing signature** (dashboard `getStats`); the fisherfolk list has a `missing` filter to surface incomplete records for completion
 - Recent activity feed (live)
 
+### Fish Catch (catch-landing & effort tracking — BFAR/FMO-aligned)
+- A record activity type under RECORDS: each catch record is **tagged to a registered fisherfolk** (and optionally the vessel used), mirroring the other record features (list + create form + detail).
+- Auto-generated `FC-YYYY-NNNN` reference number, unique per tenant.
+- Landing/effort header captures: landing date + time, optional departure/return timestamps, fishing ground (free-text barangay + descriptive label + optional FMA code — note: barangay is a free-text field selected from the Calapan barangay list, there is no separate Barangay entity), gear type (17 Philippine gear classifications) + gear detail/units, fishing hours, number of trips, number of fishers, total catch (kg), estimated value (PHP), disposition (7 outcomes: sold/consumed/etc.), and a data-source tag (FMO enumerator / self-reported / etc.).
+- Per-record **species composition** (one-to-many, cascade-deleted with the catch): common name (free-text with a common-Philippine-species datalist — no fixed Species master table), scientific name, weight (kg), quantity (pcs), price/kg + value (PHP), disposition, average length (cm), and size class.
+- **CPUE** (catch-per-unit-effort: kg/hour and kg/trip) is computed at query time from effort fields — not stored.
+- Surfaced on the fisherfolk profile as a "Fish Catches" related-record card.
+- **Fish Catch analytics** live on the Dashboard/Analytics area (the Analytics page is tabbed: **Fisherfolk | Fish Catch**). The Fish Catch tab renders catch & value trends over time, CPUE trend lines, and breakdowns by species, by gear type, by barangay/fishing ground, plus top fishers and top vessels — Recharts, HSL chart tokens, consistent with the rest of the app.
+
 ### Reports (list generator with official government headers — NOT charts)
 - Reports is a list generator, not a chart module (charts belong on Dashboard)
 - 9 report types: Member List, New Registrations, Renewed Members, Inactive Members, Senior Citizens, Voter-Eligible, Violation Report, Vessel Inventory, Family Clusters
@@ -211,6 +220,7 @@ Philippine LGUs manage thousands of fisherfolk registrations annually using Exce
 - Live matching record count + preview table
 - Generate as PDF or Excel (Tenant Admin and Tenant Superadmin only)
 - Print-friendly layout for LGU presentations and Ayuda distribution lists
+- **Universal Report Hub** (additive tab on /reports — the 9 fixed report types above are unchanged): pick one of **6 data domains** (fisherfolk, household, vessel, violation, ayuda, fish-catch), apply **mix-and-match faceted filters** for that domain, and generate a **ledger-style tabular report plus 2–3 domain charts** in one view. Export to **Excel** (Tenant Admin / Tenant Superadmin) or **print / browser-PDF** (charts hidden in print). This is the flexible "filter any data → report + charts and/or ledger" companion to the fixed official-header reports.
 
 ### Ayuda Programs (standalone sidebar module — Tenant Admin only creation)
 - Create program: Title, Description, Date/time created
@@ -351,6 +361,10 @@ custom roles may never grant User Management or Billing (PD-005, shipped).
 **Vessel**: id, tenantId, mfvrNumber (unique per tenant), vesselName, vesselType (Motorized, Non-Motorized), hullMaterial (Wood, Fiberglass, Composite), placeBuilt, yearBuilt, registeredLength, registeredBreadth, registeredDepth, grossTonnage, netTonnage, engineMake, engineSerialNumber, horsepower, homeport, fishingGearClassification (array), vesselPhoto (compressed image path), qrCode (auto-generated, encodes vessel profile URL), status (Active, Impounded, Inactive, Archived), linkedOwners (relation to Fisherfolk), violations (relation), createdAt, updatedAt, createdBy, updatedBy
 
 **Violation**: id, tenantId, targetType (Fisherfolk, Vessel, Both), fisherfolkId (nullable), vesselId (nullable), subject (from tenant's predefined list), details (rich text), evidenceImages (array of compressed image paths), notes, status (Active, Lifted), filedBy (Bantay Dagat user), liftedBy (Admin user, nullable), liftedAt (nullable), resolutionNotes (nullable), createdAt, updatedAt
+
+**FishCatch**: id, tenantId, referenceNo (auto `FC-YYYY-NNNN`, unique per tenant), fisherfolkId (relation to Fisherfolk), vesselId (nullable, relation to Vessel), landingDate, landingTime (nullable), departureAt (nullable), returnAt (nullable), fishingGroundBarangay (nullable, free-text), fishingGroundLabel (nullable), fmaCode (nullable), gearType (17 PH gear classifications), gearDetail (nullable), gearUnits (nullable), fishingHours (nullable, decimal), numTrips (default 1), numFishers (nullable), totalCatchKg (decimal), estimatedValuePhp (nullable, decimal), disposition (nullable — 7 outcomes), source (FMO_ENUMERATOR default), remarks (nullable), species (relation to FishCatchSpecies), recordedBy, createdAt, updatedAt, createdBy, updatedBy. (CPUE is computed at query time, not stored.)
+
+**FishCatchSpecies**: id, tenantId, fishCatchId (relation, cascade-deleted with the parent catch), commonName (free-text), scientificName (nullable), weightKg (decimal), quantityPcs (nullable), pricePerKgPhp (nullable, decimal), valuePhp (nullable, decimal), disposition (nullable), avgLengthCm (nullable, decimal), sizeClass (nullable), createdAt. (No standalone Species master table — common names use a datalist of common Philippine species.)
 
 **EditRequest**: id, tenantId, fisherfolkId, requestedBy (Encoder user), fieldChanges (JSON: {field: {old, new}}), status (Pending, Approved, Rejected), reviewedBy (Admin user, nullable), reviewedAt (nullable), rejectionReason (nullable), createdAt
 
@@ -583,7 +597,6 @@ Theming approach:   shadcn/ui CSS variables (--primary / --secondary set from th
 - No offline mode (requires internet connection; PWA for quick access, not offline data entry)
 - No light mode (dark mode only with accent color customization)
 - No boat licensing or permit issuance (registration only)
-- No fish catch reporting or harvest tracking
 - No financial transaction processing
 - No integration with MARINA vessel documentation system
 - No purple or violet colors in the design system

@@ -3,6 +3,22 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-07-17 — PRODUCT.md back-port: Fish Catch (M2/M3) + Universal Report Hub (M4) (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM, Full-Auto loop, owner "do all 3 gated items")
+**Scope:** docs only (PRODUCT.md + DECISIONS_LOG.md); no code change. LOCAL commit (HARD HOLD).
+
+Back-ported three already-built-and-verified features (batch 2026-07-09) into the human-owned spec,
+under an explicit owner Rule-1 waiver ("do all 3 gated items", 2026-07-17):
+- **docs/PRODUCT.md**: (a) new `### Fish Catch (catch-landing & effort tracking)` module (M2 activity
+  + M3 tabbed analytics); (b) `Universal Report Hub` paragraph appended to `### Reports` (M4 — 6-domain
+  faceted ledger+charts; 9 fixed report types unchanged); (c) `FishCatch` + `FishCatchSpecies` under
+  `## Data Entities` (fields transcribed from the shipped Prisma schema — code won over draft memory);
+  (d) removed the stale `- No fish catch reporting or harvest tracking` from `## Out of Scope`.
+- **docs/DECISIONS_LOG.md**: logged the back-port + Rule-1-waiver precedent.
+Ground-truth verified before writing: routers `fishCatch.ts`/`fishCatchAnalytics.ts`/`report/*` and
+schema models `FishCatch`/`FishCatchSpecies` all present on `main`.
+
 ## 2026-07-11 — FMO masterlist data import + missing-asset backfill (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor, plan-first-dispatch)
