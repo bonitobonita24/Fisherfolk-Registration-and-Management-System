@@ -65,15 +65,39 @@ ssh_vps "cd ${STACK}; \
 
 echo "▶ 4/6 Migrate staging (prod-data → new schema; drift-resolve fallback)"
 DBPORT=$(ssh_vps "grep -oP '(?<=^DB_PORT=)[0-9]+' ${STACK}/.env")
-DBURL=$(ssh_vps "grep -oP '(?<=^INTERNAL_DATABASE_URL=).*' ${STACK}/.env")
-DBURL_LOCAL=$(echo "$DBURL" | sed -E "s#@[^:/]+:5432#@localhost:${DBPORT}#")
-ssh -i "$KEY" -N -L "${DBPORT}:localhost:${DBPORT}" "$VPS" & TUN=$!; sleep 3
+# Pick a FREE local port for the SSH tunnel, DECOUPLED from the remote DB_PORT.
+# Binding local==remote collides with any local process already on that number
+# (e.g. another project's dev DB); the forward then fails to bind and migrate
+# silently connects to the WRONG database. Lesson:
+# deploy.staging-gate.tunnel-port-collision-swallows-migrate-failure.
+LPORT=""
+for _p in $(seq 15432 15999); do
+  if ! ss -ltnH "sport = :${_p}" 2>/dev/null | grep -q .; then LPORT="${_p}"; break; fi
+done
+[ -z "$LPORT" ] && { echo "  ✗ no free local port in 15432-15999 for the DB tunnel — aborting"; exit 1; }
+DBURL_LOCAL=$(ssh_vps "grep -oP '(?<=^INTERNAL_DATABASE_URL=).*' ${STACK}/.env" | sed -E "s#@[^@/]+:[0-9]+/#@localhost:${LPORT}/#")
+ssh -i "$KEY" -N -L "${LPORT}:localhost:${DBPORT}" "$VPS" & TUN=$!
+# Fail LOUD if the forward never comes up — never fall through to a no-op migrate.
+for _ in $(seq 1 10); do ss -ltnH "sport = :${LPORT}" 2>/dev/null | grep -q . && break; sleep 1; done
+if ! ss -ltnH "sport = :${LPORT}" 2>/dev/null | grep -q .; then
+  echo "  ✗ SSH tunnel on localhost:${LPORT} never came up — aborting (staging NOT migrated)"
+  kill $TUN 2>/dev/null || true; exit 1
+fi
 if ! DATABASE_URL="$DBURL_LOCAL" pnpm --filter @frms/db db:migrate:deploy; then
   echo "  ↳ migrate deploy hit drift; resolving pending migrations as applied…"
   for M in $(DATABASE_URL="$DBURL_LOCAL" pnpm --filter @frms/db exec prisma migrate status 2>/dev/null | grep -oE '[0-9]{14}_[a-zA-Z0-9_]+'); do
     DATABASE_URL="$DBURL_LOCAL" pnpm --filter @frms/db exec prisma migrate resolve --applied "$M" || true
   done
 fi
+# HARD GATE — the deploy is valid ONLY if the schema is genuinely up to date.
+# Never let a swallowed migrate error + a shallow /health 200 fake a promotable
+# staging (lesson deploy.staging-gate.tunnel-port-collision-...).
+if ! DATABASE_URL="$DBURL_LOCAL" pnpm --filter @frms/db exec prisma migrate status 2>&1 | grep -q "Database schema is up to date"; then
+  echo "  ✗ staging schema NOT up to date after migrate — aborting BEFORE deploy"
+  echo "    (app not restarted; staging DB = fresh prod copy + pre-refresh backup on the VPS)"
+  kill $TUN 2>/dev/null || true; exit 1
+fi
+echo "  ✓ staging schema up to date"
 kill $TUN 2>/dev/null || true
 
 echo "▶ 5/6 Bring staging up on new image"
