@@ -10,9 +10,12 @@
  * Usage (run from apps/web):
  *   pnpm exec tsx scripts/import-masterlist-batch.ts [--confirm] \
  *     [--tenant-slug calapan-city] [--limit 100] \
- *     [--xlsx for_importation/Masterlist.xlsx]
+ *     [--xlsx for_importation/Masterlist.xlsx] [--skip-header-check]
  *
  * Default = DRY RUN (no DB writes) — only --confirm performs writes.
+ * Row 1 headers are asserted against the expected positional layout before
+ * parsing (fail loud on a reshuffled spreadsheet) — pass --skip-header-check
+ * to bypass.
  *
  * Fixed input path (relative to repo root — this script runs from apps/web,
  * so repo root is two levels up): for_importation/Masterlist.xlsx,
@@ -91,6 +94,7 @@ const confirm = hasFlag("confirm");
 const dry = !confirm;
 const limitArg = getArg("limit");
 const limit = limitArg !== undefined ? parseInt(limitArg, 10) : undefined;
+const skipHeaderCheck = hasFlag("skip-header-check");
 
 // ── Fixed paths (repo root is two levels up from apps/web) ───────────────────
 
@@ -137,6 +141,101 @@ function cellValueToString(value: ExcelJS.CellValue | undefined): string {
   return String(value).trim();
 }
 
+/** Formats a JS Date using its LOCAL date parts (avoids UTC/toISOString TZ off-by-one). */
+function formatLocalDate(d: Date): string {
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+/** Converts an Excel serial day-count (epoch 1899-12-30, UTC) to YYYY-MM-DD. */
+function excelSerialToDateString(serial: number): string {
+  const EXCEL_EPOCH_UTC_MS = Date.UTC(1899, 11, 30);
+  const ms = EXCEL_EPOCH_UTC_MS + serial * 86_400_000;
+  const d = new Date(ms);
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    d.getUTCDate(),
+  ).padStart(2, "0")}`;
+}
+
+/**
+ * Coerce the raw DOB cell (column [3]) to a normalizeDob-friendly string.
+ * exceljs returns date-formatted cells as JS Date, Excel serial numbers, or
+ * plain strings — String()-coercing a Date/serial produces unparseable junk
+ * ("Mon Mar 12 2007…" / "38475") that normalizeDob silently rejects to NULL.
+ */
+function dobCellToString(value: ExcelJS.CellValue | undefined): string {
+  if (value instanceof Date) return formatLocalDate(value);
+
+  if (typeof value === "number") return excelSerialToDateString(value);
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    // Numeric-looking string with no slashes (e.g. "38475") — treat as a
+    // serial too; MM/DD/YYYY-style strings always contain "/" and pass
+    // through unchanged to normalizeDob.
+    if (trimmed !== "" && !trimmed.includes("/") && /^\d+(\.\d+)?$/.test(trimmed)) {
+      return excelSerialToDateString(Number(trimmed));
+    }
+    return trimmed;
+  }
+
+  // Rich text / hyperlink / formula / other object shapes — fall back to the
+  // generic coercion (covers formula results that resolve to a Date/number
+  // only in the rare case; otherwise yields the same string as before).
+  return cellValueToString(value);
+}
+
+// ── Header assertion (fail loud on a reshuffled spreadsheet) ─────────────────
+
+/** Expected header label at each 1-indexed column position (index 0 unused). */
+const EXPECTED_HEADERS: Readonly<Record<number, string>> = {
+  1: "ID NUMBER",
+  2: "FULL NAME",
+  3: "DATE OF BIRTH",
+  4: "ADDRESS",
+  5: "SEX",
+  6: "IMAGE",
+  7: "SIGNATURE",
+  8: "RSBSA #",
+  9: "CATEGORY",
+  10: "CONTACT NUMBER",
+};
+
+/** Normalizes a header label for tolerant comparison: trim, uppercase, collapse spaces, strip trailing #/.  */
+function normalizeHeaderLabel(raw: string): string {
+  return raw
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ")
+    .replace(/[#.]$/, "")
+    .trim();
+}
+
+/**
+ * Asserts row 1 of the worksheet matches the expected positional column
+ * layout — fails loud on a reshuffled spreadsheet instead of silently
+ * mis-mapping columns. Bypass with --skip-header-check.
+ */
+function assertHeaderLayout(headerRow: ExcelJS.Row): void {
+  const values = headerRow.values as Array<ExcelJS.CellValue | undefined>;
+
+  for (const [posStr, expected] of Object.entries(EXPECTED_HEADERS)) {
+    const pos = Number(posStr);
+    const actualRaw = cellValueToString(values[pos]);
+    const actual = normalizeHeaderLabel(actualRaw);
+    const expectedNorm = normalizeHeaderLabel(expected);
+
+    if (actual !== expectedNorm) {
+      throw new Error(
+        `Header mismatch at column ${pos}: expected "${expected}", found "${actualRaw}". ` +
+          "The masterlist columns may have been reshuffled — pass --skip-header-check to bypass.",
+      );
+    }
+  }
+}
+
 // ── Masterlist parsing (fixed positional column mapping) ─────────────────────
 
 async function parseMasterlist(xlsxPath: string): Promise<RawImportRow[]> {
@@ -154,6 +253,11 @@ async function parseMasterlist(xlsxPath: string): Promise<RawImportRow[]> {
     );
   }
 
+  if (!skipHeaderCheck) {
+    const headerRow = worksheet.getRow(1);
+    assertHeaderLayout(headerRow);
+  }
+
   const rows: RawImportRow[] = [];
 
   worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
@@ -165,7 +269,7 @@ async function parseMasterlist(xlsxPath: string): Promise<RawImportRow[]> {
     if (!idNumber) return; // skip rows with empty column A
 
     const fullName = cellValueToString(values[2]);
-    const dateOfBirth = cellValueToString(values[3]);
+    const dateOfBirth = dobCellToString(values[3]);
     const address = cellValueToString(values[4]);
     const sex = cellValueToString(values[5]);
     // values[6] = IMAGE, values[7] = SIGNATURE — ignored (separate tool)
@@ -288,9 +392,10 @@ async function main(): Promise<void> {
     );
     const invalidRows: RowReport[] = report.rows.filter(
       (r) =>
-        r.status === "error" ||
-        r.action === "skip-duplicate" ||
-        r.action === "skip-collision",
+        r.action !== "skip-existing" &&
+        (r.status === "error" ||
+          r.action === "skip-duplicate" ||
+          r.action === "skip-collision"),
     );
 
     console.log(
