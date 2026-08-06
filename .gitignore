@@ -93,6 +93,8 @@ test-artifacts/
 # Seed export cache (contains real PII — never commit)
 .seed-cache/
 .tempfiles/
+# One-off masterlist import staging (xlsx + PHOTO/SIGNATURE image dumps — real PII, ~280MB; never commit)
+for_importation/
 
 # Telegram-backfill manifest (maps id_number → Telegram file_id — real PII; never commit)
 .backfill/
