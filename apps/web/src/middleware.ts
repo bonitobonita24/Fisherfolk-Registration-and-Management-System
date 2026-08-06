@@ -10,7 +10,19 @@ import { canAccessRouteSegment } from "@/lib/route-feature-map";
 import type { Actor, FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
 
-const PUBLIC_PATHS = ["/login", "/api/auth", "/api/health", "/api/trpc"];
+// `/api/media` self-authenticates in its route handler (requireRouteAuth +
+// tenant-scoped MediaObject lookup + rate-limit + egress audit — see
+// app/api/media/route.ts), exactly like `/api/trpc`. It must bypass the tenant
+// URL-routing below: its path second segment is "media", not a tenant slug, so
+// without this an authed request would 307-redirect to /<slug>/dashboard and
+// every image/signature/attachment would fail to load.
+const PUBLIC_PATHS = [
+  "/login",
+  "/api/auth",
+  "/api/health",
+  "/api/trpc",
+  "/api/media",
+];
 
 /**
  * Custom-domain "masking" map, parsed once per runtime from
