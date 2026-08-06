@@ -287,6 +287,27 @@ async function main() {
 
   console.log(`  ✅ ${defaultCategories.length} default categories created`);
 
+  // Barangay aliases — canonical name-merge rules used by import normalization (typoMap).
+  // Seeded so they survive a DB reset (previously created only via Settings CRUD and lost
+  // in a crash-reset). "San Rafael" is the former name of Salong (FMO-confirmed 2026-08-04).
+  const barangayAliases = [{ fromLabel: "San Rafael", toLabel: "Salong" }];
+
+  for (const alias of barangayAliases) {
+    await prisma.barangayAlias.upsert({
+      where: {
+        tenantId_fromLabel: { tenantId: tenant.id, fromLabel: alias.fromLabel },
+      },
+      update: { toLabel: alias.toLabel },
+      create: {
+        tenantId: tenant.id,
+        fromLabel: alias.fromLabel,
+        toLabel: alias.toLabel,
+      },
+    });
+  }
+
+  console.log(`  ✅ ${barangayAliases.length} barangay alias(es) created`);
+
   verifyFeatureRegistry();
 
   console.log("\n✅ Seed complete!");
