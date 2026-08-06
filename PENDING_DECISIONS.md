@@ -6,6 +6,31 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-04 — Masterlist import + image fix + full audit (durable detail: [[next_session_barangay_salong_merge]])
+
+- [x] ✅ **DONE (2026-08-06) — Barangay "San Rafael" → "Salong" full merge (DEV).** Merged all 41
+  `fisherfolk.barangay='San Rafael'` → `'Salong'` (tenant `calapan-city` `cmrnmmivz0000gmcxggvp9b04`);
+  Salong now 67, 0 "San Rafael" remain. Re-added lost `BarangayAlias` (San Rafael→Salong) to live dev DB
+  AND to `packages/db/prisma/seed.ts` so it survives future resets (branch `chore/barangay-salong-merge`,
+  LOCAL). MAP legacy alias kept. 🔒 Staging/prod merge = separate owner-gated step (below).
+- [ ] 🔒 **Apply the same San Rafael→Salong merge to STAGING + PROD?** (owner-gated) — DEV done; the
+  same UPDATE + alias re-add would run against staging/prod `calapan-city`. Owner's call when to promote.
+- [ ] 🔒 **Merge the 2 local branches to `main`?** (owner-gated) — `feat/masterlist-batch-import` @ `43f7ab6`
+  (importer + DOB-parse fix + backfill) and `fix/api-media-middleware-bypass` @ `685eaa9` (broken-images
+  middleware fix). Both off main, unpushed, tsc-clean. Must land together.
+- [ ] 🔒 **Promote the `/api/media` middleware fix to STAGING + PROD** (owner-gated, HIGH IMPACT) — the bug
+  breaks EVERY Telegram-backed image in-browser on staging/prod too, once viewed. Fix ready.
+- [ ] 🔒 **Delete `for_importation/` (~280MB PII image dump)?** On disk, gitignored on the importer branch.
+  Offer to remove once the import is confirmed good (like `.tempfiles`).
+- [ ] 🔵 (optional) Middleware `isPublicPath` `startsWith` → exact-match `/api/media` (future `/api/media-admin`
+  would else be silently public). Latent, not active.
+- [ ] 🔵 (cosmetic) Co-author trailer `Claude Opus 4.8` vs global `(1M context)` variant — future commits only.
+- ✅ DONE this session: imported 74 new fisherfolk + 148 Telegram assets to DEV (3016→3090); fixed broken
+  images (dev rebuild + middleware); full audit → DOB drop on 26/74 found + fixed (code + dev backfill).
+  Lessons logged (exceljs date/serial, middleware public-paths, dev-freshness).
+
+---
+
 - [] 2026-07-09 — **M4 Universal Report Hub — product-grain defaults (non-blocking).** The Full-Auto
   loop built the Report Hub with sensible technical defaults; each below is a `[WHAT]` the owner may
   flip. None blocked the build.
