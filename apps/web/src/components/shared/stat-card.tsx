@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { Card, CardHeader } from "@/components/ui/card";
+import { NumberTicker } from "@/components/ui/number-ticker";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps {
@@ -27,9 +29,11 @@ export function StatCard({
         </div>
         <div className="flex min-w-0 flex-col">
           {loading === true ? (
-            <div
-              className="h-8 w-24 animate-pulse rounded bg-muted"
-              aria-hidden="true"
+            <Skeleton className="h-8 w-24" />
+          ) : typeof value === "number" ? (
+            <NumberTicker
+              value={value}
+              className="text-2xl font-bold text-foreground"
             />
           ) : (
             <span className="text-2xl font-bold text-foreground">{value}</span>
