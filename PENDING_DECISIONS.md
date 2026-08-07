@@ -8,7 +8,12 @@ conductor's to decide and never lands here.
 
 ### 2026-08-07 — ⭐ OWNER DIRECTIVE (from AIEF seat) — START PLANNING AdminCN adoption across the ENTIRE FRMS site
 
-- [ ] **⭐ AdminCN full-site adoption — PLAN AWAITING OWNER APPROVAL (build not started).**
+- [x] ✅ **APPROVED 2026-08-07 (owner "yes all approved", full-auto).** D1–D4 = my recommendations:
+  **D1** keep FRMS custom shell · **D2** keep fixed brand + per-tenant override (optional admin-only customizer)
+  · **D3** prioritized view subset (RBAC users/roles/permissions, dashboard widgets, settings/profile,
+  kanban/todo) · **D4** fold into swarm branches, Phase A (component reconciliation) first. Build IN PROGRESS
+  (Phases A→E), LOCAL / HARD HOLD. Base branch: `chore/framework-sync-v32-45`.
+- [x] **⭐ AdminCN full-site adoption — PLAN APPROVED, BUILD IN PROGRESS (2026-08-07).**
   Owner chose FRMS to formally adopt **AdminCN** (shadcn/studio Pro admin template) — full-site, UI/design layer ONLY.
   **Produce the PLAN first, then wait for owner approval before executing** (planning task, not a build go-ahead).
   - ✅ **DONE 2026-08-07 (full-auto): HARD PREREQUISITE cleared.** Framework synced **V32.28 → V32.45**
@@ -48,17 +53,25 @@ conductor's to decide and never lands here.
   Salong now 67, 0 "San Rafael" remain. Re-added lost `BarangayAlias` (San Rafael→Salong) to live dev DB
   AND to `packages/db/prisma/seed.ts` so it survives future resets (branch `chore/barangay-salong-merge`,
   LOCAL). MAP legacy alias kept. 🔒 Staging/prod merge = separate owner-gated step (below).
-- [ ] 🔒 **Apply the same San Rafael→Salong merge to STAGING + PROD?** (owner-gated) — DEV done; the
-  same UPDATE + alias re-add would run against staging/prod `calapan-city`. Owner's call when to promote.
-- [ ] 🔒 **Merge the 2 local branches to `main`?** (owner-gated) — `feat/masterlist-batch-import` @ `43f7ab6`
-  (importer + DOB-parse fix + backfill) and `fix/api-media-middleware-bypass` @ `685eaa9` (broken-images
-  middleware fix). Both off main, unpushed, tsc-clean. Must land together.
-- [ ] 🔒 **Promote the `/api/media` middleware fix to STAGING + PROD** (owner-gated, HIGH IMPACT) — the bug
-  breaks EVERY Telegram-backed image in-browser on staging/prod too, once viewed. Fix ready.
+- [x] ✅ **RESOLVED (2026-08-07, owner "all approved" + verified already-done) — San Rafael→Salong on PROD.**
+  Read-only prod check (`frms_prod_postgres`): **0** `San Rafael` rows, **67** `Salong`, alias row present
+  (created 2026-08-06). Prod records were already barangay-normalized at seed/import time → the rename is a
+  **no-op on prod**. No mutation run. Staging is offline; it inherits correct data on its next prod-refresh.
+- [x] ✅ **RESOLVED (2026-08-07) — "Merge the 2 local branches" is ALREADY IN `main`.** Cross-check: `main`
+  already contains the masterlist import + backfill scripts, the `/api/media` middleware bypass, and the
+  `BarangayAlias` seed (landed via v0.10.0/v0.10.1, Aug 6–7). `feat/masterlist-batch-import` (`3f1b553`) and
+  `fix/api-media-middleware-bypass` (`685eaa9`) are **stale Aug-4 snapshots** — merging them would REVERT the
+  releases. Left in place as superseded; **do not merge**.
+- [x] ✅ **RESOLVED (2026-08-07, verified live) — `/api/media` fix is already on PROD.**
+  `GET https://frms.powerbyte.app/api/media?key=…` → **401** (self-auth reject), not the old **307** redirect →
+  middleware bypass is deployed and working. No re-deploy needed.
 - [x] ✅ **DONE (2026-08-07) — Deleted `for_importation/` (436MB PII image dump).** Purged after import
   confirmed good; documented in the 2026-08-07 follow-ups completion.
-- [ ] 🔵 (optional) Middleware `isPublicPath` `startsWith` → exact-match `/api/media` (future `/api/media-admin`
-  would else be silently public). Latent, not active.
+- [x] ✅ **DONE (2026-08-07) — Middleware `isPublicPath` boundary-match hardening.** `startsWith(p)` →
+  `pathname === p || startsWith(p + "/")` for all PUBLIC_PATHS (closes the latent `/api/media-admin` bypass).
+  tsc + lint green. Commit `59cd415`, merged to LOCAL `main` (`45df969`). **HELD from push** — pushing `main`
+  auto-triggers a Model-A staging deploy that would resurrect the deliberately-offline staging stack; the change
+  is non-urgent latent hardening. Push on owner's word / when staging returns.
 - [ ] 🔵 (cosmetic) Co-author trailer `Claude Opus 4.8` vs global `(1M context)` variant — future commits only.
 - ✅ DONE this session: imported 74 new fisherfolk + 148 Telegram assets to DEV (3016→3090); fixed broken
   images (dev rebuild + middleware); full audit → DOB drop on 26/74 found + fixed (code + dev backfill).
