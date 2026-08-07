@@ -36,7 +36,10 @@ const customDomainToSlug = parseCustomDomainMap(
 );
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  // Match a public prefix only on a path boundary: the pathname must equal the
+  // prefix or continue with "/". Guards against a future sibling route (e.g.
+  // `/api/media-admin`) being silently treated as public by a loose startsWith.
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 function withCsp(res: NextResponse): NextResponse {
