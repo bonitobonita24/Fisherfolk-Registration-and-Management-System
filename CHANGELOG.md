@@ -4,6 +4,12 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.10.1 — 2026-08-07
+
+### [FIXED]
+- pin pnpm to 10.0.0 in Dockerfile to match packageManager (`5d3fc85`)
+
+
 ## v0.10.0 — 2026-08-06
 
 ### [FEATURE]
