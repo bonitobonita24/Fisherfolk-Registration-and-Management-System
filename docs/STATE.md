@@ -1,26 +1,25 @@
 # FRMS — Project State
 
-## Current State (2026-07-14) — 🔨 Telegram-Storage Migration (Path A) — Milestone 1 IN PROGRESS
+## Current State (2026-08-07) — ✅ Import-reconcile follow-ups cleared + CI restored + v0.10.1 shipped
 
-Owner approved **Path A**: migrate fisherfolk media (photos + signatures) off self-hosted MinIO onto
-**Telegram-bot storage** (the Marine-Guardian pattern), executing the 11-task plan in
-`docs/plans/telegram-storage-migration-plan.md`.
+All 5 carried-over 2026-08-06 follow-ups resolved this session (see `.sessions/slot-23/next-session` +
+memory `project_followups_done_0807`):
+- **CI docker-publish FIXED** — pinned `pnpm@10.0.0` in `apps/web/Dockerfile` (both stages). Released
+  **v0.10.1** (patch), pushed origin/main `1a0c301`. **docker-publish run 31172106097 = SUCCESS** — auto-deploy
+  restored (manual docker save/load no longer needed).
+- **Staging stack** taken down (owner-decided), volumes preserved.
+- **VILLANUEVA dup** deleted on DEV + PROD (prod → 3089; 0 relations; prod backed up); staging inherits via
+  refresh-deploy.
+- **Fuzzy near-name pairs** reviewed (`docs/DEDUP_REVIEW_2026-08-07.md`) — 0 real dups, all differ by DOB.
+- **`for_importation/` (436MB PII)** deleted.
 
-- **M1 Foundation (T1–T3):**
-  - **T1 schema** ✅ PM-verified — `MediaObject` ledger + `Tenant.telegramChannelId`, additive migration
-    `20260714093659_add_media_object_ledger` (CREATE TABLE + one ADD COLUMN; **no domain-field churn** —
-    `Fisherfolk.photo/signature`, `Vessel.vesselPhoto` untouched).
-  - **T2 Telegram lib** ✅ PM-verified — `packages/storage/src/telegram.ts` (copied from MG, prisma-free) +
-    10 vitest unit tests green (`uploadDocumentToTelegram` / `fetchTelegramFileBytes` / 429-retry / token).
-  - **T3 storage adapter** — dispatched (StorageAdapter interface + S3Adapter + TelegramAdapter + `resolveBackend()`).
-- **Also this session:** CSP fix `fa11f27` (Cloudflare Insights beacon whitelist) — LOCAL main, un-pushed, rides next deploy.
-- **T8 migration byte source** = dev/demo MinIO (~2,979 photos) per owner. Owner to provision Telegram bot + channel before M3.
-- **HARD HOLD** — all work LOCAL commits only; no staging/prod deploy and no Telegram upload without explicit owner word.
+**Open (owner-gated):** merge `docs/session-save-import-reconcile` → main (docs; a push); M1–M4 PRODUCT.md
+back-ports; 2 tiny optional items. **HARD HOLD** intact — no further push without owner word.
 
 evidence:
-  contract: "M1 foundation acceptance: @frms/storage Telegram lib unit tests all green, and the T1 MediaObject migration is additive-only (existing domain media fields untouched)."
-  check_command: "pnpm --filter @frms/storage test  # + cd packages/db && prisma validate"
-  captured_output: "vitest v3.2.6 — src/__tests__/telegram.test.ts (10 tests) — Test Files 1 passed (1), Tests 10 passed (10). prisma: 'The schema at prisma/schema.prisma is valid'; media_objects table + tenants.telegram_channel_id present, fisherfolk.photo/signature/vessel_photo unchanged."
+  contract: "v0.10.1 CI fix acceptance: docker-publish workflow builds+publishes green (it failed on the pnpm --frozen-lockfile step for weeks), and the VILLANUEVA duplicate is gone from prod."
+  check_command: "gh run view 31172106097 --json conclusion  # + prod fisherfolk count"
+  captured_output: "CI run 31172106097 conclusion=success (prev v0.10.0 run failed at 35s on pnpm install). Prod fisherfolk count = 3089 (was 3090); only id_number 2024-175205000-07796 remains for VILLANUEVA, M-JAY ALEJO."
 
 ---
 

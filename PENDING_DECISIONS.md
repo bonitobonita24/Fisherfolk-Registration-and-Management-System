@@ -6,6 +6,26 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-07 — ⭐ OWNER DIRECTIVE (from AIEF seat) — START PLANNING AdminCN adoption across the ENTIRE FRMS site
+
+- [ ] **⭐ On resume: START PLANNING adoption of the V32.43 fleet-default AdminCN design template across ALL of FRMS.**
+  Owner chose FRMS to formally adopt **AdminCN** (shadcn/studio Pro admin template) — full-site, UI/design layer ONLY.
+  **Produce the PLAN first, then wait for owner approval before executing** (planning task, not a build go-ahead).
+  - **HARD PREREQUISITE:** FRMS is on framework **V32.28** — the AdminCN deliverables aren't here yet. First
+    `register-to-aief` → `prep-sync` (or AIEF deploy.sh) to land `.ai_prompt/admincn-starter.md` (deliverable #39),
+    the `starter/admincn/` slice, and **Scenario 49** (the retrofit procedure). THEN plan against Scenario 49.
+  - **✅ LOW DELTA (from the rollout tracker):** FRMS already did a manual **AdminCN-style dark reskin (SET-1)** +
+    **dashboard redesign (SET-2)**, merged to LOCAL `main` (unpushed). So this **formalizes** the existing reskin onto
+    the official V32.43 starter — likely just a **theme-preset swap + component-extra reconciliation**, NOT a full
+    re-skin (effort S–M). The plan should DIFF the current FRMS UI against the AdminCN slice and adopt only the delta.
+  - **Scope/discipline:** UI/design layer ONLY — keep tRPC + Prisma + Auth.js v5; reconcile the default-layout sidebar
+    shell + theme preset + component set; any newly-adopted view grafts off `fake-db` onto FRMS's real tRPC/Prisma
+    (5-state + RBAC preserved); Rule-12 tokens win value conflicts; verify-all-pages (gov app → axe WCAG 2.2 AA gate
+    stays green); PLAN-FIRST (PM+Architect); commit LOCAL / HARD HOLD.
+  - **Priority reconcile:** the unpushed SET-1/SET-2 `main` work + the annual-reset UI fast-follow still stand —
+    fold this into them, don't duplicate. Confirm ordering with the owner before dispatch.
+  - Reference: AIEF `docs/planning/V32.44_ADMINCN_FLEET_ROLLOUT_TRACKER.md` (FRMS = effort S–M, priority Medium).
+
 ### 2026-08-04 — Masterlist import + image fix + full audit (durable detail: [[next_session_barangay_salong_merge]])
 
 - [x] ✅ **DONE (2026-08-06) — Barangay "San Rafael" → "Salong" full merge (DEV).** Merged all 41
