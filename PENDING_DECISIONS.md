@@ -8,12 +8,27 @@ conductor's to decide and never lands here.
 
 ### 2026-08-07 — ⭐ OWNER DIRECTIVE (from AIEF seat) — START PLANNING AdminCN adoption across the ENTIRE FRMS site
 
-- [ ] **⭐ On resume: START PLANNING adoption of the V32.43 fleet-default AdminCN design template across ALL of FRMS.**
+- [ ] **⭐ AdminCN full-site adoption — PLAN AWAITING OWNER APPROVAL (build not started).**
   Owner chose FRMS to formally adopt **AdminCN** (shadcn/studio Pro admin template) — full-site, UI/design layer ONLY.
   **Produce the PLAN first, then wait for owner approval before executing** (planning task, not a build go-ahead).
-  - **HARD PREREQUISITE:** FRMS is on framework **V32.28** — the AdminCN deliverables aren't here yet. First
-    `register-to-aief` → `prep-sync` (or AIEF deploy.sh) to land `.ai_prompt/admincn-starter.md` (deliverable #39),
-    the `starter/admincn/` slice, and **Scenario 49** (the retrofit procedure). THEN plan against Scenario 49.
+  - ✅ **DONE 2026-08-07 (full-auto): HARD PREREQUISITE cleared.** Framework synced **V32.28 → V32.45**
+    (`prep-sync` → `sync-to-project.sh` → `deploy.sh`), governance-only, zero app source. Branch
+    `chore/framework-sync-v32-45` @ `8cdd5da` (LOCAL / HARD HOLD). `.ai_prompt/admincn-starter.md` (#39),
+    `starter/admincn/` (222-file slice), and **Scenario 49** are now present. Stale contaminated
+    `chore/framework-sync-v32-31` branch force-deleted (would have reverted Aug import work).
+  - ✅ **DONE 2026-08-07 (full-auto): adoption plan produced** → `docs/ADMINCN_ADOPTION_PLAN.md`. Gap-diff
+    complete: FRMS's token reskin is ALREADY in `main` (`globals.css` 2026-07-04) + shell is already
+    AdminCN-shaped → genuinely **low-delta (S–M)**, mostly additive. **Owner: review the plan, then answer
+    D1–D4 below before ANY UI build begins.** Build is NOT started (planning-only per directive).
+  - ⏳ **OWNER `[WHAT]` — 4 scope decisions gate the build (my recs in the plan):**
+    - **D1 App-shell:** keep FRMS's custom shell (👍 recommend — low delta, RBAC+tenant baked in) vs migrate to
+      shadcn `Sidebar` default-layout (effort L, higher risk).
+    - **D2 Theme:** keep fixed orange/teal/navy brand + per-tenant override (👍 recommend) vs adopt 11-preset
+      `ThemeCustomizer` (optionally admin-only).
+    - **D3 View-adoption scope:** prioritized subset — RBAC users/roles/permissions, dashboard widgets,
+      settings/profile, kanban/todo (👍 recommend) vs all 41 screens.
+    - **D4 Ordering:** fold into the `swarm/admincn-reskin` + `swarm/dashboard-redesign` branches + annual-reset
+      fast-follow (👍 recommend Phase A component-reconciliation first) — confirm before dispatch.
   - **✅ LOW DELTA (from the rollout tracker):** FRMS already did a manual **AdminCN-style dark reskin (SET-1)** +
     **dashboard redesign (SET-2)**, merged to LOCAL `main` (unpushed). So this **formalizes** the existing reskin onto
     the official V32.43 starter — likely just a **theme-preset swap + component-extra reconciliation**, NOT a full
@@ -40,8 +55,8 @@ conductor's to decide and never lands here.
   middleware fix). Both off main, unpushed, tsc-clean. Must land together.
 - [ ] 🔒 **Promote the `/api/media` middleware fix to STAGING + PROD** (owner-gated, HIGH IMPACT) — the bug
   breaks EVERY Telegram-backed image in-browser on staging/prod too, once viewed. Fix ready.
-- [ ] 🔒 **Delete `for_importation/` (~280MB PII image dump)?** On disk, gitignored on the importer branch.
-  Offer to remove once the import is confirmed good (like `.tempfiles`).
+- [x] ✅ **DONE (2026-08-07) — Deleted `for_importation/` (436MB PII image dump).** Purged after import
+  confirmed good; documented in the 2026-08-07 follow-ups completion.
 - [ ] 🔵 (optional) Middleware `isPublicPath` `startsWith` → exact-match `/api/media` (future `/api/media-admin`
   would else be silently public). Latent, not active.
 - [ ] 🔵 (cosmetic) Co-author trailer `Claude Opus 4.8` vs global `(1M context)` variant — future commits only.
