@@ -13,6 +13,11 @@ conductor's to decide and never lands here.
   · **D3** prioritized view subset (RBAC users/roles/permissions, dashboard widgets, settings/profile,
   kanban/todo) · **D4** fold into swarm branches, Phase A (component reconciliation) first. Build IN PROGRESS
   (Phases A→E), LOCAL / HARD HOLD. Base branch: `chore/framework-sync-v32-45`.
+- [x] ✅ **AdminCN full-site adoption — BUILD COMPLETE + CONSOLIDATED onto local `main` (2026-08-08).**
+  Phases A (7 UI primitives) / D-1 (dashboard animated StatCard) / D-2 (RBAC surface reskin, styling-only) /
+  E (verification) all done and verified live (owner present); merged `--no-ff` into local `main`
+  (`73fbf94`), tsc green. **Push HELD (HARD HOLD)** — pushing `main` auto-fires staging deploy; staging is
+  offline. Only remaining owner `[WHAT]` here is when to push/deploy. Original plan detail below (kept for record).
 - [x] **⭐ AdminCN full-site adoption — PLAN APPROVED, BUILD IN PROGRESS (2026-08-07).**
   Owner chose FRMS to formally adopt **AdminCN** (shadcn/studio Pro admin template) — full-site, UI/design layer ONLY.
   **Produce the PLAN first, then wait for owner approval before executing** (planning task, not a build go-ahead).

@@ -1,5 +1,38 @@
 # FRMS — Project State
 
+## Current State (2026-08-08) — ✅ AdminCN adoption CONSOLIDATED onto local main (Phases A/D-1/D-2/E complete)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner present, resumed session, chose **"Consolidate onto main (local only)"**. The completed AdminCN
+adoption stack is now merged into local `main` — **no push, HARD HOLD intact.**
+
+**✅ DONE THIS SESSION:**
+- **Merged the AdminCN stack into local `main`** (`--no-ff`, merge commit `73fbf94`), preserving the phase
+  history: `8cdd5da` framework sync V32.28→V32.45 · `7449fc6` adoption plan + D1–D4 · `c12db6a` Phase A
+  (7 UI primitives) · `c363899` Phase D-1 (dashboard animated StatCard) · `e5e304c` Phase D-2 (RBAC surface
+  reskin, styling-only). Merge also unites main's `isPublicPath` boundary-match hardening (`45df969`) — no
+  file overlap, conflict-free.
+- **Verified merged main:** `tsc --noEmit` on `apps/web` → exit 0. (D-2 already runtime-verified live with
+  owner: roles/permission surfaces correct, 0 console errors, 13 tests green.)
+- **Branch cleanup:** deleted the 3 merged AdminCN phase branches (`feat/admincn-phase-a-primitives`,
+  `-d1-dashboard`, `-d2-rbac`). Left `chore/framework-sync-v32-45` — it holds 2 now-stale docs-only
+  checkpoint commits (`d466a54`/`d8f4542`) not worth merging or force-deleting.
+
+**⏳ PENDING / OPEN `[WHAT]` (all owner-gated, HARD HOLD):**
+- **Push local `main`** — now ~13 commits ahead of origin (AdminCN stack + earlier import/hardening work).
+  Pushing auto-fires a Model-A staging deploy; staging is deliberately offline. Awaits explicit owner word.
+- **Deploy items (unchanged):** promote `/api/media` fix + San Rafael→Salong to staging/prod on refresh.
+- **Non-blocking (2026-07-09):** M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
+
+**Git/HARD HOLD state:** on `main` @ `73fbf94`, ~13 ahead of origin/main, **unpushed**. HARD HOLD intact —
+no push/deploy without explicit owner word. No staging/prod touched.
+
+**NEXT un-gated work:** none — remaining items all need an owner `[WHAT]` (push/deploy) or are non-blocking
+product back-ports.
+
+---
+
 ## Current State (2026-08-07 late) — ✅ Framework synced V32.28→V32.45 + AdminCN adoption PLAN produced (full-auto)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
