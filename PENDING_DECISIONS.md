@@ -6,6 +6,20 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-08 — 🔐 QUEUED FOR NEXT SESSION (owner-approved task) — bump Auth.js to beta.32+ (CRITICAL fail-open)
+
+- [ ] 🔴 **Upgrade `next-auth` beta.31 → `>=5.0.0-beta.32` + `@auth/core` → `>=0.41.3`.** Surfaced by the
+  CI dep-audit on the 2026-08-08 ship. Two **CRITICAL** Auth.js advisories on the current pinned version:
+  - **GHSA-8fpg-xm3f-6cx3** — config errors can cause existence-based auth checks to **FAIL OPEN** (auth
+    object populated with an error). Serious for a gov app holding citizen PII.
+  - **GHSA-7rqj-j65f-68wh** — email normalizer validates before Unicode normalization → **homoglyph `@`
+    bypass**. Also hits `@auth/core@0.41.2` via `@auth/prisma-adapter` (patched `>=0.41.3`).
+  - (also HIGH `brace-expansion` ReDoS, transitive via `exceljs > archiver` → bump to `>=2.1.2`.)
+  - **Task scope:** beta version bump on the auth-critical path → own branch, full verify pass (login /
+    3-tier RBAC / session flows re-exercised, tsc/lint/tests green), then LOCAL commit. NOT a drive-by.
+    Owner-approved to do next session (2026-08-08). HARD HOLD on push as usual.
+
+
 ### 2026-08-07 — ⭐ OWNER DIRECTIVE (from AIEF seat) — START PLANNING AdminCN adoption across the ENTIRE FRMS site
 
 - [x] ✅ **APPROVED 2026-08-07 (owner "yes all approved", full-auto).** D1–D4 = my recommendations:
