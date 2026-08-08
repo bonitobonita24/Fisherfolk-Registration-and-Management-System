@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -129,6 +130,9 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create User</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Add a new user to this tenant.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -223,6 +227,14 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
           )}
 
           <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              disabled={create.isPending}
+            >
+              Cancel
+            </Button>
             <Button type="submit" disabled={create.isPending}>
               {create.isPending ? "Creating…" : "Create User"}
             </Button>

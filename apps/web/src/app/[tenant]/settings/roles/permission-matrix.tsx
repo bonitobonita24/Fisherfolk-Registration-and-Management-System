@@ -49,9 +49,11 @@ export function PermissionMatrix({ grid, onChange, disabled = false }: Permissio
               Feature
             </TableHead>
             {MATRIX_ACTIONS.map((action) => (
-              <TableHead key={action} scope="col" className="text-center">
+              <TableHead key={action} scope="col" className="text-center align-bottom">
                 <div className="flex flex-col items-center gap-1">
-                  <span>{MATRIX_ACTION_LABELS[action]}</span>
+                  <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {MATRIX_ACTION_LABELS[action]}
+                  </span>
                   <Button
                     type="button"
                     variant="ghost"
@@ -71,7 +73,7 @@ export function PermissionMatrix({ grid, onChange, disabled = false }: Permissio
         <TableBody>
           {FEATURE_ROWS.map((featureKey) => (
             <TableRow key={featureKey}>
-              <TableHead scope="row" className="text-left font-medium">
+              <TableHead scope="row" className="text-left text-sm font-medium">
                 <div className="flex items-center justify-between gap-2">
                   <span>{FEATURE_LABELS[featureKey]}</span>
                   <Button

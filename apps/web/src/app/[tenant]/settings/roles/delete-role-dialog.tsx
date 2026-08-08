@@ -60,6 +60,7 @@ export function DeleteRoleDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteRole.isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={deleteRole.isPending}
             onClick={() => {
               if (roleId) deleteRole.mutate({ tenantId, id: roleId });

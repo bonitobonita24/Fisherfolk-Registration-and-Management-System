@@ -8,12 +8,32 @@ conductor's to decide and never lands here.
 
 ### 2026-08-07 — ⭐ OWNER DIRECTIVE (from AIEF seat) — START PLANNING AdminCN adoption across the ENTIRE FRMS site
 
-- [ ] **⭐ On resume: START PLANNING adoption of the V32.43 fleet-default AdminCN design template across ALL of FRMS.**
+- [x] ✅ **APPROVED 2026-08-07 (owner "yes all approved", full-auto).** D1–D4 = my recommendations:
+  **D1** keep FRMS custom shell · **D2** keep fixed brand + per-tenant override (optional admin-only customizer)
+  · **D3** prioritized view subset (RBAC users/roles/permissions, dashboard widgets, settings/profile,
+  kanban/todo) · **D4** fold into swarm branches, Phase A (component reconciliation) first. Build IN PROGRESS
+  (Phases A→E), LOCAL / HARD HOLD. Base branch: `chore/framework-sync-v32-45`.
+- [x] **⭐ AdminCN full-site adoption — PLAN APPROVED, BUILD IN PROGRESS (2026-08-07).**
   Owner chose FRMS to formally adopt **AdminCN** (shadcn/studio Pro admin template) — full-site, UI/design layer ONLY.
   **Produce the PLAN first, then wait for owner approval before executing** (planning task, not a build go-ahead).
-  - **HARD PREREQUISITE:** FRMS is on framework **V32.28** — the AdminCN deliverables aren't here yet. First
-    `register-to-aief` → `prep-sync` (or AIEF deploy.sh) to land `.ai_prompt/admincn-starter.md` (deliverable #39),
-    the `starter/admincn/` slice, and **Scenario 49** (the retrofit procedure). THEN plan against Scenario 49.
+  - ✅ **DONE 2026-08-07 (full-auto): HARD PREREQUISITE cleared.** Framework synced **V32.28 → V32.45**
+    (`prep-sync` → `sync-to-project.sh` → `deploy.sh`), governance-only, zero app source. Branch
+    `chore/framework-sync-v32-45` @ `8cdd5da` (LOCAL / HARD HOLD). `.ai_prompt/admincn-starter.md` (#39),
+    `starter/admincn/` (222-file slice), and **Scenario 49** are now present. Stale contaminated
+    `chore/framework-sync-v32-31` branch force-deleted (would have reverted Aug import work).
+  - ✅ **DONE 2026-08-07 (full-auto): adoption plan produced** → `docs/ADMINCN_ADOPTION_PLAN.md`. Gap-diff
+    complete: FRMS's token reskin is ALREADY in `main` (`globals.css` 2026-07-04) + shell is already
+    AdminCN-shaped → genuinely **low-delta (S–M)**, mostly additive. **Owner: review the plan, then answer
+    D1–D4 below before ANY UI build begins.** Build is NOT started (planning-only per directive).
+  - ⏳ **OWNER `[WHAT]` — 4 scope decisions gate the build (my recs in the plan):**
+    - **D1 App-shell:** keep FRMS's custom shell (👍 recommend — low delta, RBAC+tenant baked in) vs migrate to
+      shadcn `Sidebar` default-layout (effort L, higher risk).
+    - **D2 Theme:** keep fixed orange/teal/navy brand + per-tenant override (👍 recommend) vs adopt 11-preset
+      `ThemeCustomizer` (optionally admin-only).
+    - **D3 View-adoption scope:** prioritized subset — RBAC users/roles/permissions, dashboard widgets,
+      settings/profile, kanban/todo (👍 recommend) vs all 41 screens.
+    - **D4 Ordering:** fold into the `swarm/admincn-reskin` + `swarm/dashboard-redesign` branches + annual-reset
+      fast-follow (👍 recommend Phase A component-reconciliation first) — confirm before dispatch.
   - **✅ LOW DELTA (from the rollout tracker):** FRMS already did a manual **AdminCN-style dark reskin (SET-1)** +
     **dashboard redesign (SET-2)**, merged to LOCAL `main` (unpushed). So this **formalizes** the existing reskin onto
     the official V32.43 starter — likely just a **theme-preset swap + component-extra reconciliation**, NOT a full
@@ -33,17 +53,25 @@ conductor's to decide and never lands here.
   Salong now 67, 0 "San Rafael" remain. Re-added lost `BarangayAlias` (San Rafael→Salong) to live dev DB
   AND to `packages/db/prisma/seed.ts` so it survives future resets (branch `chore/barangay-salong-merge`,
   LOCAL). MAP legacy alias kept. 🔒 Staging/prod merge = separate owner-gated step (below).
-- [ ] 🔒 **Apply the same San Rafael→Salong merge to STAGING + PROD?** (owner-gated) — DEV done; the
-  same UPDATE + alias re-add would run against staging/prod `calapan-city`. Owner's call when to promote.
-- [ ] 🔒 **Merge the 2 local branches to `main`?** (owner-gated) — `feat/masterlist-batch-import` @ `43f7ab6`
-  (importer + DOB-parse fix + backfill) and `fix/api-media-middleware-bypass` @ `685eaa9` (broken-images
-  middleware fix). Both off main, unpushed, tsc-clean. Must land together.
-- [ ] 🔒 **Promote the `/api/media` middleware fix to STAGING + PROD** (owner-gated, HIGH IMPACT) — the bug
-  breaks EVERY Telegram-backed image in-browser on staging/prod too, once viewed. Fix ready.
-- [ ] 🔒 **Delete `for_importation/` (~280MB PII image dump)?** On disk, gitignored on the importer branch.
-  Offer to remove once the import is confirmed good (like `.tempfiles`).
-- [ ] 🔵 (optional) Middleware `isPublicPath` `startsWith` → exact-match `/api/media` (future `/api/media-admin`
-  would else be silently public). Latent, not active.
+- [x] ✅ **RESOLVED (2026-08-07, owner "all approved" + verified already-done) — San Rafael→Salong on PROD.**
+  Read-only prod check (`frms_prod_postgres`): **0** `San Rafael` rows, **67** `Salong`, alias row present
+  (created 2026-08-06). Prod records were already barangay-normalized at seed/import time → the rename is a
+  **no-op on prod**. No mutation run. Staging is offline; it inherits correct data on its next prod-refresh.
+- [x] ✅ **RESOLVED (2026-08-07) — "Merge the 2 local branches" is ALREADY IN `main`.** Cross-check: `main`
+  already contains the masterlist import + backfill scripts, the `/api/media` middleware bypass, and the
+  `BarangayAlias` seed (landed via v0.10.0/v0.10.1, Aug 6–7). `feat/masterlist-batch-import` (`3f1b553`) and
+  `fix/api-media-middleware-bypass` (`685eaa9`) are **stale Aug-4 snapshots** — merging them would REVERT the
+  releases. Left in place as superseded; **do not merge**.
+- [x] ✅ **RESOLVED (2026-08-07, verified live) — `/api/media` fix is already on PROD.**
+  `GET https://frms.powerbyte.app/api/media?key=…` → **401** (self-auth reject), not the old **307** redirect →
+  middleware bypass is deployed and working. No re-deploy needed.
+- [x] ✅ **DONE (2026-08-07) — Deleted `for_importation/` (436MB PII image dump).** Purged after import
+  confirmed good; documented in the 2026-08-07 follow-ups completion.
+- [x] ✅ **DONE (2026-08-07) — Middleware `isPublicPath` boundary-match hardening.** `startsWith(p)` →
+  `pathname === p || startsWith(p + "/")` for all PUBLIC_PATHS (closes the latent `/api/media-admin` bypass).
+  tsc + lint green. Commit `59cd415`, merged to LOCAL `main` (`45df969`). **HELD from push** — pushing `main`
+  auto-triggers a Model-A staging deploy that would resurrect the deliberately-offline staging stack; the change
+  is non-urgent latent hardening. Push on owner's word / when staging returns.
 - [ ] 🔵 (cosmetic) Co-author trailer `Claude Opus 4.8` vs global `(1M context)` variant — future commits only.
 - ✅ DONE this session: imported 74 new fisherfolk + 148 Telegram assets to DEV (3016→3090); fixed broken
   images (dev rebuild + middleware); full audit → DOB drop on 26/74 found + fixed (code + dev backfill).

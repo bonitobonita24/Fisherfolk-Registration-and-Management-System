@@ -1,5 +1,42 @@
 # FRMS — Project State
 
+## Current State (2026-08-07 late) — ✅ Framework synced V32.28→V32.45 + AdminCN adoption PLAN produced (full-auto)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner directive (full-auto, owner asleep, full authority granted): plan AdminCN full-site adoption. Completed
+BOTH un-gated milestones; the build itself is owner-gated on D1–D4 (planning-only per directive).
+
+**✅ DONE THIS SESSION:**
+- **Framework sync V32.28 → V32.45** (governance-only, zero app source) via `prep-sync` →
+  `sync-to-project.sh` → `deploy.sh`. Branch `chore/framework-sync-v32-45` @ `8cdd5da` (LOCAL). Landed
+  `admincn-starter.md` (#39), `starter/admincn/` (222-file slice, +root `starter/admincn/`), Scenario 49,
+  +8 other new deliverables; root CLAUDE.md → V32.45.1 (AIEF:MANAGED state block preserved, no PRIMER
+  regression). `.bak` backups cleaned.
+- **Stale/contaminated `chore/framework-sync-v32-31` branch force-deleted** (owner-authorized, HARDHOLD-OK) —
+  it was off pre-Aug main and would have reverted the masterlist import work.
+- **AdminCN adoption plan** → `docs/ADMINCN_ADOPTION_PLAN.md` @ `7449fc6` (LOCAL). Gap-diff shows FRMS is
+  LOW-DELTA: token reskin already in main (`globals.css` 2026-07-04), shell already AdminCN-shaped → mostly
+  additive component + selective view-graft, effort S–M. Includes INHERIT-not-REPLACE contract, fake-db→tRPC
+  graft, 5 phases, Scenario-49 gate bar.
+
+**⏳ PENDING / OPEN `[WHAT]` (cold-start reads these first — all in PENDING_DECISIONS.md):**
+- **AdminCN build is GATED on 4 owner decisions D1–D4** (app-shell keep-vs-migrate · theme fixed-vs-customizer ·
+  view-adoption scope · ordering). My recommendations are in the plan §3. NO build starts until answered.
+- **Owner-gated deploy items (HARD HOLD, unchanged):** merge `feat/masterlist-batch-import` +
+  `fix/api-media-middleware-bypass` to main (together); promote `/api/media` fix to staging+prod; San
+  Rafael→Salong merge to staging+prod; push local `main` (1 commit ahead) + `docs/session-save-import-reconcile`.
+- **Non-blocking (2026-07-09):** M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
+
+**Git/HARD HOLD state:** on `chore/framework-sync-v32-45` @ `7449fc6` (2 commits: sync + plan, LOCAL/unpushed).
+`main` still 1 ahead of origin (handoff doc, unpushed). Many parked feature branches. **HARD HOLD intact — no
+push/deploy/merge-to-main without explicit owner word.** No staging/prod touched.
+
+**NEXT un-gated work:** none that doesn't require an owner `[WHAT]` — the AdminCN build waits on D1–D4, all
+deploy/merge items are owner-gated. Loop should `--hold` and re-surface D1–D4 until the owner answers.
+
+---
+
 ## Current State (2026-08-07) — ✅ Import-reconcile follow-ups cleared + CI restored + v0.10.1 shipped
 
 All 5 carried-over 2026-08-06 follow-ups resolved this session (see `.sessions/slot-23/next-session` +
