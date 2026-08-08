@@ -98,3 +98,4 @@ for_importation/
 
 # Telegram-backfill manifest (maps id_number → Telegram file_id — real PII; never commit)
 .backfill/
+screenshots/
