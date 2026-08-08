@@ -1,5 +1,36 @@
 # FRMS — Project State
 
+## Current State (2026-08-08) — 🚀 AdminCN adoption SHIPPED TO PRODUCTION (frms.powerbyte.app)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner authorized "push deploy it" → promoted to PROD. **Live and verified.**
+
+**✅ SHIPPED THIS SESSION:**
+- **Pushed `main` → origin** (`44b078c`) after full pre-ship gate (lint · typecheck · 386 tests · prod build all green). CI `docker-publish.yml` built + pushed the multi-arch image (`sha-44b078c`, 25m).
+- **Promoted image → PRODUCTION** via `deploy/compose/push-to-prod.sh sha-44b078c`: prod DB backed up
+  (`/root/frms-prod-backup-pre-pushtoprod-20260808-080127.sql.gz`, rollback point), image `sha-44b078c` →
+  `latest`, prod app recreated, **"No pending migrations to apply"** (UI+middleware only, schema-clean),
+  NO reseed. Prod running `frms:latest` revision `44b078c5d539` — the exact built commit.
+- **Verified prod:** `/api/health` = 200, `/login` = 200, container Up (healthy), clean Next.js boot.
+- **Dev rebuilt** off main (Rule 39) — `frms_dev_app` FRESH @ 14:05, health 200.
+- **Staging finding:** the `frms_staging` stack is torn down (0 containers on VPS) — a future standup, not
+  a blocker. `docker-publish.yml` is build-only (no auto staging deploy, by design since 2026-07-11).
+
+**⚠ Note on CI:** `ci.yml` fails only on `pnpm audit --audit-level=high` (does NOT gate deploy). Real
+finding: 2 CRITICAL Auth.js advisories on `next-auth@beta.31` (fail-open + homoglyph bypass) + HIGH
+brace-expansion ReDoS → **queued as a next-session task** in PENDING_DECISIONS (owner-approved).
+
+**⏳ OPEN / owner-gated:**
+- **Rebuild `frms_staging` stack** if staging validation is wanted again (currently torn down).
+- **Auth.js beta.32+ security bump** — queued next session (`20366cd`).
+- **Non-blocking (2026-07-09):** M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
+- **Local `main` ~1 ahead of origin** (`20366cd` docs, unpushed) — HARD HOLD, harmless.
+
+**Git state:** local `main` @ `20366cd` (origin/main @ `44b078c`, deployed to prod). Prod live. No staging.
+
+---
+
 ## Current State (2026-08-08) — ✅ AdminCN adoption CONSOLIDATED onto local main (Phases A/D-1/D-2/E complete)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
