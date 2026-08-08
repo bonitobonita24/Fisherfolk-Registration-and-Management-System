@@ -5,7 +5,13 @@ import { MoreHorizontal, Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,23 +80,23 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 p-3 pb-2">
           <div>
-            <CardTitle className="text-base">Custom Roles</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <CardTitle className="text-sm">Custom Roles</CardTitle>
+            <CardDescription className="text-xs">
               Build roles below Tenant Admin with a per-feature permission
               matrix. Custom roles can never grant Billing or User
               Management.
-            </p>
+            </CardDescription>
           </div>
           <Button onClick={openCreate} size="sm">
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
             New Role
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 pt-0">
           {isLoading ? (
             <p className="text-sm text-muted-foreground animate-pulse">
               Loading custom roles…

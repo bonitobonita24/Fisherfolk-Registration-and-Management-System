@@ -3,7 +3,13 @@
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -81,15 +87,15 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Assign Custom Roles</CardTitle>
-        <p className="text-sm text-muted-foreground">
+      <CardHeader className="p-3 pb-2">
+        <CardTitle className="text-sm">Assign Custom Roles</CardTitle>
+        <CardDescription className="text-xs">
           Attach a custom role to an Encoder, Viewer, or Bantay Dagat user.
           Tenant Admin and Tenant Superadmin accounts always keep their full
           fixed-tier access and cannot carry a custom role.
-        </p>
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-3 pt-0">
         {usersLoading ? (
           <p className="text-sm text-muted-foreground animate-pulse">Loading users…</p>
         ) : users.length === 0 ? (
