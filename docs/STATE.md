@@ -1,6 +1,29 @@
 # FRMS — Project State
 
-## Current State (2026-08-08) — 🚀 AdminCN adoption SHIPPED TO PRODUCTION (frms.powerbyte.app)
+## Current State (2026-08-08 PM) — 🔐 Auth.js security bump DONE (LOCAL, branch, HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner-approved security task executed ("start planning then swarm"). Branch `fix/authjs-security-bump`
+@ `5a1937a` (+ this governance commit), built in an isolated worktree so the running `frms_dev_app` (:44387)
+was untouched.
+
+**✅ DONE THIS SESSION:**
+- `next-auth` → **5.0.0-beta.32**, `@auth/core` → **0.41.3**, `@auth/prisma-adapter` → **2.11.3**,
+  `brace-expansion` override → **>=5.0.9**. Cleared 2 CRITICAL + 1 HIGH Auth.js advisories + brace-expansion ReDoS.
+- **Zero source changes** (no auth-surface type breaks). Gates green: tsc · lint · 386 tests · build (41 routes).
+- Independent re-audit confirmed old versions gone + brace-expansion out of graph.
+
+**⏳ OPEN / owner-gated (next):**
+- **Merge `fix/authjs-security-bump` → main + dev rebuild** — HARD HOLD; the dev rebuild is where the live
+  3-tier login click-through (Rule 16) happens. Owner word required (push to main auto-triggers Model-A CI).
+- **[WHAT] out-of-scope highs** — Next.js SSRF/DoS ×3 (`next@15.5.19`) + sharp/dompurify/undici. Bigger blast
+  radius; separate owner decision on whether to do a Next.js bump.
+- (still open from AM) main is 2 docs-commits ahead of origin (HARD HOLD); `frms_staging` torn down.
+
+---
+
+## Current State (2026-08-08 AM) — 🚀 AdminCN adoption SHIPPED TO PRODUCTION (frms.powerbyte.app)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
