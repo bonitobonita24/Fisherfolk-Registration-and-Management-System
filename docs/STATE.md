@@ -21,18 +21,20 @@ Resume session → triaged 2 stale worktrees → cleared the Next.js highs → r
   - Verify: typecheck 7/7 · lint · **386 tests** · production build all green.
 - **Full audit check** run (3 read-only auditors + completeness critic) — session work verified vs ground truth;
   fixed the doc drift this section corrects.
+- **✅ `dompurify` stale-override closed** (audit follow-up folded in) — override floor `>=3.4.11` → **`>=3.4.13`**
+  (`cc7ee4c`), clearing GHSA-55q2-fjhq-7xh7 (moderate XSS) + GHSA-c2j3-45gr-mqc4 (low). `pnpm audit --prod`
+  now **1 moderate** (only `uuid` via exceljs, needs an exceljs bump). Verify green.
 
 **⏳ PENDING / OPEN (next session):**
-1. **[owner-gated] Push local `main` → origin** — ships dockerignore + all 8 HIGH fixes through CI and brings
-   staging back online. HELD (staging deliberately offline). Owner's explicit word required.
-2. **[audit follow-up] `dompurify` override floor is STALE** — pinned `>=3.4.11`, still vulnerable to
-   GHSA-55q2-fjhq-7xh7 (moderate, patched `>=3.4.13`) + GHSA-c2j3-45gr-mqc4 (low, `>=3.4.12`). Bump the
-   override to `>=3.4.13` to clear both (same stale-floor pattern as postcss/undici — moderate/low, not a high).
+1. **[owner-gated] Push local `main` → origin** — ships dockerignore + all HIGH fixes + dompurify through CI and
+   brings staging back online. HELD (staging deliberately offline). Owner's explicit word required.
+2. **[low-priority] `uuid` moderate** (GHSA-w5hq-g745-h8pq) via `exceljs@4.4.0 > uuid@8.3.2` — no clean override;
+   needs an exceljs bump. Not urgent.
 3. **Cosmetic** — co-author trailer variant, future commits only.
 4. Minor: stale local `docker-compose.app.yml` templates (YAML lint error; server-side stack files correct,
    prod healthy). `js-yaml` HIGH is dev-only (eslint chain), excluded from `--prod`.
 
-**Git:** on branch `main` @ **`aeb666f`**, **5 commits ahead of origin/main** (`3d619b4`), tree clean, push HELD.
+**Git:** on branch `main` @ **`cc7ee4c`**, **7 commits ahead of origin/main** (`3d619b4`), tree clean, push HELD.
 Prod is live + healthy on Auth.js beta.32 (`3d619b4`). Stale worktrees removed.
 
 ---
