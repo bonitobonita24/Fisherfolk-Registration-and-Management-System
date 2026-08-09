@@ -8,7 +8,14 @@ conductor's to decide and never lands here.
 
 ### 2026-08-08 — 🔐 QUEUED FOR NEXT SESSION (owner-approved task) — bump Auth.js to beta.32+ (CRITICAL fail-open)
 
-- [ ] 🔴 **Upgrade `next-auth` beta.31 → `>=5.0.0-beta.32` + `@auth/core` → `>=0.41.3`.** Surfaced by the
+- [x] ✅ **DONE (2026-08-08 PM) — bump applied on `fix/authjs-security-bump` @ `5a1937a` (LOCAL, HARD HOLD).**
+  `next-auth` → 5.0.0-beta.32 · `@auth/core` → 0.41.3 · `@auth/prisma-adapter` → 2.11.3 · `brace-expansion`
+  override → >=5.0.9. All 3 Auth.js advisories (2 CRIT + 1 HIGH `getToken`) + brace-expansion ReDoS cleared
+  (independent re-audit confirmed). Zero source changes; tsc/lint/386-tests/build all green. **Runtime 3-tier
+  login click-through deferred to the owner-gated merge+dev-rebuild** (dev = baked Docker image; rebuild off
+  branch replaces the running app). Out-of-scope highs (Next.js SSRF/DoS, sharp, dompurify, undici) surfaced
+  as a separate [WHAT]. Awaiting owner word to merge → main + rebuild dev.
+- [x] 🔴 **Upgrade `next-auth` beta.31 → `>=5.0.0-beta.32` + `@auth/core` → `>=0.41.3`.** Surfaced by the
   CI dep-audit on the 2026-08-08 ship. Two **CRITICAL** Auth.js advisories on the current pinned version:
   - **GHSA-8fpg-xm3f-6cx3** — config errors can cause existence-based auth checks to **FAIL OPEN** (auth
     object populated with an error). Serious for a gov app holding citizen PII.

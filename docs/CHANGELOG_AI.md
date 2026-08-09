@@ -3,6 +3,34 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-08-08 — Auth.js security bump beta.31→beta.32 + brace-expansion (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor; owner-approved security task, "start planning then swarm")
+**Scope:** dependency-only bump on the auth-critical path. Branch `fix/authjs-security-bump` (isolated
+worktree so the running `frms_dev_app` on :44387 was never touched). LOCAL commit `5a1937a`. HARD HOLD — no
+merge to main / no deploy without owner word.
+
+Cleared **3 Auth.js advisories + brace-expansion** flagged by the 2026-08-08 CI dep-audit:
+- `next-auth` `^5.0.0-beta.25` (resolved beta.31) → **`5.0.0-beta.32`** (exact pin) — clears CRITICAL
+  GHSA-8fpg-xm3f-6cx3 (config-error **fail-open**), CRITICAL GHSA-7rqj-j65f-68wh (homoglyph `@` bypass),
+  and bonus HIGH GHSA-xmf8-cvqr-rfgj (`getToken()` uncaught exception).
+- `@auth/prisma-adapter` `^2.7.4` → **`^2.11.3`** → pulls `@auth/core` **0.41.2 → 0.41.3** (homoglyph patch).
+- `brace-expansion` — root `pnpm.overrides` tightened `>=5.0.6` → **`>=5.0.9`** (mid-task the audit surfaced
+  two *newer* ReDoS advisories GHSA-mh99-v99m-4gvg + GHSA-rgw5-rvv9-x895 that post-date the queued GHSA-3jxr;
+  a `pnpm dedupe` was needed to purge an orphaned `minimatch@5.1.9→brace-expansion@5.0.7` snapshot). Cleared.
+- **Zero source changes** — the beta.31→beta.32 bump caused NO type breaks on the JWT-encode/session/RBAC
+  path (`auth/config.ts`/`edge.ts`/`index.ts` untouched). Gates all green: `tsc` (7 pkgs), `lint`, `test`
+  (386 passed / 154 pre-existing DB-skipped, unchanged), `next build` (41 routes). Independent re-audit
+  confirmed old auth versions (beta.31 / 0.41.2) fully gone + brace-expansion out of the graph.
+
+**Verification note (Rule 16):** live 3-tier login click-through deferred to the owner-gated dev-rebuild
+step (dev is a baked Docker image; rebuilding off this branch replaces the running app). Code+dep+type+
+test+build verification complete; runtime login lands naturally at merge/rebuild.
+
+**Out of scope (surfaced, NOT bumped — [WHAT] for owner):** audit still shows HIGH `next@15.5.19` (SSRF/DoS
+×3), `sharp`, `dompurify` (stale override), `undici`, `nanoid`, `js-yaml`, `postcss` — a Next.js minor bump
+is a larger blast radius; queued as a separate decision.
+
 ## 2026-07-17 — PRODUCT.md back-port: Fish Catch (M2/M3) + Universal Report Hub (M4) (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM, Full-Auto loop, owner "do all 3 gated items")
