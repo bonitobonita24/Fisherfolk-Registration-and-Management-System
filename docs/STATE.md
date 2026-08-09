@@ -1,5 +1,42 @@
 # FRMS — Project State
 
+## Current State (2026-08-10) — ✅ dockerignore merged + all 8 HIGH prod advisories resolved + full audit (LOCAL)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session → triaged 2 stale worktrees → cleared the Next.js highs → ran a full audit check.
+
+**✅ DONE THIS SESSION:**
+- **Stale worktree triage + removal.** Both `.claude/worktrees/agent-*` were merged-into-main, superseded
+  pre-RBAC/pre-SET-2 snapshots (nothing unshipped). Dirty diffs archived to the project auto-memory
+  (`memory/worktree-archive-2026-08-09/*.patch`), worktrees removed, orphan branches safe-deleted (`-d`).
+- **`.dockerignore` branch FF-merged → local `main`** (`eaf9056`).
+- **✅ ALL 8 HIGH prod advisories RESOLVED** — branch `fix/prod-high-advisories-next-transitives` (`aeb666f`),
+  FF-merged → local `main`:
+  - `next` `^15.5.19` → **`^15.5.21`** (SSRF ×2 in Server Actions/rewrites + DoS in App Router).
+  - overrides: `sharp >=0.35.0` (libvips, transitive under next), `nanoid >=3.3.17` (2 ReDoS).
+  - **widened STALE override floors** whose advisory ranges had grown past them: `postcss >=8.5.10`→**`>=8.5.23`**,
+    `undici >=7.28.0`→**`>=7.29.0`**. Lesson: `pnpm.overrides.stale-floor-still-vulnerable`.
+  - `pnpm audit --prod`: **8 high → 0 high/critical** (1 low + 2 moderate remain, out of scope).
+  - Verify: typecheck 7/7 · lint · **386 tests** · production build all green.
+- **Full audit check** run (3 read-only auditors + completeness critic) — session work verified vs ground truth;
+  fixed the doc drift this section corrects.
+
+**⏳ PENDING / OPEN (next session):**
+1. **[owner-gated] Push local `main` → origin** — ships dockerignore + all 8 HIGH fixes through CI and brings
+   staging back online. HELD (staging deliberately offline). Owner's explicit word required.
+2. **[audit follow-up] `dompurify` override floor is STALE** — pinned `>=3.4.11`, still vulnerable to
+   GHSA-55q2-fjhq-7xh7 (moderate, patched `>=3.4.13`) + GHSA-c2j3-45gr-mqc4 (low, `>=3.4.12`). Bump the
+   override to `>=3.4.13` to clear both (same stale-floor pattern as postcss/undici — moderate/low, not a high).
+3. **Cosmetic** — co-author trailer variant, future commits only.
+4. Minor: stale local `docker-compose.app.yml` templates (YAML lint error; server-side stack files correct,
+   prod healthy). `js-yaml` HIGH is dev-only (eslint chain), excluded from `--prod`.
+
+**Git:** on branch `main` @ **`aeb666f`**, **5 commits ahead of origin/main** (`3d619b4`), tree clean, push HELD.
+Prod is live + healthy on Auth.js beta.32 (`3d619b4`). Stale worktrees removed.
+
+---
+
 ## Current State (2026-08-09 EOD) — ✅ `.dockerignore` nested-node_modules hardening DONE (LOCAL)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
