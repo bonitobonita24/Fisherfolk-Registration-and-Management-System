@@ -1,5 +1,41 @@
 # FRMS — Project State
 
+## Current State (2026-08-09) — 🔐 Auth.js bump MERGED to local main + dev-verified (LOCAL, HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resumed session. Owner authorized **"Merge + rebuild dev (verify login)"** — stop at LOCAL, no push.
+Executed and verified. **Prod still runs beta.31 (vulnerable) — the full chain to prod is NOT yet done.**
+
+**✅ DONE THIS SESSION:**
+- **Merged `fix/authjs-security-bump` → local `main`** (`--no-ff`, `473b6ee`). main now ~5 ahead of origin,
+  LOCAL/unpushed. Deleted the merged branch's worktree left in place (kept branch ref).
+- **Dev rebuilt off main** (Rule 39) — `frms_dev_app` recreated fresh @ 12:23, health 200, `/login` 200.
+- **Live login click-through VERIFIED** (Rule 16): `webmaster@localhost.com` (tenant_superadmin) → redirected
+  to `/calapan-city/dashboard`, full RBAC app-shell rendered, **0 console errors**. Confirms the beta.32
+  pipeline (authorize → JWT → session role+tenant → RBAC middleware) is intact — auth does NOT fail open.
+  - Dev `tenant_manager`/`tenant_admin` have a **documented pre-existing seed hash-drift** (logged prior
+    session) — NOT a bump regression; not re-tested.
+- **🔴 Build-trap found + fixed (root cause):** the first two dev rebuilds failed with `Module not found:
+  autoprefixer / next-auth/react / @radix-ui/react-dialog`. Root cause = `.dockerignore` has bare
+  `node_modules` (matches only ROOT `/node_modules`), so the Dockerfile's `COPY . .` copied the host's
+  **stale** nested `apps/web/node_modules` over the fresh deps-stage install. The host "green build" had run
+  on pre-`dedupe` stale modules, masking it. Fixed by repairing host modules (`pnpm install
+  --frozen-lockfile`, +22 −2) then rebuilding. Global lesson `docker.dockerignore.nested-node_modules-clobber`
+  logged. **Durable follow-up recommended:** add `**/node_modules` to `.dockerignore` (touches all builds
+  incl. prod → surfaced to owner, not applied unprompted).
+
+**⏳ OPEN / owner-gated:**
+- **Full chain to prod** (push main → CI image → `push-to-prod.sh`) — the ONLY thing that actually closes the
+  2 CRITICAL CVEs on frms.powerbyte.app. Owner deferred this ("stop at dev verify"). HARD HOLD.
+- **[WHAT] out-of-scope highs** — Next.js SSRF/DoS ×3 (`next@15.5.19`) + sharp/dompurify/undici. Separate call.
+- **`.dockerignore` `**/node_modules` hardening** — recommended, prod-affecting, owner-gated.
+- Non-blocking (2026-07-09): M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
+
+**Git/HARD HOLD:** on `main` @ `473b6ee`, ~5 ahead of origin, unpushed. Prod = `44b078c` (beta.31). No staging.
+
+---
+
 ## Current State (2026-08-08 PM) — 🔐 Auth.js security bump DONE (LOCAL, branch, HARD HOLD)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
