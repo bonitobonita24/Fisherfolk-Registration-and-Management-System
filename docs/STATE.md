@@ -25,11 +25,14 @@ Executed and verified. **Prod still runs beta.31 (vulnerable) — the full chain
   logged. **Durable follow-up recommended:** add `**/node_modules` to `.dockerignore` (touches all builds
   incl. prod → surfaced to owner, not applied unprompted).
 
-**⏳ OPEN / owner-gated:**
-- **Full chain to prod** (push main → CI image → `push-to-prod.sh`) — the ONLY thing that actually closes the
-  2 CRITICAL CVEs on frms.powerbyte.app. Owner deferred this ("stop at dev verify"). HARD HOLD.
-- **[WHAT] out-of-scope highs** — Next.js SSRF/DoS ×3 (`next@15.5.19`) + sharp/dompurify/undici. Separate call.
-- **`.dockerignore` `**/node_modules` hardening** — recommended, prod-affecting, owner-gated.
+**⏳ NEXT-SESSION QUEUE (owner said 2026-08-09: "do those pendings on the next session") — in order:**
+1. **Ship Auth.js fix to PROD** — push main → CI builds image → `push-to-prod.sh`. Closes the 2 CRITICAL
+   CVEs (prod still on beta.31). Owner green-lit for next session; still CONFIRM at the actual prod-push
+   moment (deploy = explicit-word gate) + back up prod DB first. Dev already verified this build.
+2. **`.dockerignore` `**/node_modules` hardening** — add the pattern so the deps-stage install is authoritative
+   (fixes the nested-node_modules clobber for all builds incl. prod). Own branch, verify a clean rebuild.
+3. **[WHAT] out-of-scope highs** — Next.js SSRF/DoS ×3 (`next@15.5.19`) + sharp/dompurify/undici. Bigger
+   blast radius; scope + verify before shipping.
 - Non-blocking (2026-07-09): M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
 
 **Git/HARD HOLD:** on `main` @ `473b6ee`, ~5 ahead of origin, unpushed. Prod = `44b078c` (beta.31). No staging.

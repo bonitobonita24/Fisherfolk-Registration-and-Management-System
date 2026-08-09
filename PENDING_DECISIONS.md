@@ -12,13 +12,12 @@ conductor's to decide and never lands here.
   chose "Merge + rebuild dev (verify login), LOCAL only". `tenant_superadmin` login click-through green on
   the rebuilt dev (beta.32), 0 console errors → auth pipeline intact, does not fail open. Build-trap fixed
   (`.dockerignore` nested-node_modules clobber — lesson `docker.dockerignore.nested-node_modules-clobber`).
-- [ ] 🔴 **OWNER-GATED — ship the fix to PROD.** frms.powerbyte.app still runs the **vulnerable beta.31**
-  (`44b078c`). The 2 CRITICAL CVEs are only actually closed once main is pushed → CI builds the image →
-  `push-to-prod.sh` promotes it. Owner deferred this at the dev-verify step. Push main auto-fires Model-A CI.
-  Recommend shipping soon given it's a gov app holding citizen PII. HARD HOLD until owner's word.
-- [ ] 🟡 **(follow-up) `.dockerignore` hardening** — add `**/node_modules` so the deps-stage install is
-  authoritative and `COPY . .` can never clobber it with stale host modules. Prod-affecting build change →
-  owner-gated. Cheap + standard practice.
+- [ ] 🔴 **NEXT SESSION (owner green-lit 2026-08-09 "do those pendings next session") — ship the fix to PROD.**
+  frms.powerbyte.app still runs the **vulnerable beta.31** (`44b078c`). Closed once main is pushed → CI builds
+  image → `push-to-prod.sh`. Owner approved doing it next session; still CONFIRM at the actual prod-push moment
+  (deploy = explicit-word) + back up prod DB first. Dev already verified this exact build.
+- [ ] 🟡 **NEXT SESSION — `.dockerignore` hardening** — add `**/node_modules` so the deps-stage install is
+  authoritative and `COPY . .` can never clobber it with stale host modules. Own branch, verify clean rebuild.
 - [x] ✅ **DONE (2026-08-08 PM) — bump applied on `fix/authjs-security-bump` @ `5a1937a` (LOCAL, HARD HOLD).**
   `next-auth` → 5.0.0-beta.32 · `@auth/core` → 0.41.3 · `@auth/prisma-adapter` → 2.11.3 · `brace-expansion`
   override → >=5.0.9. All 3 Auth.js advisories (2 CRIT + 1 HIGH `getToken`) + brace-expansion ReDoS cleared
