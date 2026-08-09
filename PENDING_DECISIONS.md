@@ -18,8 +18,12 @@ conductor's to decide and never lands here.
   all green (`/api/auth/session` → clean `null`, fail-closed). **2 CRITICAL CVEs mitigated in production.**
   Required a CI fix mid-ship: build was hitting the 30-min timeout (uncached multi-arch/arm64) → switched to
   amd64-only + 45m (`fix/ci-build-timeout-amd64`), build 30.3min→5.2min.
-- [ ] 🟡 **NEXT SESSION — `.dockerignore` hardening** — add `**/node_modules` so the deps-stage install is
-  authoritative and `COPY . .` can never clobber it with stale host modules. Own branch, verify clean rebuild.
+- [x] ✅ **DONE (2026-08-09) — `.dockerignore` hardening.** `node_modules` → `**/node_modules` so the
+  deps-stage install stays authoritative and `COPY . .` can never overwrite it with the 7 nested host
+  module trees (apps/web + packages/*). Branch `chore/dockerignore-nested-node-modules` @ `adfb7d6`,
+  LOCAL / HARD HOLD. Verified: fresh amd64 `docker build` completes green (full turbo build + image
+  export, 417MB). Merge to `main` = owner's call (a `main` push would auto-trigger the Model-A staging
+  deploy — currently deliberately offline).
 - [x] ✅ **DONE (2026-08-08 PM) — bump applied on `fix/authjs-security-bump` @ `5a1937a` (LOCAL, HARD HOLD).**
   `next-auth` → 5.0.0-beta.32 · `@auth/core` → 0.41.3 · `@auth/prisma-adapter` → 2.11.3 · `brace-expansion`
   override → >=5.0.9. All 3 Auth.js advisories (2 CRIT + 1 HIGH `getToken`) + brace-expansion ReDoS cleared
