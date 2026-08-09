@@ -1,5 +1,40 @@
 # FRMS — Project State
 
+## Current State (2026-08-09 EOD) — ✅ `.dockerignore` nested-node_modules hardening DONE (LOCAL)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. Prod is stable on Auth.js beta.32 (previous section). Worked the one un-gated pending item —
+the owner-pre-approved `.dockerignore` hardening — verified it, committed LOCAL. Then "save session".
+
+**✅ DONE THIS SESSION:**
+- **`.dockerignore` `node_modules` → `**/node_modules`.** Bare `node_modules` excluded only the repo-root
+  dir, so the builder-stage `COPY . .` (after `COPY --from=deps /app/ ./`) copied the **7 nested host module
+  trees** (`apps/web` + `packages/{shared,db,api-client,ui,jobs,storage}`) over the fresh `--frozen-lockfile`
+  install — the durable root cause behind last session's dev-rebuild `Module not found` trap.
+- **Verified (acceptance criterion):** fresh `linux/amd64` `docker build -f apps/web/Dockerfile .` completes
+  **green end-to-end** (full turbo build + Next.js compile + image export, 417MB). Test image removed.
+- Branch **`chore/dockerignore-nested-node-modules`** — `adfb7d6` (fix) + `6863c8a` (PENDING_DECISIONS mark-done).
+  **LOCAL / HARD HOLD.** Not merged to main.
+- Global lessons ledger already carries the nested-node_modules trap from last session — no new lesson.
+
+**⏳ PENDING / OPEN (next session):**
+1. **Merge `chore/dockerignore-nested-node-modules` → main?** — owner's call. A `main` push auto-triggers the
+   Model-A staging deploy, and staging is deliberately offline → HELD. (Same reason `45df969` isPublicPath
+   hardening is still held on main-unpushed.)
+2. **[WHAT] out-of-scope HIGH advisories** — `next` 15.5.x → **15.5.19** (3 advisories: middleware SSRF,
+   cache-key confusion, DoS) as its own scoped branch (full verify + WCAG gate); batch transitive HIGHs
+   (`sharp`/`dompurify`/`undici`/`nanoid`/`js-yaml`/`postcss`) into one `pnpm.overrides` pass. Not urgent —
+   none is remotely exploitable like the fail-open CVE. Awaiting owner word to proceed.
+3. **Cosmetic** — co-author trailer variant, future commits only.
+4. Minor: stale local `docker-compose.app.yml` templates (missing `depends_on:` → YAML lint error; server-side
+   stack files are correct, prod healthy), 2 stale git worktrees for `git worktree remove`.
+
+**Git:** on branch `chore/dockerignore-nested-node-modules` (2 commits ahead of main). `main` itself is 1 ahead
+of origin (docs checkpoint `c029d75`) — the prod ship is already live on origin/`3d619b4`.
+
+---
+
 ## Current State (2026-08-09 PM) — 🚀 Auth.js beta.32 SHIPPED TO PRODUCTION + verified (CVE closed)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
