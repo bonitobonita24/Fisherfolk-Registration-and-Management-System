@@ -12,10 +12,12 @@ conductor's to decide and never lands here.
   chose "Merge + rebuild dev (verify login), LOCAL only". `tenant_superadmin` login click-through green on
   the rebuilt dev (beta.32), 0 console errors → auth pipeline intact, does not fail open. Build-trap fixed
   (`.dockerignore` nested-node_modules clobber — lesson `docker.dockerignore.nested-node_modules-clobber`).
-- [ ] 🔴 **NEXT SESSION (owner green-lit 2026-08-09 "do those pendings next session") — ship the fix to PROD.**
-  frms.powerbyte.app still runs the **vulnerable beta.31** (`44b078c`). Closed once main is pushed → CI builds
-  image → `push-to-prod.sh`. Owner approved doing it next session; still CONFIRM at the actual prod-push moment
-  (deploy = explicit-word) + back up prod DB first. Dev already verified this exact build.
+- [x] ✅ **DONE (2026-08-09, owner "yes do #1") — SHIPPED TO PROD.** Pushed main → origin (`3d619b4`) → CI built
+  the image → `push-to-prod.sh sha-3d619b4` (prod DB backed up, manifest retag, app recreate, migrate no-op).
+  **frms.powerbyte.app now runs beta.32**, container healthy @ revision `3d619b4`; health/login/NextAuth-runtime
+  all green (`/api/auth/session` → clean `null`, fail-closed). **2 CRITICAL CVEs mitigated in production.**
+  Required a CI fix mid-ship: build was hitting the 30-min timeout (uncached multi-arch/arm64) → switched to
+  amd64-only + 45m (`fix/ci-build-timeout-amd64`), build 30.3min→5.2min.
 - [ ] 🟡 **NEXT SESSION — `.dockerignore` hardening** — add `**/node_modules` so the deps-stage install is
   authoritative and `COPY . .` can never clobber it with stale host modules. Own branch, verify clean rebuild.
 - [x] ✅ **DONE (2026-08-08 PM) — bump applied on `fix/authjs-security-bump` @ `5a1937a` (LOCAL, HARD HOLD).**

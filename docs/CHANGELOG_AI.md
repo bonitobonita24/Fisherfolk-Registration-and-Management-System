@@ -3,6 +3,30 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-08-09 — Auth.js beta.32 SHIPPED TO PRODUCTION + CI build fix (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM). Owner authorized "yes do #1" → ship the merged Auth.js beta.32 security fix
+to production. Full chain executed + verified live.
+
+**Deploy (frms.powerbyte.app):**
+- Pushed local `main` → origin (`44b078c..3d619b4`, authorized HARD-HOLD ship). CI built the deploy image.
+- Promoted `sha-3d619b4` → PROD via `deploy/compose/push-to-prod.sh`: prod DB backed up → manifest retag
+  (`latest` + `prod-sha-3d619b4`) → `frms_prod_app` recreated → `prisma migrate deploy` **no-op** (18 migrations,
+  0 pending — deps+docs-only batch).
+- **Verified live:** container Up (healthy), revision `3d619b4`; `/api/health` 200, `/login` 200, `/` 307;
+  NextAuth runtime green — `/api/auth/session` 200 → clean `null` (fail-**closed**), `/providers` + `/csrf` 200,
+  no error logs. **2 CRITICAL fail-open/homoglyph CVEs now mitigated in production** (prod was on vulnerable
+  beta.31 until this ship).
+
+**fix(ci): amd64-only build + 45m timeout (`3d619b4`, branch `fix/ci-build-timeout-amd64`):**
+- The first two docker-publish runs concluded **cancelled** — `Build & push` hit `timeout-minutes: 30` at
+  30.3 min. Root cause: the beta.32 lockfile busted the buildx GHA cache; the uncached multi-arch build (slow
+  QEMU **arm64**) ran over the cap. All deploy targets are amd64 (Hostinger VPS + WSL2 dev) → arm64 was pure
+  build cost with no consumer. Restricted `platforms` to `linux/amd64` + raised timeout to 45m.
+  **Result: build dropped 30.3 min (cancelled) → 5.2 min (success).**
+- Rule 39: dev rebuilt off main (app code already identical — only docs + the CI workflow changed since dev's
+  base `473b6ee`).
+
 ## 2026-08-08 — Auth.js security bump beta.31→beta.32 + brace-expansion (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + Sonnet spec-executor; owner-approved security task, "start planning then swarm")

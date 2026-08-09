@@ -1,13 +1,33 @@
 # FRMS — Project State
 
-## Current State (2026-08-09) — 🔐 Auth.js bump MERGED to local main + dev-verified (LOCAL, HARD HOLD)
+## Current State (2026-08-09 PM) — 🚀 Auth.js beta.32 SHIPPED TO PRODUCTION + verified (CVE closed)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-Resumed session. Owner authorized **"Merge + rebuild dev (verify login)"** — stop at LOCAL, no push.
-Executed and verified. **Prod still runs beta.31 (vulnerable) — the full chain to prod is NOT yet done.**
+Resume session. Owner authorized **"yes do #1"** → ship the Auth.js fix to PROD. Executed the full chain and
+verified live. **frms.powerbyte.app now runs beta.32 — the 2 CRITICAL fail-open/homoglyph CVEs are mitigated
+in production.** Pushed to origin (authorized HARD-HOLD ship).
 
-**✅ DONE THIS SESSION:**
+**✅ DONE THIS SESSION (prod ship):**
+- **Pushed local main → origin** (`44b078c..3d619b4`, authorized). CI **Docker Build & Publish** built the
+  deploy image.
+- **🔴 CI build was silently failing (root-caused + fixed):** the first two runs concluded **cancelled** — the
+  `Build & push` step hit the **`timeout-minutes: 30`** cap at 30.3 min. Cause: the beta.32 lockfile busted the
+  buildx GHA cache, and the uncached multi-arch build (slow QEMU **arm64**) ran over 30 min. All deploy targets
+  are amd64 (Hostinger VPS + WSL2 dev) → arm64 was pure build cost with no consumer. Fixed CI to **amd64-only +
+  45m timeout** (`fix/ci-build-timeout-amd64` → main `3d619b4`). Next build: **5.2 min, success.**
+- **Promoted `sha-3d619b4` → PROD** via `deploy/compose/push-to-prod.sh`: prod DB backed up (rollback point) →
+  manifest retag (`latest` + `prod-sha-3d619b4`) → `frms_prod_app` recreated → `migrate deploy` **no-op** (18
+  migrations, 0 pending — deps+docs-only batch, no schema change).
+- **Live verification (Rule 16):** `frms_prod_app` **Up (healthy)**, running **revision `3d619b4`**. `/api/health`
+  200, `/login` 200, `/` 307 (auth redirect). **NextAuth runtime green:** `/api/auth/session` 200 returning clean
+  `null` (fail-**closed**, the exact behavior the fail-open CVE was about), `/api/auth/providers` + `/csrf` 200,
+  **no error lines** in prod logs since recreate. (initial script health probe was a 404 cold-start race — 200 on
+  first re-probe after boot.)
+- **Rule 39 dev-freshness:** dev rebuilt off main (app code was already identical — only docs + the CI-workflow
+  file changed since dev's last rebuild base `473b6ee`; rebuild refreshes the timestamp backstop).
+
+**✅ DONE PRIOR THIS-DAY (Auth.js merge, LOCAL — kept for record):**
 - **Merged `fix/authjs-security-bump` → local `main`** (`--no-ff`, `473b6ee`). main now ~5 ahead of origin,
   LOCAL/unpushed. Deleted the merged branch's worktree left in place (kept branch ref).
 - **Dev rebuilt off main** (Rule 39) — `frms_dev_app` recreated fresh @ 12:23, health 200, `/login` 200.
@@ -25,17 +45,24 @@ Executed and verified. **Prod still runs beta.31 (vulnerable) — the full chain
   logged. **Durable follow-up recommended:** add `**/node_modules` to `.dockerignore` (touches all builds
   incl. prod → surfaced to owner, not applied unprompted).
 
-**⏳ NEXT-SESSION QUEUE (owner said 2026-08-09: "do those pendings on the next session") — in order:**
-1. **Ship Auth.js fix to PROD** — push main → CI builds image → `push-to-prod.sh`. Closes the 2 CRITICAL
-   CVEs (prod still on beta.31). Owner green-lit for next session; still CONFIRM at the actual prod-push
-   moment (deploy = explicit-word gate) + back up prod DB first. Dev already verified this build.
+**⏳ REMAINING QUEUE — in order:**
+1. ✅ **DONE — Auth.js fix shipped to PROD** (this session, see above). CVEs mitigated live.
 2. **`.dockerignore` `**/node_modules` hardening** — add the pattern so the deps-stage install is authoritative
    (fixes the nested-node_modules clobber for all builds incl. prod). Own branch, verify a clean rebuild.
+   Owner queued for next; not yet applied.
 3. **[WHAT] out-of-scope highs** — Next.js SSRF/DoS ×3 (`next@15.5.19`) + sharp/dompurify/undici. Bigger
    blast radius; scope + verify before shipping.
+- **Follow-up (found this session):** local `deploy/compose/{prod,stage}/docker-compose.app.yml` templates are
+  malformed (missing `depends_on:` key → YAML error at line 24) + certresolver-case/tls-label lint fails. These
+  are **stale scaffolding drift** — the live prod stack uses its own server-side files at
+  `/etc/komodo/stacks/frms-prod` (which are correct — prod is healthy). Not blocking, but the repo templates
+  should be reconciled to the server truth.
+- **Cleanup:** two stale git worktrees remain (`.claude/worktrees/agent-a7639e…` @ 97bcd72,
+  `agent-aff9fb9c…` @ 08f9054, both Jul-5) — inflate lint-deploy counts; `git worktree remove` when convenient.
 - Non-blocking (2026-07-09): M1–M4 PRODUCT.md back-ports + Fish Catch follow-ups.
 
-**Git/HARD HOLD:** on `main` @ `473b6ee`, ~5 ahead of origin, unpushed. Prod = `44b078c` (beta.31). No staging.
+**Git:** on `main` @ `3d619b4`, **pushed to origin** (in sync). Prod = `3d619b4` (beta.32, LIVE). No staging
+(build-only CI). `fix/ci-build-timeout-amd64` merged FF to main (can delete branch ref).
 
 ---
 
