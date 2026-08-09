@@ -27,7 +27,7 @@ jobs:
   build-and-push:
     name: Build & push image
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     permissions:
       contents: read
       packages: write
@@ -64,8 +64,11 @@ jobs:
         with:
           context: .
           file: ./apps/web/Dockerfile
+          # All deploy targets (Hostinger VPS + WSL2 dev) are amd64; arm64 was pure
+          # build cost (slow QEMU emulation) with no consumer, and pushed the uncached
+          # build past the timeout. Restrict to amd64. (2026-08-09)
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
