@@ -1,5 +1,41 @@
 # FRMS — Project State
 
+## Current State (2026-08-10, evening) — ✅ CI back to GREEN on main (js-yaml HIGH cleared) + pushed
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. No open owner decisions; production healthy on Auth.js beta.32 (8 security commits live).
+
+**✅ DONE THIS SESSION:**
+- **Closed the carried "verify CI" follow-up + fixed a real red-CI bug.** The `CI` workflow's
+  *Dependency vulnerability audit* job had been failing (build/lint/typecheck/test were green).
+  Sole HIGH = `js-yaml` DoS (GHSA-pm4m-ph32-ghv5), **dev/lint-toolchain only** (`eslint@8 >
+  @eslint/eslintrc`) — invisible to `--prod`, caught by CI's all-deps `--audit-level=high`.
+  Root cause: stale override `js-yaml@<4.2.0 → >=4.2.0` pointed at a **nonexistent** 4.x version,
+  forcing an upward jump onto the vulnerable **5.2.0** major.
+- **Fix** (`c383b52`, branch `fix/ci-js-yaml-audit-high`, FF-merged to main): targeted the real
+  vulnerable range (`js-yaml@>=5.0.0 <5.2.2 → >=5.2.2`) + dropped the bad floor → js-yaml resolves
+  to safe **4.3.1**. Verified: `pnpm audit --audit-level=high` exit 0, lint 5/5 green.
+- **Pushed** `main` → origin (`4fde84a..c383b52`, owner-authorized) — also carried the prior
+  `1fecd17` docs checkpoint. **CI on main now FULLY GREEN** ✅ (all 6 jobs, audit incl., run 31387952770).
+  Docker Build & Publish re-triggered (was green last push; js-yaml is dev-only, no runtime bundle change).
+- Logged footgun to global ledger: `pnpm.overrides.floor-points-at-nonexistent-version`.
+
+**⏳ PENDING / OPEN (next session):**
+1. **[DEFERRED — [HOW] risk call, NOT forcing] `uuid` moderate (GHSA-w5hq-g745-h8pq).** exceljs@4.4.0
+   is ALREADY latest (no upstream fix); only mitigation = override uuid 8.3.2 → ≥11.1.1, a **major**
+   jump beneath exceljs (risks breaking Excel import/export — a real gov feature). Advisory affects
+   `uuid.v3/v5/v6` w/ provided buf; exceljs uses **v4** (not the vulnerable path). Below the CI gate
+   (moderate; CI audits at high, green). → Not worth the blast radius; revisit only if exceljs ships
+   a uuid-11 release or owner accepts the risk to force it.
+2. **[owner-gated, queued] V32.48 lint-design framework sync** — broadcast from AIEF seat; run via
+   `prep-sync`, governance-only, LOCAL/HARD HOLD. Awaiting owner word.
+3. **[non-blocking [WHAT]] M4 Universal Report Hub product-grain defaults** back-port (long-standing).
+
+Git at close: `main` == origin/main (pushed), tree clean.
+
+---
+
 ## Current State (2026-08-10, later) — 🚀 8 security commits PUSHED to origin + loop stopped (owner)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
