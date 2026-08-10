@@ -187,3 +187,13 @@ only open follow-ups — both non-blocking, batch outcome ✅ COMPLETE)_
 
 - [x] 2026-06-29 — Palette direction → **modern dark, orange + navy** (owner picked after a light
   "Deep Sea Teal" trial); greenish chart accent retuned to navy. Shipped in the rehab.
+
+### AdminCN reference-slice untrack — remove the committed vendored slice (framework V32.48.1) (2026-08-10, broadcast from AIEF seat)
+- [x] ✅ **DONE (2026-08-10) — untracked on branch `chore/untrack-admincn-slice`.** `git rm -r --cached starter/admincn` (222 files, `git ls-files starter/admincn` → 0; working copy stays on disk) + added `starter/admincn/` to `.gitignore` manually (did NOT run the full `deploy.sh` sync — that's the separate owner-gated V32.48 item). Verified zero app imports from the slice. LOCAL / HARD HOLD.
+- [x] ~~**[HOW] Untrack the vendored `starter/admincn/` AdminCN reference slice**~~ (un-gated mechanical cleanup — no owner decision needed; execute on this seat at your convenience).
+  - **Why:** framework **V32.48.1** (`deploy.sh`) now gitignores the vendored `starter/admincn/` slice — it is a local cherry-pick REFERENCE (re-copied on each framework sync), never meant to be committed, and is non-compiling reference material. This app currently has **222 slice files tracked in git**, duplicating ~37 of your own `components/ui` components.
+  - **Fix (run on THIS app's seat, LOCAL only — HARD HOLD, no push required for it to take effect):**
+    `git rm -r --cached starter/admincn && git commit -m "chore: untrack AdminCN reference slice (framework V32.48.1)"`
+    The working copy stays on disk (deploy.sh re-copies it each sync); only git tracking is removed. Then re-run the framework sync (`deploy.sh`) so the `starter/admincn/` line lands in this app's `.gitignore` (V32.48.1 adds it automatically).
+  - **Verify:** `git ls-files starter/admincn | wc -l` → 0 after. Mark `- [x]` when done.
+  - Answer: _(seat executes)_
