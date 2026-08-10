@@ -13,7 +13,7 @@ overrides:
   vite@<6.4.3: '>=6.4.3'
   dompurify@<3.4.13: '>=3.4.13'
   esbuild@<0.28.1: '>=0.28.1'
-  js-yaml@<4.2.0: '>=4.2.0'
+  js-yaml@>=5.0.0 <5.2.2: '>=5.2.2'
   brace-expansion@>=5.0.0 <5.0.9: '>=5.0.9'
   brace-expansion@1: '>=1.1.12'
   brace-expansion@2: '>=2.1.4'
@@ -4116,8 +4116,8 @@ packages:
   js-tokens@9.0.1:
     resolution: {integrity: sha512-mxa9E9ITFOt0ban3j6L5MpjwegGz6lBQmM1IJkWeBZGcMxto50+eWdjC/52xDbS2vy0k7vIMK0Fe2wfL9OQSpQ==}
 
-  js-yaml@5.2.0:
-    resolution: {integrity: sha512-YeLUMlvR4Ou1B119LIaM0r65JvbOBooJDc9yEu0dClb/uSC5P4FrLU8OCCz/HXWvtPoIrR0dRzABTjo1sTN9Bw==}
+  js-yaml@4.3.1:
+    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
 
   jsdom@28.1.0:
@@ -6351,7 +6351,7 @@ snapshots:
       globals: 13.24.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 5.2.0
+      js-yaml: 4.3.1
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -6365,7 +6365,7 @@ snapshots:
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 5.2.0
+      js-yaml: 4.3.1
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -9239,7 +9239,7 @@ snapshots:
       imurmurhash: 0.1.4
       is-glob: 4.0.3
       is-path-inside: 3.0.3
-      js-yaml: 5.2.0
+      js-yaml: 4.3.1
       json-stable-stringify-without-jsonify: 1.0.1
       levn: 0.4.1
       lodash.merge: 4.6.2
@@ -9797,7 +9797,7 @@ snapshots:
 
   js-tokens@9.0.1: {}
 
-  js-yaml@5.2.0:
+  js-yaml@4.3.1:
     dependencies:
       argparse: 2.0.1
 
