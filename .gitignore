@@ -102,3 +102,4 @@ screenshots/
 
 # Vendored AdminCN reference slice — re-copied by deploy.sh each framework sync (V32.48.1); never tracked
 starter/admincn/
+.ai_prompt/starter/admincn/
