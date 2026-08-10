@@ -115,7 +115,7 @@ conductor's to decide and never lands here.
   tsc + lint green. Commit `59cd415`, merged to LOCAL `main` (`45df969`). **HELD from push** — pushing `main`
   auto-triggers a Model-A staging deploy that would resurrect the deliberately-offline staging stack; the change
   is non-urgent latent hardening. Push on owner's word / when staging returns.
-- [ ] 🔵 (cosmetic) Co-author trailer `Claude Opus 4.8` vs global `(1M context)` variant — future commits only.
+- [x] 🔵 (cosmetic) Co-author trailer — RESOLVED [HOW] 2026-08-10: use the standard global trailer (`Co-Authored-By: Claude Opus 4.8`) on future commits. No back-fill.
 - ✅ DONE this session: imported 74 new fisherfolk + 148 Telegram assets to DEV (3016→3090); fixed broken
   images (dev rebuild + middleware); full audit → DOB drop on 26/74 found + fixed (code + dev backfill).
   Lessons logged (exceljs date/serial, middleware public-paths, dev-freshness).

@@ -1,5 +1,29 @@
 # FRMS — Project State
 
+## Current State (2026-08-10, later) — 🚀 8 security commits PUSHED to origin + loop stopped (owner)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner released the HARD HOLD ("yes push it then save session and stop loop").
+
+**✅ DONE THIS SESSION:**
+- **Pushed local `main` → origin** (`3d619b4..4fde84a`, `git push --follow-tags`, owner-authorized
+  `# HARDHOLD-OK`). Ships all 8 held commits: `.dockerignore` hardening + 8 HIGH prod advisory fixes
+  (next 15.5.21 + sharp/nanoid/postcss/undici overrides) + dompurify `>=3.4.13`.
+  → CI `docker-publish` now builds the image; Model-A push-to-main revives the (deliberately-offline) staging deploy.
+- **Closed the cosmetic co-author-trailer `[HOW]`** — standard global trailer `Claude Opus 4.8` going forward, no back-fill.
+- Session closed via `close-session --stop` per owner's "stop loop".
+
+**⏳ PENDING / OPEN (next session):**
+1. **Verify CI + staging** — confirm `docker-publish` went green and the revived staging stack is healthy
+   after this push (was offline pre-push). Not yet observed at close.
+2. **[deferred, low] `uuid` moderate advisory** — needs an `exceljs` bump (`pnpm audit --prod` = 1 moderate).
+3. **[non-blocking [WHAT]] M4 Universal Report Hub product-grain defaults** back-port (long-standing).
+
+Git at close: `main` == origin/main (pushed), tree clean.
+
+---
+
 ## Current State (2026-08-10) — ✅ dockerignore merged + all 8 HIGH prod advisories resolved + full audit (LOCAL)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
