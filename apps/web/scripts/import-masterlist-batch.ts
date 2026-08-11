@@ -71,6 +71,7 @@ import {
   type RowReport,
 } from "../src/lib/import/validate";
 import type { RawImportRow } from "../src/lib/import/excel";
+import { cellValueToString } from "../src/lib/import/excel";
 import { omitUndefined } from "../src/server/lib/prisma-input";
 import { buildQRPayload } from "../src/lib/qr-code";
 
@@ -107,39 +108,6 @@ const XLSX_PATH = xlsxArg
 const WORKSHEET_NAME = "Master List";
 
 // ── Cell coercion ─────────────────────────────────────────────────────────────
-
-/** Coerce any ExcelJS cell value to a trimmed string. */
-function cellValueToString(value: ExcelJS.CellValue | undefined): string {
-  if (value === null || value === undefined) return "";
-  if (typeof value === "string") return value.trim();
-  if (typeof value === "number") return String(value);
-  if (typeof value === "boolean") return String(value);
-  if (value instanceof Date) return value.toISOString();
-
-  if (typeof value === "object") {
-    if ("richText" in value) {
-      return value.richText.map((r) => r.text).join("").trim();
-    }
-    if ("hyperlink" in value) {
-      return value.text.trim();
-    }
-    if ("formula" in value) {
-      const result = value.result;
-      if (result === undefined || result === null) return "";
-      if (typeof result === "object" && "error" in result) return "";
-      return cellValueToString(result);
-    }
-    if ("sharedFormula" in value) {
-      const result = value.result;
-      if (result === undefined || result === null) return "";
-      if (typeof result === "object" && "error" in result) return "";
-      return cellValueToString(result);
-    }
-    if ("error" in value) return "";
-  }
-
-  return String(value).trim();
-}
 
 /** Formats a JS Date using its LOCAL date parts (avoids UTC/toISOString TZ off-by-one). */
 function formatLocalDate(d: Date): string {
