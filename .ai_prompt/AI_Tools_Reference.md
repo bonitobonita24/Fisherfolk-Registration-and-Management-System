@@ -243,6 +243,37 @@ established design system.
 **Fallback:** if the Pro MCP is unreachable, fall back to the plain shadcn/ui MCP (§2.4) + the
 shadcn/ui Blocks gallery — same shadcn/ui output target, lower automation.
 
+### 2.6 IconStack MCP Server (NEW V32.49)
+```
+URL:      https://iconstack.io/api
+Type:     MCP server (hosted remote via the mcp-remote proxy) — icon SEARCH + SVG SOURCING
+Added:    V32.49
+Scope:    user-global — 51,378 MIT-licensed icons across 21 libraries (lucide, tabler, phosphor,
+          material, remix, bootstrap, ant, …). No auth, no API key, no rate limits, CORS enabled.
+Auth:     none — free/public, MIT-only, attribution not required. Remote endpoint; DESIGN-TIME only.
+Install:  ~/.claude.json  (user-global, single machine — not committed to any app repo):
+          "iconstack": { "command": "npx", "args": ["-y", "mcp-remote",
+            "https://sglpxftkuzsqdpdhftwv.supabase.co/functions/v1/mcp"] }
+Tools:    search_icons · get_icon_svg · list_libraries
+API:      GET .../functions/v1/icon-search?q=<term>&library=<ids>&style=<outline|filled>&limit=<1-100>
+          GET .../functions/v1/icon-svg?library=lucide&id=user[&format=svg]
+```
+
+**What it is:** the framework's DEFAULT icon-SOURCING layer (V32.49). IconStack aggregates the same MIT
+icon sets we already use (lucide included) into one searchable surface — the place the agent finds/pulls
+anything BEYOND lucide. `lucide-react` stays the shadcn RUNTIME baseline (ui-rules.md Rule 9).
+
+**INHERIT-not-REPLACE (HARD):** IconStack does NOT replace lucide and adds NO runtime dependency. The
+agent searches at design/build time and materializes the returned SVG as a self-hosted, tree-shakeable
+component in the repo (`components/icons/`); the client app NEVER calls IconStack at runtime (CSP +
+offline safe). Never add a competing icon NPM library (heroicons / react-icons / font-awesome / phosphor).
+
+**When the framework reaches for it:** the design phases (2.8 / 3.3 / Parts 5-6 / Phase 7) whenever a
+needed glyph isn't in lucide — `search_icons` → pick → `get_icon_svg` → drop into `components/icons/`.
+
+**License:** the API/MCP returns MIT-licensed icons only; free for commercial/client use, attribution
+not required (backlink to iconstack.io appreciated).
+
 ---
 
 ## 3. Skills & Plugins
@@ -1150,7 +1181,7 @@ The Master Prompt contains a UI COMPONENT RULES section that enforces shadcn/ui 
 | Charts | Recharts (via shadcn/ui Chart) | Dashboard charts, area/bar/line/pie | `npx shadcn@latest add chart` |
 | Data tables | TanStack Table (via shadcn/ui Data Table) | Sortable, filterable, paginated tables | `npx shadcn@latest add data-table` |
 | Forms | React Hook Form + Zod (via shadcn/ui Form) | Client-side validation matching server Zod schemas | `npx shadcn@latest add form` |
-| Icons | lucide-react | Icon set (shadcn/ui dependency) | Already installed with shadcn/ui |
+| Icons | lucide-react (runtime baseline) + IconStack MCP (sourcing layer §2.6) | Runtime icons = lucide (shadcn dep); anything beyond lucide → source a self-hosted SVG via IconStack MCP | lucide installed with shadcn/ui; IconStack = user-global MCP, no runtime dep |
 | Maps (default) | Leaflet.js + OpenStreetMap | Simple pins/markers, zero API cost | `npm install leaflet react-leaflet` |
 | Maps (advanced) | mapcn (MapLibre GL) | Routes, layers, vector tiles, auto-theming | `npx shadcn@latest add https://mapcn.dev/maps/map.json` |
 | Complex UI | Kibo UI | Kanban, Gantt, Editor, Dropzone, Code Block | `npx kibo-ui add [component]` |

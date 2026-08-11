@@ -594,6 +594,13 @@ GITIGNORE_ENTRIES=(
   "tokens/build/"
   "tests/visual/__snapshots__/"
   "tests/visual/diff/"
+  "# ─── V32.48.1 AdminCN starter slice — local cherry-pick REFERENCE, never committed ───"
+  "# (sync-to-project.sh stages it to .ai_prompt/starter/admincn/, deploy.sh re-copies that to"
+  "#  starter/admincn/ each sync; it is non-compiling reference material — committing EITHER copy"
+  "#  duplicates an app's own components/ui. Both paths are ignored. Cherry-pick the AdminCN extras"
+  "#  OUT of it per Scenario 49.)"
+  "starter/admincn/"
+  ".ai_prompt/starter/admincn/"
 )
 
 for entry in "${GITIGNORE_ENTRIES[@]}"; do

@@ -4213,6 +4213,7 @@ Before reporting Feature Update complete, verify ALL of these:
 □ SocratiCode index refreshed via codebase_update
 □ IF this update added a new UI surface: docs/MOCKUP.jsx updated + design:validate/build rerun + baseline re-captured (V32.8 — Rule 31)
 □ REGISTRY DONE-CLAIM (V32.8 — Rule 32): LESSONS_REGISTRY.md scanned for surface fingerprints; acceptance check output captured in STATE.md {contract, check_command, captured_output}. Empty evidence field = malformed claim.
+□ INVISIBLE-QUALITY RADAR (V32.47 — Rule 40, ADVISORY consideration — a radar prompt, NOT a build-blocking gate): for each IN-SCOPE invisible-quality dimension this update touched (primer `INVISIBLE_DIMS_IN_SCOPE` — security · SEO · a11y · privacy · audit · perf · observability · ISO · reliability · maintainability), re-assert it was attended to via its existing owner surface (security.md L1-L6 · seo.md Rule 35 · ui-rules.md R13 WCAG · privacy.md Rule 33 · audit.md Rule 38 · L5 AuditLog); INHERIT-not-REPLACE over those rules. D6/D7/D8 are named-but-unowned — just keep them in view.
 IF ANY item fails → Feature Update = INCOMPLETE → fix before marking done
 ─────────────────────────────────────────────────────────
 

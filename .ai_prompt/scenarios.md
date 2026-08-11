@@ -1,4 +1,4 @@
-# Spec-Driven Platform V32.45 — Scenarios 1-49
+# Spec-Driven Platform V32.47 — Scenarios 1-49
 
 > Loaded contextually when user triggers a named scenario.
 > Read ONLY the scenario matching the user's request.
