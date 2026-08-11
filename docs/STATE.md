@@ -1,5 +1,27 @@
 # FRMS — Project State
 
+## Current State (2026-08-11) — ✅ Held commits pushed + CGC established + framework synced to V32.49
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. No open owner `[WHAT]` decisions. Production healthy (Auth.js beta.32).
+
+**✅ DONE THIS SESSION (2026-08-11):**
+- **Pushed the 2 held commits** (`c383b52..3b60cdd`) to `origin/main` (owner-authorized) — STATE checkpoint + AdminCN slice untrack.
+- **Untracked the 2nd AdminCN copy** `.ai_prompt/starter/admincn` (222 files) → `fda4d52`, gitignored, pushed to `origin/main`. **CI + Docker Build both GREEN** for that push. Both `starter/admincn` copies now untracked+ignored (deploy.sh re-copies each sync).
+- **CGC (CodeGraphContext) established** on this seat (directed opt-in). Light-path index of `apps/web`: 308 files, 745 fn nodes, 10508 CALLS edges, ~21s, peak RSS ~193MB. Untracked `.cgcignore` added. Queries verified (`analyze complexity`). ⚠ accelerator only — grep+typecheck stay the blast-radius authority (CGC under-reports callers).
+- **Framework synced V32.45.1 → V32.49** (governance-only) via `prep-sync` → owner-approved. Branch **`chore/framework-sync-v32-48` @ `f6170d7`**, 22 files +711/−25, zero app code, scripts `bash -n` clean. AIEF repo advanced mid-session (plan said V32.48.2 → landed V32.49). **LOCAL / HARD HOLD — branch only, NOT merged/pushed.**
+
+**⏳ PENDING / NEXT (un-gated unless noted):**
+- ⭐ **[WHAT] Merge `chore/framework-sync-v32-48` → main?** — governance-only; a later authorized push = docs release, no staging/prod impact. Awaiting owner word.
+- ⚠ **Restart Claude Code** to load the new V32.49 hooks/rules (this reboot handles it).
+- **Staging is 404 / torn-down** (build-only pipeline by design). Revival = owner-gated `deploy/staging-refresh-and-deploy.sh` (prod→staging data refresh + deploy). Owner said "later."
+- Deferred: `uuid` moderate advisory (via exceljs, below CI gate); M4 back-port.
+
+**Git:** `main` level with `origin/main`; work sits on branch `chore/framework-sync-v32-48` (`f6170d7`). Untracked `.cgcignore` (CGC trial artifact, intentionally uncommitted). HARD HOLD on all pushes/deploys.
+
+---
+
 ## Current State (2026-08-10, evening) — ✅ CI back to GREEN on main (js-yaml HIGH cleared) + pushed
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
