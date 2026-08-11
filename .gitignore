@@ -113,3 +113,6 @@ starter/admincn/
 #  duplicates an app's own components/ui. Both paths are ignored. Cherry-pick the AdminCN extras
 
 #  OUT of it per Scenario 49.)
+
+# CodeGraphContext (opt-in per-seat dev-nav tooling — never committed)
+.cgcignore
