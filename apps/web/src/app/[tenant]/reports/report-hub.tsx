@@ -5,106 +5,11 @@ import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import type { ReportDomain, UniversalReportFilter } from "@frms/shared/schemas";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
+import { getFacetVisibility, type AppliedQuery } from "./report-hub-config";
+import { ReportFilters } from "./report-hub-filters";
+import { ReportResults } from "./report-hub-results";
 import { ReportHubCharts } from "./report-hub-charts";
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-const DOMAIN_LABELS: Record<ReportDomain, string> = {
-  fisherfolk: "Fisherfolk",
-  household: "Household",
-  vessel: "Vessel",
-  violation: "Violation",
-  ayuda: "Ayuda",
-  "fish-catch": "Fish Catch",
-};
-
-const DOMAINS = Object.keys(DOMAIN_LABELS) as ReportDomain[];
-
-interface AppliedQuery {
-  domain: ReportDomain;
-  filter: UniversalReportFilter;
-}
-
-// ── Shimmer ───────────────────────────────────────────────────────────────────
-function Shimmer({ className }: { className?: string }) {
-  return (
-    <div
-      className={`animate-pulse rounded bg-muted ${className ?? ""}`}
-      aria-hidden="true"
-    />
-  );
-}
-
-// ── Faceted checkbox group ──────────────────────────────────────────────────
-function FacetCheckboxGroup({
-  legend,
-  options,
-  selected,
-  onChange,
-}: {
-  legend: string;
-  options: string[];
-  selected: string[];
-  onChange: (next: string[]) => void;
-}) {
-  const idBase = `hub-facet-${legend.toLowerCase().replace(/\s+/g, "-")}`;
-
-  function toggle(value: string) {
-    onChange(
-      selected.includes(value)
-        ? selected.filter((v) => v !== value)
-        : [...selected, value],
-    );
-  }
-
-  return (
-    <fieldset className="space-y-1.5 rounded-md border border-border p-3">
-      <legend className="px-1 text-sm font-medium">{legend}</legend>
-      {options.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No options available.</p>
-      ) : (
-        <div className="max-h-40 space-y-1 overflow-y-auto">
-          {options.map((opt) => {
-            const checkboxId = `${idBase}-${opt}`;
-            return (
-              <Label
-                key={opt}
-                htmlFor={checkboxId}
-                className="flex min-h-6 cursor-pointer items-center gap-2 py-1 font-normal"
-              >
-                <Checkbox
-                  id={checkboxId}
-                  checked={selected.includes(opt)}
-                  onCheckedChange={() => toggle(opt)}
-                />
-                {opt}
-              </Label>
-            );
-          })}
-        </div>
-      )}
-    </fieldset>
-  );
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function ReportHub() {
@@ -205,17 +110,6 @@ export function ReportHub() {
     }
   }
 
-  const facets = facetsQuery.data;
-  const showBarangays = domain !== "violation" && domain !== "ayuda";
-  const showCategories = domain === "fisherfolk";
-  const showStatuses =
-    domain === "fisherfolk" || domain === "vessel" || domain === "violation" || domain === "ayuda";
-  const showAgeVessel = domain === "fisherfolk";
-  const showVesselTypes = domain === "fisherfolk" || domain === "vessel";
-  const showProgram = domain === "ayuda";
-  const showGearType = domain === "fish-catch";
-  const showDateRange = domain === "violation" || domain === "ayuda" || domain === "fish-catch";
-
   return (
     <div className="space-y-6">
       {/* ── Print-only government header ──────────────────────────────────── */}
@@ -231,263 +125,47 @@ export function ReportHub() {
       </div>
 
       {/* ── Filters card (hidden on print) ────────────────────────────────── */}
-      <Card className="print:hidden">
-        <CardHeader>
-          <CardTitle className="text-base">Report Hub — Faceted Query</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="hub-domain">Domain</Label>
-            <Select
-              value={domain}
-              onValueChange={(v) => handleDomainChange(v as ReportDomain)}
-            >
-              <SelectTrigger id="hub-domain" className="w-full sm:w-72">
-                <SelectValue placeholder="Select domain…" />
-              </SelectTrigger>
-              <SelectContent>
-                {DOMAINS.map((d) => (
-                  <SelectItem key={d} value={d}>
-                    {DOMAIN_LABELS[d]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {showBarangays && (
-              <FacetCheckboxGroup
-                legend={domain === "fish-catch" ? "Fishing Ground" : domain === "vessel" ? "Homeport Barangay" : "Barangay"}
-                options={facets?.barangays ?? []}
-                selected={barangays}
-                onChange={setBarangays}
-              />
-            )}
-            {showCategories && (
-              <FacetCheckboxGroup
-                legend="Category"
-                options={(facets?.categories ?? []).map((c) => c.name)}
-                selected={categoryIds}
-                onChange={(names) =>
-                  setCategoryIds(
-                    (facets?.categories ?? [])
-                      .filter((c) => names.includes(c.name))
-                      .map((c) => c.id),
-                  )
-                }
-              />
-            )}
-            {showStatuses && (
-              <FacetCheckboxGroup
-                legend="Status"
-                options={facets?.statuses ?? []}
-                selected={statuses}
-                onChange={setStatuses}
-              />
-            )}
-            {showVesselTypes && (
-              <FacetCheckboxGroup
-                legend="Vessel Type"
-                options={facets?.vesselTypes ?? []}
-                selected={vesselTypes}
-                onChange={setVesselTypes}
-              />
-            )}
-
-            {showAgeVessel && (
-              <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hub-age-min">Min age</Label>
-                  <Input
-                    id="hub-age-min"
-                    type="number"
-                    min={0}
-                    max={150}
-                    value={ageMin}
-                    onChange={(e) => setAgeMin(e.target.value)}
-                    placeholder="Any"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hub-age-max">Max age</Label>
-                  <Input
-                    id="hub-age-max"
-                    type="number"
-                    min={0}
-                    max={150}
-                    value={ageMax}
-                    onChange={(e) => setAgeMax(e.target.value)}
-                    placeholder="Any"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hub-vessel-owner">Vessel owner</Label>
-                  <Select
-                    value={vesselOwner}
-                    onValueChange={(v) => setVesselOwner(v as "any" | "yes" | "no")}
-                  >
-                    <SelectTrigger id="hub-vessel-owner">
-                      <SelectValue placeholder="Any" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">Any</SelectItem>
-                      <SelectItem value="yes">Owner</SelectItem>
-                      <SelectItem value="no">Non-owner</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-
-            {showProgram && (
-              <div className="space-y-1.5">
-                <Label htmlFor="hub-program">Program</Label>
-                <Select value={programId} onValueChange={setProgramId}>
-                  <SelectTrigger id="hub-program">
-                    <SelectValue placeholder="Any program" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any program</SelectItem>
-                    {(facets?.programs ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {showGearType && (
-              <div className="space-y-1.5">
-                <Label htmlFor="hub-gear-type">Gear type</Label>
-                <Select value={gearType} onValueChange={setGearType}>
-                  <SelectTrigger id="hub-gear-type">
-                    <SelectValue placeholder="Any gear type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any gear type</SelectItem>
-                    {(facets?.gearTypes ?? []).map((g) => (
-                      <SelectItem key={g} value={g}>
-                        {g}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {showDateRange && (
-              <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hub-date-from">Date From</Label>
-                  <Input
-                    id="hub-date-from"
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hub-date-to">Date To</Label>
-                  <Input
-                    id="hub-date-to"
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Button onClick={handleGenerate}>Generate Report</Button>
-            {applied !== null && (
-              <>
-                <Button variant="outline" onClick={() => window.print()}>
-                  Print / PDF
-                </Button>
-                {canExport && (
-                  <Button
-                    variant="outline"
-                    onClick={() => void handleExport()}
-                    disabled={exportExcel.isFetching}
-                  >
-                    {exportExcel.isFetching ? "Exporting…" : "Export Excel"}
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <ReportFilters
+        domain={domain}
+        onDomainChange={handleDomainChange}
+        barangays={barangays}
+        setBarangays={setBarangays}
+        categoryIds={categoryIds}
+        setCategoryIds={setCategoryIds}
+        statuses={statuses}
+        setStatuses={setStatuses}
+        vesselTypes={vesselTypes}
+        setVesselTypes={setVesselTypes}
+        vesselOwner={vesselOwner}
+        setVesselOwner={setVesselOwner}
+        ageMin={ageMin}
+        setAgeMin={setAgeMin}
+        ageMax={ageMax}
+        setAgeMax={setAgeMax}
+        programId={programId}
+        setProgramId={setProgramId}
+        gearType={gearType}
+        setGearType={setGearType}
+        dateFrom={dateFrom}
+        setDateFrom={setDateFrom}
+        dateTo={dateTo}
+        setDateTo={setDateTo}
+        facets={facetsQuery.data}
+        visibility={getFacetVisibility(domain)}
+        hasApplied={applied !== null}
+        canExport={canExport}
+        exporting={exportExcel.isFetching}
+        onGenerate={handleGenerate}
+        onExport={() => void handleExport()}
+      />
 
       {/* ── Results card ───────────────────────────────────────────────────── */}
       {applied !== null && (
-        <Card>
-          <CardHeader className="pb-3">
-            {reportLoading ? (
-              <div className="space-y-2">
-                <Shimmer className="h-5 w-48" />
-                <Shimmer className="h-4 w-32" />
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <CardTitle className="text-base">
-                  {report?.title ?? DOMAIN_LABELS[applied.domain]}
-                </CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  {report?.count !== undefined && (
-                    <span>
-                      {report.count.toLocaleString()}{" "}
-                      {report.count === 1 ? "record" : "records"}
-                      {report.generatedAt ? " · " : ""}
-                    </span>
-                  )}
-                  {report?.generatedAt && <span>Generated {report.generatedAt}</span>}
-                </p>
-              </div>
-            )}
-          </CardHeader>
-          <CardContent>
-            {reportLoading ? (
-              <div className="space-y-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Shimmer key={i} className="h-8 w-full" />
-                ))}
-              </div>
-            ) : !report || report.count === 0 ? (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                No records found for the selected filters.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      {report.columns.map((col) => (
-                        <TableHead key={col.key}>{col.label}</TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {report.rows.map((row, rowIdx) => (
-                      <TableRow key={rowIdx}>
-                        {report.columns.map((col) => (
-                          <TableCell key={col.key}>
-                            {row[col.key] !== undefined ? String(row[col.key]) : "—"}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <ReportResults
+          report={report}
+          reportLoading={reportLoading}
+          appliedDomain={applied.domain}
+        />
       )}
 
       {applied !== null && (
