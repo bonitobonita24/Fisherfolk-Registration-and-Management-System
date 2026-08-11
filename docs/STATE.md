@@ -7,15 +7,16 @@
 Resume session. **No open owner `[WHAT]` decisions.** Production healthy (Auth.js beta.32). Tree clean, `main` == `origin/main`.
 
 **✅ DONE THIS SESSION:**
-- **Owner released the HARD HOLD → pushed local `main` → origin** (`fda4d52..76c4f42`, the 4 held governance-only commits incl. V32.49 sync). Verified: `git status` = 0 ahead/0 behind; **CI green** (CI run 2m52s + Docker Build & Publish 4m17s both success for `76c4f42`); Model-A staging build/deploy pipeline reactivated by the push.
-- **Full audit check (5 read-only auditors + completeness critic)** — all session claims verified against ground truth (push synced · AdminCN slice untracked+ignored · V32.49 range 0 app-code files · prod healthy/fail-closed · security 0 crit/0 high, lone deferred `uuid` moderate). Fixes applied LOCAL on branch `chore/audit-fixes`: (A) untracked 7 stale `.bak` files; (B) this reconcile; (C) fixed malformed YAML (`depends_on:` key) in prod+stage `docker-compose.app.yml` — both now parse.
+- **Owner released HARD HOLD → pushed local `main` → origin** (`fda4d52..76c4f42`, 4 held governance-only commits incl. V32.49 sync). Verified 0 ahead/0 behind; **CI green** (CI 2m52s + Docker Build & Publish 4m17s both success for `76c4f42`); Model-A staging pipeline reactivated.
+- **Full audit check (5 read-only auditors + completeness critic)** — all session claims verified vs ground truth (push synced · AdminCN slice untracked+ignored · V32.49 range 0 app-code files · prod healthy/fail-closed · security 0 crit/0 high, lone deferred `uuid` moderate).
+- **Audit fixes committed + MERGED to `main` + PUSHED** (`edd4193`, owner-authorized): (A) untracked 7 stale `.bak` files; (B) STATE reconcile; (C) fixed malformed `depends_on:` YAML in prod+stage `docker-compose.app.yml` (both now parse). Branch `chore/audit-fixes` deleted. `main` == `origin/main`.
+- **Import cleanup verified + finished:** confirmed the temporary Excel import sources + the ~436 MB photo/signature import folders are already deleted from disk (purged 2026-08-07); zero real PII tracked in git (only intentional `packages/db/demo-assets/*`). Cleared the leftover gitignored 26 MB `.playwright-mcp/` test-scratch dir.
 
 **⏳ PENDING / NEXT:**
-- 🔒 **[WHAT] Two pre-existing Traefik-label defects** surfaced by C once the compose files parsed: `certresolver=letsEncrypt` (linter wants lowercase `letsencrypt`) + missing `tls=true` on the websecure router, in prod+stage `docker-compose.app.yml`. NOT auto-fixed — they interact with the live Traefik static config not visible from this seat (prod serves TLS fine → deployed server file already correct). Owner decision before aligning the in-repo templates.
-- 🔒 **[WHAT] Push `chore/audit-fixes` → merge to `main` + push origin?** — audit fixes are LOCAL/HARD HOLD; a `main` push re-triggers the Model-A pipeline. Awaiting owner word.
+- 🔒 **[WHAT] Two pre-existing Traefik-label defects** surfaced by fix C once the compose files parsed: `certresolver=letsEncrypt` (linter wants lowercase `letsencrypt`) + missing `tls=true` on the websecure router, in prod+stage `docker-compose.app.yml`. NOT auto-fixed — they interact with the live Traefik static config not visible from this seat (prod serves TLS fine → deployed server file already correct). Owner decision before aligning the in-repo templates.
 - Deferred (unchanged): `uuid` moderate (via exceljs, below CI gate); M4 back-port; owner-gated V32.48 lint-design `prep-sync`; stale branch `chore/framework-sync-v32-45`; staging revival (owner said "later").
 
-**Git:** branch `chore/audit-fixes` off `main` (`76c4f42`, synced to origin). Audit fixes uncommitted→committing now, LOCAL only. HARD HOLD on all pushes/deploys.
+**Git:** `main` @ `edd4193`, **synced with `origin/main`** (0 ahead), tree clean. HARD HOLD stands on all future pushes/deploys.
 
 ---
 
