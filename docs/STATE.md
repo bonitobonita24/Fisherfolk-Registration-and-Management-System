@@ -1,5 +1,29 @@
 # FRMS — Project State
 
+## Current State (2026-08-11, later) — ✅ V32.49 framework sync MERGED to local main (push held)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. No open owner `[WHAT]` decisions. Production healthy (Auth.js beta.32).
+
+**✅ DONE THIS SESSION:**
+- **Owner answered the carried merge decision → "Merge to main, hold push".** FF-merged `chore/framework-sync-v32-48` into local `main`. Merged branch deleted (safe, fully merged). `main` now **3 commits ahead of origin, tree clean, PUSH HELD (HARD HOLD)**.
+- **`.cgcignore` cleanup:** the loose CGC dev-tooling config → added to `.gitignore` + committed (`04bd72d`), consistent with how repo ignores `.code-review-graph/`. CGC is a per-seat, dev-machine-only accelerator.
+- Verified ground truth: 0 open PENDING_DECISIONS, no failing tests / known bugs / in-flight tasks.
+
+**⏳ PENDING / NEXT (un-gated unless noted):**
+- ⚠ **Restart Claude Code** to load the new V32.49 hooks/scripts (`lint-design.sh`, `spec-gap-check.sh`, `build-primer.sh`) — only activate on a fresh process. (This reboot handles it.)
+- 🔒 **[WHAT] Push local `main` (3 commits) → origin?** — governance-only docs release; pushing revives the Model-A staging build/deploy pipeline. Awaiting owner word.
+- **Stale branch `chore/framework-sync-v32-45`** — 2 superseded AdminCN docs/state checkpoints, unmerged; left as-is (not safe for plain delete, not this task's scope).
+- **Staging is 404 / torn-down** (build-only by design). Revival = owner-gated `deploy/staging-refresh-and-deploy.sh`. Owner said "later."
+- Deferred: `uuid` moderate advisory (via exceljs, below CI gate); M4 back-port; owner-gated V32.48 lint-design `prep-sync`.
+
+**Git:** local `main` @ `04bd72d`, **3 ahead of `origin/main`**, tree clean. HARD HOLD on all pushes/deploys.
+
+**On local `main` (3 unpushed, zero app code):** V32.49 governance sync (`f6170d7`) · handoff doc (`e8daf33`) · `.cgcignore` gitignore (`04bd72d`).
+
+---
+
 ## Current State (2026-08-11) — ✅ Held commits pushed + CGC established + framework synced to V32.49
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
