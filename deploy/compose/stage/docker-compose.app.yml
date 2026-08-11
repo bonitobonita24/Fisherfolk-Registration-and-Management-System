@@ -21,6 +21,7 @@ services:
       - PORT=${APP_PORT}
     networks: [app_network, proxy]
     restart: unless-stopped
+    depends_on:
       valkey:
         condition: service_healthy
     healthcheck:
