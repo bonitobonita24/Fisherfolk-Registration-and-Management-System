@@ -1,5 +1,28 @@
 # FRMS — Project State
 
+## Current State (2026-08-12, latest) — ✅ CGC established + 2 CGC-driven refactors (local, HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. **No open owner `[WHAT]` decisions gating work.** Production healthy (Auth.js beta.32). `main` @ `024a40f`, **1 ahead of origin** (prior docs handoff — held). Two new refactor branches sit LOCAL/unpushed.
+
+**✅ DONE THIS SESSION:**
+- **CGC (CodeGraphContext) ESTABLISHED on this seat** (owner-directed). Setup verified idempotent: `SCIP_INDEXER=false`; gitignored `.cgcignore` (added `screenshots/` → scopes `starter/ .ai_prompt/ test-artifacts/ screenshots/ .next/ coverage/ node_modules/ dist/ build/`); `index apps/web` = 308 files/745 fn/10508 CALLS, ~28s, **peak RSS ~200 MB**. Live queries verified. Memory `incoming_cgc_adopt_directed_2026-08-10` marked DONE.
+- **CGC analysis sweep (FRMS-scoped Cypher).** Complexity hotspots ranked; dead-code sweep = all false positives (confirmed the documented caller-gap → grep+typecheck stay the blast-radius authority).
+- **Refactor 1 — `refactor/dedupe-cellvaluetostring` (`594636f`, LOCAL):** exported `cellValueToString` from `src/lib/import/excel.ts`, deleted 2 byte-identical script copies (−66 lines). typecheck+lint green.
+- **Refactor 2 — `refactor/report-hub-decompose` (`b18e97e`, LOCAL):** split `ReportHub` (**CC 90 → 41**) into `report-hub-config.ts` (+pure unit-tested `getFacetVisibility`), `<ReportFilters>`, `<ReportResults>`; orchestrator logic byte-identical (git diff confirms). typecheck+lint+7 new tests+build all green; CGC re-index confirmed CC drop.
+
+**⏳ PENDING / NEXT (owner offers — un-answered, non-blocking):**
+- **Owner review + merge** of the 2 local refactor branches (`refactor/dedupe-cellvaluetostring`, `refactor/report-hub-decompose`). Both LOCAL/HARD HOLD.
+- **[bug, discovered] Category facet checkbox never renders checked** in `report-hub-filters.tsx` — `selected={categoryIds}` (IDs) vs `options`=category names; `includes()` never matches. Filter still APPLIES on submit (visual-only). PRESERVED verbatim in the refactor (behavior-neutral). One-line fix available on a separate branch — owner offered, not yet chosen.
+- **Offered next hotspots:** `BulkFilterDialog` (CC 69), `buildReport` (CC 64), `BarangayDensityMap` (CC 78 — hard to verify headless).
+- 🔒 **[WHAT] Two pre-existing Traefik-label defects** (carried from 2026-08-11): `certresolver=letsEncrypt` case + missing `tls=true` in prod+stage `docker-compose.app.yml`. Owner decision vs live Traefik static config (prod TLS fine → deployed file already correct).
+- Deferred (unchanged): `uuid` moderate (via exceljs, below CI gate); M4 back-port; owner-gated V32.48 lint-design `prep-sync`; stale branch `chore/framework-sync-v32-45`; staging revival (owner said "later").
+
+**Git:** `main` @ `024a40f`, **1 ahead of `origin/main`** (docs handoff, held). Branches `refactor/dedupe-cellvaluetostring` (`594636f`) + `refactor/report-hub-decompose` (`b18e97e`) LOCAL/unpushed. Tree clean. HARD HOLD stands on all pushes/deploys/merges-to-main.
+
+---
+
 ## Current State (2026-08-11, latest) — ✅ Held `main` PUSHED to origin + full audit check green
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
