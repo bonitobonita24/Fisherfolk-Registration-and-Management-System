@@ -1,6 +1,25 @@
 # FRMS — Project State
 
-## Current State (2026-08-12, latest) — ✅ CGC established + 2 CGC-driven refactors (local, HARD HOLD)
+## Current State (2026-08-12, latest) — ✅ Traefik-label drift RESOLVED [HOW] + loop stopped by owner
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Resume session. Owner-initiated **"save session stop loop"** → loop halted. Production healthy (Auth.js beta.32). Tree clean.
+
+**✅ DONE THIS SESSION:**
+- **Resolved PENDING decision #2 — Traefik-label drift ([HOW], owner "resolve it yourself").** Verified true resolver name from `Server-Setups/Powerbyte-Hostinger/setup/traefik/traefik.yml` → `certificatesResolvers.letsencrypt` (lowercase; the server FRMS prod deploys to). Fixed `deploy/compose/{prod,stage}/docker-compose.app.yml`: `certresolver=letsEncrypt`→`letsencrypt` + added explicit `tls=true` on websecure router. `scripts/lint-deploy.sh` C2+C3 now PASS (exit 0; 2 pre-existing non-blocking env-var warnings only). Closed the item in `PENDING_DECISIONS.md`.
+- Branch **`fix/traefik-label-drift`**: `79693f0` (fix) + `7bb2a2e` (decision closure). LOCAL / HARD HOLD.
+
+**⏳ PENDING / NEXT — 1 open owner `[WHAT]`:**
+- 🔀 **[WHAT] Merge/push decision for the CGC-driven refactor branches** (`refactor/dedupe-cellvaluetostring` `594636f`, `refactor/report-hub-decompose` `b18e97e`) — both green, behavior-preserving, LOCAL/HARD HOLD. **Fold `fix/traefik-label-drift` into the same merge when owner authorizes.**
+- Carried un-gated offers (non-blocking): one-line fix for the preserved category-checkbox visual bug (`report-hub-filters.tsx`); next hotspots `BulkFilterDialog` CC69 / `buildReport` CC64 / `BarangayDensityMap` CC78.
+- Deferred (unchanged): `uuid` moderate (via exceljs, below CI gate); M4 back-port; owner-gated V32.48 lint-design `prep-sync`; staging revival ("later").
+
+**Git:** `main` @ `95ea63b`, **3 ahead of `origin/main`** (docs handoffs, held). Branches: `refactor/dedupe-cellvaluetostring` (`594636f`), `refactor/report-hub-decompose` (`b18e97e`), `fix/traefik-label-drift` (`7bb2a2e`) — all LOCAL/unpushed. Tree clean. HARD HOLD stands on all pushes/deploys/merges-to-main.
+
+---
+
+## Current State (2026-08-12) — ✅ CGC established + 2 CGC-driven refactors (local, HARD HOLD)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
