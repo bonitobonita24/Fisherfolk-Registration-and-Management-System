@@ -6,6 +6,29 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-12 — 🔀 Two local CGC-driven refactor branches — owner review + merge/push (HARD HOLD)
+
+- [ ] **[WHAT] Merge + push decision for 2 LOCAL refactor branches** (both green: typecheck/lint/test/build;
+  behavior-preserving). Merge to `main` and/or push is owner-gated.
+  - `refactor/dedupe-cellvaluetostring` (`594636f`) — export `cellValueToString` from `src/lib/import/excel.ts`,
+    drop 2 byte-identical script copies (−66 lines).
+  - `refactor/report-hub-decompose` (`b18e97e`) — split `ReportHub` CC 90→41 into config/filters/results +
+    pure unit-tested `getFacetVisibility` (7 new tests). Orchestrator logic byte-identical.
+  - Also note (`[HOW]`, no gate — conductor may just do it if asked): a **pre-existing category-checkbox bug**
+    was PRESERVED in refactor 2 (`selected={categoryIds}` IDs vs `options`=names → never renders checked;
+    filter still applies). One-line fix available on a separate branch. Next-hotspot options: `BulkFilterDialog`
+    CC 69, `buildReport` CC 64.
+
+### 2026-08-11 — 🔒 Two pre-existing Traefik-label defects in prod+stage compose templates
+
+- [ ] **[WHAT] Align (or leave) the in-repo Traefik labels vs the live Traefik static config.** Surfaced once the
+  `depends_on:` YAML fix made `deploy/compose/{prod,stage}/docker-compose.app.yml` parse: (1) `tls.certresolver=letsEncrypt`
+  (linter wants lowercase `letsencrypt` — must byte-match the resolver name in Traefik's static config); (2) no explicit
+  `tls=true` on the websecure router (implicit via certresolver, likely a nit). **Live prod serves TLS fine and the
+  deployed server-side stack file is already correct** — this is repo-template drift only, no live impact, deploy is HARD
+  HOLD regardless. Conductor can resolve as `[HOW]` after verifying the true resolver name from Server-Setups (Traefik
+  static config), or owner decides. Not urgent.
+
 ### 2026-08-08 — 🔐 Auth.js beta.32+ bump (CRITICAL fail-open) — MERGED + dev-verified; PROD chain still open
 
 - [x] ✅ **DONE (2026-08-09) — MERGED to local `main` (`473b6ee`) + dev rebuilt + login VERIFIED.** Owner
