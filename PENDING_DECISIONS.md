@@ -8,16 +8,20 @@ conductor's to decide and never lands here.
 
 ### 2026-08-14 — 🚀 Push / merge authorization (HARD HOLD)
 
-- [ ] **[WHAT] Push `main` to origin** — `main` (`46d21db`) is **12 commits ahead of origin** (3 branch merges
-  + decision-closure + prior docs handoffs, all verified & held). A `main` push trips Model-A auto-deploy;
-  staging is deliberately offline. Owner word required.
-- [ ] **[WHAT] Merge + push `feat/public-landing-page`** (`6268bc5`) — the new public landing page + login
-  relocation to `/admin`. Built, `next build`-green, running on the rebuilt dev container (`localhost:44387`),
-  LOCAL/HARD HOLD. Owner said "good to leave on the branch" (2026-08-14) → merge/push deferred until owner
-  authorizes. Optional pre-merge tweak available: default the public landing to LIGHT (currently loads dark =
-  app-wide default).
+- [x] ✅ **RESOLVED [WHAT] (2026-08-14, owner authorized both) — PUSHED + RELEASED `v0.11.0`.**
+  Merged `feat/public-landing-page` → `main` (`--no-ff`, `ddc52ca`), applied consolidated release
+  `v0.11.0` (CHANGELOG + version-sync across all packages + landing-footer + annotated tag `b4b8511`),
+  then `git push --follow-tags origin main` (owner-confirmed version "yes it's OK"). `origin/main` now
+  current, tag `v0.11.0` published → trips Model-A CI (docker-publish) + staging auto-deploy.
+  Both prior open items (push main / merge+push landing page) are closed by this single release.
 
+### 2026-08-14 — 🟣 "Calapan City" demo tenant seed — DEMO-STACK DEPLOY GATE (HARD HOLD)
 
+- [ ] **[WHAT] Deploy the demo seed to the live demo stack (`frms-demo.powerbyte.app`)** — the overnight
+  build creates an isolated demo tenant `calapan-demo` (name "Calapan City") with 500+ fabricated fisherfolk
+  + vessels/violations/ayuda/catches/etc, all with photos + signatures, in **LOCAL DEV only**. Promoting it
+  to the client-facing demo stack is a deliberate `push-to-demo` (migrate-yes/reseed-never) and needs the
+  owner's explicit word. The seed scripts make this a one-command promotion when authorized.
 
 ### 2026-08-12 — 🔀 Two local CGC-driven refactor branches — owner review + merge/push (HARD HOLD)
 
