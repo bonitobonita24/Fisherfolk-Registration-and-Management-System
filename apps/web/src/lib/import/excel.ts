@@ -84,7 +84,7 @@ function slugify(s: string): string {
  * Coerce any ExcelJS cell value to a trimmed string.
  * Returns "" for null / undefined / error cells.
  */
-function cellValueToString(value: ExcelJS.CellValue | undefined): string {
+export function cellValueToString(value: ExcelJS.CellValue | undefined): string {
   if (value === null || value === undefined) return "";
   if (typeof value === "string") return value.trim();
   if (typeof value === "number") return String(value);
