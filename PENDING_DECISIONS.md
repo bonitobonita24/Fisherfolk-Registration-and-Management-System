@@ -8,13 +8,17 @@ conductor's to decide and never lands here.
 
 ### 2026-08-12 — 🔀 Two local CGC-driven refactor branches — owner review + merge/push (HARD HOLD)
 
-- [ ] **[WHAT] Merge + push decision for 2 LOCAL refactor branches** (both green: typecheck/lint/test/build;
-  behavior-preserving). Merge to `main` and/or push is owner-gated.
+- [x] ✅ **RESOLVED [WHAT] (2026-08-13, owner "Merge all 3 to main, LOCAL only") — MERGED, no push.**
+  All 3 held branches `--no-ff` merged into local `main` (refactor/dedupe-cellvaluetostring `594636f`,
+  refactor/report-hub-decompose `b18e97e`, fix/traefik-label-drift `79693f0`). Merged tree verified green
+  (tsc clean; 59/59 tests incl. new report-hub-config characterization). `main` now 11 ahead of origin,
+  **LOCAL only / HARD HOLD — no push, nothing deployed** (push remains a separate future owner decision;
+  a push would trip Model-A auto-deploy, staging deliberately offline). Original branches retained.
   - `refactor/dedupe-cellvaluetostring` (`594636f`) — export `cellValueToString` from `src/lib/import/excel.ts`,
     drop 2 byte-identical script copies (−66 lines).
   - `refactor/report-hub-decompose` (`b18e97e`) — split `ReportHub` CC 90→41 into config/filters/results +
     pure unit-tested `getFacetVisibility` (7 new tests). Orchestrator logic byte-identical.
-  - Also note (`[HOW]`, no gate — conductor may just do it if asked): a **pre-existing category-checkbox bug**
+  - Still OPEN (`[HOW]`, no gate — say the word): a **pre-existing category-checkbox bug**
     was PRESERVED in refactor 2 (`selected={categoryIds}` IDs vs `options`=names → never renders checked;
     filter still applies). One-line fix available on a separate branch. Next-hotspot options: `BulkFilterDialog`
     CC 69, `buildReport` CC 64.
