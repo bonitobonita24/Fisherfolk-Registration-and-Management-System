@@ -18,7 +18,7 @@ export default async function TenantLayout({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/admin");
   }
 
   const { tenant } = await params;

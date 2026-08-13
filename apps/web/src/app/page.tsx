@@ -1,16 +1,83 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/server/auth";
+import type { Metadata } from "next";
 
-export default async function HomePage() {
-  const session = await auth();
+import { LandingNav } from "@/components/landing/landing-nav";
+import { LandingHero } from "@/components/landing/landing-hero";
+import { LandingStats } from "@/components/landing/landing-stats";
+import { LandingFeatures } from "@/components/landing/landing-features";
+import { LandingGallery } from "@/components/landing/landing-gallery";
+import { LandingProcess } from "@/components/landing/landing-process";
+import { LandingCta } from "@/components/landing/landing-cta";
+import { LandingFooter } from "@/components/landing/landing-footer";
 
-  if (!session?.user) {
-    redirect("/login");
-  }
+const TITLE =
+  "FRMS — Fisherfolk Registration & Management System | Calapan City";
+const DESCRIPTION =
+  "The digital system of record for the City Fisheries Management Office of Calapan City — fisherfolk registration, vessels, subsidies, catch monitoring, compliance, and analytics in one platform.";
 
-  if (session.user.role === "tenant_manager") {
-    redirect("/platform/tenants");
-  }
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    title: TITLE,
+    description: DESCRIPTION,
+    siteName: "FRMS",
+    images: [
+      {
+        url: "/showcase/01-dashboard.png",
+        width: 1600,
+        height: 900,
+        alt: "FRMS dashboard for the Calapan City Fisheries Management Office",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/showcase/01-dashboard.png"],
+  },
+};
 
-  redirect(`/${session.user.tenantSlug}/dashboard`);
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "FRMS — Fisherfolk Registration & Management System",
+  applicationCategory: "GovernmentApplication",
+  operatingSystem: "Web",
+  description: DESCRIPTION,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "PHP" },
+  publisher: {
+    "@type": "Organization",
+    name: "Powerbyte IT Solutions",
+    url: "https://www.powerbyteitsolutions.com/",
+  },
+  provider: {
+    "@type": "GovernmentOrganization",
+    name: "City Government of Calapan — Fisheries Management Office",
+    areaServed: "Calapan City, Oriental Mindoro, Philippines",
+  },
+};
+
+export default function LandingPage() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
+      <LandingNav />
+      <main>
+        <LandingHero />
+        <LandingStats />
+        <LandingFeatures />
+        <LandingGallery />
+        <LandingProcess />
+        <LandingCta />
+      </main>
+      <LandingFooter />
+    </>
+  );
 }

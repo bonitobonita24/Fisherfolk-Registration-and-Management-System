@@ -12,7 +12,7 @@ export default async function PlatformLayout({
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    redirect("/admin");
   }
 
   if (session.user.role !== "tenant_manager") {

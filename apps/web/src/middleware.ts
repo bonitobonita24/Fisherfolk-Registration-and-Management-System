@@ -16,7 +16,12 @@ import type { UserRole } from "@frms/shared/types";
 // URL-routing below: its path second segment is "media", not a tenant slug, so
 // without this an authed request would 307-redirect to /<slug>/dashboard and
 // every image/signature/attachment would fail to load.
+// `/admin` is the staff/administrator sign-in (relocated from `/login`, which
+// is retained as a silent redirect). `/` is the public marketing landing —
+// handled explicitly in route() so anonymous visitors see it instead of being
+// bounced to sign-in, while authenticated users are still routed to their app.
 const PUBLIC_PATHS = [
+  "/admin",
   "/login",
   "/api/auth",
   "/api/health",
@@ -65,30 +70,37 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.next();
   }
 
+  // The root `/` is the PUBLIC marketing landing. Anonymous visitors see it;
+  // authenticated users are forwarded into their app (platform or tenant).
+  if (pathname === "/") {
+    const user = session?.user;
+    if (!user) {
+      return NextResponse.next();
+    }
+    if (user.role === "tenant_manager") {
+      return NextResponse.redirect(new URL("/platform/tenants", req.url));
+    }
+    if (user.tenantSlug) {
+      return NextResponse.redirect(
+        new URL(`/${user.tenantSlug}/dashboard`, req.url),
+      );
+    }
+    // Authenticated but no tenant context — fall through to the landing.
+    return NextResponse.next();
+  }
+
   if (!session?.user) {
-    const loginUrl = new URL("/login", req.url);
+    const loginUrl = new URL("/admin", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   const { role, tenantSlug, tenantId, customView } = session.user;
 
-  if (pathname === "/") {
-    if (role === "tenant_manager") {
-      return NextResponse.redirect(new URL("/platform/tenants", req.url));
-    }
-    if (tenantSlug) {
-      return NextResponse.redirect(
-        new URL(`/${tenantSlug}/dashboard`, req.url),
-      );
-    }
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
   // Platform routes — tenant_manager only
   if (pathname.startsWith("/platform")) {
     if (role !== "tenant_manager") {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin", req.url));
     }
     return NextResponse.next();
   }
@@ -136,7 +148,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL("/login", req.url));
+  return NextResponse.redirect(new URL("/admin", req.url));
 }
 
 export default auth((req: NextRequest & { auth: unknown }) => {
