@@ -1,6 +1,32 @@
 # FRMS — Project State
 
-## Current State (2026-08-14, latest) — ✅ Public landing page built + 3 held branches merged to main (all LOCAL/HARD HOLD)
+## Current State (2026-08-14, latest) — ✅ v0.11.0 PUSHED + "Calapan City" demo tenant seeded (500+ ff, every menu populated) — demo build LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Overnight full-auto session. Owner: push authorized work, then build a demo tenant "Calapan City" with 500+ dummy fisherfolk (photos+signatures), dummy vessels/violations/ayuda/etc all with images, no blank menus.
+
+**✅ DONE THIS SESSION:**
+- **Released & pushed `v0.11.0`** (owner authorized both pending pushes + confirmed version). Merged `feat/public-landing-page`→`main` (`ddc52ca`), consolidated changelog + version-sync across all packages + landing-footer + annotated tag (`b4b8511`), `git push --follow-tags origin main`. `origin/main` current, tag `v0.11.0` live → tripped Model-A CI + staging auto-deploy. Both prior open push [WHAT]s closed in PENDING_DECISIONS.
+- **Seeded isolated demo tenant "Calapan City"** (`slug=calapan-demo`, id `cmsrrs4br0000gm47j9r17eph`) in **local dev only** — real `calapan-city` (3089 ff) untouched. Branch **`feat/calapan-demo-seed`** (LOCAL/HARD HOLD). Commits: `974ab45` (3 seed scripts + PENDING), `cff67e1` (photo-fix + notifications page).
+  - **500 fisherfolk** — hand-rolled Filipino names (disjoint from real registrants), idNumber `DEMO-2026-#####`, ALL with photo + signature. Photos = 100-face pool from **randomuser.me** (magic-byte-validated JPEGs; thispersondoesnotexist returned HTML → rejected by validation). Signatures = reused from calapan-city's 3082 signature MediaObjects via Telegram-pointer copy into demo-tenant keys. Media backend = dev Telegram channel.
+  - **300 vessels** (all vesselPhoto), **60 violations** (evidenceImages + ViolationAttachment), **4 ayuda programs / 456 beneficiaries** (+ AyudaUpload event photo & signed sheet), **120 fish catches** (+237 species), **40 households** (67 members), **25 kanban** (+attachments), **30 notifications**, **15 edit requests**, **8 categories**, **2 ID templates**, **40 audit logs**, **20 renewals**, **3 import batches**, **2 ID-print batches**.
+  - Media pipeline: fisherfolk photo=200 pool objs; vessels/violations/ayuda/kanban via `seed-demo-calapan-media.ts` (8 demo-assets uploaded once, reused). Total demo mediaObjects ~208+.
+- **NEW SCRIPTS** (apps/web/scripts, ALLOW_DEMO_SEED-gated, idempotent, self-load .env.dev): `seed-demo-calapan.ts` (tenant+users+500 ff+media pools), `seed-demo-calapan-extras.ts` (9 long-tail models), `seed-demo-calapan-media.ts` (vessel/violation/ayuda/kanban media), `fix-demo-photos.ts` (validated photo re-seed). Reused existing `seed-demo.ts --tenant calapan-demo` for vessels/households/ayuda/violations/kanban.
+- **Fixed 2 verification findings:** (1) portraits were saving thispersondoesnotexist HTML mislabeled image/jpeg → `fix-demo-photos.ts` rebuilt pool with magic-byte validation, re-pointed all 500, purged 100 stale HTML media; (2) `/notifications` was a heading-only stub → built a real list page (`trpc.notification.listAll`, mark-as-read/all, skeleton, empty-state).
+- **Dev rebuilt** (foreground, exit 0 — background rebuilds kept getting harness-killed at `next build`; machine RAM tight ~3Gi free) → `frms_dev_app` FRESH ≥ main. **Re-verified live** (Playwright): fisherfolk photo=valid JPEG (FF D8 FF) via /api/media 200, signature renders, notifications=16 items, vessel photo=valid PNG, 0 console errors. Earlier full 19-route sweep: all menus POPULATED.
+
+**🔑 Demo logins** (tenant "Calapan City", local dev): `admin@demo.com` (tenant_admin) · `demo-super@calapan-demo.local` (tenant_superadmin — required for Audit Log + User Management, which are correctly RBAC-gated) · pwd `DemoCalapan_LocalDev_2026`.
+
+**⏳ OPEN [WHAT] (HARD HOLD):** Deploy the demo seed to the live demo stack `frms-demo.powerbyte.app` — a deliberate push-to-demo (migrate-yes/reseed-never), needs owner's explicit word. Scripts make it a one-command promotion. All demo work is LOCAL/unpushed on `feat/calapan-demo-seed`.
+
+**Minor/deferred:** reused signatures served `image/png` but bytes are JPEG (render fine, cosmetic); households modest at 40. 🔴 Lesson logged: `prisma.scalar-list.isempty-misses-null` ({ isEmpty:true } misses NULL scalar-list columns).
+
+**Git:** `origin/main` @ `b4b8511` (v0.11.0, pushed). `feat/calapan-demo-seed` @ `cff67e1` (LOCAL, 2 commits ahead of main-at-merge). Working tree: docs pending commit.
+
+---
+
+## Previous State (2026-08-14) — ✅ Public landing page built + 3 held branches merged to main (all LOCAL/HARD HOLD)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
