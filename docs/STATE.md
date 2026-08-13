@@ -1,6 +1,32 @@
 # FRMS — Project State
 
-## Current State (2026-08-12, latest) — ✅ Traefik-label drift RESOLVED [HOW] + loop stopped by owner
+## Current State (2026-08-14, latest) — ✅ Public landing page built + 3 held branches merged to main (all LOCAL/HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Interactive session. Owner **"save session"**. Production healthy (Auth.js beta.32). Tree clean.
+
+**✅ DONE THIS SESSION:**
+- **Resolved PENDING decision #1 — merged the 3 held branches to `main`, LOCAL only** (owner "Merge all 3 to main, LOCAL only"). `--no-ff` merged `refactor/dedupe-cellvaluetostring` (`594636f`), `refactor/report-hub-decompose` (`b18e97e`), `fix/traefik-label-drift` (`79693f0`). Merged tree verified green (tsc clean; 59/59 tests incl. new report-hub-config characterization). Closed decision (`46d21db`).
+- **Built a public marketing landing page** (owner request; Craft-template structure → FRMS coastal gov-tech, existing orange/teal tokens). Branch **`feat/public-landing-page` `6268bc5`** (LOCAL/HARD HOLD, owner "good to leave on the branch"):
+  - `/` is now a PUBLIC animated landing: nav · hero (animated coastal wave + framed dashboard shot) · NumberTicker stat band · 8-module bento grid · tabbed screenshot gallery (reuses `docs/showcase` shots, copied to `apps/web/public/showcase/`) · how-it-works · CTA · footer. Light+dark, motion respects reduced-motion, full SEO metadata + JSON-LD (Rule 35).
+  - **Footer credits Blue Alliance** (logo copied from Marine-Guardian → `apps/web/public/blue-alliance-logo.png`) **+ Developed by Powerbyte IT Solutions** (fleet-standard new-tab link) + version tag; always-dark footer band so the white logo reads.
+  - **Login relocated to `/admin`** (off the public landing); `/login` silently 307→`/admin` (old bookmarks/sessions/callbackUrl preserved); middleware opens `/` to anonymous (authed still route to app); all sign-in redirects + `auth` `pages` config + signOut targets repoint to `/admin`. New files: `src/app/admin/page.tsx`, `src/components/landing/*`.
+  - Verified on the REAL rebuilt dev container (`localhost:44387`): `/`→200 landing, `/admin`→200, `/login`→307→/admin. `next build` gate PASSED (caught+fixed 13 strict-lint errors tsc missed: nullable-boolean `useReducedMotion` conditionals + a stray `react/no-danger` disable). `dev-freshness-check` = FRESH.
+- **Rebuilt the dev container** off the branch (`bash deploy/compose/start.sh dev up -d --build`) — LOCAL only.
+
+**⏳ PENDING / NEXT — owner-gated holds (re-surface):**
+- 🔒 **[WHAT] Push authorization** — `main` is **12 ahead of origin** (3 branch merges + decision-closure + prior docs handoffs, all HELD). A `main` push trips Model-A auto-deploy (staging deliberately offline).
+- 🔀 **[WHAT] Merge + push `feat/public-landing-page`** (`6268bc5`) to `main` — owner said "leave on branch" for now.
+- Optional (owner-discretion): make the public landing default LIGHT (currently loads dark = app-wide default; not changed to avoid flipping the app/login/dashboard). Copy/section tweaks (add testimonials, contact block, swap gallery shots).
+- Carried un-gated offers (non-blocking): one-line fix for the preserved category-checkbox visual bug (`report-hub-filters.tsx`); next hotspots `BulkFilterDialog` CC69 / `buildReport` CC64 / `BarangayDensityMap` CC78.
+- Deferred (unchanged): `uuid` moderate (via exceljs, below CI gate); M4 back-port; owner-gated V32.48 lint-design `prep-sync`; staging revival ("later").
+
+**Git:** `main` @ `46d21db`, **12 ahead of `origin/main`** (HELD). Branch `feat/public-landing-page` @ `6268bc5` (landing, LOCAL/unpushed). Source branches `refactor/dedupe-cellvaluetostring`, `refactor/report-hub-decompose`, `fix/traefik-label-drift` retained. Tree clean. HARD HOLD stands on all pushes/deploys/merges-to-main.
+
+---
+
+## Current State (2026-08-12) — ✅ Traefik-label drift RESOLVED [HOW] + loop stopped by owner
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

@@ -6,6 +6,19 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-14 — 🚀 Push / merge authorization (HARD HOLD)
+
+- [ ] **[WHAT] Push `main` to origin** — `main` (`46d21db`) is **12 commits ahead of origin** (3 branch merges
+  + decision-closure + prior docs handoffs, all verified & held). A `main` push trips Model-A auto-deploy;
+  staging is deliberately offline. Owner word required.
+- [ ] **[WHAT] Merge + push `feat/public-landing-page`** (`6268bc5`) — the new public landing page + login
+  relocation to `/admin`. Built, `next build`-green, running on the rebuilt dev container (`localhost:44387`),
+  LOCAL/HARD HOLD. Owner said "good to leave on the branch" (2026-08-14) → merge/push deferred until owner
+  authorizes. Optional pre-merge tweak available: default the public landing to LIGHT (currently loads dark =
+  app-wide default).
+
+
+
 ### 2026-08-12 — 🔀 Two local CGC-driven refactor branches — owner review + merge/push (HARD HOLD)
 
 - [x] ✅ **RESOLVED [WHAT] (2026-08-13, owner "Merge all 3 to main, LOCAL only") — MERGED, no push.**
