@@ -21,7 +21,7 @@ export function PlatformHeaderActions({ username }: PlatformHeaderActionsProps) 
       <Button
         variant="outline"
         size="sm"
-        onClick={() => void signOut({ callbackUrl: "/login" })}
+        onClick={() => void signOut({ callbackUrl: "/admin" })}
       >
         <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
         Sign out
