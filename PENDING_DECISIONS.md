@@ -21,13 +21,14 @@ conductor's to decide and never lands here.
 
 ### 2026-08-11 — 🔒 Two pre-existing Traefik-label defects in prod+stage compose templates
 
-- [ ] **[WHAT] Align (or leave) the in-repo Traefik labels vs the live Traefik static config.** Surfaced once the
-  `depends_on:` YAML fix made `deploy/compose/{prod,stage}/docker-compose.app.yml` parse: (1) `tls.certresolver=letsEncrypt`
-  (linter wants lowercase `letsencrypt` — must byte-match the resolver name in Traefik's static config); (2) no explicit
-  `tls=true` on the websecure router (implicit via certresolver, likely a nit). **Live prod serves TLS fine and the
-  deployed server-side stack file is already correct** — this is repo-template drift only, no live impact, deploy is HARD
-  HOLD regardless. Conductor can resolve as `[HOW]` after verifying the true resolver name from Server-Setups (Traefik
-  static config), or owner decides. Not urgent.
+- [x] ✅ **RESOLVED [HOW] (2026-08-12, owner "resolve it yourself") — labels aligned to server static config.**
+  Verified the true resolver name from `Server-Setups/Powerbyte-Hostinger/setup/traefik/traefik.yml`
+  (`certificatesResolvers.letsencrypt`, lowercase) — the server FRMS prod actually deploys to. Applied to
+  `deploy/compose/{prod,stage}/docker-compose.app.yml` on branch `fix/traefik-label-drift` (`79693f0`):
+  (1) `certresolver=letsEncrypt` → `letsencrypt`; (2) added explicit `tls=true` on the websecure router.
+  `scripts/lint-deploy.sh` C2 + C3 now PASS (exit 0; only 2 pre-existing non-blocking env-var warnings remain).
+  LOCAL only / HARD HOLD — no push, no deploy. Merge to `main` folds in with the decision-#1 branches when owner
+  authorizes.
 
 ### 2026-08-08 — 🔐 Auth.js beta.32+ bump (CRITICAL fail-open) — MERGED + dev-verified; PROD chain still open
 
