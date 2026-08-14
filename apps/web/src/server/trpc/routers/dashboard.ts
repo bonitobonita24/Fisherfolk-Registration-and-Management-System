@@ -5,6 +5,61 @@ import type { FisherfolkStatus } from "@frms/db";
 import { createTRPCRouter, adminProcedure, protectedProcedure } from "../trpc";
 import { resetAnnualRegistrations } from "../../lib/registration-lifecycle";
 
+// ── Year-over-year comparison helpers ────────────────────────────────────────
+
+export interface YoYYearRow {
+  year: number;
+  /** New registrations recorded for this registrationYear. */
+  newCount: number;
+  /** Renewals recorded for this renewalYear (RegistrationRenewal ledger). */
+  renewedCount: number;
+  /** newCount + renewedCount. */
+  total: number;
+  /**
+   * Percent change of `total` vs the immediately prior calendar year,
+   * rounded to 1 decimal. null when the prior year has no data (or zero).
+   */
+  deltaPercent: number | null;
+}
+
+/**
+ * Pure merge of the two groupBy result sets into an ascending per-year series
+ * with a delta-vs-prior-year percentage. Exported for unit testing.
+ */
+export function buildYoYComparison(
+  newGroups: { registrationYear: number; _count: { _all: number } }[],
+  renewalGroups: { renewalYear: number; _count: { _all: number } }[],
+): YoYYearRow[] {
+  const byYear = new Map<number, { newCount: number; renewedCount: number }>();
+  const ensure = (year: number): { newCount: number; renewedCount: number } => {
+    let e = byYear.get(year);
+    if (e == null) {
+      e = { newCount: 0, renewedCount: 0 };
+      byYear.set(year, e);
+    }
+    return e;
+  };
+  for (const g of newGroups) ensure(g.registrationYear).newCount = g._count._all;
+  for (const g of renewalGroups)
+    ensure(g.renewalYear).renewedCount = g._count._all;
+
+  const years = Array.from(byYear.keys()).sort((a, b) => a - b);
+  return years.map((year) => {
+    const e = byYear.get(year);
+    const newCount = e?.newCount ?? 0;
+    const renewedCount = e?.renewedCount ?? 0;
+    const total = newCount + renewedCount;
+    const prior = byYear.get(year - 1);
+    const priorTotal =
+      prior == null ? null : prior.newCount + prior.renewedCount;
+    const deltaPercent =
+      priorTotal != null && priorTotal > 0
+        ? Math.round(((total - priorTotal) / priorTotal) * 1000) / 10
+        : null;
+    return { year, newCount, renewedCount, total, deltaPercent };
+  });
+}
+
 export const dashboardRouter = createTRPCRouter({
   getStats: protectedProcedure
     .input(z.object({ year: z.number().int().optional() }).optional())
@@ -447,6 +502,36 @@ export const dashboardRouter = createTRPCRouter({
       tenant.currentRegistrationYear,
     );
     return result;
+  }),
+
+  // Year-over-year registrations: per-year NEW registrations (groupBy
+  // Fisherfolk.registrationYear — near-copy of analytics.getRegistrationTrends)
+  // + renewals (groupBy RegistrationRenewal.renewalYear) + delta percent vs the
+  // prior year. Status filter mirrors getFisherfolkCategoryBreakdown's "ALL"
+  // convention (NEW/RENEWED/ACTIVE — excludes INACTIVE/archived records).
+  getYoYComparison: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const tenantId: string = ctx.tenantId;
+
+    const [newGroups, renewalGroups] = await Promise.all([
+      ctx.db.fisherfolk.groupBy({
+        by: ["registrationYear"],
+        where: {
+          tenantId,
+          status: { in: ["NEW", "RENEWED", "ACTIVE"] as FisherfolkStatus[] },
+        },
+        _count: { _all: true },
+        orderBy: { registrationYear: "asc" },
+      }),
+      ctx.db.registrationRenewal.groupBy({
+        by: ["renewalYear"],
+        where: { tenantId },
+        _count: { _all: true },
+        orderBy: { renewalYear: "asc" },
+      }),
+    ]);
+
+    return buildYoYComparison(newGroups, renewalGroups);
   }),
 
   // Per-Category fisherfolk counts filtered by registration type + year.
