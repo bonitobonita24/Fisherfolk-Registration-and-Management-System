@@ -3,7 +3,19 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
-## 2026-08-14 (latest) — Final LIVE journey smoke on the demo (v0.13.1) — 7/7 PASS
+## 2026-08-14 (latest) — Pushed held docs commits to origin/main
+
+**In your words:** push the held docs commits.
+
+✅ **Done & verified**
+- Pushed the 4 held docs/session-save commits to `origin/main` (`752c6a5..c101981`); `git status` confirms `main` up to date with `origin/main`, no ahead/behind.
+- Documentation only (STATE, session log, journey-smoke) — no code, no deploy. Live demo unaffected (still v0.13.1).
+
+💬 **Notes**
+- Plain push to `main` may trigger CI `docker-publish` image build (Model-A); no environment auto-deploys — staging/prod/demo promotion stays owner-gated.
+- Untracked `.qa-learnings/` left in place (QA-skills scratch, not app code).
+
+## 2026-08-14 — Final LIVE journey smoke on the demo (v0.13.1) — 7/7 PASS
 
 **In your words:** run the final visitor-journey smoke on the live `frms-demo.powerbyte.app` — especially the just-added "Sign in" nav button — read-only, then save the session.
 
