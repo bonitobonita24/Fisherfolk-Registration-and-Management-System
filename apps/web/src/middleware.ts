@@ -5,7 +5,11 @@ import {
   buildContentSecurityPolicy,
   storageOriginFromEnv,
 } from "@/lib/security-headers";
-import { parseCustomDomainMap, resolveTenantRoute } from "@/lib/tenant-routing";
+import {
+  normalizeHost,
+  parseCustomDomainMap,
+  resolveTenantRoute,
+} from "@/lib/tenant-routing";
 import { canAccessRouteSegment } from "@/lib/route-feature-map";
 import type { Actor, FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -113,6 +117,18 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   const tenantSlugFromUrl = pathname.split("/")[1];
   if (tenantSlugFromUrl && tenantId) {
     if (tenantSlug && tenantSlugFromUrl !== tenantSlug) {
+      // On a custom-domain host, a session for a DIFFERENT tenant is invalid
+      // here: redirecting to the session's tenant would immediately be
+      // re-prefixed with the host's slug and loop forever (e.g. a stale
+      // session from a re-seeded demo). Clear the session, go to login.
+      const hostSlug =
+        customDomainToSlug[normalizeHost(req.headers.get("host")) ?? ""];
+      if (hostSlug !== undefined && hostSlug !== tenantSlug) {
+        const res = NextResponse.redirect(new URL("/admin", req.url));
+        res.cookies.delete("authjs.session-token");
+        res.cookies.delete("__Secure-authjs.session-token");
+        return res;
+      }
       // Session tenant doesn't match URL tenant — redirect to correct tenant
       return NextResponse.redirect(
         new URL(`/${tenantSlug}/dashboard`, req.url),
