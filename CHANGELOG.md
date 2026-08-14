@@ -4,6 +4,15 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.1 — 2026-08-14
+
+### [FIXED]
+- custom-domain clean URLs — app-level route exemption + inverse masking (`0aac6a1`)
+
+### [DOCS]
+- demo deployed — frms-demo.powerbyte.app/demo = official Calapan City demo (v0.12.0, smoke 8/8) (`7b3a83e`)
+
+
 ## v0.12.0 — 2026-08-14
 
 ### [FEATURE]
