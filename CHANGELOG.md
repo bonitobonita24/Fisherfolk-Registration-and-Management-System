@@ -4,6 +4,12 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.13.1 — 2026-08-14
+
+### [FIXED]
+- add Sign in button to nav (desktop + mobile sheet) (`54fa422`)
+
+
 ## v0.13.0 — 2026-08-14
 
 ### [FEATURE]
