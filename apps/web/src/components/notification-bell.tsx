@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { notificationHref } from "@/lib/notification-href";
 import { trpc } from "@/lib/trpc/client";
 
 const TYPE_DOT: Record<string, string> = {
@@ -18,13 +21,6 @@ const TYPE_DOT: Record<string, string> = {
   SUCCESS: "bg-green-500",
   WARNING: "bg-yellow-500",
   ERROR: "bg-red-500",
-};
-
-const ENTITY_ROUTES: Record<string, string> = {
-  EditRequest: "edit-requests",
-  Fisherfolk: "fisherfolk",
-  Vessel: "vessels",
-  Violation: "violations",
 };
 
 function formatRelativeTime(date: Date): string {
@@ -43,6 +39,7 @@ export function NotificationBell() {
   const params = useParams<{ tenant: string }>();
   const tenant = params.tenant;
   const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -79,12 +76,10 @@ export function NotificationBell() {
     entityId: string | null;
   }) {
     markRead.mutate({ id: notif.id });
-    if (notif.entityType && notif.entityId) {
-      const segment = ENTITY_ROUTES[notif.entityType];
-      if (segment) {
-        router.push(`/${tenant}/${segment}/${notif.entityId}`);
-        return;
-      }
+    const href = notificationHref(tenant, notif.entityType, notif.entityId);
+    if (href) {
+      setOpen(false);
+      router.push(href);
     }
   }
 
@@ -93,7 +88,7 @@ export function NotificationBell() {
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative" aria-label="Notifications">
           <Bell className="h-4 w-4" />
@@ -126,7 +121,10 @@ export function NotificationBell() {
             No new notifications
           </div>
         ) : (
-          <ScrollArea className="max-h-80">
+          // Radix ScrollArea: max-h on the Root never resolves (the Viewport is
+          // h-full against an auto-height parent), so the Root's overflow-hidden
+          // just clips. Target the Viewport itself with the max-height instead.
+          <ScrollArea className="[&>[data-radix-scroll-area-viewport]]:max-h-80">
             <ul>
               {notifications.map((notif, index) => {
                 const dotClass = TYPE_DOT[notif.type] ?? "bg-gray-400";
@@ -162,6 +160,14 @@ export function NotificationBell() {
             </ul>
           </ScrollArea>
         )}
+        <Separator />
+        <Link
+          href={`/${tenant}/notifications`}
+          onClick={() => setOpen(false)}
+          className="block px-4 py-2.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          View all notifications
+        </Link>
       </PopoverContent>
     </Popover>
   );
