@@ -16,6 +16,10 @@ handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`
   - **v0.12.4** — middleware tenant cross-check swallowed `public/data/*.geojson` (silent 307 → map lost its data, ALL hosts) → `/data` added to PUBLIC_PATHS.
   - **v0.12.5** — owner hit `ERR_TOO_MANY_REDIRECTS` on a stale old-demo URL: a session for a DIFFERENT tenant (old `calapan-city` JWT survived the DB wipe) looped forever on the custom domain → such sessions are now cleared + sent to login.
   - **v0.12.6** — login hung at "Signing in…": the post-login `router.push(callbackUrl=/demo)` stalled on the inverse-mask 308 → custom-domain hosts now issue CLEAN callbackUrls (bare root → `/dashboard`); login verified landing on `/dashboard` in 5.2s.
+- **Owner follow-up: "root always goes to /admin — is that OK?"** → chose **landing-first**:
+  - **v0.13.0** — the custom-domain root is now app-level: anonymous visitors see the animated marketing landing (URL stays `/`); signed-in users are forwarded to `/dashboard` (host-aware clean redirect).
+  - **v0.13.1** — the landing had NO path to login (E2E caught it) → "Sign in" button added to the nav, desktop + mobile sheet.
+  - **Final journey verification (v0.13.1): 7/7 PASS** — landing renders at `/`, Sign in visible (both breakpoints), login → `/dashboard` in 7.5s, logged-in root forwards to dashboard, 0 console errors. Screenshots `screenshots/demo-landing-signin-*.png`.
 - **Final live verification:** login lands on rendered `/dashboard` (clean URL), all sidebar navs clean, fisherfolk photos render, `/demo/dashboard` → `/dashboard`, geojson **200 `application/geo+json`**, 0 console errors. Dev rebuilt FRESH per release.
 - 🔴 2 global lessons recorded: `nextjs.middleware.rerun-on-rewrite-loop`, `nextjs.middleware.swallows-public-static-files`.
 
