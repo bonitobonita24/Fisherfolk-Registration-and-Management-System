@@ -99,7 +99,22 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
 
   if (!session?.user) {
     const loginUrl = new URL("/admin", req.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    // On a custom-domain host `pathname` is the internally REWRITTEN
+    // `/<slug>/...` form. Hand the login page the CLEAN path instead: the
+    // post-login `router.push(callbackUrl)` must not hit the inverse-mask 308
+    // (client-side RSC navigation stalls on it) — the clean path rewrites
+    // straight to the tenant route. Bare tenant root → /dashboard directly.
+    const hostSlug =
+      customDomainToSlug[normalizeHost(req.headers.get("host")) ?? ""];
+    let callbackPath = pathname;
+    if (
+      hostSlug !== undefined &&
+      (pathname === `/${hostSlug}` || pathname.startsWith(`/${hostSlug}/`))
+    ) {
+      callbackPath = pathname.slice(`/${hostSlug}`.length) || "/dashboard";
+      if (callbackPath === "/") callbackPath = "/dashboard";
+    }
+    loginUrl.searchParams.set("callbackUrl", callbackPath);
     return NextResponse.redirect(loginUrl);
   }
 
