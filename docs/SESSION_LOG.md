@@ -14,6 +14,8 @@ handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`
   - **v0.12.2** — Next re-runs middleware on rewritten URLs → the inverse-mask looped every clean URL; internal rewrites now carry a marker header.
   - **v0.12.3** — bare `/<slug>` had no page (post-login 404) → tenant-root redirect page; `/data` added to rewrite-reserved prefixes.
   - **v0.12.4** — middleware tenant cross-check swallowed `public/data/*.geojson` (silent 307 → map lost its data, ALL hosts) → `/data` added to PUBLIC_PATHS.
+  - **v0.12.5** — owner hit `ERR_TOO_MANY_REDIRECTS` on a stale old-demo URL: a session for a DIFFERENT tenant (old `calapan-city` JWT survived the DB wipe) looped forever on the custom domain → such sessions are now cleared + sent to login.
+  - **v0.12.6** — login hung at "Signing in…": the post-login `router.push(callbackUrl=/demo)` stalled on the inverse-mask 308 → custom-domain hosts now issue CLEAN callbackUrls (bare root → `/dashboard`); login verified landing on `/dashboard` in 5.2s.
 - **Final live verification:** login lands on rendered `/dashboard` (clean URL), all sidebar navs clean, fisherfolk photos render, `/demo/dashboard` → `/dashboard`, geojson **200 `application/geo+json`**, 0 console errors. Dev rebuilt FRESH per release.
 - 🔴 2 global lessons recorded: `nextjs.middleware.rerun-on-rewrite-loop`, `nextjs.middleware.swallows-public-static-files`.
 
