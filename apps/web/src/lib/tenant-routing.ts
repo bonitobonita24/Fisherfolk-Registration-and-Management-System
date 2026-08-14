@@ -118,6 +118,11 @@ export function resolveTenantRoute(
     if (isAppLevel(pathname)) {
       return { slug: slugFromHost, source: "host", rewriteTo: null, redirectTo: null };
     }
+    // The domain root is app-level too: anonymous visitors get the public
+    // marketing landing; signed-in users are forwarded by the auth handler.
+    if (pathname === "/") {
+      return { slug: slugFromHost, source: "host", rewriteTo: null, redirectTo: null };
+    }
     // Slug-prefixed URL on the custom domain → redirect to the clean form
     // (inverse masking) so the slug never shows in the address bar.
     if (

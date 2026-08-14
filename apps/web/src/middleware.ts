@@ -89,9 +89,16 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return NextResponse.redirect(new URL("/platform/tenants", req.url));
     }
     if (user.tenantSlug) {
-      return NextResponse.redirect(
-        new URL(`/${user.tenantSlug}/dashboard`, req.url),
-      );
+      // On a custom-domain host matching the session's tenant, redirect to
+      // the CLEAN path — a slug-prefixed target would immediately 308 back
+      // through the inverse mask (extra hop, and client RSC navs stall on it).
+      const rootHostSlug =
+        customDomainToSlug[normalizeHost(req.headers.get("host")) ?? ""];
+      const dashboardPath =
+        rootHostSlug !== undefined && rootHostSlug === user.tenantSlug
+          ? "/dashboard"
+          : `/${user.tenantSlug}/dashboard`;
+      return NextResponse.redirect(new URL(dashboardPath, req.url));
     }
     // Authenticated but no tenant context — fall through to the landing.
     return NextResponse.next();
