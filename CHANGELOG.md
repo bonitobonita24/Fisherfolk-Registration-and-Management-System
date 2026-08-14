@@ -4,6 +4,15 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.5 — 2026-08-14
+
+### [FIXED]
+- break redirect loop for foreign-tenant sessions on custom-domain hosts (`1b98c23`)
+
+### [DOCS]
+- demo at subdomain root via custom-domain masking (v0.12.1–v0.12.4, live-verified) (`b210749`)
+
+
 ## v0.12.4 — 2026-08-14
 
 ### [FIXED]
