@@ -27,10 +27,15 @@ the custom-domain tenant mechanism: `tenants.custom_domain='frms-demo.powerbyte.
 - **v0.12.6** `8451794` — 🔴 login hung at "Signing in…": anonymous redirects carried the REWRITTEN
   `/demo` as callbackUrl; post-login `router.push` stalls on the inverse-mask 308 (client RSC nav).
   Fix: custom-domain hosts issue CLEAN callbackUrls (slug stripped; bare tenant root → `/dashboard`).
-**Final live E2E (v0.12.6):** root → `callbackUrl=%2Fdashboard` → login lands rendered `/dashboard` in
-**5.2s** (no hang) · sidebar navs clean · stale `/calapan-city/dashboard` = clean 404, session preserved,
-NO loop · geojson 200 `application/geo+json` · 0 console errors.
-`origin/main` = local main @ `8451794` (v0.12.6, pushed). Dev rebuilt FRESH per release.
+- **v0.13.0** `94614d6` — owner chose LANDING-FIRST for the demo root: custom-domain root is now
+  app-level (resolver returns no rewrite for `/`) — anonymous → marketing landing at `/`; signed-in →
+  host-aware CLEAN `/dashboard` redirect (avoids inverse-mask 308 on client navs).
+- **v0.13.1** `752c6a5` — E2E caught the landing had NO login entry point → "Sign in" button added to
+  `landing-nav.tsx` (desktop header + mobile sheet), links `/admin`.
+**Final journey E2E (v0.13.1): 7/7 PASS** — anonymous `/` = landing (URL stays `/`) · Sign in visible
+desktop+mobile · login → rendered `/dashboard` in 7.5s · logged-in `/` forwards to `/dashboard` ·
+stale foreign-tenant URLs safe (v0.12.5) · geojson 200 · 0 console errors.
+`origin/main` = local main @ `752c6a5` (v0.13.1, pushed). Dev rebuilt FRESH per release.
 **Optional polish (open, low-prio):** emit clean (non-slug) hrefs on custom-domain hosts to avoid the
 per-click 308 hop; real Calapan barangay names in the demo seed so the density map plots.
 
