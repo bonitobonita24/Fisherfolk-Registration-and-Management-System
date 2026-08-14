@@ -35,6 +35,7 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
       slug: "calapan-city",
       source: "host",
       rewriteTo: "/calapan-city",
+      redirectTo: null,
     });
   });
 
@@ -48,7 +49,7 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
     expect(r.source).toBe("host");
   });
 
-  it("does NOT double-rewrite when already in /<slug>/... form", () => {
+  it("redirects a slug-prefixed URL to its clean form (inverse masking)", () => {
     const r = resolveTenantRoute({
       host: "fisherfolk.calapancity.gov.ph",
       pathname: "/calapan-city/dashboard",
@@ -58,7 +59,31 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
       slug: "calapan-city",
       source: "host",
       rewriteTo: null,
+      redirectTo: "/dashboard",
     });
+  });
+
+  it("redirects the bare /<slug> to the domain root", () => {
+    const r = resolveTenantRoute({
+      host: "fisherfolk.calapancity.gov.ph",
+      pathname: "/calapan-city",
+      customDomainToSlug: MAP,
+    });
+    expect(r.redirectTo).toBe("/");
+    expect(r.rewriteTo).toBeNull();
+  });
+
+  it("serves app-level routes (/admin, /login, /platform) as-is on a custom domain", () => {
+    for (const p of ["/admin", "/login", "/platform/tenants"]) {
+      const r = resolveTenantRoute({
+        host: "fisherfolk.calapancity.gov.ph",
+        pathname: p,
+        customDomainToSlug: MAP,
+      });
+      expect(r.rewriteTo).toBeNull();
+      expect(r.redirectTo).toBeNull();
+      expect(r.slug).toBe("calapan-city");
+    }
   });
 
   it("never rewrites reserved paths (api/_next/assets) on a custom domain", () => {
@@ -85,6 +110,7 @@ describe("resolveTenantRoute — subdirectory routing (default today)", () => {
       slug: "calapan-city",
       source: "path",
       rewriteTo: null,
+      redirectTo: null,
     });
   });
 
@@ -94,7 +120,7 @@ describe("resolveTenantRoute — subdirectory routing (default today)", () => {
       pathname: "/",
       customDomainToSlug: MAP,
     });
-    expect(r).toEqual({ slug: null, source: "none", rewriteTo: null });
+    expect(r).toEqual({ slug: null, source: "none", rewriteTo: null, redirectTo: null });
   });
 
   it("an unknown host falls through to subdirectory routing", () => {

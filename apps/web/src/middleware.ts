@@ -156,11 +156,18 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   // INTERNALLY to the tenant's `/<slug>/...` route before auth/route runs. The
   // browser keeps the custom domain in the URL bar. Inert while the map is empty
   // (rewriteTo is always null) — zero behaviour change until a domain is added.
-  const { rewriteTo } = resolveTenantRoute({
+  const { rewriteTo, redirectTo } = resolveTenantRoute({
     host: req.headers.get("host"),
     pathname: req.nextUrl.pathname,
     customDomainToSlug,
   });
+  // Inverse masking: a slug-prefixed URL on a custom domain redirects to its
+  // clean form (e.g. /demo/dashboard → /dashboard) so the slug never shows.
+  if (redirectTo && redirectTo !== req.nextUrl.pathname) {
+    const url = req.nextUrl.clone();
+    url.pathname = redirectTo;
+    return NextResponse.redirect(url, 308);
+  }
   if (rewriteTo && rewriteTo !== req.nextUrl.pathname) {
     const url = req.nextUrl.clone();
     url.pathname = rewriteTo;
