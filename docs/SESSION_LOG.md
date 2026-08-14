@@ -3,6 +3,24 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-08-14 (latest) — Demo now at the subdomain ROOT (custom-domain masking) — no more `/demo` path (v0.12.1–v0.12.4)
+
+**In your words:** the `/demo` slug on the `frms-demo` subdomain is redundant — serve the demo at the subdomain root like its own site; I'm fine with the subdomain.
+
+✅ **Done & verified**
+- Mapped `frms-demo.powerbyte.app` as the `demo` tenant's **custom domain** (the mechanism built for real client domains) — tenant now serves at the subdomain root; slug exists internally but never shows in the URL.
+- Live onboarding exposed **4 real defects** in the never-before-activated masking path; all fixed, released, deployed (each verified on the live stack):
+  - **v0.12.1** — `/admin`,`/login`,`/platform` exempt from tenant rewriting (login 404'd) + inverse-mask 308 (slug-prefixed URL → clean form).
+  - **v0.12.2** — Next re-runs middleware on rewritten URLs → the inverse-mask looped every clean URL; internal rewrites now carry a marker header.
+  - **v0.12.3** — bare `/<slug>` had no page (post-login 404) → tenant-root redirect page; `/data` added to rewrite-reserved prefixes.
+  - **v0.12.4** — middleware tenant cross-check swallowed `public/data/*.geojson` (silent 307 → map lost its data, ALL hosts) → `/data` added to PUBLIC_PATHS.
+- **Final live verification:** login lands on rendered `/dashboard` (clean URL), all sidebar navs clean, fisherfolk photos render, `/demo/dashboard` → `/dashboard`, geojson **200 `application/geo+json`**, 0 console errors. Dev rebuilt FRESH per release.
+- 🔴 2 global lessons recorded: `nextjs.middleware.rerun-on-rewrite-loop`, `nextjs.middleware.swallows-public-static-files`.
+
+💬 **Notes**
+- Sidebar hrefs are still slug-prefixed (each click 308s to the clean form — works, one extra hop). Optional polish: emit clean hrefs on custom-domain hosts.
+- The geojson fix benefits dev/staging/prod too (defect existed everywhere, silently).
+
 ## 2026-08-14 (later) — Demo deployed: `frms-demo.powerbyte.app/demo` is the official Calapan City demo (v0.12.0)
 
 **In your words:** deploy the demo, prune the old demo we already had, and make the Calapan City tenant the real official demo — accessible as `/demo` just like any registered tenant.
