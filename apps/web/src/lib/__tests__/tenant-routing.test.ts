@@ -25,7 +25,7 @@ describe("normalizeHost", () => {
 });
 
 describe("resolveTenantRoute — custom domain (masking)", () => {
-  it("rewrites the domain root to /<slug>", () => {
+  it("serves the domain root app-level (landing / auth-handler forward), no rewrite", () => {
     const r = resolveTenantRoute({
       host: "fisherfolk.calapancity.gov.ph",
       pathname: "/",
@@ -34,7 +34,7 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
     expect(r).toEqual({
       slug: "calapan-city",
       source: "host",
-      rewriteTo: "/calapan-city",
+      rewriteTo: null,
       redirectTo: null,
     });
   });
