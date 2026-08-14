@@ -73,11 +73,11 @@ export function FisherfolkGroupTile({
     });
 
   return (
-    <Card>
-      <CardHeader className="p-3 pb-2">
-        <CardTitle className="text-sm">Fisherfolk</CardTitle>
+    <Card className="flex flex-col gap-0 overflow-hidden py-0">
+      <CardHeader className="space-y-1 border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Fisherfolk</CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0 space-y-2">
+      <CardContent className="flex min-h-64 flex-1 flex-col space-y-2 px-6 py-5">
         {/* Big headline: ACTIVE + NEW + RENEWED (D1 decision) */}
         {statsLoading ? (
           <Shimmer className="h-8 w-20" />

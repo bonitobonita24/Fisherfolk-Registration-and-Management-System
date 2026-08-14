@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Card, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,12 @@ interface StatCardProps {
   hint?: string;
   loading?: boolean;
   className?: string;
+  /**
+   * Tinted Tailwind pair for the icon chip, e.g.
+   * "bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-400".
+   * Defaults to the tenant-aware accent surface (bg-primary/10 text-primary).
+   */
+  tone?: string;
 }
 
 export function StatCard({
@@ -20,30 +26,40 @@ export function StatCard({
   hint,
   loading,
   className,
+  tone,
 }: StatCardProps) {
   return (
-    <Card className={cn("gap-4", className)}>
-      <CardHeader className="flex flex-row items-center gap-3 space-y-0">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-          {icon}
+    <Card className={cn("gap-0 py-5", className)}>
+      <CardContent className="space-y-3 px-6 py-0">
+        <div className="flex items-center gap-2.5">
+          <span
+            className={cn(
+              "flex size-9 shrink-0 items-center justify-center rounded-lg",
+              tone ?? "bg-primary/10 text-primary",
+            )}
+          >
+            {icon}
+          </span>
+          <p className="min-w-0 truncate text-sm font-medium text-muted-foreground">
+            {title}
+          </p>
         </div>
-        <div className="flex min-w-0 flex-col">
-          {loading === true ? (
-            <Skeleton className="h-8 w-24" />
-          ) : typeof value === "number" ? (
-            <NumberTicker
-              value={value}
-              className="text-2xl font-bold text-foreground"
-            />
-          ) : (
-            <span className="text-2xl font-bold text-foreground">{value}</span>
-          )}
-          <span className="truncate text-sm text-muted-foreground">{title}</span>
-          {hint ? (
-            <span className="text-xs text-muted-foreground">{hint}</span>
-          ) : null}
-        </div>
-      </CardHeader>
+        {loading === true ? (
+          <Skeleton className="h-7 w-24" />
+        ) : typeof value === "number" ? (
+          <NumberTicker
+            value={value}
+            className="truncate text-[28px] font-semibold leading-none tracking-tight tabular-nums text-foreground"
+          />
+        ) : (
+          <p className="truncate text-[28px] font-semibold leading-none tracking-tight tabular-nums text-foreground">
+            {value}
+          </p>
+        )}
+        {hint ? (
+          <p className="truncate text-xs text-muted-foreground">{hint}</p>
+        ) : null}
+      </CardContent>
     </Card>
   );
 }

@@ -20,7 +20,7 @@ export function YearSelect({ value, onValueChange }: YearSelectProps) {
       onValueChange={(v) => onValueChange(Number(v))}
     >
       <SelectTrigger
-        className="w-full bg-card text-muted-foreground"
+        className="h-8 w-full text-muted-foreground"
         aria-label="Registration year"
       >
         <SelectValue placeholder="Year" />

@@ -194,11 +194,11 @@ function DashboardClientInner() {
   return (
     <div className="space-y-4">
       {/* ── Density Map (~75%) + Side Column (25%) ───────────────────────── */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4 lg:gap-6">
         <div className="lg:col-span-3 lg:min-h-0">
           <BarangayDensityMap />
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <FisherfolkGroupTile
             activeFisherfolk={stats?.activeFisherfolk ?? 0}
             newFisherfolk={stats?.newFisherfolk ?? 0}
@@ -216,12 +216,12 @@ function DashboardClientInner() {
       </div>
 
       {/* ── TILE B: Demographics — Gender + Age + Barangay ─────────────────── */}
-      <Card>
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm">Demographics</CardTitle>
+      <Card className="flex flex-col gap-0 overflow-hidden py-0">
+        <CardHeader className="space-y-1 border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Demographics</CardTitle>
           <CardDescription className="text-xs">Gender, age group, and barangay breakdown</CardDescription>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
+        <CardContent className="flex min-h-64 flex-1 flex-col px-6 py-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Gender Distribution */}
             <div>
@@ -360,12 +360,12 @@ function DashboardClientInner() {
       </Card>
 
       {/* ── TILE C: Activity Categories ──────────────────────────────────── */}
-      <Card>
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm">Activity Categories</CardTitle>
+      <Card className="flex flex-col gap-0 overflow-hidden py-0">
+        <CardHeader className="space-y-1 border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Activity Categories</CardTitle>
           <CardDescription className="text-xs">Category distribution and by-barangay breakdown</CardDescription>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
+        <CardContent className="flex min-h-64 flex-1 flex-col px-6 py-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {/* Activity Category Distribution */}
             <div>
@@ -469,14 +469,14 @@ function DashboardClientInner() {
       </Card>
 
       {/* ── TILE D: Vessels · Ayuda · Violations ─────────────────────────── */}
-      <Card>
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm">Vessels · Ayuda · Violations</CardTitle>
+      <Card className="flex flex-col gap-0 overflow-hidden py-0">
+        <CardHeader className="space-y-1 border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Vessels · Ayuda · Violations</CardTitle>
           <CardDescription className="text-xs">
             Vessels by type, ayuda by program, and violations by status
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
+        <CardContent className="flex min-h-64 flex-1 flex-col px-6 py-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Vessels by type */}
             <div>
@@ -650,14 +650,14 @@ function DashboardClientInner() {
       </Card>
 
       {/* ── TILE E: Households ───────────────────────────────────────────── */}
-      <Card>
-        <CardHeader className="p-3 pb-2">
-          <CardTitle className="text-sm">Households</CardTitle>
+      <Card className="flex flex-col gap-0 overflow-hidden py-0">
+        <CardHeader className="space-y-1 border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Households</CardTitle>
           <CardDescription className="text-xs">
             Total registered households, by barangay, and by head&apos;s activity category
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
+        <CardContent className="flex min-h-64 flex-1 flex-col px-6 py-5">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Total households stat */}
             <div className="flex flex-col justify-center">
@@ -771,7 +771,7 @@ function DashboardClientInner() {
       {/* ── Data Completeness ─────────────────────────────────────────────── */}
       <section aria-label="Data completeness">
         <h2 className="mb-3 text-sm font-semibold text-foreground">Data Completeness</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2">
           <Link href={`/${tenantSlug}/fisherfolk?missing=photo`}>
             <StatCard
               icon={<ImageOff className="size-5" />}

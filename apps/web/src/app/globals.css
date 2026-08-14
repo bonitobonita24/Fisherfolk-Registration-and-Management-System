@@ -44,9 +44,6 @@
     --sidebar-accent: 0 0% 94.5%;
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 92.2%;
-    /* RETIRING (Wave 1 deletes): legacy teal nav-active fill, still read by sidebar.tsx */
-    --nav-active-bg: 175 100% 22%;
-    --nav-active-fg: 0 0% 100%;
   }
 
   .dark {
@@ -79,9 +76,6 @@
     --sidebar-accent: 0 0% 16.1%;
     --sidebar-accent-foreground: 0 0% 92.2%;
     --sidebar-border: 0 0% 13.3%;
-    /* RETIRING (Wave 1 deletes): legacy teal nav-active fill, still read by sidebar.tsx */
-    --nav-active-bg: 175 100% 20%;
-    --nav-active-fg: 0 0% 100%;
   }
 }
 

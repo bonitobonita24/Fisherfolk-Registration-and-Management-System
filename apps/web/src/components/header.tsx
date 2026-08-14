@@ -8,6 +8,7 @@ import { Menu, LogOut, Settings, PanelLeft } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -86,7 +87,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
   const onDashboard = pathname?.endsWith("/dashboard") ?? false;
 
   return (
-    <header className="flex h-14 items-center gap-2 border-b border-border bg-card px-3">
+    <header className="flex h-12 shrink-0 items-center gap-2 bg-muted/40 px-4">
       {/* Mobile: always-present drawer trigger */}
       <Button
         variant="ghost"
@@ -100,15 +101,18 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
 
       {/* Desktop: collapse toggle — only when app-shell provides the handler */}
       {onToggleSidebar && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hidden shrink-0 md:flex"
-          onClick={onToggleSidebar}
-          aria-label="Toggle sidebar"
-        >
-          <PanelLeft className="h-4 w-4" />
-        </Button>
+        <>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden shrink-0 md:flex"
+            onClick={onToggleSidebar}
+            aria-label="Toggle sidebar"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </Button>
+          <Separator orientation="vertical" className="mr-1 h-5" />
+        </>
       )}
 
       {/* Dashboard-only filters — desktop only */}
@@ -133,7 +137,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
               aria-label="User menu"
             >
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">{initials}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>

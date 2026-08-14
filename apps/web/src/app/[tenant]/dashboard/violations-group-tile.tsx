@@ -24,11 +24,11 @@ export function ViolationsGroupTile({
   loading,
 }: ViolationsGroupTileProps) {
   return (
-    <Card>
-      <CardHeader className="p-3 pb-2">
-        <CardTitle className="text-sm">Active Violations</CardTitle>
+    <Card className="flex flex-col gap-0 overflow-hidden py-0">
+      <CardHeader className="space-y-1 border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Active Violations</CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="flex flex-1 flex-col justify-center px-6 py-5">
         {loading ? (
           <Shimmer className="h-8 w-12" />
         ) : (
