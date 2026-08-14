@@ -375,7 +375,7 @@ async function main(): Promise<void> {
   console.log(`  ✅ Tenant ready: ${tenant.name} (${tenant.slug})`);
 
   // ── 2. Demo users ────────────────────────────────────────────────────────
-  const DEMO_PASSWORD = "DemoCalapan_LocalDev_2026";
+  const DEMO_PASSWORD = process.env.DEMO_SEED_PASSWORD ?? "DemoCalapan_LocalDev_2026";
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   const superadmin = await prisma.user.upsert({
