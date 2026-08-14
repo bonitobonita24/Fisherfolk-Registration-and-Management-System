@@ -25,7 +25,9 @@ export default async function IdTemplateSettingsPage({
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">ID Card Template</h1>
+        <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+          <h1 className="truncate text-base font-semibold tracking-tight">ID Card Template</h1>
+        </div>
         <div
           role="alert"
           className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm"
@@ -57,20 +59,22 @@ export default async function IdTemplateSettingsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">ID Card Template</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Design the ID card template once — the <strong>active</strong>{" "}
-          template is automatically used by the{" "}
-          <Link
-            href={`/${tenant}/id-generator`}
-            className="font-medium underline underline-offset-2"
-          >
-            ID Generator
-          </Link>{" "}
-          when encoders print IDs. Only one template per type can be active at
-          a time.
-        </p>
+      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+        <div>
+          <h1 className="truncate text-base font-semibold tracking-tight">ID Card Template</h1>
+          <p className="text-xs text-muted-foreground">
+            Design the ID card template once — the <strong>active</strong>{" "}
+            template is automatically used by the{" "}
+            <Link
+              href={`/${tenant}/id-generator`}
+              className="font-medium underline underline-offset-2"
+            >
+              ID Generator
+            </Link>{" "}
+            when encoders print IDs. Only one template per type can be active at
+            a time.
+          </p>
+        </div>
       </div>
       <TemplateEditor canManage />
     </div>

@@ -43,8 +43,8 @@ export function ReportResults({
   appliedDomain: ReportDomain;
 }) {
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="overflow-hidden py-0">
+      <CardHeader className="border-b px-6 py-5">
         {reportLoading ? (
           <div className="space-y-2">
             <Shimmer className="h-5 w-48" />
@@ -52,12 +52,12 @@ export function ReportResults({
           </div>
         ) : (
           <div className="space-y-1">
-            <CardTitle className="text-base">
+            <CardTitle className="text-sm font-medium">
               {report?.title ?? DOMAIN_LABELS[appliedDomain]}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
               {report?.count !== undefined && (
-                <span>
+                <span className="tabular-nums">
                   {report.count.toLocaleString()}{" "}
                   {report.count === 1 ? "record" : "records"}
                   {report.generatedAt ? " · " : ""}
@@ -68,7 +68,7 @@ export function ReportResults({
           </div>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6 py-5">
         {reportLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -85,7 +85,12 @@ export function ReportResults({
               <TableHeader>
                 <TableRow>
                   {report.columns.map((col) => (
-                    <TableHead key={col.key}>{col.label}</TableHead>
+                    <TableHead
+                      key={col.key}
+                      className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0"
+                    >
+                      {col.label}
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -93,7 +98,10 @@ export function ReportResults({
                 {report.rows.map((row, rowIdx) => (
                   <TableRow key={rowIdx}>
                     {report.columns.map((col) => (
-                      <TableCell key={col.key}>
+                      <TableCell
+                        key={col.key}
+                        className="border-r px-3 py-2 text-sm last:border-r-0"
+                      >
                         {row[col.key] !== undefined ? String(row[col.key]) : "—"}
                       </TableCell>
                     ))}

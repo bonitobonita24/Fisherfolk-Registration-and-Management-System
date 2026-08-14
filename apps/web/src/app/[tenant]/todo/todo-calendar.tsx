@@ -102,15 +102,15 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_1fr]">
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-sm font-semibold">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="flex items-center justify-between text-sm font-medium">
             <span>No Due Date</span>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="outline" className="text-[11px] tabular-nums">
               {undated.length}
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {isLoading ? (
             <UndatedListSkeleton />
           ) : undated.length === 0 ? (
@@ -137,13 +137,13 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-semibold">{monthLabel}</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">{monthLabel}</CardTitle>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-8"
               onClick={goPrev}
               aria-label="Previous month"
             >
@@ -152,7 +152,7 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-8"
               onClick={goNext}
               aria-label="Next month"
             >
@@ -160,12 +160,12 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {isLoading ? (
             <CalendarGridSkeleton />
           ) : (
             <table
-              className="w-full table-fixed border-collapse text-xs"
+              className="w-full table-fixed border-collapse text-sm"
               aria-label={`Calendar for ${monthLabel}`}
             >
               <thead>
@@ -174,7 +174,7 @@ export function TodoCalendar({ assignedToMe }: { assignedToMe: boolean }) {
                     <th
                       key={label}
                       scope="col"
-                      className="w-[14.28%] pb-2 text-center font-medium text-muted-foreground"
+                      className="w-[14.28%] pb-2 text-center text-xs font-medium text-muted-foreground"
                     >
                       {label}
                     </th>

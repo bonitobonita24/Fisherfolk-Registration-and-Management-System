@@ -29,7 +29,7 @@ export function RegistrationTypeSelect({
       }}
     >
       <SelectTrigger
-        className="w-full bg-card text-muted-foreground"
+        className="h-8 w-full text-muted-foreground"
         aria-label="Filter by registration type"
       >
         <SelectValue placeholder="Registration type" />

@@ -83,17 +83,17 @@ export function FileUpload({
           if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 transition-colors",
+          "flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed px-6 py-8 transition-colors",
           dragOver
             ? "border-primary bg-primary/5"
             : "border-muted-foreground/25 hover:border-muted-foreground/50",
         )}
       >
         <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Drag & drop or click to upload
         </p>
-        <p className="mt-1 text-xs text-muted-foreground/60">
+        <p className="mt-1 text-xs text-muted-foreground">
           Max {maxSizeMB}MB{accept ? ` · ${accept}` : ""}
         </p>
         <input
@@ -123,7 +123,7 @@ export function FileUpload({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-8 w-8 p-0"
                 onClick={(e) => {
                   e.stopPropagation();
                   removeFile(i);

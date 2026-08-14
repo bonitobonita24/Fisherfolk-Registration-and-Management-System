@@ -35,7 +35,7 @@ export function IdGeneratorClient() {
         >
           <span
             aria-hidden="true"
-            className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${
+            className={`flex size-5 items-center justify-center rounded-full text-xs ${
               step === 1
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"
@@ -58,7 +58,7 @@ export function IdGeneratorClient() {
         >
           <span
             aria-hidden="true"
-            className={`flex h-5 w-5 items-center justify-center rounded-full text-xs ${
+            className={`flex size-5 items-center justify-center rounded-full text-xs ${
               step === 2
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground"

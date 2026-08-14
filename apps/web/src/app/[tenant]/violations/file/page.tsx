@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
+import { PageHeader } from "@/components/shared";
 import { ViolationFormClient } from "./violation-form-client";
 
 interface FileViolationPageProps {
@@ -24,13 +25,10 @@ export default async function FileViolationPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">File Violation</h1>
-        <p className="text-muted-foreground">
-          Record a new fishery violation against a fisherfolk, a vessel, or
-          both.
-        </p>
-      </div>
+      <PageHeader
+        title="File Violation"
+        description="Record a new fishery violation against a fisherfolk, a vessel, or both."
+      />
       <ViolationFormClient />
     </div>
   );

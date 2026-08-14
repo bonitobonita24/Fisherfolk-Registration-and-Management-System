@@ -153,6 +153,7 @@ export function RoleFormDialog({
                 disabled={isSaving}
                 maxLength={60}
                 aria-describedby={nameError ? "role-name-err" : undefined}
+                className="h-9"
               />
               {nameError && (
                 <p id="role-name-err" className="text-xs text-destructive">
@@ -170,6 +171,7 @@ export function RoleFormDialog({
                 placeholder="What is this role for?"
                 disabled={isSaving}
                 maxLength={500}
+                className="h-9"
               />
             </div>
           </div>
@@ -186,7 +188,7 @@ export function RoleFormDialog({
           )}
 
           <DialogFooter>
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" size="sm" disabled={isSaving}>
               {isSaving ? "Saving…" : isEditMode ? "Save Changes" : "Create Role"}
             </Button>
           </DialogFooter>

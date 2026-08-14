@@ -90,62 +90,71 @@ export function FishCatchesListClient() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <SearchInput
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search reference no. or fisherfolk..."
-          className="w-full sm:w-auto"
-        />
-        <Select value={gearType ?? "ALL"} onValueChange={handleGearTypeChange}>
-          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Filter by gear type">
-            <SelectValue placeholder="Gear Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Gear Types</SelectItem>
-            {GEAR_TYPES.map((g) => (
-              <SelectItem key={g} value={g}>
-                {GEAR_TYPE_LABELS[g]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={barangay ?? "ALL"} onValueChange={handleBarangayChange}>
-          <SelectTrigger className="w-full sm:w-[180px]" aria-label="Filter by fishing ground barangay">
-            <SelectValue placeholder="Barangay" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">All Barangays</SelectItem>
-            {CALAPAN_BARANGAYS.map((b) => (
-              <SelectItem key={b} value={b}>
-                {b}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex items-center gap-2">
-          <label htmlFor="fish-catch-date-from" className="text-sm text-muted-foreground">
-            From
-          </label>
-          <Input
-            id="fish-catch-date-from"
-            type="date"
-            value={dateFrom}
-            onChange={(e) => handleDateFromChange(e.target.value)}
-            className="w-full sm:w-[160px]"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="fish-catch-date-to" className="text-sm text-muted-foreground">
-            To
-          </label>
-          <Input
-            id="fish-catch-date-to"
-            type="date"
-            value={dateTo}
-            onChange={(e) => handleDateToChange(e.target.value)}
-            className="w-full sm:w-[160px]"
-          />
+      <div className="sticky top-0 z-30 -mx-4 bg-background">
+        <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+          <Fish className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">All Fish Catches</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {data ? data.total : "-"}
+          </span>
+          <div className="ml-auto flex w-full flex-wrap items-center gap-2 xl:w-auto">
+            <SearchInput
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search reference no. or fisherfolk..."
+              className="w-full sm:w-56"
+            />
+            <Select value={gearType ?? "ALL"} onValueChange={handleGearTypeChange}>
+              <SelectTrigger className="h-8 w-full sm:w-[180px]" aria-label="Filter by gear type">
+                <SelectValue placeholder="Gear Type" />
+              </SelectTrigger>
+              <SelectContent className="w-60">
+                <SelectItem value="ALL">All Gear Types</SelectItem>
+                {GEAR_TYPES.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {GEAR_TYPE_LABELS[g]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={barangay ?? "ALL"} onValueChange={handleBarangayChange}>
+              <SelectTrigger className="h-8 w-full sm:w-[160px]" aria-label="Filter by fishing ground barangay">
+                <SelectValue placeholder="Barangay" />
+              </SelectTrigger>
+              <SelectContent className="w-56">
+                <SelectItem value="ALL">All Barangays</SelectItem>
+                {CALAPAN_BARANGAYS.map((b) => (
+                  <SelectItem key={b} value={b}>
+                    {b}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center gap-2">
+              <label htmlFor="fish-catch-date-from" className="text-sm text-muted-foreground">
+                From
+              </label>
+              <Input
+                id="fish-catch-date-from"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => handleDateFromChange(e.target.value)}
+                className="h-8 w-full sm:w-[150px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="fish-catch-date-to" className="text-sm text-muted-foreground">
+                To
+              </label>
+              <Input
+                id="fish-catch-date-to"
+                type="date"
+                value={dateTo}
+                onChange={(e) => handleDateToChange(e.target.value)}
+                className="h-8 w-full sm:w-[150px]"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

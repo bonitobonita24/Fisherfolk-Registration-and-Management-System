@@ -22,7 +22,7 @@ export default async function PlatformLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6">
-        <span className="text-lg font-bold text-foreground">FRMS Platform</span>
+        <span className="text-base font-semibold tracking-tight text-foreground">FRMS Platform</span>
         <PlatformHeaderActions username={session.user.username} />
       </header>
       <main className="flex-1 p-6">{children}</main>

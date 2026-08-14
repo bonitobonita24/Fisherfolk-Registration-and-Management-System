@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -21,12 +23,44 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { EmptyState } from "@/components/shared";
+import { cn } from "@/lib/utils";
 import { trpc } from "@/lib/trpc/client";
 import type { RegistrationType } from "./registration-type-select";
 
 const categoryChartConfig = {
   count: { label: "Fisherfolk", color: "hsl(var(--chart-1))" },
 } satisfies ChartConfig;
+
+const yoyChartConfig = {
+  newCount: { label: "New", color: "hsl(var(--chart-1))" },
+  renewedCount: { label: "Renewed", color: "hsl(var(--chart-2))" },
+} satisfies ChartConfig;
+
+/** Small "+12% vs 2025" pill for the YoY delta. */
+function DeltaBadge({
+  deltaPercent,
+  priorYear,
+}: {
+  deltaPercent: number;
+  priorYear: number;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
+        deltaPercent > 0
+          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"
+          : deltaPercent < 0
+            ? "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400"
+            : "bg-muted text-muted-foreground",
+      )}
+    >
+      {deltaPercent > 0 ? "+" : ""}
+      {deltaPercent}% vs {priorYear}
+    </span>
+  );
+}
 
 const FISHERFOLK_COLORS = [
   "hsl(var(--chart-1))",
@@ -72,12 +106,19 @@ export function FisherfolkGroupTile({
       year,
     });
 
+  const { data: yoy, isLoading: yoyLoading } =
+    trpc.dashboard.getYoYComparison.useQuery();
+
+  // Last ~4 years, oldest → newest; latest row carries the delta badge.
+  const yoySeries = (yoy ?? []).slice(-4);
+  const yoyLatest = yoySeries.length > 0 ? yoySeries[yoySeries.length - 1] : undefined;
+
   return (
-    <Card>
-      <CardHeader className="p-3 pb-2">
-        <CardTitle className="text-sm">Fisherfolk</CardTitle>
+    <Card className="flex flex-col gap-0 overflow-hidden py-0">
+      <CardHeader className="space-y-1 border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Fisherfolk</CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0 space-y-2">
+      <CardContent className="flex min-h-64 flex-1 flex-col space-y-2 px-6 py-5">
         {/* Big headline: ACTIVE + NEW + RENEWED (D1 decision) */}
         {statsLoading ? (
           <Shimmer className="h-8 w-20" />
@@ -93,11 +134,64 @@ export function FisherfolkGroupTile({
             </p>
           </div>
         )}
-        {/* vs last year — PLACEHOLDER only, never fabricated */}
-        {!statsLoading && (
-          <p className="text-xs text-muted-foreground italic">
-            Year-over-year comparison coming soon
-          </p>
+        {/* Year-over-year comparison — new + renewed per year, delta vs prior */}
+        {yoyLoading ? (
+          <Shimmer className="h-[96px] w-full" />
+        ) : yoySeries.length < 2 ? (
+          <EmptyState
+            title="Not enough data for a year-over-year comparison"
+            description="At least two years of registrations are needed."
+            className="gap-1 px-4 py-4 [&>h2]:text-xs [&>p]:text-xs"
+          />
+        ) : (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                Year over year
+              </p>
+              {yoyLatest?.deltaPercent != null && (
+                <DeltaBadge
+                  deltaPercent={yoyLatest.deltaPercent}
+                  priorYear={yoyLatest.year - 1}
+                />
+              )}
+            </div>
+            <ChartContainer
+              config={yoyChartConfig}
+              className="aspect-auto h-[96px] w-full"
+            >
+              <AreaChart
+                data={yoySeries}
+                margin={{ top: 4, right: 4, bottom: 0, left: 4 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="year"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={4}
+                  tick={{ fontSize: 9 }}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="newCount"
+                  stroke="var(--color-newCount)"
+                  fill="var(--color-newCount)"
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="renewedCount"
+                  stroke="var(--color-renewedCount)"
+                  fill="var(--color-renewedCount)"
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
         )}
         {/* Category breakdown chart (registrationType-filtered) */}
         {catLoading ? (

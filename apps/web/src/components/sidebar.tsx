@@ -43,7 +43,7 @@ export function Sidebar({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className="flex h-full w-full flex-col bg-card">
+      <aside className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
         {/* Brand block — h-14 per AdminCN spec */}
         <div
           className={cn(
@@ -58,7 +58,7 @@ export function Sidebar({
               onClick={() => onNavigate?.()}
               aria-label="FRMS Dashboard"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Ship className="h-4 w-4" />
               </span>
             </Link>
@@ -70,7 +70,7 @@ export function Sidebar({
                 className="flex items-center gap-2"
                 onClick={() => onNavigate?.()}
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Ship className="h-4 w-4" />
                 </span>
                 <span className="flex flex-col leading-none">
@@ -84,7 +84,7 @@ export function Sidebar({
                   onClick={onToggle}
                   aria-label="Collapse sidebar"
                   aria-expanded={true}
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
@@ -105,11 +105,11 @@ export function Sidebar({
                   {isCollapsed ? (
                     /* Divider between groups in icon-rail mode */
                     <div
-                      className="mx-1 my-2 border-t border-border/50"
+                      className="mx-1 my-2 border-t border-sidebar-border/60"
                       aria-hidden="true"
                     />
                   ) : (
-                    <p className="px-2 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="px-2 pb-1 pt-3 text-[0.6875rem] font-medium text-muted-foreground/70">
                       {group.label}
                     </p>
                   )}
@@ -122,8 +122,8 @@ export function Sidebar({
                         "relative flex items-center rounded-md text-sm transition-colors",
                         isCollapsed ? "justify-center px-2 py-1.5" : "gap-2.5 px-2 py-1.5",
                         isActive
-                          ? "bg-[hsl(var(--nav-active-bg))] text-[hsl(var(--nav-active-fg))] font-medium before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                          ? "bg-[color-mix(in_oklab,hsl(var(--foreground))_12%,transparent)] text-sidebar-accent-foreground font-medium dark:bg-[color-mix(in_oklab,hsl(var(--foreground))_5%,transparent)]"
+                          : "text-muted-foreground hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_12%,transparent)] hover:text-sidebar-accent-foreground dark:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_5%,transparent)]",
                       );
                       return (
                         <li key={item.href}>
@@ -165,20 +165,20 @@ export function Sidebar({
 
         {/* Footer — expander when collapsed, label text when expanded */}
         {isCollapsed && onToggle ? (
-          <div className="shrink-0 border-t border-border p-2">
+          <div className="shrink-0 border-t border-sidebar-border p-2">
             <button
               type="button"
               onClick={onToggle}
               aria-label="Expand sidebar"
               aria-expanded={false}
-              className="flex h-8 w-full items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              className="flex h-8 w-full items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
         ) : (
           !isCollapsed && (
-            <div className="shrink-0 space-y-1 border-t border-border p-2.5 text-[10px] text-muted-foreground">
+            <div className="shrink-0 space-y-1 border-t border-sidebar-border p-2.5 text-[10px] text-muted-foreground">
               <p>
                 FRMS · {tenantSlug}
                 {process.env.NEXT_PUBLIC_APP_VERSION ? (

@@ -121,6 +121,7 @@ export function ResetPasswordDialog({
               aria-describedby={
                 errors.newPassword ? "rp-new-password-err" : undefined
               }
+              className="h-9"
             />
             {errors.newPassword && (
               <p id="rp-new-password-err" className="text-xs text-destructive">
@@ -142,6 +143,7 @@ export function ResetPasswordDialog({
               aria-describedby={
                 errors.confirmPassword ? "rp-confirm-password-err" : undefined
               }
+              className="h-9"
             />
             {errors.confirmPassword && (
               <p
@@ -163,12 +165,13 @@ export function ResetPasswordDialog({
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
               disabled={resetPassword.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={resetPassword.isPending}>
+            <Button type="submit" size="sm" disabled={resetPassword.isPending}>
               {resetPassword.isPending ? "Resetting…" : "Reset Password"}
             </Button>
           </DialogFooter>

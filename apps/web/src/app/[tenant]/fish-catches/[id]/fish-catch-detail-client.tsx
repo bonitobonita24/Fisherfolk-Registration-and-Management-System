@@ -2,19 +2,17 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 
 import { GEAR_TYPE_LABELS, CATCH_DISPOSITION_LABELS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PageHeader } from "@/components/shared";
+import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
 
 interface Props {
   id: string;
@@ -40,19 +38,6 @@ function formatKg(value: number | null | undefined): string {
   return `${value.toLocaleString("en-PH", { maximumFractionDigits: 2 })} kg`;
 }
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="text-sm text-foreground">
-        {value === null || value === undefined || value === "" ? "—" : value}
-      </p>
-    </div>
-  );
-}
-
 export function FishCatchDetailClient({ id }: Props) {
   const params = useParams<{ tenant: string }>();
 
@@ -72,13 +57,12 @@ export function FishCatchDetailClient({ id }: Props) {
   if (isError) {
     const notFound = error?.data?.code === "NOT_FOUND";
     return (
-      <div className="space-y-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/fish-catches`}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to list
-          </Link>
-        </Button>
+      <div className="space-y-4 pb-4">
+        <RecordHeader
+          backHref={`/${params.tenant}/fish-catches`}
+          backLabel="Back to fish catches"
+          title="Fish catch record"
+        />
         <Card>
           <CardContent className="py-10 text-center">
             <p className="text-sm text-muted-foreground">
@@ -115,30 +99,22 @@ export function FishCatchDetailClient({ id }: Props) {
     record.numTrips > 0 ? (totalCatchKg / record.numTrips).toFixed(2) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${params.tenant}/fish-catches`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <PageHeader
-            title={record.referenceNo}
-            description={formatDate(record.landingDate)}
-          />
-        </div>
-      </div>
+    <div className="space-y-4 pb-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/fish-catches`}
+        backLabel="Back to fish catches"
+        title={record.referenceNo}
+        meta={formatDate(record.landingDate)}
+      />
 
       {/* Catch details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Catch Details</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Catch Details</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field
+        <CardContent className="px-6 py-0">
+          <DefinitionGrid columns={3}>
+            <DetailField
               label="Fisherfolk"
               value={
                 <Link
@@ -149,7 +125,7 @@ export function FishCatchDetailClient({ id }: Props) {
                 </Link>
               }
             />
-            <Field
+            <DetailField
               label="Vessel"
               value={
                 record.vessel ? (
@@ -164,24 +140,24 @@ export function FishCatchDetailClient({ id }: Props) {
                 )
               }
             />
-            <Field
+            <DetailField
               label="Landing Date"
               value={`${formatDate(record.landingDate)}${
                 record.landingTime ? ` · ${record.landingTime}` : ""
               }`}
             />
-            <Field
+            <DetailField
               label="Fishing Ground"
               value={record.fishingGroundBarangay ?? record.fishingGroundLabel}
             />
-            <Field label="FMA" value={record.fmaCode} />
-            <Field
+            <DetailField label="FMA" value={record.fmaCode} />
+            <DetailField
               label="Gear"
               value={`${GEAR_TYPE_LABELS[record.gearType]}${
                 record.gearDetail ? ` — ${record.gearDetail}` : ""
               }`}
             />
-            <Field
+            <DetailField
               label="Effort"
               value={[
                 record.gearUnits != null ? `${record.gearUnits} unit(s)` : null,
@@ -196,12 +172,12 @@ export function FishCatchDetailClient({ id }: Props) {
                 .filter(Boolean)
                 .join(" · ")}
             />
-            <Field label="Total Catch" value={formatKg(record.totalCatchKg)} />
-            <Field
+            <DetailField label="Total Catch" value={formatKg(record.totalCatchKg)} />
+            <DetailField
               label="Est. Value"
               value={formatPeso(record.estimatedValuePhp)}
             />
-            <Field
+            <DetailField
               label="Disposition"
               value={
                 record.disposition
@@ -209,30 +185,27 @@ export function FishCatchDetailClient({ id }: Props) {
                   : "—"
               }
             />
-            <Field label="Source" value={record.source} />
-            <Field label="Recorded By" value={record.recordedBy?.name} />
-            <Field label="Remarks" value={record.remarks} />
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 border-t pt-4 sm:grid-cols-2">
-            <Field
+            <DetailField label="Source" value={record.source} />
+            <DetailField label="Recorded By" value={record.recordedBy?.name} />
+            <DetailField label="Remarks" value={record.remarks} />
+            <DetailField
               label="CPUE (kg/hr)"
               value={cpue ? `${cpue} kg/hr` : "—"}
             />
-            <Field
+            <DetailField
               label="Catch per Trip (kg/trip)"
               value={kgPerTrip ? `${kgPerTrip} kg/trip` : "—"}
             />
-          </div>
+          </DefinitionGrid>
         </CardContent>
       </Card>
 
       {/* Species composition */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Species Composition</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Species Composition</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-0">
           {record.species.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -240,7 +213,7 @@ export function FishCatchDetailClient({ id }: Props) {
                   Species composition for catch {record.referenceNo}
                 </caption>
                 <thead>
-                  <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr className="border-b text-left text-xs font-medium text-muted-foreground">
                     <th scope="col" className="py-2 pr-4 font-medium">
                       Species
                     </th>
@@ -267,7 +240,7 @@ export function FishCatchDetailClient({ id }: Props) {
                 <tbody>
                   {record.species.map((s) => (
                     <tr key={s.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">
+                      <td className="py-2 pr-4 text-sm">
                         <p className="font-medium text-foreground">
                           {s.commonName}
                         </p>
@@ -277,16 +250,16 @@ export function FishCatchDetailClient({ id }: Props) {
                           </p>
                         ) : null}
                       </td>
-                      <td className="py-2 pr-4">{formatKg(s.weightKg)}</td>
-                      <td className="py-2 pr-4">{s.quantityPcs ?? "—"}</td>
-                      <td className="py-2 pr-4">{formatPeso(s.pricePerKgPhp)}</td>
-                      <td className="py-2 pr-4">{formatPeso(s.valuePhp)}</td>
-                      <td className="py-2 pr-4">
+                      <td className="py-2 pr-4 text-sm">{formatKg(s.weightKg)}</td>
+                      <td className="py-2 pr-4 text-sm">{s.quantityPcs ?? "—"}</td>
+                      <td className="py-2 pr-4 text-sm">{formatPeso(s.pricePerKgPhp)}</td>
+                      <td className="py-2 pr-4 text-sm">{formatPeso(s.valuePhp)}</td>
+                      <td className="py-2 pr-4 text-sm">
                         {s.disposition
                           ? CATCH_DISPOSITION_LABELS[s.disposition]
                           : "—"}
                       </td>
-                      <td className="py-2 pr-4">
+                      <td className="py-2 pr-4 text-sm">
                         {s.avgLengthCm != null
                           ? `${Number(s.avgLengthCm)} cm`
                           : "—"}
@@ -299,13 +272,13 @@ export function FishCatchDetailClient({ id }: Props) {
                 </tbody>
                 <tfoot>
                   <tr className="border-t font-medium">
-                    <th scope="row" className="py-2 pr-4 text-left font-medium">
+                    <th scope="row" className="py-2 pr-4 text-left text-sm font-medium">
                       Total
                     </th>
-                    <td className="py-2 pr-4">{formatKg(totalWeightKg)}</td>
+                    <td className="py-2 pr-4 text-sm">{formatKg(totalWeightKg)}</td>
                     <td className="py-2 pr-4" />
                     <td className="py-2 pr-4" />
-                    <td className="py-2 pr-4">{formatPeso(totalValuePhp)}</td>
+                    <td className="py-2 pr-4 text-sm">{formatPeso(totalValuePhp)}</td>
                     <td className="py-2 pr-4" />
                     <td className="py-2 pr-4" />
                   </tr>

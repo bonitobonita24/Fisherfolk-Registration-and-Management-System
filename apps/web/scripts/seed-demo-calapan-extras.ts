@@ -149,14 +149,21 @@ const PH_FISH_SPECIES = [
 ];
 
 const NOTIFICATION_TYPES: NotificationType[] = ["INFO", "WARNING", "SUCCESS", "ERROR"];
-const NOTIFICATION_MESSAGES: Array<{ type: NotificationType; title: string; message: string }> = [
-  { type: "INFO", title: "New fisherfolk registered", message: "A new fisherfolk record was added to your barangay." },
-  { type: "SUCCESS", title: "Edit request approved", message: "Your requested edit was approved and applied." },
-  { type: "WARNING", title: "Vessel registration expiring soon", message: "A vessel registration is due for renewal within 30 days." },
-  { type: "ERROR", title: "Import batch failed rows", message: "Some rows in the last import batch failed validation." },
-  { type: "INFO", title: "Ayuda program updated", message: "Beneficiary counts were refreshed for an ayuda program." },
-  { type: "WARNING", title: "Violation filed", message: "A new violation was filed and requires review." },
-  { type: "SUCCESS", title: "ID batch printed", message: "An ID print batch completed successfully." },
+// entityType keys MUST match apps/web/src/lib/notification-href.ts (notificationHref)
+// so every seeded notification deep-links to a real record.
+const NOTIFICATION_MESSAGES: Array<{
+  type: NotificationType;
+  title: string;
+  message: string;
+  entityType: string;
+}> = [
+  { type: "INFO", title: "New fisherfolk registered", message: "A new fisherfolk record was added to your barangay.", entityType: "Fisherfolk" },
+  { type: "SUCCESS", title: "Edit request approved", message: "Your requested edit was approved and applied.", entityType: "EditRequest" },
+  { type: "WARNING", title: "Vessel registration expiring soon", message: "A vessel registration is due for renewal within 30 days.", entityType: "Vessel" },
+  { type: "ERROR", title: "Import batch failed rows", message: "Some rows in the last import batch failed validation.", entityType: "ImportBatch" },
+  { type: "INFO", title: "Ayuda program updated", message: "Beneficiary counts were refreshed for an ayuda program.", entityType: "AyudaProgram" },
+  { type: "WARNING", title: "Violation filed", message: "A new violation was filed and requires review.", entityType: "Violation" },
+  { type: "SUCCESS", title: "ID batch printed", message: "An ID print batch completed successfully.", entityType: "IdBatch" },
 ];
 
 const CATEGORY_DEFS: Array<{ name: string; emoji: string; color: string }> = [
@@ -277,24 +284,11 @@ async function main(): Promise<void> {
     }
     console.log(`✅  FishCatch: ${fishCatchCreated} created (${speciesCreated} species rows), target ${N_FISH_CATCHES}.`);
 
-    // ── 2. Notification ─────────────────────────────────────────────────────────
-    const existingNotifCount = await prisma.notification.count({ where: { tenantId } });
+    // ── 2. Notification — MOVED to section 10 (end of script) so every template
+    //      can reference a REAL seeded entity id (EditRequest/ImportBatch/
+    //      IDPrintBatch are created in later sections).
     let notifCreated = 0;
-    for (let i = existingNotifCount; i < N_NOTIFICATIONS; i++) {
-      const def = pick(NOTIFICATION_MESSAGES);
-      await prisma.notification.create({
-        data: {
-          tenantId,
-          userId: pick(userIds),
-          type: def.type,
-          title: def.title,
-          message: def.message,
-          isRead: rng() < 0.5,
-        },
-      });
-      notifCreated++;
-    }
-    console.log(`✅  Notification: ${notifCreated} created, target ${N_NOTIFICATIONS}.`);
+    let notifBackfilled = 0;
     void NOTIFICATION_TYPES; // referenced for type completeness of the enum import
 
     // ── 3. EditRequest ───────────────────────────────────────────────────────────
@@ -478,9 +472,78 @@ async function main(): Promise<void> {
     }
     console.log(`✅  IDPrintBatch: ${printBatchCreated} created, target ${N_PRINT_BATCHES}.`);
 
+    // ── 10. Notification (entity-linked deep links) ──────────────────────────────
+    // Runs LAST so every template's entity pool is already seeded. Each template
+    // title maps to a fixed entityType (NOTIFICATION_MESSAGES); real ids are
+    // looked up from the live tenant data at seed time so notification rows
+    // deep-link to real records (resolved by src/lib/notification-href.ts).
+    const [vesselPool, violationPool, ayudaPool, editReqPool, importBatchPool, printBatchPool] =
+      await Promise.all([
+        prisma.vessel.findMany({ where: { tenantId }, select: { id: true }, take: 300 }),
+        prisma.violation.findMany({ where: { tenantId }, select: { id: true }, take: 100 }),
+        prisma.ayudaProgram.findMany({ where: { tenantId }, select: { id: true }, take: 50 }),
+        prisma.editRequest.findMany({ where: { tenantId }, select: { id: true }, take: 100 }),
+        prisma.importBatch.findMany({ where: { tenantId }, select: { id: true }, take: 20 }),
+        prisma.iDPrintBatch.findMany({ where: { tenantId }, select: { id: true }, take: 20 }),
+      ]);
+    const ENTITY_POOLS: Record<string, string[]> = {
+      Fisherfolk: ffIds,
+      Vessel: vesselPool.map((r) => r.id),
+      Violation: violationPool.map((r) => r.id),
+      AyudaProgram: ayudaPool.map((r) => r.id),
+      EditRequest: editReqPool.map((r) => r.id),
+      ImportBatch: importBatchPool.map((r) => r.id),
+      IdBatch: printBatchPool.map((r) => r.id),
+    };
+    const linkableDefs = NOTIFICATION_MESSAGES.filter(
+      (d) => (ENTITY_POOLS[d.entityType] ?? []).length > 0,
+    );
+
+    // 10a. Backfill — earlier seed runs created notifications WITHOUT entity
+    // refs; re-link them by template title so re-runs heal old rows.
+    const missingRefs = await prisma.notification.findMany({
+      where: { tenantId, OR: [{ entityType: null }, { entityId: null }] },
+      select: { id: true, title: true },
+    });
+    for (const notif of missingRefs) {
+      const def = NOTIFICATION_MESSAGES.find((d) => d.title === notif.title);
+      if (!def) continue;
+      const pool = ENTITY_POOLS[def.entityType] ?? [];
+      if (pool.length === 0) continue;
+      await prisma.notification.update({
+        where: { id: notif.id },
+        data: { entityType: def.entityType, entityId: pick(pool) },
+      });
+      notifBackfilled++;
+    }
+
+    // 10b. Top-up to N_NOTIFICATIONS (count-gated create loop, as before) —
+    // only from templates whose entity pool is non-empty.
+    const existingNotifCount = await prisma.notification.count({ where: { tenantId } });
+    for (let i = existingNotifCount; i < N_NOTIFICATIONS && linkableDefs.length > 0; i++) {
+      const def = pick(linkableDefs);
+      const pool = ENTITY_POOLS[def.entityType]!;
+      await prisma.notification.create({
+        data: {
+          tenantId,
+          userId: pick(userIds),
+          type: def.type,
+          title: def.title,
+          message: def.message,
+          isRead: rng() < 0.5,
+          entityType: def.entityType,
+          entityId: pick(pool),
+        },
+      });
+      notifCreated++;
+    }
+    console.log(
+      `✅  Notification: ${notifCreated} created, ${notifBackfilled} backfilled with entity refs, target ${N_NOTIFICATIONS}.`,
+    );
+
     console.log("\n🎉  Demo long-tail extras seed complete. Summary:");
     console.log(`   FishCatch: ${fishCatchCreated} (+${speciesCreated} species)`);
-    console.log(`   Notification: ${notifCreated}`);
+    console.log(`   Notification: ${notifCreated} (+${notifBackfilled} backfilled refs)`);
     console.log(`   EditRequest: ${editReqCreated}`);
     console.log(`   Category: ${categoryCreated}`);
     console.log(`   IDTemplate: ${idTemplateCreated}`);

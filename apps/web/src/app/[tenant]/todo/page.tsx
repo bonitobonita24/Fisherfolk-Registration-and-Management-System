@@ -11,13 +11,11 @@ export default async function TodoPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">ToDo</h1>
-          <p className="text-muted-foreground">
-            Task management board for tracking registration workflow progress.
-          </p>
-        </div>
+      <div className="flex shrink-0 flex-col gap-1 pt-4 pb-4">
+        <h1 className="truncate text-base font-semibold tracking-tight text-foreground">ToDo</h1>
+        <p className="text-xs text-muted-foreground">
+          Task management board for tracking registration workflow progress.
+        </p>
       </div>
       <TodoBoardClient canManage={canManage} />
     </div>

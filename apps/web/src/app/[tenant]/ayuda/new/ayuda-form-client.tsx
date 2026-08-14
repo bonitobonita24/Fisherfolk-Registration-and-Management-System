@@ -142,7 +142,7 @@ export function AyudaFormClient() {
                       <SelectValue placeholder="Select distribution unit" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="w-52">
                     <SelectItem value="FISHERFOLK">Per fisherfolk</SelectItem>
                     <SelectItem value="HOUSEHOLD">Per household</SelectItem>
                   </SelectContent>

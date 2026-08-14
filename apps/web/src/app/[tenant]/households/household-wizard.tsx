@@ -213,10 +213,10 @@ export function HouseholdWizard() {
       {/* ── Step 1: Head ────────────────────────────────────────────────── */}
       {step === "head" && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Select Household Head</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Select Household Head</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="head-search">Search fisherfolk</Label>
               <SearchInput
@@ -271,10 +271,10 @@ export function HouseholdWizard() {
       {/* ── Step 2: Members ─────────────────────────────────────────────── */}
       {step === "members" && head && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Add Members</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Add Members</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-5">
+          <CardContent className="space-y-5 px-6 py-5">
             <div className="space-y-1.5">
               <Label htmlFor="member-search">Search fisherfolk</Label>
               <SearchInput
@@ -377,10 +377,10 @@ export function HouseholdWizard() {
       {/* ── Step 3: Review ──────────────────────────────────────────────── */}
       {step === "review" && head && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Review Household</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Review Household</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-5">
             <div>
               <p className="text-xs font-medium text-muted-foreground">
                 Head

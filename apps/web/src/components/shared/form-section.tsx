@@ -11,11 +11,13 @@ interface FormSectionProps {
 export function FormSection({ title, description, children, className }: FormSectionProps) {
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {description ? (
+          <CardDescription className="text-xs text-muted-foreground">{description}</CardDescription>
+        ) : null}
       </CardHeader>
-      <CardContent className="space-y-4">{children}</CardContent>
+      <CardContent className="space-y-4 px-6 py-5">{children}</CardContent>
     </Card>
   );
 }

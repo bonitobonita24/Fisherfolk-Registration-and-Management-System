@@ -87,15 +87,15 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
 
   return (
     <Card>
-      <CardHeader className="p-3 pb-2">
-        <CardTitle className="text-sm">Assign Custom Roles</CardTitle>
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Assign Custom Roles</CardTitle>
         <CardDescription className="text-xs">
           Attach a custom role to an Encoder, Viewer, or Bantay Dagat user.
           Tenant Admin and Tenant Superadmin accounts always keep their full
           fixed-tier access and cannot carry a custom role.
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-3 pt-0">
+      <CardContent className="px-6 py-5">
         {usersLoading ? (
           <p className="text-sm text-muted-foreground animate-pulse">Loading users…</p>
         ) : users.length === 0 ? (
@@ -110,9 +110,9 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
               </TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead scope="col">User</TableHead>
-                  <TableHead scope="col">Fixed Tier</TableHead>
-                  <TableHead scope="col">Custom Role</TableHead>
+                  <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">User</TableHead>
+                  <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Fixed Tier</TableHead>
+                  <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Custom Role</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -120,14 +120,14 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
                   const assignable = ASSIGNABLE_ROLES.has(u.role);
                   return (
                     <TableRow key={u.id}>
-                      <TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                         <div className="font-medium">{u.name}</div>
                         <div className="text-xs text-muted-foreground">{u.username}</div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                         <Badge variant="secondary">{ROLE_LABELS[u.role] ?? u.role}</Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                         {assignable ? (
                           <Select
                             value={u.customRoleId ?? NONE_VALUE}
@@ -140,7 +140,7 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
                             >
                               <SelectValue placeholder="None" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="w-56">
                               <SelectItem value={NONE_VALUE}>None</SelectItem>
                               {activeRoles.map((r) => (
                                 <SelectItem key={r.id} value={r.id}>

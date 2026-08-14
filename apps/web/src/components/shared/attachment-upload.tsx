@@ -147,7 +147,7 @@ export function AttachmentUpload({
         disabled={isDisabled}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "flex w-full flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors",
+          "flex w-full flex-col items-center justify-center rounded-md border border-dashed px-6 py-8 text-center transition-colors",
           isDisabled
             ? "cursor-not-allowed opacity-50 border-muted-foreground/25"
             : "cursor-pointer border-muted-foreground/25 hover:border-muted-foreground/50",
@@ -156,7 +156,7 @@ export function AttachmentUpload({
         {isUploading ? (
           <>
             <Loader2 className="mb-2 h-8 w-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Uploading {uploadingCount} file
               {uploadingCount !== 1 ? "s" : ""}…
             </p>
@@ -164,10 +164,10 @@ export function AttachmentUpload({
         ) : (
           <>
             <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Click to upload attachments
             </p>
-            <p className="mt-1 text-xs text-muted-foreground/60">
+            <p className="mt-1 text-xs text-muted-foreground">
               JPEG · PNG · WEBP · PDF · max 15 MB each
             </p>
           </>
@@ -210,7 +210,7 @@ export function AttachmentUpload({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0"
+                  className="h-8 w-8 p-0"
                   disabled={isDisabled}
                   onClick={() => removeItem(attachment.filePath)}
                 >

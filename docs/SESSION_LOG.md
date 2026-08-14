@@ -1,6 +1,27 @@
 # FRMS — Session Log
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
+
+## 2026-08-14 — NexaCRM whole-app redesign + demo polish batch (6 queued tasks, swarm)
+
+**In your words:** Redesign everything with the NexaCRM shadcn/studio Pro template first, then fill the blank dashboard charts, fix the oversized/non-clickable notifications page, make the bell list scrollable, add real sample images + scannable QR codes, and compress the sparse vessel detail layout.
+
+✅ Done (all on LOCAL branches — HARD HOLD, nothing pushed/deployed)
+- **NexaCRM redesign (T6)** — "inherit the look" path (owner-picked): 4 waves on `feat/nexacrm-reskin` (12 commits ahead of main @ `c4eff7d`): tokens (oklch→HSL, tenant accents preserved) → shell+dashboard → list screens → detail pages → forms/ops (60 files final wave). Port map authority committed: `docs/NEXACRM_PORT_MAP.md`. Powerbyte SidebarFooter credit + version tag preserved; WCAG contrast enforced over template values where they conflicted.
+- **Blank charts healed (T1)** — root cause: demo seed created all 500 fisherfolk with empty `categoryIds` + generic "Barangay N" names. Seed repaired (`feat/demo-seed-repair`): weighted categories, 33 REAL Calapan barangay centroid names, households 6→45. YoY "coming soon" placeholder replaced with real `dashboard.getYoYComparison` + area chart + delta badge (7/7 tests). Verified live: zero blank series left; density map plots all barangays.
+- **Notifications (T2+T3)** — compact ~40px clickable rows (16 visible vs 5), whole-row deep-links via new shared `notificationHref()`; bell ScrollArea Radix max-h bug fixed (viewport-level), View-all footer, closes-on-navigate. Seed backfilled 30/30 notifications with verified entity refs. Click-through verified live (notification → exact vessel record).
+- **Real photos + QR (T4)** — QR system already existed (`buildQRPayload`, PII-free envelope for the future scanner app) but was never seeded: backfilled 300 vessels + 500 fisherfolk; 30 distinct real boat photos via Telegram-pointer pipeline replacing the single shared placeholder PNG. 10/10 sample QR parse match.
+- **Vessel detail compression (T5)** — photo+QR side-by-side 16rem media column + 3-col field grid (Hull/Place/Year/Homeport pulled up); blank space eliminated; mobile 393px stacks cleanly, no overflow.
+- **QA sweep on rebuilt dev** — dashboard/vessels/notifications/map/mobile all verified live (screenshots in `screenshots/qa-*.png`); map "blank after login-redirect" observation retested → transient, loads on SPA-nav (8 basemap requests) — non-issue.
+
+💬 Decisions/notes
+- Owner picked Option A (inherit NexaCRM look on Next15/TW3 stack) over full template swap (Next16/TW4 migration rejected as high-risk).
+- Dev DB has no `demo`-slug tenant → all seed runs hit `calapan-demo` (dev). **The remote demo stack needs the same seed scripts run at deploy time** (`seed-demo-calapan --tenant demo` heal + `seed-demo-vessel-media --tenant demo` + extras).
+- Owed before merge (advisory): full axe a11y sweep + Rule-31 design-fidelity re-baseline (workers preserved aria/focus/contrast by construction; formal audit pending).
+- Branches awaiting owner: `feat/nexacrm-reskin` (contains everything, incl. merged `feat/dashboard-yoy` + `feat/notifications-ux`), `feat/demo-seed-repair` (worktree). Merge to main + demo deploy = owner's word.
+
+⏳ Not yet — deploy to frms-demo (owner-gated); remote demo seed heal at that moment.
+
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
 ## 2026-08-14 (latest) — Pushed held docs commits to origin/main

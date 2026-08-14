@@ -114,23 +114,23 @@ export function TemplateManager({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-28">Type</TableHead>
-              <TableHead className="w-24">Status</TableHead>
-              <TableHead className="w-32">Updated</TableHead>
+              <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Name</TableHead>
+              <TableHead className="w-28 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Type</TableHead>
+              <TableHead className="w-24 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Status</TableHead>
+              <TableHead className="w-32 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Updated</TableHead>
               {canManage && (
-                <TableHead className="w-64 text-right">Actions</TableHead>
+                <TableHead className="w-64 border-r px-3 text-right text-xs font-medium text-muted-foreground last:border-r-0">Actions</TableHead>
               )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {templates.map((tpl) => (
               <TableRow key={tpl.id}>
-                <TableCell className="font-medium">{tpl.name}</TableCell>
-                <TableCell className="text-xs text-muted-foreground capitalize">
+                <TableCell className="border-r px-3 py-2 text-sm font-medium last:border-r-0">{tpl.name}</TableCell>
+                <TableCell className="border-r px-3 py-2 text-xs text-muted-foreground capitalize last:border-r-0">
                   {tpl.templateType.toLowerCase()}
                 </TableCell>
-                <TableCell>
+                <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                   {tpl.status === "ACTIVE" ? (
                     <Badge className="gap-1 text-xs">
                       <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
@@ -142,11 +142,11 @@ export function TemplateManager({
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
+                <TableCell className="border-r px-3 py-2 text-xs text-muted-foreground last:border-r-0">
                   {formatDate(tpl.updatedAt)}
                 </TableCell>
                 {canManage && (
-                  <TableCell>
+                  <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                     <div className="flex justify-end gap-1">
                       {/* Set Active (only when not already active) */}
                       {tpl.status !== "ACTIVE" && (
@@ -239,6 +239,7 @@ export function TemplateManager({
           <DialogFooter>
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setDeleteId(null)}
               disabled={remove.isPending}
             >
@@ -246,6 +247,7 @@ export function TemplateManager({
             </Button>
             <Button
               variant="destructive"
+              size="sm"
               onClick={handleDeleteConfirm}
               disabled={remove.isPending}
             >

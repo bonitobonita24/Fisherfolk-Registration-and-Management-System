@@ -30,6 +30,14 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ── Shared Recharts tick/grid props ──────────────────────────────────────────
+const tickProps = {
+  tick: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
+  tickLine: false,
+  axisLine: false,
+  tickMargin: 8,
+} as const;
+
 // ── Chart color cycle ─────────────────────────────────────────────────────────
 const CHART_COLORS = [
   "hsl(var(--chart-1))",
@@ -76,13 +84,13 @@ export function ReportHubCharts({
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 print:hidden">
         {[0, 1].map((i) => (
-          <Card key={i}>
-            <CardHeader>
-              <CardTitle className="text-base">
+          <Card key={i} className="overflow-hidden py-0">
+            <CardHeader className="border-b px-6 py-5">
+              <CardTitle className="text-sm font-medium">
                 <Shimmer className="h-4 w-40" />
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-6 py-5">
               <Shimmer className="h-[300px] w-full" />
             </CardContent>
           </Card>
@@ -94,8 +102,8 @@ export function ReportHubCharts({
   if (charts.length === 0 || charts.every((c) => c.data.length === 0)) {
     return (
       <div className="print:hidden">
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="overflow-hidden py-0">
+          <CardContent className="px-6 py-5">
             <EmptyState message="No chart data available for this report." />
           </CardContent>
         </Card>
@@ -108,11 +116,11 @@ export function ReportHubCharts({
       {charts.map((chart) => {
         const chartConfig = buildChartConfig();
         return (
-          <Card key={chart.key}>
-            <CardHeader>
-              <CardTitle className="text-base">{chart.title}</CardTitle>
+          <Card key={chart.key} className="overflow-hidden py-0">
+            <CardHeader className="border-b px-6 py-5">
+              <CardTitle className="text-sm font-medium">{chart.title}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-6 py-5">
               {chart.data.length === 0 ? (
                 <EmptyState message="No data for this chart." />
               ) : (
@@ -125,17 +133,19 @@ export function ReportHubCharts({
                     data={chart.data}
                     margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                      vertical={false}
+                    />
                     <XAxis
                       dataKey="label"
-                      tickLine={false}
-                      axisLine={false}
                       angle={-30}
                       textAnchor="end"
                       interval={0}
-                      tick={{ fontSize: 11 }}
+                      {...tickProps}
                     />
-                    <YAxis tickLine={false} axisLine={false} width={56} />
+                    <YAxis {...tickProps} width={56} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                       {chart.data.map((entry, i) => (

@@ -243,7 +243,7 @@ export function VesselRegistrationFormClient() {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="w-52">
                       <SelectItem value="Motorized">Motorized</SelectItem>
                       <SelectItem value="Non-Motorized">
                         Non-Motorized
@@ -266,7 +266,7 @@ export function VesselRegistrationFormClient() {
                         <SelectValue placeholder="Select material" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="w-52">
                       <SelectItem value="Wood">Wood</SelectItem>
                       <SelectItem value="Fiberglass">Fiberglass</SelectItem>
                       <SelectItem value="Composite">Composite</SelectItem>

@@ -534,12 +534,12 @@ export function BarangayDensityMap() {
   }
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardHeader>
-        <CardTitle className="text-base">
+    <Card className="flex h-full flex-col gap-0 overflow-hidden py-0">
+      <CardHeader className="space-y-1 border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">
           {DATASET_LABELS[dataset]} Density Map
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs">
           {DATASET_DESCRIPTIONS[dataset]}
           {unmatchedBarangays.length > 0 && (
             <span className="mt-1 block text-amber-500">
@@ -550,7 +550,7 @@ export function BarangayDensityMap() {
           )}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 lg:min-h-0">
+      <CardContent className="flex flex-1 flex-col px-6 py-5 lg:min-h-0">
         <div className="relative h-[36rem] w-full overflow-hidden rounded-md border lg:h-full lg:min-h-[28rem]">
           <div ref={containerRef} className="h-full w-full" />
 

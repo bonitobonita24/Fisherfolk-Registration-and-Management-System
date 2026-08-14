@@ -8,6 +8,8 @@ export { CategoryPicker } from "./category-picker";
 export { EmptyState } from "./empty-state";
 export { StatCard } from "./stat-card";
 export { PageHeader } from "./page-header";
+export { RecordHeader } from "./record-header";
+export { DetailField, DefinitionGrid, FieldRail } from "./detail-field";
 export { FormSection } from "./form-section";
 export { FormActions } from "./form-actions";
 export { Stepper } from "./stepper";

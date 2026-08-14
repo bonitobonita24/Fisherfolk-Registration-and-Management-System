@@ -27,7 +27,9 @@ export default async function RoleBuilderPage({
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Role Builder</h1>
+        <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+          <h1 className="truncate text-base font-semibold tracking-tight">Role Builder</h1>
+        </div>
         <div
           role="alert"
           className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-4 text-sm"
@@ -65,7 +67,9 @@ export default async function RoleBuilderPage({
   if (!tenantRecord) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Role Builder</h1>
+        <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+          <h1 className="truncate text-base font-semibold tracking-tight">Role Builder</h1>
+        </div>
         <p className="text-sm text-muted-foreground">Tenant not found.</p>
       </div>
     );
@@ -73,12 +77,14 @@ export default async function RoleBuilderPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Role Builder</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Create custom roles with a per-feature permission matrix, and
-          assign them to Encoder, Viewer, and Bantay Dagat users.
-        </p>
+      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+        <div>
+          <h1 className="truncate text-base font-semibold tracking-tight">Role Builder</h1>
+          <p className="text-xs text-muted-foreground">
+            Create custom roles with a per-feature permission matrix, and
+            assign them to Encoder, Viewer, and Bantay Dagat users.
+          </p>
+        </div>
       </div>
       <RoleBuilderClient tenantId={tenantRecord.id} />
     </div>

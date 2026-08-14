@@ -64,7 +64,7 @@ export function TemplateForm({
           <SelectTrigger id="tpl-type" className="h-8 text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-52">
             <SelectItem value="FISHERFOLK">Fisherfolk</SelectItem>
             <SelectItem value="VESSEL">Vessel</SelectItem>
           </SelectContent>
@@ -85,7 +85,7 @@ export function TemplateForm({
           <SelectTrigger id="tpl-status" className="h-8 text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="w-52">
             <SelectItem value="ACTIVE">Active</SelectItem>
             <SelectItem value="ARCHIVED">Archived</SelectItem>
           </SelectContent>

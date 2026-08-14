@@ -39,6 +39,15 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ── Shared Recharts tick/grid props ──────────────────────────────────────────
+const gridProps = { strokeDasharray: "3 3", stroke: "hsl(var(--border))" } as const;
+const tickProps = {
+  tick: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
+  tickLine: false,
+  axisLine: false,
+  tickMargin: 8,
+} as const;
+
 // ── Formatters ───────────────────────────────────────────────────────────────
 function formatCompactNumber(value: number): string {
   return new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
@@ -68,12 +77,14 @@ export function FishCatchTrendsClient() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* ── Total Catch (kg) over time ────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Total Catch (kg) over time</CardTitle>
-          <CardDescription>Monthly total landed catch weight</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Total Catch (kg) over time</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Monthly total landed catch weight
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {trendsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : data.length === 0 ? (
@@ -87,11 +98,10 @@ export function FishCatchTrendsClient() {
                 data={data}
                 margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
+                <XAxis dataKey="month" {...tickProps} />
                 <YAxis
-                  tickLine={false}
-                  axisLine={false}
+                  {...tickProps}
                   width={56}
                   tickFormatter={formatCompactNumber}
                 />
@@ -111,12 +121,14 @@ export function FishCatchTrendsClient() {
       </Card>
 
       {/* ── Catch Value (₱) over time ─────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Catch Value (₱) over time</CardTitle>
-          <CardDescription>Monthly estimated catch value</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Catch Value (₱) over time</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Monthly estimated catch value
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {trendsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : data.length === 0 ? (
@@ -130,11 +142,10 @@ export function FishCatchTrendsClient() {
                 data={data}
                 margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
+                <XAxis dataKey="month" {...tickProps} />
                 <YAxis
-                  tickLine={false}
-                  axisLine={false}
+                  {...tickProps}
                   width={56}
                   tickFormatter={formatCompactNumber}
                 />
@@ -154,14 +165,14 @@ export function FishCatchTrendsClient() {
       </Card>
 
       {/* ── CPUE Trend ───────────────────────────────────────────────────── */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-base">CPUE Trend</CardTitle>
-          <CardDescription>
+      <Card className="overflow-hidden py-0 lg:col-span-2">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">CPUE Trend</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
             Catch per unit effort — kg per fishing hour and kg per trip
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {trendsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : data.length === 0 ? (
@@ -175,11 +186,10 @@ export function FishCatchTrendsClient() {
                 data={data}
                 margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
+                <XAxis dataKey="month" {...tickProps} />
                 <YAxis
-                  tickLine={false}
-                  axisLine={false}
+                  {...tickProps}
                   width={56}
                   tickFormatter={formatCompactNumber}
                 />

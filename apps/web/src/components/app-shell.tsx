@@ -26,11 +26,12 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
 
   return (
     <div className="flex h-full w-full overflow-hidden">
-      {/* Desktop sidebar — collapses to icon rail (w-14) when toggled */}
+      {/* Desktop sidebar — collapses to icon rail (w-14) when toggled.
+          NexaCRM: sidebar sits directly on the page; border moved to the content box. */}
       <div
         className={cn(
-          "hidden shrink-0 border-r border-border md:flex",
-          sidebarCollapsed ? "w-14" : "w-56",
+          "hidden shrink-0 md:flex",
+          sidebarCollapsed ? "w-14" : "w-64",
         )}
       >
         <Sidebar
@@ -42,7 +43,7 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
       </div>
       {/* Mobile sidebar (Sheet) — unchanged */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-56 p-0">
+        <SheetContent side="left" className="w-64 p-0">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <Sidebar
             tenantSlug={tenantSlug}
@@ -51,8 +52,8 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           />
         </SheetContent>
       </Sheet>
-      {/* Main column */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      {/* Main column — NexaCRM framed content box (header + scroll area) */}
+      <div className="flex flex-1 flex-col overflow-hidden bg-background md:border md:border-border xl:rounded-tl-3xl">
         {/* S3 will add onToggleSidebar prop to Header and expose a header-level toggle button */}
         <Header
           userName={userName}
@@ -61,7 +62,7 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           onMenuClick={() => setMobileOpen(true)}
           onToggleSidebar={toggleSidebar}
         />
-        <main className="flex-1 overflow-y-auto bg-background p-3 md:p-4">
+        <main className="flex-1 overflow-y-auto bg-background px-4 pb-4">
           {children}
         </main>
       </div>

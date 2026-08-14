@@ -18,18 +18,18 @@ export default async function IdGeneratorPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex shrink-0 flex-wrap items-start gap-3 pt-4 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">ID Generator</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="truncate text-base font-semibold tracking-tight text-foreground">ID Generator</h1>
+          <p className="mt-1 text-xs text-muted-foreground">
             Print fisherfolk ID cards using the active template — pick up to 4,
             preview, then confirm.
           </p>
         </div>
         {isAdmin && (
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="ml-auto shrink-0">
             <Link href={`/${tenant}/settings/id-template`}>
-              <Settings className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              <Settings className="mr-1.5 size-4" aria-hidden="true" />
               Manage ID template
             </Link>
           </Button>

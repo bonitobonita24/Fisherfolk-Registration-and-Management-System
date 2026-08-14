@@ -8,7 +8,6 @@ import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -25,6 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { RecordHeader } from "@/components/shared";
+import { StatusBadge } from "@/components/shared/status-badge";
 
 interface Props {
   id: string;
@@ -64,14 +65,6 @@ function displayValue(value: unknown): string {
   return value as string;
 }
 
-function statusVariant(
-  status: string,
-): "default" | "secondary" | "destructive" | "outline" {
-  if (status === "APPROVED") return "default";
-  if (status === "REJECTED") return "destructive";
-  return "secondary";
-}
-
 // ── DiffRow ───────────────────────────────────────────────────────────────────
 
 function DiffRow({
@@ -96,7 +89,7 @@ function DiffRow({
         </span>
       </td>
       <td className="w-3/8 py-3 align-top">
-        <span className="rounded bg-green-50 px-1 py-0.5 text-sm text-green-700">
+        <span className="rounded bg-emerald-50 px-1 py-0.5 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
           {displayValue(newValue)}
         </span>
       </td>
@@ -222,38 +215,26 @@ export function EditRequestReviewClient({ id }: Props) {
   // ── render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
-      {/* Back + header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${params.tenant}/edit-requests`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Edit Request Review
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Requested by{" "}
-              <span className="font-medium">
-                {request.requestedBy?.name ?? "—"}
-              </span>{" "}
-              on {formatDatetime(request.createdAt)}
-            </p>
-          </div>
-        </div>
-        <Badge variant={statusVariant(request.status)}>{request.status}</Badge>
-      </div>
+    <div className="space-y-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/edit-requests`}
+        backLabel="Back to edit requests"
+        title="Edit Request Review"
+        meta={
+          <>
+            Requested by {request.requestedBy?.name ?? "—"} on{" "}
+            {formatDatetime(request.createdAt)}
+          </>
+        }
+        badge={<StatusBadge status={request.status} />}
+      />
 
       {/* Fisherfolk info card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Fisherfolk</CardTitle>
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Fisherfolk</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           <Link
             href={`/${params.tenant}/fisherfolk/${fisherfolk.id}`}
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
@@ -266,10 +247,10 @@ export function EditRequestReviewClient({ id }: Props) {
 
       {/* Diff table */}
       <Card>
-        <CardHeader>
-          <CardTitle>Proposed Changes</CardTitle>
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Proposed Changes</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent className="overflow-x-auto px-6 py-5">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b">
@@ -279,7 +260,7 @@ export function EditRequestReviewClient({ id }: Props) {
                 <th className="pb-2 pr-4 text-left text-xs font-medium uppercase tracking-wide text-destructive">
                   Current (Old)
                 </th>
-                <th className="pb-2 text-left text-xs font-medium uppercase tracking-wide text-green-700">
+                <th className="pb-2 text-left text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                   Proposed (New)
                 </th>
               </tr>
@@ -307,6 +288,7 @@ export function EditRequestReviewClient({ id }: Props) {
       {isPending && (
         <div className="flex items-center gap-3">
           <Button
+            size="sm"
             onClick={() => approveMutation.mutate({ id })}
             disabled={approveMutation.isPending || rejectMutation.isPending}
           >
@@ -314,6 +296,7 @@ export function EditRequestReviewClient({ id }: Props) {
             Approve
           </Button>
           <Button
+            size="sm"
             variant="destructive"
             onClick={handleOpenReject}
             disabled={approveMutation.isPending || rejectMutation.isPending}
@@ -327,10 +310,10 @@ export function EditRequestReviewClient({ id }: Props) {
       {/* Verdict (non-PENDING) */}
       {!isPending && (
         <Card>
-          <CardHeader>
-            <CardTitle>Decision</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Decision</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="space-y-2 px-6 py-5 text-sm">
             <p>
               <span className="font-medium">Reviewed by:</span>{" "}
               {request.reviewedBy?.name ?? "—"}
@@ -354,10 +337,12 @@ export function EditRequestReviewClient({ id }: Props) {
         <>
           <Separator />
           <Card>
-            <CardHeader>
-              <CardTitle>Prior Rejection History</CardTitle>
+            <CardHeader className="border-b px-6 py-5">
+              <CardTitle className="text-sm font-medium">
+                Prior Rejection History
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 px-6 py-5">
               {priorRejections.map((h) => (
                 <div
                   key={h.id}

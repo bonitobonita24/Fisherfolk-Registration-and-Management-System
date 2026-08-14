@@ -18,7 +18,7 @@ import {
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -287,14 +287,15 @@ function ResultsPanel({
 
   if (matches.length === 0) {
     return (
-      <Card className="space-y-4 border-emerald-500/40 bg-emerald-500/5 p-6">
+      <Card className="border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20">
+        <CardContent className="space-y-4 px-6 py-5">
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
           <div className="space-y-1">
-            <h3 className="font-semibold text-foreground">
+            <h3 className="text-sm font-medium text-foreground">
               No matching records found
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               No active fisherfolk in this tenant match the search criteria.
               You can safely proceed to register a new record.
             </p>
@@ -309,6 +310,7 @@ function ResultsPanel({
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
+        </CardContent>
       </Card>
     );
   }
@@ -319,12 +321,13 @@ function ResultsPanel({
 
   return (
     <Card
-      className={`space-y-4 p-6 ${
+      className={
         hasExact
           ? "border-destructive/40 bg-destructive/5"
-          : "border-amber-500/40 bg-amber-500/5"
-      }`}
+          : "border-amber-500/40 bg-amber-500/5 dark:bg-amber-950/20"
+      }
     >
+      <CardContent className="space-y-4 px-6 py-5">
       <div className="flex items-start gap-3">
         <AlertTriangle
           className={`mt-0.5 h-5 w-5 flex-shrink-0 ${
@@ -332,11 +335,11 @@ function ResultsPanel({
           }`}
         />
         <div className="space-y-1">
-          <h3 className="font-semibold text-foreground">
+          <h3 className="text-sm font-medium text-foreground">
             {matches.length} possible {matches.length === 1 ? "match" : "matches"}{" "}
             found
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Review the records below before creating a duplicate. If this is a
             genuinely different person, you may proceed.
           </p>
@@ -360,6 +363,7 @@ function ResultsPanel({
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
+      </CardContent>
     </Card>
   );
 }
@@ -375,11 +379,11 @@ function matchBadgeClass(matchType: MatchType): string {
   switch (matchType) {
     case "EXACT_ID":
     case "EXACT_RSBSA":
-      return "border-destructive/50 bg-destructive/10 text-destructive";
+      return "rounded-full border-transparent bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive dark:bg-destructive/20";
     case "STRONG_NAME_DOB":
-      return "border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400";
+      return "rounded-full border-transparent bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-400";
     case "POSSIBLE_NAME":
-      return "border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400";
+      return "rounded-full border-transparent bg-yellow-50 px-2 py-0.5 text-[11px] font-medium text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
   }
 }
 

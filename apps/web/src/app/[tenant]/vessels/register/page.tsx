@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
+import { PageHeader } from "@/components/shared";
 import { VesselRegistrationFormClient } from "./registration-form-client";
 
 interface VesselRegisterPageProps {
@@ -25,14 +26,10 @@ export default async function VesselRegisterPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Register Vessel</h1>
-        <p className="text-muted-foreground">
-          Fill in the vessel details. The MFVR number must be unique within this
-          tenant. Link fisherfolk owners after completing the basic record, or
-          select them below.
-        </p>
-      </div>
+      <PageHeader
+        title="Register Vessel"
+        description="Fill in the vessel details. The MFVR number must be unique within this tenant. Link fisherfolk owners after completing the basic record, or select them below."
+      />
       <VesselRegistrationFormClient />
     </div>
   );

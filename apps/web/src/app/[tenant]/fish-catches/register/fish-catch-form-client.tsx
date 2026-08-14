@@ -489,7 +489,7 @@ export function FishCatchFormClient() {
                         <SelectValue placeholder="Select gear type" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="w-56">
                       {GEAR_TYPES.map((g) => (
                         <SelectItem key={g} value={g}>
                           {GEAR_TYPE_LABELS[g]}
@@ -734,7 +734,7 @@ export function FishCatchFormClient() {
                             <SelectValue placeholder="Select disposition" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="w-56">
                           {DISPOSITIONS.map((d) => (
                             <SelectItem key={d} value={d}>
                               {CATCH_DISPOSITION_LABELS[d]}
@@ -825,7 +825,7 @@ export function FishCatchFormClient() {
                         <SelectValue placeholder="Select disposition" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="w-56">
                       {DISPOSITIONS.map((d) => (
                         <SelectItem key={d} value={d}>
                           {CATCH_DISPOSITION_LABELS[d]}
@@ -849,7 +849,7 @@ export function FishCatchFormClient() {
                         <SelectValue placeholder="Select source" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="w-56">
                       {SOURCES.map((s) => (
                         <SelectItem key={s} value={s}>
                           {SOURCE_LABELS[s]}

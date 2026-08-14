@@ -7,18 +7,18 @@ import { cn } from "@/lib/utils";
 
 type BadgeColor = "green" | "red" | "yellow" | "blue" | "gray" | "purple" | "orange";
 
-// Text tone is bumped one step darker than the original (-400 → -300 is too
-// light on this theme's dark surface; -400 stays, but weight goes up in the
-// badge markup below) so contrast holds while backgrounds stay identical —
+// NexaCRM tinted-pair pattern (port map §3.5): light `bg-{hue}-50 text-{hue}-700`
+// / dark `bg-{hue}-950 text-{hue}-400`. Light text uses -700 (not the template's
+// -600) so 11px text holds WCAG AA 4.5:1 on the -50 tint (§5.1 hard gate) —
 // no semantic hue is changed for any status.
 const colorClasses: Record<BadgeColor, string> = {
-  green: "border-transparent bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25",
-  red: "border-transparent bg-red-500/15 text-red-400 hover:bg-red-500/25",
-  yellow: "border-transparent bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25",
-  blue: "border-transparent bg-blue-500/15 text-blue-400 hover:bg-blue-500/25",
-  gray: "border-transparent bg-muted text-muted-foreground hover:bg-muted/80",
-  purple: "border-transparent bg-purple-500/15 text-purple-400 hover:bg-purple-500/25",
-  orange: "border-transparent bg-orange-500/15 text-orange-400 hover:bg-orange-500/25",
+  green: "border-transparent bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400",
+  red: "border-transparent bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400",
+  yellow: "border-transparent bg-yellow-50 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400",
+  blue: "border-transparent bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400",
+  gray: "border-transparent bg-muted text-muted-foreground",
+  purple: "border-transparent bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-400",
+  orange: "border-transparent bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400",
 };
 
 const statusColorMap: Record<string, BadgeColor> = {
@@ -93,7 +93,7 @@ export function StatusBadge({
     <Badge
       variant="outline"
       className={cn(
-        "gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium tracking-wide",
+        "gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium",
         colorClasses[resolvedColor],
         className,
       )}

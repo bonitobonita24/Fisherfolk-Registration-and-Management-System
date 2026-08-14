@@ -34,13 +34,21 @@ interface CommitResult {
 const STEP_LABELS = ["Upload", "Preview", "Done"];
 const STEP_INDEX: Record<"upload" | "preview" | "done", number> = { upload: 0, preview: 1, done: 2 };
 
-// ── Badge variant helpers ──────────────────────────────────────────────────────
-function statusBadgeVariant(
-  status: "valid" | "warning" | "error",
-): "default" | "secondary" | "destructive" {
-  if (status === "valid") return "default";
-  if (status === "warning") return "secondary";
-  return "destructive";
+// ── Badge tint helpers ──────────────────────────────────────────────────────
+function statusBadgeClass(status: "valid" | "warning" | "error"): string {
+  if (status === "valid")
+    return "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400";
+  if (status === "warning")
+    return "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400";
+  return "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400";
+}
+
+function batchStatusBadgeClass(status: string): string {
+  if (status === "COMPLETED")
+    return "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400";
+  if (status === "FAILED")
+    return "bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-400";
+  return "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400";
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -166,10 +174,10 @@ export function ImportWizard() {
       {/* ── Upload step ───────────────────────────────────────────────────── */}
       {step === "upload" && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Upload Spreadsheet</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Upload Spreadsheet</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-5">
             {/* ── Mode selector ─────────────────────────────────────────── */}
             <div className="space-y-2">
               <Label>Import mode</Label>
@@ -204,14 +212,17 @@ export function ImportWizard() {
               <Label htmlFor="import-file">
                 Select file (.xlsx, .xls, .csv)
               </Label>
-              <Input
-                id="import-file"
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx,.xls,.csv"
-                disabled={isProcessing}
-                onChange={(e) => handleFileChange(e)}
-              />
+              <div className="rounded-md border border-dashed px-4 py-3">
+                <Input
+                  id="import-file"
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  disabled={isProcessing}
+                  onChange={(e) => handleFileChange(e)}
+                  className="h-9 cursor-pointer border-0 p-0 shadow-none file:mr-3 file:h-9"
+                />
+              </div>
             </div>
             {isProcessing && (
               <p className="text-sm text-muted-foreground animate-pulse">
@@ -229,12 +240,12 @@ export function ImportWizard() {
         <div className="space-y-4">
           {/* Summary card */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
+            <CardHeader className="border-b px-6 py-5">
+              <CardTitle className="text-sm font-medium">
                 Validation Preview — {fileName}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-6 py-5">
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCell
@@ -299,7 +310,7 @@ export function ImportWizard() {
 
               {/* Actions */}
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button variant="outline" onClick={handleReset}>
+                <Button variant="outline" size="sm" onClick={handleReset}>
                   Back
                 </Button>
                 {(() => {
@@ -309,6 +320,7 @@ export function ImportWizard() {
                       : report.counts.toImport;
                   return (
                     <Button
+                      size="sm"
                       onClick={() => void handleCommit()}
                       disabled={committable === 0 || commit.isPending}
                     >
@@ -326,10 +338,10 @@ export function ImportWizard() {
 
           {/* Row preview table — first 100 rows */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
+            <CardHeader className="border-b px-6 py-5">
+              <CardTitle className="text-sm font-medium">
                 Row Preview{" "}
-                <span className="text-muted-foreground font-normal text-sm">
+                <span className="text-muted-foreground font-normal text-xs">
                   (first {Math.min(report.rows.length, 100)} of{" "}
                   {report.rows.length})
                 </span>
@@ -339,12 +351,12 @@ export function ImportWizard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Row</TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Barangay</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Issues</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Row</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">ID</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Name</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Barangay</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Status</TableHead>
+                    <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Issues</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -352,26 +364,28 @@ export function ImportWizard() {
                     const issues = [...row.warnings, ...row.errors].join("; ");
                     return (
                       <TableRow key={row.rowIndex}>
-                        <TableCell className="tabular-nums text-muted-foreground">
+                        <TableCell className="border-r px-3 py-2 text-sm tabular-nums text-muted-foreground last:border-r-0">
                           {row.rowIndex + 1}
                         </TableCell>
-                        <TableCell className="font-mono text-xs">
+                        <TableCell className="border-r px-3 py-2 text-sm font-mono text-xs last:border-r-0">
                           {row.idNumber}
                         </TableCell>
-                        <TableCell>{row.normalized.fullName}</TableCell>
-                        <TableCell>
+                        <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">{row.normalized.fullName}</TableCell>
+                        <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                           {row.normalized.barangay ?? (
                             <span className="text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={statusBadgeVariant(row.status)}>
+                        <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClass(row.status)}`}
+                          >
                             {row.status}
-                          </Badge>
+                          </span>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                        <TableCell className="border-r px-3 py-2 max-w-xs truncate text-xs text-muted-foreground last:border-r-0">
                           {issues || (
-                            <span className="text-muted-foreground/50">—</span>
+                            <span className="text-muted-foreground">—</span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -387,10 +401,10 @@ export function ImportWizard() {
       {/* ── Done step ─────────────────────────────────────────────────────── */}
       {step === "done" && commitResult !== null && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Import Complete</CardTitle>
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="text-sm font-medium">Import Complete</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-5">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <StatCell
                 label="Imported"
@@ -410,7 +424,7 @@ export function ImportWizard() {
                 variant="secondary"
               />
             </div>
-            <Button variant="outline" onClick={handleReset}>
+            <Button variant="outline" size="sm" onClick={handleReset}>
               Import another file
             </Button>
           </CardContent>
@@ -419,8 +433,8 @@ export function ImportWizard() {
 
       {/* ── Recent imports (always visible) ───────────────────────────────── */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent Imports</CardTitle>
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Recent Imports</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto p-0">
           {!batches || batches.length === 0 ? (
@@ -431,45 +445,39 @@ export function ImportWizard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>File</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Imported</TableHead>
-                  <TableHead>Skipped</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">File</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Status</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Total</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Imported</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Skipped</TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {batches.map((batch) => (
                   <TableRow key={batch.id}>
-                    <TableCell className="text-xs font-mono max-w-xs truncate">
+                    <TableCell className="border-r px-3 py-2 max-w-xs truncate text-sm font-mono text-xs last:border-r-0">
                       {batch.fileName ?? (
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          batch.status === "COMPLETED"
-                            ? "default"
-                            : batch.status === "FAILED"
-                              ? "destructive"
-                              : "secondary"
-                        }
+                    <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${batchStatusBadgeClass(batch.status)}`}
                       >
                         {batch.status}
-                      </Badge>
+                      </span>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="border-r px-3 py-2 text-sm tabular-nums last:border-r-0">
                       {batch.totalRows ?? 0}
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="border-r px-3 py-2 text-sm tabular-nums last:border-r-0">
                       {batch.importedRows ?? 0}
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="border-r px-3 py-2 text-sm tabular-nums last:border-r-0">
                       {batch.skippedRows ?? 0}
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                    <TableCell className="border-r px-3 py-2 text-sm whitespace-nowrap text-xs text-muted-foreground last:border-r-0">
                       {new Date(batch.createdAt).toLocaleString()}
                     </TableCell>
                   </TableRow>

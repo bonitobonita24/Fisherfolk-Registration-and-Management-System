@@ -57,27 +57,34 @@ export function ViolationsListClient() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-          <SearchInput
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search violations..."
-            className="w-full sm:w-auto"
-          />
-          <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-[150px]" aria-label="Filter by status">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Status</SelectItem>
-              {STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s.replace(/_/g, " ")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="sticky top-0 z-30 -mx-4 bg-background">
+        <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+          <AlertTriangle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">All Violations</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {data ? data.total : "-"}
+          </span>
+          <div className="ml-auto flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <SearchInput
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search violations..."
+              className="w-full sm:w-56"
+            />
+            <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
+              <SelectTrigger className="h-8 w-full sm:w-[150px]" aria-label="Filter by status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="w-52">
+                <SelectItem value="ALL">All Status</SelectItem>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 

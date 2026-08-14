@@ -44,12 +44,12 @@ export function SearchInput({
 
   return (
     <div className={cn("relative max-w-sm", className)}>
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         value={internalValue}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-8 pr-8"
+        className="h-8 pl-8 pr-8"
       />
       {internalValue.length > 0 && (
         <Button

@@ -1,14 +1,14 @@
+import { PageHeader } from "@/components/shared/page-header";
 import { DashboardClient } from "./dashboard-client";
 
 export default function DashboardPage() {
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Overview of fisherfolk registration and management statistics.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Overview of fisherfolk registration and management statistics."
+        className="pb-0"
+      />
       <DashboardClient />
     </div>
   );

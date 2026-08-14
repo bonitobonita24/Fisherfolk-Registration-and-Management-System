@@ -111,7 +111,7 @@ function priorityBadge(priority: KanbanPriority) {
       return (
         <Badge
           variant="outline"
-          className="border-orange-500 text-orange-500 text-xs"
+          className="border-transparent bg-amber-50 text-amber-600 text-xs dark:bg-amber-950 dark:text-amber-400"
         >
           High
         </Badge>
@@ -222,7 +222,7 @@ function NewTaskDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button size="sm">
           <Plus className="mr-2 h-4 w-4" />
           New Task
         </Button>
@@ -413,9 +413,9 @@ function TaskCard({
 }) {
   return (
     <Card
-      className={`relative rounded-xl border border-border/80 border-l-4 ${PRIORITY_ACCENT_CLASS[task.priority]} bg-card shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md`}
+      className={`relative rounded-md border border-l-4 ${PRIORITY_ACCENT_CLASS[task.priority]} bg-card p-3 text-sm shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-md`}
     >
-      <CardHeader className="pb-1.5 pt-3 px-3.5">
+      <CardHeader className="gap-0 p-0 pb-1.5">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-sm font-medium leading-snug">
             <button
@@ -434,7 +434,7 @@ function TaskCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-3.5 pb-3.5 space-y-2">
+      <CardContent className="space-y-2 p-0">
         {task.description && (
           <p className="text-xs text-muted-foreground line-clamp-2">
             {task.description}
@@ -619,9 +619,9 @@ function KanbanColumns({
         {COLUMNS.map(({ status, label }) => (
           <div key={status} className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+              <h2 className="text-sm font-medium text-foreground">{label}</h2>
               {!isLoading && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="outline" className="text-[11px] tabular-nums">
                   {itemsByStatus(status).length}
                 </Badge>
               )}
@@ -669,9 +669,9 @@ export function TodoBoardClient({ canManage }: { canManage: boolean }) {
   return (
     <div className="space-y-4">
       <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "calendar")}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <TabsList aria-label="ToDo view">
+        <div className="sticky top-0 z-30 -mx-4 bg-background">
+          <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+            <TabsList aria-label="ToDo view" className="h-8">
               <TabsTrigger value="kanban">Kanban</TabsTrigger>
               <TabsTrigger value="calendar">Calendar</TabsTrigger>
             </TabsList>
@@ -702,9 +702,13 @@ export function TodoBoardClient({ canManage }: { canManage: boolean }) {
                 Assigned to me
               </Button>
             </div>
-          </div>
 
-          {canManage && <NewTaskDialog />}
+            {canManage && (
+              <div className="ml-auto flex w-full flex-wrap items-center gap-2 sm:w-auto">
+                <NewTaskDialog />
+              </div>
+            )}
+          </div>
         </div>
 
         <TabsContent value="kanban" className="mt-4">

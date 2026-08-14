@@ -178,7 +178,7 @@ export function ViolationFormClient() {
                       <SelectValue placeholder="Select target" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent>
+                  <SelectContent className="w-52">
                     <SelectItem value="FISHERFOLK">Fisherfolk</SelectItem>
                     <SelectItem value="VESSEL">Vessel</SelectItem>
                     <SelectItem value="BOTH">Both</SelectItem>
