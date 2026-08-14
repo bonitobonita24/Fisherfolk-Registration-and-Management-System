@@ -4,6 +4,19 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.0 — 2026-08-14
+
+### [FEATURE]
+- Calapan City demo tenant seed — 500+ fisherfolk + full records, all with media (`974ab45`)
+
+### [FIXED]
+- allow DEMO_SEED_PASSWORD env override for demo-stack seeding (`4728f24`)
+- validated photo re-seed + build notifications list page (`cff67e1`)
+
+### [DOCS]
+- session handoff — Calapan City demo tenant seeded (500+ ff, all menus) + v0.11.0 shipped (`2a923e7`)
+
+
 ## v0.11.0 — 2026-08-14
 
 ### [FEATURE]
