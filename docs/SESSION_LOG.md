@@ -3,6 +3,24 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-08-14 (later) — Demo deployed: `frms-demo.powerbyte.app/demo` is the official Calapan City demo (v0.12.0)
+
+**In your words:** deploy the demo, prune the old demo we already had, and make the Calapan City tenant the real official demo — accessible as `/demo` just like any registered tenant.
+
+✅ **Done & verified**
+- **Released v0.12.0** — merged `feat/calapan-demo-seed` + made the seed admin password vault-overridable (`DEMO_SEED_PASSWORD`); tsc clean + 393/393 tests; tagged + pushed `08ee976`; CI image green.
+- **Old demo pruned** — DB backed up first (`/root/frms-demo-backup-pre-calapan-demo-*.sql.gz` on the VPS; it held the old calapan-city demo + 6 IDT test tenants), then all demo volumes wiped.
+- **Fresh demo stood up** — `demo-latest` = `sha-08ee976`, fresh migrations, full seed chain re-run remotely with slug **`demo`** → tenant "Calapan City" lives at **`frms-demo.powerbyte.app/demo`**. Login `admin@demo.com` with the **vault demo password** (not the local-dev one).
+- **Data:** 500 fisherfolk (validated 100-face photo pool, magic-byte checked) · 300 vessels w/ photos · 60 violations w/ evidence · 4 ayuda programs / ~530 beneficiaries · 120 fish catches · 25 kanban · 30 notifications + full long-tail. Media on Telegram (bot token added to demo env); new UI uploads on demo still go to MinIO.
+- **Playwright smoke on the live stack: 8/8 PASS, 0 console errors** (landing, login, dashboard, fisherfolk photo+signature render, vessels, notifications, violations, ayuda). Screenshots in `screenshots/demo-smoke-*.png`.
+- **Dev freshness** — local dev rebuilt off v0.12.0 main, freshness check FRESH.
+
+💬 **Decisions / notes**
+- Owner approved: v0.12.0 version; Telegram-creds approach for demo media (fast path) over a MinIO re-home script.
+- Seed hit the WSL2 IPv6 black-hole on Telegram uploads — **proven no-sudo fix recorded** in the global ledger: `NODE_OPTIONS="--dns-result-order=ipv4first --no-network-family-autoselection"`.
+- Cosmetic (non-blocking): notifications list displays 16 items (same cap as dev); density map can't plot the generic "Barangay 1–12" seed names (no centroids); households = 6 (hardcoded target — tracked enhancement).
+- Demo signatures use the bundled QA fixtures (fresh DB had no calapan-city pool to copy) — photos remain a 100-face unique pool.
+
 ## 2026-08-14 — "Calapan City" demo tenant seed (500+ fisherfolk, every menu populated) + v0.11.0 shipped
 
 **In your words:** (overnight, full auto) push the authorized work, then build a fresh **demo tenant named "Calapan City"** with 500+ dummy fisherfolk (fabricated names, NOT the real registrants) each with a photo + signature, plus dummy vessels/violations/ayuda/etc all with images — make sure **no menu is blank**. Reuse random signatures from the official tenant; source person photos anywhere (no real photos/names).

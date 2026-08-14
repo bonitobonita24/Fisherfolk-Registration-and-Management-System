@@ -1,6 +1,31 @@
 # FRMS — Project State
 
-## Current State (2026-08-14, latest) — ✅ v0.11.0 PUSHED + "Calapan City" demo tenant seeded (500+ ff, every menu populated) — demo build LOCAL/HARD HOLD
+## Current State (2026-08-14, latest) — 🚀 DEMO DEPLOYED: `frms-demo.powerbyte.app/demo` = official "Calapan City" demo (v0.12.0, verified 8/8)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner directive: deploy the demo, prune the old demo, official demo = the Calapan City tenant at `/demo` like any registered tenant. Owner confirmed v0.12.0 + Telegram-creds media approach.
+
+**✅ DONE THIS SESSION:**
+- **Released v0.12.0** — merged `feat/calapan-demo-seed` (--no-ff `df5cc67`) + `fix/demo-seed-password-env` (`4728f24`, seed admin pwd now `DEMO_SEED_PASSWORD`-overridable); verified tsc clean + 393/393 tests; `gen-release-notes --apply` (CHANGELOG + version-sync all packages + landing footer); **pushed `--follow-tags` → `origin/main` @ `08ee976`, tag `v0.12.0`**; CI docker-publish green (`sha-08ee976`).
+- **Old demo pruned (backed up first)** — `pg_dump` → `/root/frms-demo-backup-pre-calapan-demo-20260814T041651Z.sql.gz` on the VPS (old demo held `calapan-city` demo tenant + platform + 6 IDT test tenants). All `frms_demo_*` containers removed + postgres/minio/valkey **volumes wiped**.
+- **Fresh demo stood up** — retagged `sha-08ee976`→`demo-latest`, full stack up, fresh `prisma migrate deploy` (all migrations). **Telegram bot token copied prod→demo `.env` server-side + `TELEGRAM_DEFAULT_CHANNEL_ID` = dev-assets channel** (dummy data → dev channel). New UI uploads on demo still MinIO (adapter default; V32.27 demo=MinIO stands for app uploads).
+- **Seed chain run remotely** (SSH tunnel :15436, `ALLOW_DEMO_SEED=1`, vault demo pwd): `seed-demo-calapan --tenant demo --name "Calapan City"` → `seed-demo --tenant demo --vessels 300 --beneficiaries 150 --violations 60 --kanban 25` → extras → media → `fix-demo-photos`. **Tenant slug = `demo`** (id `cmssg3yyq0000gm79foxmnfjg`) → routes as `/demo`. Data: 500 ff (100-face validated randomuser pool, 0 HTML stubs) · 300 vessels w/ photos · 60 violations w/ evidence · 4 ayuda / ~530 benef · 120 catches · 25 kanban · 30 notifications + long-tail. Signatures = bundled QA fixtures (fresh DB had no calapan-city pool → fallback path).
+- **Verified live (Playwright smoke, read-only): 8/8 PASS, 0 console errors** — landing 200, login `admin@demo.com`, `/demo/dashboard` populated, ff detail photo naturalWidth>0 + signature renders, vessels 300, notifications real list (16 shown), violations 60, ayuda 4. Screenshots `screenshots/demo-smoke-*.png`.
+- **Dev freshness** — local dev rebuilt off v0.12.0 main; `dev-freshness-check.sh` FRESH.
+- 🔴 **Lesson updated** (`node.fetch.wsl2-ipv6-etimedout`, seen 2×): Telegram uploads failed 100% via node fetch (curl fine) — **proven no-sudo fix: `NODE_OPTIONS="--dns-result-order=ipv4first --no-network-family-autoselection"`** (disables happy-eyeballs → IPv4-only); 100+ uploads zero failures after.
+
+**🔑 Demo logins (LIVE demo stack):** `admin@demo.com` (tenant_admin) · `demo-super@calapan-demo.local` (tenant_superadmin) · `encoder@calapan-demo.local` — pwd = **vault demo cred** (`universal-login-credentials.enc.yaml` → demo.tenant_superadmin). Local-dev calapan-demo tenant unchanged (still `DemoCalapan_LocalDev_2026`).
+
+**Minor/deferred (cosmetic, non-blocking):** notifications page displays 16 of 30 (display cap, same as dev); density map plots nothing for generic "Barangay 1–12" names (no centroid match — could adopt real Calapan barangay names in a future seed tweak); households = 6 on demo (hardcoded `HOUSEHOLDS_TARGET`, tracked enhancement); demo-super/encoder emails still read `@calapan-demo.local` (hardcoded, cosmetic).
+
+**Git:** `origin/main` @ `08ee976` = local main (v0.12.0, pushed, clean apart from session-save docs). Branches `feat/calapan-demo-seed`, `fix/demo-seed-password-env` merged, retained.
+
+**⏳ OPEN:** no owner-gated deploy items. Optional: household-limit enhancement + real-barangay demo names (above).
+
+---
+
+## Previous State (2026-08-14) — ✅ v0.11.0 PUSHED + "Calapan City" demo tenant seeded (500+ ff, every menu populated) — demo build LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
