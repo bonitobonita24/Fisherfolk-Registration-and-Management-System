@@ -4,6 +4,15 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.13.0 — 2026-08-14
+
+### [FEATURE]
+- marketing landing at custom-domain root for anonymous visitors (`00204bf`)
+
+### [DOCS]
+- v0.12.5–v0.12.6 — stale-session loop + login-hang fixes, final E2E PASS (`caf9b1b`)
+
+
 ## v0.12.6 — 2026-08-14
 
 ### [FIXED]
