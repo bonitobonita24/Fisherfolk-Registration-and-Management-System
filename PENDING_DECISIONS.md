@@ -17,11 +17,18 @@ conductor's to decide and never lands here.
 
 ### 2026-08-14 — 🟣 "Calapan City" demo tenant seed — DEMO-STACK DEPLOY GATE (HARD HOLD)
 
-- [ ] **[WHAT] Deploy the demo seed to the live demo stack (`frms-demo.powerbyte.app`)** — the overnight
-  build creates an isolated demo tenant `calapan-demo` (name "Calapan City") with 500+ fabricated fisherfolk
-  + vessels/violations/ayuda/catches/etc, all with photos + signatures, in **LOCAL DEV only**. Promoting it
-  to the client-facing demo stack is a deliberate `push-to-demo` (migrate-yes/reseed-never) and needs the
-  owner's explicit word. The seed scripts make this a one-command promotion when authorized.
+- [x] ✅ **RESOLVED [WHAT] (2026-08-14, owner: "deploy the demo + prune the old one; official demo = the
+  Calapan City tenant at `/demo`") — DEPLOYED + VERIFIED.** Released **v0.12.0** (merge demo-seed branch +
+  `DEMO_SEED_PASSWORD` env override; tsc + 393 tests green; pushed `08ee976`, CI image built) → old demo
+  backed up (`/root/frms-demo-backup-pre-calapan-demo-*.sql.gz` on the VPS; held old calapan-city demo +
+  6 IDT test tenants) → demo volumes WIPED (old demo fully pruned) → stack up on `demo-latest`=`sha-08ee976`
+  → fresh `migrate deploy` → full seed chain re-run remotely with **`--tenant demo`** (slug = `/demo`, name
+  "Calapan City", `admin@demo.com` = vault demo cred via `DEMO_SEED_PASSWORD`): 500 fisherfolk (validated
+  photo pool) · 300 vessels · 60 violations · 4 ayuda/~530 benef · 120 catches · 25 kanban + long-tail, all
+  media on Telegram (bot token added to demo env; new UI uploads still MinIO). Playwright smoke: **8/8 PASS,
+  0 console errors** at `frms-demo.powerbyte.app/demo`. Notes: notifications list shows 16 (display cap,
+  same as dev); density map can't plot generic "Barangay 1–12" names (cosmetic); households=6 (hardcoded
+  target — the tracked household-limit enhancement still open below).
 
 ### 2026-08-12 — 🔀 Two local CGC-driven refactor branches — owner review + merge/push (HARD HOLD)
 
