@@ -163,7 +163,13 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   });
   // Inverse masking: a slug-prefixed URL on a custom domain redirects to its
   // clean form (e.g. /demo/dashboard → /dashboard) so the slug never shows.
-  if (redirectTo && redirectTo !== req.nextUrl.pathname) {
+  // GUARD: Next re-runs middleware on the rewritten URL, so a masking rewrite
+  // below would loop back here as a slug-prefixed path — the internal-rewrite
+  // marker header distinguishes that second pass from a real browser request
+  // (spoofing it only skips a cosmetic redirect; auth is untouched).
+  const isInternalRewrite =
+    req.headers.get("x-tenant-internal-rewrite") === "1";
+  if (redirectTo && !isInternalRewrite && redirectTo !== req.nextUrl.pathname) {
     const url = req.nextUrl.clone();
     url.pathname = redirectTo;
     return NextResponse.redirect(url, 308);
@@ -171,7 +177,9 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   if (rewriteTo && rewriteTo !== req.nextUrl.pathname) {
     const url = req.nextUrl.clone();
     url.pathname = rewriteTo;
-    return withCsp(NextResponse.rewrite(url));
+    const headers = new Headers(req.headers);
+    headers.set("x-tenant-internal-rewrite", "1");
+    return withCsp(NextResponse.rewrite(url, { request: { headers } }));
   }
 
   return withCsp(route(req));
