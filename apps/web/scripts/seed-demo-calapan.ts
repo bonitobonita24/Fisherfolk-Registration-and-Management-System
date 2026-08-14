@@ -171,7 +171,13 @@ async function fetchPersonDoesNotExist(timeoutMs = 15_000): Promise<Buffer | nul
     });
     if (!res.ok) return null;
     const arrayBuffer = await res.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
+    // Magic-byte validation (mirrors fix-demo-photos.ts): the endpoint has
+    // been observed returning an HTML landing page with 200/OK — never save
+    // non-JPEG bytes as a photo. Falls back to the bundled fixtures instead.
+    if (buffer.length < 2048) return null;
+    if (buffer[0] !== 0xff || buffer[1] !== 0xd8 || buffer[2] !== 0xff) return null;
+    return buffer;
   } catch {
     return null;
   } finally {
@@ -343,17 +349,24 @@ async function main(): Promise<void> {
   console.log(`🌱 Seeding demo tenant "${TENANT_SLUG}" (${TENANT_NAME})...`);
 
   // ── 1. Tenant ────────────────────────────────────────────────────────────
+  // REAL Calapan barangay names, all matching the density-map centroid keys in
+  // apps/web/src/data/calapan-barangay-centroids.ts EXACTLY (so every seeded
+  // record plots on the barangay density map). Notable spellings: the centroid
+  // key is "Lumang Bayan" (two words), and "Wawa" is mapped to canonical
+  // "Sabang" in that file — use the canonical key here.
   const barangayList = [
-    "Barangay 1", "Barangay 2", "Barangay 3", "Barangay 4", "Barangay 5", "Barangay 6",
-    "Barangay 7", "Barangay 8", "Barangay 9", "Barangay 10", "Barangay 11", "Barangay 12",
-    "Guinobatan", "Lumangbayan", "Mahal na Pangalan", "Malad", "Masipit", "Nag-iba I",
+    "Balingayan", "Balite", "Baruyan", "Batino", "Bayanan I", "Bayanan II",
+    "Calero", "Camilmil", "Ibaba East", "Ibaba West", "Ilaya", "San Vicente Central",
+    "Guinobatan", "Lumang Bayan", "Mahal na Pangalan", "Malad", "Masipit", "Nag-iba I",
     "Nag-iba II", "Navotas", "Pachoca", "Palhi", "Panggalaan", "Parang", "Patas",
-    "Personas", "Putingtubig", "Salong", "Silonay", "Suqui", "Tawiran", "Tibag", "Wawa",
+    "Personas", "Putingtubig", "Salong", "Silonay", "Suqui", "Tawiran", "Tibag", "Sabang",
   ];
 
   const tenant = await prisma.tenant.upsert({
     where: { slug: TENANT_SLUG },
-    update: { name: TENANT_NAME },
+    // Heal name + barangayList on re-run (real centroid-keyed names replace
+    // the earlier generic "Barangay N" entries).
+    update: { name: TENANT_NAME, barangayList },
     create: {
       slug: TENANT_SLUG,
       name: TENANT_NAME,
@@ -443,6 +456,69 @@ async function main(): Promise<void> {
   const sigKeys = await buildSignaturePool(tenantId, chatId, botToken, N_SIG_POOL);
   console.log(`  ✅ Signature pool: ${sigKeys.length} keys.`);
 
+  // ── 3.5 Categories (BEFORE the fisherfolk loop, so every record can carry
+  // 1-2 categoryIds — the dimension behind every category chart/breakdown).
+  // Same defs/slugs as seed-demo-calapan-extras.ts CATEGORY_DEFS: its later
+  // upsert (update:{}) is a no-op against these rows, so both scripts stay
+  // idempotent regardless of run order.
+  const CATEGORY_DEFS: Array<{ name: string; emoji: string; color: string }> = [
+    { name: "Municipal Fisherfolk", emoji: "🎣", color: "#2563eb" },
+    { name: "Commercial", emoji: "🚢", color: "#0891b2" },
+    { name: "Fish Vendor", emoji: "🐟", color: "#059669" },
+    { name: "Aquaculture", emoji: "🦐", color: "#7c3aed" },
+    { name: "Gleaner", emoji: "🐚", color: "#d97706" },
+    { name: "Fish Processor", emoji: "🏭", color: "#dc2626" },
+    { name: "Bantay Dagat Volunteer", emoji: "🛟", color: "#0284c7" },
+    { name: "Senior Fisherfolk", emoji: "👴", color: "#65a30d" },
+  ];
+  const slugifyCategory = (name: string): string =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const categoryIdList: string[] = [];
+  for (let i = 0; i < CATEGORY_DEFS.length; i++) {
+    const c = CATEGORY_DEFS[i]!;
+    const upserted = await prisma.category.upsert({
+      where: { tenantId_slug: { tenantId, slug: slugifyCategory(c.name) } },
+      update: {},
+      create: {
+        tenantId,
+        name: c.name,
+        slug: slugifyCategory(c.name),
+        displayColor: c.color,
+        iconType: "EMOJI",
+        iconEmoji: c.emoji,
+        displayOrder: i,
+        status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+    categoryIdList.push(upserted.id);
+  }
+  console.log(`  ✅ Categories ready: ${categoryIdList.length} (assignable to fisherfolk).`);
+
+  // Weighted category pick: Municipal Fisherfolk dominates (realistic for a
+  // coastal LGU), long tail across the rest; ~35% carry a second category.
+  // Index-aligned with CATEGORY_DEFS above.
+  const CATEGORY_WEIGHTS = [40, 8, 12, 6, 8, 6, 5, 10];
+  const totalCategoryWeight = CATEGORY_WEIGHTS.reduce((a, b) => a + b, 0);
+  function pickWeightedCategoryIndex(): number {
+    let roll = rng() * totalCategoryWeight;
+    for (let i = 0; i < CATEGORY_WEIGHTS.length; i++) {
+      roll -= CATEGORY_WEIGHTS[i]!;
+      if (roll < 0) return i;
+    }
+    return 0;
+  }
+  function pickCategoryIds(): string[] {
+    const primary = pickWeightedCategoryIndex();
+    const ids = [categoryIdList[primary]!];
+    if (rng() < 0.35) {
+      const secondary = pickWeightedCategoryIndex();
+      if (secondary !== primary) ids.push(categoryIdList[secondary]!);
+    }
+    return ids;
+  }
+
   // ── 4. Fisherfolk ────────────────────────────────────────────────────────
   const STATUS_WEIGHTED: Array<"ACTIVE" | "NEW" | "RENEWED"> = [
     "ACTIVE", "ACTIVE", "ACTIVE", "ACTIVE", "ACTIVE", "NEW", "NEW", "RENEWED",
@@ -476,10 +552,15 @@ async function main(): Promise<void> {
     const civilStatus = pick(CIVIL_STATUSES);
     const photo = pick(photoKeys);
     const signature = pick(sigKeys);
+    const categoryIds = pickCategoryIds();
+    const address = `Purok ${randInt(1, 7)}, ${barangay}, ${TENANT_NAME}`;
 
     const result = await prisma.fisherfolk.upsert({
       where: { tenantId_idNumber: { tenantId, idNumber } },
-      update: {},
+      // HEAL on re-run: earlier runs created these records with
+      // categoryIds: [] and generic "Barangay N" names — repair both so the
+      // category charts and the density map fill without a wipe.
+      update: { categoryIds, barangay, address },
       create: {
         tenantId,
         idNumber,
@@ -487,13 +568,13 @@ async function main(): Promise<void> {
         lastName,
         firstName,
         middleName,
-        address: `Purok ${randInt(1, 7)}, ${barangay}, ${TENANT_NAME}`,
+        address,
         barangay,
         dateOfBirth,
         sex,
         civilStatus,
         contactNumber,
-        categoryIds: [],
+        categoryIds,
         photo,
         signature,
         status,

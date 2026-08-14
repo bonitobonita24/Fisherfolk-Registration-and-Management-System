@@ -184,7 +184,9 @@ async function main(): Promise<void> {
     // Only pulls fisherfolk with householdId === null so re-runs never steal
     // people already assigned to a household (idempotent), and each household
     // number is checked before creation so re-runs never duplicate a number.
-    const HOUSEHOLDS_TARGET = 6;
+    // Realistic demo volume so "Households by barangay (top 15)" fills
+    // (raised from the original 6 — matches the prior calapan-demo dataset).
+    const HOUSEHOLDS_TARGET = 45;
     const existingHouseholdCount = await prisma.household.count({ where: { tenantId } });
     let householdCreated = 0;
     const demoHouseholdIds: string[] = [];
@@ -194,7 +196,7 @@ async function main(): Promise<void> {
         where: { tenantId, householdId: null },
         select: { id: true, barangay: true, address: true },
         orderBy: { idNumber: "asc" },
-        take: 200,
+        take: 300,
       });
 
       let cursor = 0;
@@ -257,6 +259,32 @@ async function main(): Promise<void> {
       }
     }
     console.log(`✅  Households: ${householdCreated} created (target ${HOUSEHOLDS_TARGET}, HH-****).`);
+
+    // HEAL pass: households snapshot the head's barangay/address at creation.
+    // When the demo fisherfolk seed repairs barangay names (generic
+    // "Barangay N" → real centroid-keyed names), re-sync every household to
+    // its head's CURRENT barangay/address so the households-by-barangay chart
+    // and density map stay consistent. Idempotent — no-op once in sync.
+    const householdsWithHeads = await prisma.household.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        barangay: true,
+        address: true,
+        head: { select: { barangay: true, address: true } },
+      },
+    });
+    let householdsHealed = 0;
+    for (const hh of householdsWithHeads) {
+      if (hh.barangay !== hh.head.barangay || hh.address !== hh.head.address) {
+        await prisma.household.update({
+          where: { id: hh.id },
+          data: { barangay: hh.head.barangay, address: hh.head.address },
+        });
+        householdsHealed++;
+      }
+    }
+    console.log(`✅  Households heal: ${householdsHealed} re-synced to head barangay/address.`);
 
     // ── Ayuda programs + beneficiaries ──────────────────────────────────────────
     const PROGRAMS = [
