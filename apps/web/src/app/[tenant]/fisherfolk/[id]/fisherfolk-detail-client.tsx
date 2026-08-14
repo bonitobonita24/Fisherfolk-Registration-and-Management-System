@@ -4,13 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  ArrowLeft,
+  Activity,
+  AlertTriangle,
   CheckCircle,
   Clock,
+  Fish,
   FileX2,
+  HeartHandshake,
+  History,
   ImageOff,
+  ListChecks,
   Pencil,
   RefreshCw,
+  Ship,
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +35,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -37,6 +44,8 @@ import {
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { RecordHeader } from "@/components/shared/record-header";
+import { DetailField, FieldRail } from "@/components/shared/detail-field";
 import { GEAR_TYPE_LABELS } from "@frms/shared/constants";
 
 interface Props {
@@ -51,19 +60,6 @@ function formatDate(value: Date | string | null | undefined): string {
     month: "long",
     day: "numeric",
   });
-}
-
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="text-sm text-foreground">
-        {value === null || value === undefined || value === "" ? "—" : value}
-      </p>
-    </div>
-  );
 }
 
 export function FisherfolkDetailClient({ id }: Props) {
@@ -119,13 +115,10 @@ export function FisherfolkDetailClient({ id }: Props) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/fisherfolk`}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to list
-          </Link>
+          <Link href={`/${params.tenant}/fisherfolk`}>Back to list</Link>
         </Button>
-        <Card>
-          <CardContent className="py-10 text-center">
+        <Card className="gap-0 py-5">
+          <CardContent className="px-6 py-10 text-center">
             <p className="text-sm text-muted-foreground">
               {notFound
                 ? "Fisherfolk not found."
@@ -181,504 +174,485 @@ export function FisherfolkDetailClient({ id }: Props) {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <Button asChild variant="ghost" size="sm" className="mt-1 shrink-0">
-            <Link href={`/${params.tenant}/fisherfolk`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {record.fullName}
-            </h1>
-            <p className="text-sm text-muted-foreground">{record.idNumber}</p>
-            {/* Registration status line */}
-            <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <StatusBadge
-                status={isRenewed ? "RENEWED" : "NEW"}
-                color={isRenewed ? "orange" : "green"}
-                icon={isRenewed ? RefreshCw : Sparkles}
-              />
-              <span className="text-xs text-muted-foreground">
-                {isRenewed
-                  ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
-                  : "New registration"}
-              </span>
-              <span className="text-xs text-muted-foreground" aria-hidden="true">
-                ·
-              </span>
-              <span className="text-xs text-muted-foreground">
-                Originally joined {formatDate(record.dateJoined)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action buttons area — encoder/tenant_admin/tenant_superadmin/tenant_manager only */}
-        <div className="flex flex-wrap items-center justify-end gap-2.5">
-          {canAct && (
-            <>
-              {/* Renew Registration — disabled + tooltip when active violation */}
-              {hasActiveViolation ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      {/* span receives pointer/focus events when button is disabled */}
-                      <span
-                        tabIndex={0}
-                        aria-label="Renew registration (blocked: active violation on record)"
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          disabled
-                          aria-disabled="true"
-                        >
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          Renew
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      Cannot renew: fisherfolk has an active violation on
-                      record.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <ConfirmDialog
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label="Renew registration"
-                    >
+  const headerActions = (
+    <>
+      {canAct && (
+        <>
+          {/* Renew Registration — disabled + tooltip when active violation */}
+          {hasActiveViolation ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* span receives pointer/focus events when button is disabled */}
+                  <span
+                    tabIndex={0}
+                    aria-label="Renew registration (blocked: active violation on record)"
+                  >
+                    <Button variant="outline" size="sm" disabled aria-disabled="true">
                       <RefreshCw className="mr-2 h-4 w-4" />
                       Renew
                     </Button>
-                  }
-                  title="Renew Registration"
-                  description={`Renew ${record.fullName}'s fisherfolk registration for the current year. This sets their status to RENEWED.`}
-                  confirmLabel="Confirm Renewal"
-                  variant="default"
-                  onConfirm={handleRenew}
-                />
-              )}
-
-              {/* Mark ID as Released — hidden once already released */}
-              {!isAlreadyReleased && (
-                <ConfirmDialog
-                  trigger={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      aria-label="Mark ID as released"
-                    >
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Mark ID Released
-                    </Button>
-                  }
-                  title="Mark ID as Released"
-                  description={`Confirm that ${record.fullName}'s fisherfolk ID card has been physically released to them. This action cannot be undone.`}
-                  confirmLabel="Confirm Release"
-                  variant="default"
-                  onConfirm={handleMarkReleased}
-                />
-              )}
-            </>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Cannot renew: fisherfolk has an active violation on record.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <ConfirmDialog
+              trigger={
+                <Button variant="outline" size="sm" aria-label="Renew registration">
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Renew
+                </Button>
+              }
+              title="Renew Registration"
+              description={`Renew ${record.fullName}'s fisherfolk registration for the current year. This sets their status to RENEWED.`}
+              confirmLabel="Confirm Renewal"
+              variant="default"
+              onConfirm={handleRenew}
+            />
           )}
 
-          {canAct && (
-            <Separator orientation="vertical" className="mx-0.5 h-6" />
+          {/* Mark ID as Released — hidden once already released */}
+          {!isAlreadyReleased && (
+            <ConfirmDialog
+              trigger={
+                <Button variant="outline" size="sm" aria-label="Mark ID as released">
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Mark ID Released
+                </Button>
+              }
+              title="Mark ID as Released"
+              description={`Confirm that ${record.fullName}'s fisherfolk ID card has been physically released to them. This action cannot be undone.`}
+              confirmLabel="Confirm Release"
+              variant="default"
+              onConfirm={handleMarkReleased}
+            />
           )}
+        </>
+      )}
 
-          <MakeTodoDialog
-            sourceEntityType="fisherfolk"
-            sourceEntityId={id}
-            defaultTitle={`Follow up / missing data: ${record.fullName}`}
-          />
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/${params.tenant}/fisherfolk/${id}/edit`}>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Link>
-          </Button>
-          <StatusBadge status={record.status} />
-        </div>
-      </div>
+      {canAct && <Separator orientation="vertical" className="mx-0.5 h-6" />}
 
-      {/* Two-column shell: main content left + activity timeline right */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        {/* LEFT main column */}
-        <div className="space-y-6">
-          {/* Profile Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-6 sm:flex-row">
-                {/* Media column — photo / signature / QR */}
-                <div className="grid shrink-0 grid-cols-3 gap-3 sm:flex sm:w-40 sm:flex-col">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Photo
-                    </p>
-                    {record.photo && photoUrlResp?.url ? (
-                      <img
-                        src={photoUrlResp.url}
-                        alt={`Portrait of ${record.fullName}`}
-                        className="aspect-square w-full rounded-lg border bg-muted object-cover"
-                      />
-                    ) : (
-                      <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
-                        <ImageOff size={20} className="text-muted-foreground" />
-                        <p className="text-[10px] text-muted-foreground">
-                          No image
-                        </p>
-                      </div>
-                    )}
-                  </div>
+      <MakeTodoDialog
+        sourceEntityType="fisherfolk"
+        sourceEntityId={id}
+        defaultTitle={`Follow up / missing data: ${record.fullName}`}
+      />
+      <Button asChild variant="outline" size="sm">
+        <Link href={`/${params.tenant}/fisherfolk/${id}/edit`}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Edit
+        </Link>
+      </Button>
+    </>
+  );
 
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Signature
-                    </p>
-                    {record.signature && signatureUrlResp?.url ? (
-                      <img
-                        src={signatureUrlResp.url}
-                        alt={`${record.fullName} signature`}
-                        className="h-16 w-full rounded-md border bg-white object-contain"
-                      />
-                    ) : (
-                      <div className="flex h-16 w-full flex-col items-center justify-center gap-1 rounded-md border bg-muted">
-                        <FileX2 size={16} className="text-muted-foreground" />
-                        <p className="text-[10px] text-muted-foreground">
-                          None
-                        </p>
-                      </div>
-                    )}
-                  </div>
+  return (
+    <div className="space-y-4 pb-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/fisherfolk`}
+        backLabel="Back to fisherfolk list"
+        title={record.fullName}
+        meta={record.idNumber}
+        badge={<StatusBadge status={record.status} />}
+        actions={headerActions}
+      />
 
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                      QR Code
-                    </p>
-                    {qrDataUrl ? (
-                      <img
-                        src={qrDataUrl}
-                        alt={`${record.idNumber} QR code`}
-                        className="aspect-square w-full rounded-lg border bg-white p-1.5"
-                      />
-                    ) : (
-                      <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
-                        <p className="text-[10px] text-muted-foreground">
-                          {record.qrCode ? "…" : "No QR"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Fields */}
-                <div className="min-w-0 flex-1 space-y-5">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <Field label="ID Number" value={record.idNumber} />
-                    <Field label="RSBSA Number" value={record.rsbsaNumber} />
-                    <Field label="Status" value={record.status} />
-                    <Field label="Last Name" value={record.lastName} />
-                    <Field label="First Name" value={record.firstName} />
-                    <Field label="Middle Name" value={record.middleName} />
-                    <Field label="Suffix" value={record.suffix} />
-                    <Field
-                      label="Date of Birth"
-                      value={formatDate(record.dateOfBirth)}
-                    />
-                    <Field label="Sex" value={record.sex} />
-                    <Field label="Civil Status" value={record.civilStatus} />
-                    <Field
-                      label="Contact Number"
-                      value={record.contactNumber}
-                    />
-                  </div>
-
-                  <Separator />
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Field label="Barangay" value={record.barangay} />
-                    <Field
-                      label="Date Joined"
-                      value={formatDate(record.dateJoined)}
-                    />
-                    <Field
-                      label="Registration Year"
-                      value={record.registrationYear}
-                    />
-                    <Field label="Remarks" value={record.remarks} />
-                  </div>
-
-                  <Separator />
-
-                  {/* Household membership */}
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Household
-                    </p>
-                    {record.household ? (
-                      <Link
-                        href={`/${params.tenant}/households/${record.household.id}`}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline"
-                      >
-                        {record.household.householdNumber}
-                        <Badge variant="secondary">
-                          {record.household.headId === record.id
-                            ? "Head"
-                            : "Member"}
-                        </Badge>
-                      </Link>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        No household
-                      </p>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {/* ID release status */}
-                  <div className="flex items-center gap-2">
-                    {isAlreadyReleased ? (
-                      <>
-                        <CheckCircle
-                          className="h-4 w-4 shrink-0 text-green-600"
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm">
-                          ID released on {formatDate(record.idReleasedAt)}
-                          {record.idReleasedBy
-                            ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
-                            : ""}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Clock
-                          className="h-4 w-4 shrink-0 text-muted-foreground"
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          ID not yet released
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Renewal History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Renewal History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {record.renewals.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No renewals yet.
-                </p>
+      <div className="grid gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
+        {/* LEFT — fields rail */}
+        <FieldRail>
+          {/* Media row — photo / signature / QR, compact side-by-side */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Photo</p>
+              {record.photo && photoUrlResp?.url ? (
+                <img
+                  src={photoUrlResp.url}
+                  alt={`Portrait of ${record.fullName}`}
+                  className="aspect-square w-full rounded-lg border bg-muted object-cover"
+                />
               ) : (
-                <ul
-                  className="divide-y divide-border"
-                  aria-label="Renewal history"
-                >
-                  {record.renewals.map((r) => (
-                    <li key={r.id} className="space-y-0.5 py-3 first:pt-0 last:pb-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {r.renewalYear}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(r.renewedAt)} &middot;{" "}
-                        {r.renewedBy?.name ??
-                          r.renewedBy?.email ??
-                          "Unknown staff"}
-                        {r.notes ? ` · ${r.notes}` : ""}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                  <ImageOff size={18} className="text-muted-foreground" />
+                  <p className="text-[10px] text-muted-foreground">No image</p>
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Related records — compact 2x2 grid */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Registered Vessels */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Registered Vessels</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {record.vessels.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No registered vessels.
-                  </p>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {record.vessels.map((v) => (
-                      <li
-                        key={v.id}
-                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="min-w-0">
-                          <Link
-                            href={`/${params.tenant}/vessels/${v.id}`}
-                            className="text-sm font-medium text-foreground hover:underline"
-                          >
-                            {v.vesselName}
-                          </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {v.mfvrNumber} &middot; {v.vesselType}
-                          </p>
-                        </div>
-                        <StatusBadge status={v.status} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">Signature</p>
+              {record.signature && signatureUrlResp?.url ? (
+                <img
+                  src={signatureUrlResp.url}
+                  alt={`${record.fullName} signature`}
+                  className="aspect-square w-full rounded-lg border bg-white object-contain"
+                />
+              ) : (
+                <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
+                  <FileX2 size={18} className="text-muted-foreground" />
+                  <p className="text-[10px] text-muted-foreground">None</p>
+                </div>
+              )}
+            </div>
 
-            {/* Latest Violations */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Latest Violations</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {record.violations.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No violations on record.
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">QR Code</p>
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt={`${record.idNumber} QR code`}
+                  className="aspect-square w-full rounded-lg border bg-white p-1"
+                />
+              ) : (
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
+                  <p className="text-[10px] text-muted-foreground">
+                    {record.qrCode ? "…" : "No QR"}
                   </p>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {record.violations.map((v) => (
-                      <li
-                        key={v.id}
-                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="min-w-0">
-                          <Link
-                            href={`/${params.tenant}/violations/${v.id}`}
-                            className="text-sm font-medium text-foreground hover:underline"
-                          >
-                            {v.subject}
-                          </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(v.createdAt)}
-                          </p>
-                        </div>
-                        <StatusBadge
-                          status={v.status}
-                          color={v.status === "ACTIVE" ? "red" : "green"}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Ayuda Received */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ayuda Received</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {record.ayudaBeneficiaries.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No ayuda programs.
-                  </p>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {record.ayudaBeneficiaries.map((b) => (
-                      <li
-                        key={b.id}
-                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="min-w-0">
-                          <Link
-                            href={`/${params.tenant}/ayuda/${b.program.id}`}
-                            className="text-sm font-medium text-foreground hover:underline"
-                          >
-                            {b.program.title}
-                          </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {b.verifiedAt
-                              ? `Received ${formatDate(b.verifiedAt)}`
-                              : `Added ${formatDate(b.createdAt)}`}
-                          </p>
-                        </div>
-                        <StatusBadge status={b.verificationStatus} />
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Fish Catches */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Fish Catches</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {record.fishCatches.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No fish catches on record.
-                  </p>
-                ) : (
-                  <ul className="divide-y divide-border">
-                    {record.fishCatches.map((fc) => (
-                      <li
-                        key={fc.id}
-                        className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div className="min-w-0">
-                          <Link
-                            href={`/${params.tenant}/fish-catches/${fc.id}`}
-                            className="text-sm font-medium text-foreground hover:underline"
-                          >
-                            {fc.referenceNo}
-                          </Link>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(fc.landingDate).toLocaleDateString(
-                              "en-PH",
-                            )}{" "}
-                            &middot; {GEAR_TYPE_LABELS[fc.gearType]}
-                          </p>
-                        </div>
-                        <span className="shrink-0 text-sm text-muted-foreground">
-                          {fc.totalCatchKg.toLocaleString()} kg
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* RIGHT — activity timeline + linked todos */}
-        <aside aria-label="Activity timeline" className="space-y-6">
-          <FisherfolkActivityTimeline id={id} />
-          <LinkedTodos sourceEntityType="fisherfolk" sourceEntityId={id} />
-        </aside>
+          <DetailField label="ID Number" value={record.idNumber} />
+          <DetailField label="RSBSA Number" value={record.rsbsaNumber} />
+          <DetailField label="Status" value={record.status} />
+          <DetailField label="Last Name" value={record.lastName} />
+          <DetailField label="First Name" value={record.firstName} />
+          <DetailField label="Middle Name" value={record.middleName} />
+          <DetailField label="Suffix" value={record.suffix} />
+          <DetailField label="Date of Birth" value={formatDate(record.dateOfBirth)} />
+          <DetailField label="Sex" value={record.sex} />
+          <DetailField label="Civil Status" value={record.civilStatus} />
+          <DetailField label="Contact Number" value={record.contactNumber} />
+
+          <Separator />
+
+          <DetailField label="Barangay" value={record.barangay} />
+          <DetailField label="Date Joined" value={formatDate(record.dateJoined)} />
+          <DetailField label="Registration Year" value={record.registrationYear} />
+          <DetailField
+            label="Renewal Status"
+            value={
+              <span className="inline-flex items-center gap-1.5">
+                <StatusBadge
+                  status={isRenewed ? "RENEWED" : "NEW"}
+                  color={isRenewed ? "orange" : "green"}
+                  icon={isRenewed ? RefreshCw : Sparkles}
+                />
+                <span className="text-xs text-muted-foreground">
+                  {isRenewed
+                    ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
+                    : "New registration"}
+                </span>
+              </span>
+            }
+          />
+          <DetailField label="Remarks" value={record.remarks} />
+
+          <Separator />
+
+          <DetailField
+            label="Household"
+            value={
+              record.household ? (
+                <Link
+                  href={`/${params.tenant}/households/${record.household.id}`}
+                  className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {record.household.householdNumber}
+                  <Badge variant="secondary">
+                    {record.household.headId === record.id ? "Head" : "Member"}
+                  </Badge>
+                </Link>
+              ) : (
+                "No household"
+              )
+            }
+          />
+
+          <DetailField
+            label="ID Release Status"
+            value={
+              isAlreadyReleased ? (
+                <span className="inline-flex items-center gap-2">
+                  <CheckCircle
+                    className="h-4 w-4 shrink-0 text-green-600"
+                    aria-hidden="true"
+                  />
+                  <span>
+                    Released {formatDate(record.idReleasedAt)}
+                    {record.idReleasedBy
+                      ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
+                      : ""}
+                  </span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  Not yet released
+                </span>
+              )
+            }
+          />
+        </FieldRail>
+
+        {/* RIGHT — tabbed related-record sections */}
+        <div className="min-w-0">
+          <Tabs defaultValue="vessels">
+            <TabsList className="h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
+              <TabsTrigger value="vessels" className="shrink-0 gap-1.5">
+                <Ship className="size-3.5" aria-hidden="true" />
+                Vessels
+                <Badge variant="outline" className="text-[11px] tabular-nums">
+                  {record.vessels.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="violations" className="shrink-0 gap-1.5">
+                <AlertTriangle className="size-3.5" aria-hidden="true" />
+                Violations
+                <Badge variant="outline" className="text-[11px] tabular-nums">
+                  {record.violations.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="ayuda" className="shrink-0 gap-1.5">
+                <HeartHandshake className="size-3.5" aria-hidden="true" />
+                Ayuda
+                <Badge variant="outline" className="text-[11px] tabular-nums">
+                  {record.ayudaBeneficiaries.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="fish-catches" className="shrink-0 gap-1.5">
+                <Fish className="size-3.5" aria-hidden="true" />
+                Fish Catches
+                <Badge variant="outline" className="text-[11px] tabular-nums">
+                  {record.fishCatches.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="renewals" className="shrink-0 gap-1.5">
+                <History className="size-3.5" aria-hidden="true" />
+                Renewals
+                <Badge variant="outline" className="text-[11px] tabular-nums">
+                  {record.renewals.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="activity" className="shrink-0 gap-1.5">
+                <Activity className="size-3.5" aria-hidden="true" />
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="todos" className="shrink-0 gap-1.5">
+                <ListChecks className="size-3.5" aria-hidden="true" />
+                ToDos
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="vessels" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">
+                    Registered Vessels
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 py-0">
+                  {record.vessels.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No registered vessels.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {record.vessels.map((v) => (
+                        <li
+                          key={v.id}
+                          className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="min-w-0">
+                            <Link
+                              href={`/${params.tenant}/vessels/${v.id}`}
+                              className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              {v.vesselName}
+                            </Link>
+                            <p className="text-xs text-muted-foreground">
+                              {v.mfvrNumber} &middot; {v.vesselType}
+                            </p>
+                          </div>
+                          <StatusBadge status={v.status} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="violations" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">
+                    Latest Violations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 py-0">
+                  {record.violations.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No violations on record.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {record.violations.map((v) => (
+                        <li
+                          key={v.id}
+                          className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="min-w-0">
+                            <Link
+                              href={`/${params.tenant}/violations/${v.id}`}
+                              className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              {v.subject}
+                            </Link>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(v.createdAt)}
+                            </p>
+                          </div>
+                          <StatusBadge
+                            status={v.status}
+                            color={v.status === "ACTIVE" ? "red" : "green"}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="ayuda" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">
+                    Ayuda Received
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 py-0">
+                  {record.ayudaBeneficiaries.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No ayuda programs.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {record.ayudaBeneficiaries.map((b) => (
+                        <li
+                          key={b.id}
+                          className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="min-w-0">
+                            <Link
+                              href={`/${params.tenant}/ayuda/${b.program.id}`}
+                              className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              {b.program.title}
+                            </Link>
+                            <p className="text-xs text-muted-foreground">
+                              {b.verifiedAt
+                                ? `Received ${formatDate(b.verifiedAt)}`
+                                : `Added ${formatDate(b.createdAt)}`}
+                            </p>
+                          </div>
+                          <StatusBadge status={b.verificationStatus} />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="fish-catches" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">
+                    Fish Catches
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 py-0">
+                  {record.fishCatches.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No fish catches on record.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border">
+                      {record.fishCatches.map((fc) => (
+                        <li
+                          key={fc.id}
+                          className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                        >
+                          <div className="min-w-0">
+                            <Link
+                              href={`/${params.tenant}/fish-catches/${fc.id}`}
+                              className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              {fc.referenceNo}
+                            </Link>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(fc.landingDate).toLocaleDateString("en-PH")}{" "}
+                              &middot; {GEAR_TYPE_LABELS[fc.gearType]}
+                            </p>
+                          </div>
+                          <span className="shrink-0 text-sm text-muted-foreground">
+                            {fc.totalCatchKg.toLocaleString()} kg
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="renewals" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">
+                    Renewal History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-6 py-0">
+                  {record.renewals.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No renewals yet.
+                    </p>
+                  ) : (
+                    <ul className="divide-y divide-border" aria-label="Renewal history">
+                      {record.renewals.map((r) => (
+                        <li key={r.id} className="space-y-0.5 py-3 first:pt-0 last:pb-0">
+                          <p className="text-sm font-medium text-foreground">
+                            {r.renewalYear}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(r.renewedAt)} &middot;{" "}
+                            {r.renewedBy?.name ?? r.renewedBy?.email ?? "Unknown staff"}
+                            {r.notes ? ` · ${r.notes}` : ""}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="activity" className="min-w-0 pt-4">
+              <FisherfolkActivityTimeline id={id} />
+            </TabsContent>
+
+            <TabsContent value="todos" className="min-w-0 pt-4">
+              <LinkedTodos sourceEntityType="fisherfolk" sourceEntityId={id} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );

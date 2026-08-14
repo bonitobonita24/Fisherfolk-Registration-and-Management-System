@@ -8,6 +8,11 @@ import { ArrowLeft, Crown, Trash2, UserMinus, UserPlus } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { SearchInput } from "@/components/shared/search-input";
+import {
+  RecordHeader,
+  DetailField,
+  DefinitionGrid,
+} from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,19 +54,6 @@ interface FisherfolkLite {
 
 interface Props {
   id: string;
-}
-
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="text-sm text-foreground">
-        {value === null || value === undefined || value === "" ? "—" : value}
-      </p>
-    </div>
-  );
 }
 
 // ── Add Member dialog ───────────────────────────────────────────────────
@@ -409,15 +401,15 @@ export function HouseholdDetailClient({ id }: Props) {
   if (isError) {
     const notFound = error?.data?.code === "NOT_FOUND";
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 pb-4">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/${params.tenant}/households`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
         </Button>
-        <Card>
-          <CardContent className="py-10 text-center">
+        <Card className="gap-0 py-5">
+          <CardContent className="px-6 py-10 text-center">
             <p className="text-sm text-muted-foreground">
               {notFound ? "Household not found." : "Failed to load household."}
             </p>
@@ -432,61 +424,50 @@ export function HouseholdDetailClient({ id }: Props) {
   const currentMemberIds = [record.head.id, ...record.members.map((m) => m.id)];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${params.tenant}/households`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {record.householdNumber}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Head: {record.head.fullName}
-            </p>
-          </div>
-        </div>
-
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Household
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete this household?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will unlink all {currentMemberIds.length} member
-                {currentMemberIds.length !== 1 ? "s" : ""} from this
-                household. Fisherfolk records themselves are not deleted.
-                This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={removeHousehold.isPending}>
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                disabled={removeHousehold.isPending}
-                onClick={() => removeHousehold.mutate({ id: record.id })}
-              >
-                {removeHousehold.isPending ? "Deleting…" : "Delete"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+    <div className="space-y-4 pb-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/households`}
+        backLabel="Back to households"
+        title={record.householdNumber}
+        meta={`Head: ${record.head.fullName}`}
+        actions={
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Household
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this household?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will unlink all {currentMemberIds.length} member
+                  {currentMemberIds.length !== 1 ? "s" : ""} from this
+                  household. Fisherfolk records themselves are not deleted.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={removeHousehold.isPending}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={removeHousehold.isPending}
+                  onClick={() => removeHousehold.mutate({ id: record.id })}
+                >
+                  {removeHousehold.isPending ? "Deleting…" : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        }
+      />
 
       {/* Details */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Household Details</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="flex flex-row items-center justify-between px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Household Details</CardTitle>
           <Button
             type="button"
             size="sm"
@@ -496,17 +477,15 @@ export function HouseholdDetailClient({ id }: Props) {
             Edit Details
           </Button>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Household Number" value={record.householdNumber} />
-            <Field label="Barangay" value={record.barangay} />
-            <Field label="Address" value={record.address} />
-          </div>
+        <CardContent className="px-6 py-0">
+          <DefinitionGrid columns={3}>
+            <DetailField label="Household Number" value={record.householdNumber} />
+            <DetailField label="Barangay" value={record.barangay} />
+            <DetailField label="Address" value={record.address} />
+          </DefinitionGrid>
           {record.notes && (
-            <div className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Notes
-              </p>
+            <div className="mt-4 space-y-1">
+              <p className="text-xs text-muted-foreground">Notes</p>
               <p className="whitespace-pre-wrap text-sm text-foreground">
                 {record.notes}
               </p>
@@ -516,9 +495,9 @@ export function HouseholdDetailClient({ id }: Props) {
       </Card>
 
       {/* Members */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>Members</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Members</CardTitle>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -539,34 +518,34 @@ export function HouseholdDetailClient({ id }: Props) {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-0">
           <ul className="divide-y">
-            <li className="flex items-center justify-between gap-3 py-3 first:pt-0">
+            <li className="flex items-center justify-between gap-3 py-2 first:pt-0">
               <Link
                 href={`/${params.tenant}/fisherfolk/${record.head.id}`}
                 className="min-w-0 flex-1 hover:underline"
               >
-                <p className="truncate font-medium text-foreground">
+                <p className="truncate text-sm font-medium text-foreground">
                   {record.head.fullName}
                 </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {record.head.idNumber} · {record.head.barangay}
                 </p>
               </Link>
-              <Badge>Head</Badge>
+              <Badge variant="secondary">Head</Badge>
             </li>
             {record.members
               .filter((m) => m.id !== record.head.id)
               .map((member) => (
                 <li
                   key={member.id}
-                  className="flex items-center justify-between gap-3 py-3 last:pb-0"
+                  className="flex items-center justify-between gap-3 py-2 last:pb-0"
                 >
                   <Link
                     href={`/${params.tenant}/fisherfolk/${member.id}`}
                     className="min-w-0 flex-1 hover:underline"
                   >
-                    <p className="truncate font-medium text-foreground">
+                    <p className="truncate text-sm font-medium text-foreground">
                       {member.fullName}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
@@ -592,7 +571,7 @@ export function HouseholdDetailClient({ id }: Props) {
               ))}
             {record.members.filter((m) => m.id !== record.head.id).length ===
               0 && (
-              <li className="py-3 text-sm text-muted-foreground first:pt-0 last:pb-0">
+              <li className="py-2 text-sm text-muted-foreground first:pt-0 last:pb-0">
                 No additional members.
               </li>
             )}

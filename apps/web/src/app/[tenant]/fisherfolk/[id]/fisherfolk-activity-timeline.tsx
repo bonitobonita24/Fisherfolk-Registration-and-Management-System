@@ -106,13 +106,11 @@ export function FisherfolkActivityTimeline({ id }: Props) {
   );
 
   return (
-    <Card className="lg:sticky lg:top-4">
-      <CardHeader className="border-b pb-3">
-        <CardTitle className="text-sm font-semibold tracking-tight">
-          Activity
-        </CardTitle>
+    <Card className="gap-0 py-5">
+      <CardHeader className="px-6 pb-4 pt-0">
+        <CardTitle className="text-sm font-medium">Activity</CardTitle>
       </CardHeader>
-      <CardContent className="pt-5">
+      <CardContent className="px-6 py-0">
         {isLoading ? (
           <TimelineSkeleton />
         ) : isError ? (

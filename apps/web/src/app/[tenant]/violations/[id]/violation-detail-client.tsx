@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AttachmentList } from "@/components/shared/attachment-list";
+import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
 
 interface Props {
   id: string;
@@ -44,19 +45,6 @@ function formatDate(value: Date | string | null | undefined): string {
     month: "long",
     day: "numeric",
   });
-}
-
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="text-sm text-foreground">
-        {value === null || value === undefined || value === "" ? "—" : value}
-      </p>
-    </div>
-  );
 }
 
 function EvidenceImage({ imageKey }: { imageKey: string }) {
@@ -148,86 +136,78 @@ export function ViolationDetailClient({ id, canManage }: Props) {
       : null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${params.tenant}/violations`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {record.subject}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Filed {formatDate(record.createdAt)}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          {canManage && (
-            <MakeTodoDialog
-              sourceEntityType="violation"
-              sourceEntityId={id}
-              defaultTitle={`Follow up: ${record.subject}`}
-            />
-          )}
+    <div className="space-y-4 pb-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/violations`}
+        backLabel="Back to violations"
+        title={record.subject}
+        meta={`Filed ${formatDate(record.createdAt)}`}
+        badge={
           <StatusBadge
-                status={record.status}
-                color={record.status === "ACTIVE" ? "red" : "green"}
+            status={record.status}
+            color={record.status === "ACTIVE" ? "red" : "green"}
+          />
+        }
+        actions={
+          <>
+            {canManage && (
+              <MakeTodoDialog
+                sourceEntityType="violation"
+                sourceEntityId={id}
+                defaultTitle={`Follow up: ${record.subject}`}
               />
-          {canManage && record.status === "ACTIVE" && (
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm">Lift / Resolve</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Lift / Resolve Violation</DialogTitle>
-                  <DialogDescription>
-                    Provide resolution notes before closing this violation.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-2">
-                  <Label htmlFor="resolutionNotes">Resolution notes</Label>
-                  <Textarea
-                    id="resolutionNotes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Describe how this violation was resolved…"
-                  />
-                </div>
-                <DialogFooter>
-                  <Button
-                    onClick={() => lift.mutate({ id, resolutionNotes: notes })}
-                    disabled={notes.trim().length === 0 || lift.isPending}
-                  >
-                    {lift.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Lifting…
-                      </>
-                    ) : (
-                      "Confirm lift"
-                    )}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+            )}
+            {canManage && record.status === "ACTIVE" && (
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">Lift / Resolve</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Lift / Resolve Violation</DialogTitle>
+                    <DialogDescription>
+                      Provide resolution notes before closing this violation.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-2">
+                    <Label htmlFor="resolutionNotes">Resolution notes</Label>
+                    <Textarea
+                      id="resolutionNotes"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Describe how this violation was resolved…"
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      onClick={() => lift.mutate({ id, resolutionNotes: notes })}
+                      disabled={notes.trim().length === 0 || lift.isPending}
+                    >
+                      {lift.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Lifting…
+                        </>
+                      ) : (
+                        "Confirm lift"
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </>
+        }
+      />
 
       {/* Top row: violator profile (left) beside Violation Details (right) */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {/* Profile — full violator details with picture */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
+        <Card className="gap-0 py-5">
+          <CardHeader className="px-6 pb-4 pt-0">
+            <CardTitle className="text-sm font-medium">Profile</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-0">
             {targetFisherfolk ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -280,95 +260,90 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                   </div>
                 </div>
                 <Separator />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Field label="ID Number" value={targetFisherfolk.idNumber} />
-                  <Field
+                <DefinitionGrid columns={3}>
+                  <DetailField label="ID Number" value={targetFisherfolk.idNumber} />
+                  <DetailField
                     label="RSBSA Number"
                     value={targetFisherfolk.rsbsaNumber}
                   />
-                  <Field label="Status" value={targetFisherfolk.status} />
-                  <Field label="Sex" value={targetFisherfolk.sex} />
-                  <Field
+                  <DetailField label="Status" value={targetFisherfolk.status} />
+                  <DetailField label="Sex" value={targetFisherfolk.sex} />
+                  <DetailField
                     label="Civil Status"
                     value={targetFisherfolk.civilStatus}
                   />
-                  <Field
+                  <DetailField
                     label="Date of Birth"
                     value={formatDate(targetFisherfolk.dateOfBirth)}
                   />
-                  <Field
+                  <DetailField
                     label="Contact Number"
                     value={targetFisherfolk.contactNumber}
                   />
-                  <Field label="Barangay" value={targetFisherfolk.barangay} />
-                  <Field
+                  <DetailField label="Barangay" value={targetFisherfolk.barangay} />
+                  <DetailField
                     label="Registration Year"
                     value={targetFisherfolk.registrationYear}
                   />
-                </div>
+                </DefinitionGrid>
               </div>
             ) : record.violatorName ? (
-              <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Violator (unregistered)
-                </p>
-                <p className="text-sm text-foreground">{record.violatorName}</p>
-              </div>
+              <DetailField
+                label="Violator (unregistered)"
+                value={record.violatorName}
+              />
             ) : (
               <p className="text-sm text-muted-foreground">No fisherfolk target.</p>
             )}
 
-            <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Vessel
-              </p>
-              {targetVessel ? (
-                <Link
-                  href={`/${params.tenant}/vessels/${targetVessel.id}`}
-                  className="flex items-center justify-between gap-2 hover:underline"
-                >
-                  <span className="text-sm font-medium text-foreground">
-                    {targetVessel.vesselName ?? targetVessel.mfvrNumber}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {targetVessel.mfvrNumber}
-                  </span>
-                </Link>
-              ) : (
-                <p className="text-sm text-foreground">—</p>
-              )}
-            </div>
+            <DetailField
+              label="Vessel"
+              value={
+                targetVessel ? (
+                  <Link
+                    href={`/${params.tenant}/vessels/${targetVessel.id}`}
+                    className="flex items-center justify-between gap-2 hover:underline"
+                  >
+                    <span className="font-medium text-foreground">
+                      {targetVessel.vesselName ?? targetVessel.mfvrNumber}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {targetVessel.mfvrNumber}
+                    </span>
+                  </Link>
+                ) : undefined
+              }
+            />
           </CardContent>
         </Card>
 
         {/* Violation Details — beside the profile, right side */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Violation Details</CardTitle>
+        <Card className="gap-0 py-5">
+          <CardHeader className="px-6 pb-4 pt-0">
+            <CardTitle className="text-sm font-medium">Violation Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Subject" value={record.subject} />
-              <Field label="Status" value={record.status} />
-              <Field label="Target Type" value={record.targetType} />
-              <Field label="Filed By" value={record.filedBy?.name} />
-              <Field label="Date Filed" value={formatDate(record.createdAt)} />
-            </div>
+          <CardContent className="space-y-4 px-6 py-0">
+            <DefinitionGrid columns={3}>
+              <DetailField label="Subject" value={record.subject} />
+              <DetailField label="Status" value={record.status} />
+              <DetailField label="Target Type" value={record.targetType} />
+              <DetailField label="Filed By" value={record.filedBy?.name} />
+              <DetailField label="Date Filed" value={formatDate(record.createdAt)} />
+            </DefinitionGrid>
             <Separator />
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Details" value={record.details} />
-              <Field label="Notes" value={record.notes} />
-            </div>
+            {/* Narrative fields — full width, never squeezed into the grid */}
+            <DetailField label="Details" value={record.details} />
+            <DetailField label="Notes" value={record.notes} />
           </CardContent>
         </Card>
       </div>
 
       {/* Evidence — full width at the bottom */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Evidence</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Evidence</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 px-6 py-0">
           {record.evidenceImages.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {record.evidenceImages.map((key) => (
@@ -379,9 +354,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
             <p className="text-sm text-muted-foreground">No evidence images.</p>
           )}
           <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Attached Files
-            </p>
+            <p className="text-xs text-muted-foreground">Attached Files</p>
             <AttachmentList
               attachments={record.attachments}
               emptyText="No evidence files."
@@ -394,14 +367,17 @@ export function ViolationDetailClient({ id, canManage }: Props) {
       <LinkedTodos sourceEntityType="violation" sourceEntityId={id} />
 
       {record.status === "LIFTED" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resolution</CardTitle>
+        <Card className="gap-0 py-5">
+          <CardHeader className="px-6 pb-4 pt-0">
+            <CardTitle className="text-sm font-medium">Resolution</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field label="Lifted By" value={record.liftedBy?.name} />
-            <Field label="Lifted At" value={formatDate(record.liftedAt)} />
-            <Field label="Resolution Notes" value={record.resolutionNotes} />
+          <CardContent className="space-y-4 px-6 py-0">
+            <DefinitionGrid columns={2}>
+              <DetailField label="Lifted By" value={record.liftedBy?.name} />
+              <DetailField label="Lifted At" value={formatDate(record.liftedAt)} />
+            </DefinitionGrid>
+            {/* Narrative field — full width */}
+            <DetailField label="Resolution Notes" value={record.resolutionNotes} />
           </CardContent>
         </Card>
       )}

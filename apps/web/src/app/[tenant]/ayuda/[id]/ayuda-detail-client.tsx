@@ -60,6 +60,7 @@ import {
   AttachmentUpload,
   type UploadedAttachment,
 } from "@/components/shared/attachment-upload";
+import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
 
 interface Props {
   id: string;
@@ -87,19 +88,6 @@ function formatDate(value: Date | string | null | undefined): string {
     month: "long",
     day: "numeric",
   });
-}
-
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="text-sm text-foreground">
-        {value === null || value === undefined || value === "" ? "—" : value}
-      </p>
-    </div>
-  );
 }
 
 function AddBeneficiaryDialog({
@@ -465,113 +453,140 @@ function BeneficiariesTable({
           </AlertDialog>
         </div>
       )}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {canManage && (
-              <TableHead className="w-10">
-                <Checkbox
-                  aria-label="Select all removable beneficiaries"
-                  checked={allRemovableSelected}
-                  disabled={removableItems.length === 0}
-                  onCheckedChange={(checked) =>
-                    toggleSelectAll(checked === true)
-                  }
-                />
+      <div className="overflow-x-auto rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {canManage && (
+                <TableHead className="w-10">
+                  <Checkbox
+                    aria-label="Select all removable beneficiaries"
+                    checked={allRemovableSelected}
+                    disabled={removableItems.length === 0}
+                    onCheckedChange={(checked) =>
+                      toggleSelectAll(checked === true)
+                    }
+                  />
+                </TableHead>
+              )}
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Fisherfolk
               </TableHead>
-            )}
-            <TableHead>Fisherfolk</TableHead>
-            <TableHead>ID Number</TableHead>
-            <TableHead>Household</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Verified By</TableHead>
-            <TableHead>Verified At</TableHead>
-            {canManage && <TableHead className="text-right">Actions</TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((b) => {
-            const isRemovable = b.verificationStatus === "PENDING";
-            return (
-              <TableRow key={b.id}>
-                {canManage && (
-                  <TableCell>
-                    <Checkbox
-                      aria-label={`Select ${b.fisherfolk.fullName}`}
-                      checked={selectedBeneficiaryIds.has(b.id)}
-                      disabled={!isRemovable}
-                      title={
-                        isRemovable
-                          ? undefined
-                          : "Confirmed distribution — cannot bulk-remove"
-                      }
-                      onCheckedChange={(checked) =>
-                        toggleSelectOne(b.id, checked === true)
-                      }
-                    />
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                ID Number
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Household
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Status
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Verified By
+              </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Verified At
+              </TableHead>
+              {canManage && (
+                <TableHead className="text-right text-xs font-medium text-muted-foreground">
+                  Actions
+                </TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((b) => {
+              const isRemovable = b.verificationStatus === "PENDING";
+              return (
+                <TableRow key={b.id}>
+                  {canManage && (
+                    <TableCell className="py-2">
+                      <Checkbox
+                        aria-label={`Select ${b.fisherfolk.fullName}`}
+                        checked={selectedBeneficiaryIds.has(b.id)}
+                        disabled={!isRemovable}
+                        title={
+                          isRemovable
+                            ? undefined
+                            : "Confirmed distribution — cannot bulk-remove"
+                        }
+                        onCheckedChange={(checked) =>
+                          toggleSelectOne(b.id, checked === true)
+                        }
+                      />
+                    </TableCell>
+                  )}
+                  <TableCell className="py-2 text-sm font-medium">
+                    <Link
+                      href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {b.fisherfolk.fullName}
+                    </Link>
                   </TableCell>
-                )}
-                <TableCell className="font-medium">
-                  <Link
-                    href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
-                    className="text-primary hover:underline"
-                  >
-                    {b.fisherfolk.fullName}
-                  </Link>
-                </TableCell>
-                <TableCell>{b.fisherfolk?.idNumber ?? "—"}</TableCell>
-                <TableCell>{b.household?.householdNumber ?? "—"}</TableCell>
-                <TableCell>
-                  <StatusBadge status={b.verificationStatus} />
-                </TableCell>
-                <TableCell>{b.verifiedBy?.name ?? "—"}</TableCell>
-                <TableCell>{formatDate(b.verifiedAt)}</TableCell>
-                {canManage && (
-                  <TableCell className="text-right">
-                    {b.verificationStatus === "PENDING" ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={verify.isPending}
-                          >
-                            Verify
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() =>
-                              verify.mutate({
-                                id: b.id,
-                                verificationStatus: "RECEIVED",
-                              })
-                            }
-                          >
-                            Mark Received
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() =>
-                              verify.mutate({
-                                id: b.id,
-                                verificationStatus: "CANCELLED",
-                              })
-                            }
-                          >
-                            Cancel
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
+                  <TableCell className="py-2 text-sm">
+                    {b.fisherfolk?.idNumber ?? "—"}
                   </TableCell>
-                )}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                  <TableCell className="py-2 text-sm">
+                    {b.household?.householdNumber ?? "—"}
+                  </TableCell>
+                  <TableCell className="py-2 text-sm">
+                    <StatusBadge status={b.verificationStatus} />
+                  </TableCell>
+                  <TableCell className="py-2 text-sm">
+                    {b.verifiedBy?.name ?? "—"}
+                  </TableCell>
+                  <TableCell className="py-2 text-sm">
+                    {formatDate(b.verifiedAt)}
+                  </TableCell>
+                  {canManage && (
+                    <TableCell className="py-2 text-right text-sm">
+                      {b.verificationStatus === "PENDING" ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8"
+                              disabled={verify.isPending}
+                            >
+                              Verify
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                verify.mutate({
+                                  id: b.id,
+                                  verificationStatus: "RECEIVED",
+                                })
+                              }
+                            >
+                              Mark Received
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                verify.mutate({
+                                  id: b.id,
+                                  verificationStatus: "CANCELLED",
+                                })
+                              }
+                            >
+                              Cancel
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
@@ -669,120 +684,115 @@ export function AyudaDetailClient({ id, canManage }: Props) {
   const canAddBeneficiary = canManage && record.status === "ACTIVE";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/${params.tenant}/ayuda`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {record.title}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Created {formatDate(record.createdAt)}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {canManage && (
-            <MakeTodoDialog
-              sourceEntityType="ayudaProgram"
-              sourceEntityId={id}
-              defaultTitle={`Ayuda schedule: ${record.title}`}
-            />
-          )}
-          {canManage && record.status === "DRAFT" && (
-            <Button
-              size="sm"
-              onClick={() => publish.mutate({ id })}
-              disabled={publish.isPending}
-            >
-              {publish.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Publish
-            </Button>
-          )}
-          {canManage && record.status === "ACTIVE" && (
-            <Dialog open={closeOpen} onOpenChange={setCloseOpen}>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline">
-                  Close Program
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Close Program</DialogTitle>
-                  <DialogDescription>
-                    Mark this program as completed once distribution is done, or
-                    cancel it if it will not proceed. This cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="gap-2 sm:gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      close.mutate({ id, status: "CANCELLED" })
-                    }
-                    disabled={close.isPending}
-                  >
-                    {close.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Cancel Program
+    <div className="space-y-4 pb-4">
+      <RecordHeader
+        backHref={`/${params.tenant}/ayuda`}
+        backLabel="Back to ayuda programs"
+        title={record.title}
+        meta={`Created ${formatDate(record.createdAt)}`}
+        badge={<StatusBadge status={record.status} />}
+        actions={
+          <>
+            {canManage && (
+              <MakeTodoDialog
+                sourceEntityType="ayudaProgram"
+                sourceEntityId={id}
+                defaultTitle={`Ayuda schedule: ${record.title}`}
+              />
+            )}
+            {canManage && record.status === "DRAFT" && (
+              <Button
+                size="sm"
+                onClick={() => publish.mutate({ id })}
+                disabled={publish.isPending}
+              >
+                {publish.isPending && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Publish
+              </Button>
+            )}
+            {canManage && record.status === "ACTIVE" && (
+              <Dialog open={closeOpen} onOpenChange={setCloseOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    Close Program
                   </Button>
-                  <Button
-                    onClick={() =>
-                      close.mutate({ id, status: "COMPLETED" })
-                    }
-                    disabled={close.isPending}
-                  >
-                    {close.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
-                    Mark Completed
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-          <StatusBadge status={record.status} />
-        </div>
-      </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Close Program</DialogTitle>
+                    <DialogDescription>
+                      Mark this program as completed once distribution is done, or
+                      cancel it if it will not proceed. This cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="gap-2 sm:gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        close.mutate({ id, status: "CANCELLED" })
+                      }
+                      disabled={close.isPending}
+                    >
+                      {close.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Cancel Program
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        close.mutate({ id, status: "COMPLETED" })
+                      }
+                      disabled={close.isPending}
+                    >
+                      {close.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Mark Completed
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </>
+        }
+      />
 
       {/* Program Details — full-width primary card (absorbs Summary) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Program Details</CardTitle>
+      <Card className="gap-0 py-5">
+        <CardHeader className="px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">
+            Program Details
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="Title" value={record.title} />
-            <Field label="Status" value={record.status} />
-            <Field
+        <CardContent className="px-6 py-0">
+          <DefinitionGrid columns={3}>
+            <DetailField label="Title" value={record.title} />
+            <DetailField label="Status" value={record.status} />
+            <DetailField
               label="Beneficiaries"
               value={record.beneficiaryCount.toLocaleString()}
             />
-            <Field label="Created By" value={record.createdBy?.name} />
-            <Field label="Date Created" value={formatDate(record.createdAt)} />
-          </div>
-          <div>
-            <Field label="Description" value={record.description} />
-          </div>
+            <DetailField label="Created By" value={record.createdBy?.name} />
+            <DetailField
+              label="Date Created"
+              value={formatDate(record.createdAt)}
+            />
+            <DetailField label="Description" value={record.description} />
+          </DefinitionGrid>
         </CardContent>
       </Card>
 
       {/* Files + Beneficiaries — responsive grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Program Files</CardTitle>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="gap-0 py-5">
+          <CardHeader className="px-6 pb-4 pt-0">
+            <CardTitle className="text-sm font-medium">
+              Program Files
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 px-6 py-0">
             <AttachmentList
               attachments={(record.uploads ?? []).map((u) => ({
                 id: u.id,
@@ -817,9 +827,11 @@ export function AyudaDetailClient({ id, canManage }: Props) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle>Beneficiaries</CardTitle>
+        <Card className="gap-0 py-5 lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 px-6 pb-4 pt-0">
+            <CardTitle className="text-sm font-medium">
+              Beneficiaries
+            </CardTitle>
             {canAddBeneficiary && (
               <div className="flex items-center gap-2">
                 <BulkFilterDialog
@@ -842,7 +854,7 @@ export function AyudaDetailClient({ id, canManage }: Props) {
               </div>
             )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 py-0">
             <BeneficiariesTable programId={record.id} canManage={canManage} />
           </CardContent>
         </Card>
