@@ -3,7 +3,19 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
-## 2026-08-14 (latest) — Demo now at the subdomain ROOT (custom-domain masking) — no more `/demo` path (v0.12.1–v0.12.4)
+## 2026-08-14 (latest) — Final LIVE journey smoke on the demo (v0.13.1) — 7/7 PASS
+
+**In your words:** run the final visitor-journey smoke on the live `frms-demo.powerbyte.app` — especially the just-added "Sign in" nav button — read-only, then save the session.
+
+✅ **Done & verified**
+- Full anonymous→signed-in journey on the LIVE demo, all 7 checks PASS: landing renders at `/` (URL stays clean) · **Sign in button visible in the nav** (desktop 1440px) · reachable on mobile 393px via the hamburger sheet and navigates to `/admin` · login → rendered `/dashboard` in 7.5s · logged-in `/` forwards to `/dashboard` · zero console errors.
+- Evidence: `screenshots/demo-landing-signin-desktop.png` + `demo-landing-signin-mobile.png` (sheet open). Password fetched via sops inside the script — never printed.
+
+💬 **Notes**
+- An initial mobile FAIL was a test-selector artifact (locator hit the theme toggle / a hidden desktop link), not an app defect — re-verified with `button[aria-label="Open menu"]`.
+- Open low-prio polish carried: clean non-slug hrefs on custom-domain hosts (avoid per-click 308) · real barangay names in demo seed for the density map.
+
+## 2026-08-14 — Demo now at the subdomain ROOT (custom-domain masking) — no more `/demo` path (v0.12.1–v0.12.4)
 
 **In your words:** the `/demo` slug on the `frms-demo` subdomain is redundant — serve the demo at the subdomain root like its own site; I'm fine with the subdomain.
 

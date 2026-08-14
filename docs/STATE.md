@@ -32,7 +32,7 @@ the custom-domain tenant mechanism: `tenants.custom_domain='frms-demo.powerbyte.
   host-aware CLEAN `/dashboard` redirect (avoids inverse-mask 308 on client navs).
 - **v0.13.1** `752c6a5` — E2E caught the landing had NO login entry point → "Sign in" button added to
   `landing-nav.tsx` (desktop header + mobile sheet), links `/admin`.
-**Final journey E2E (v0.13.1): 7/7 PASS** — anonymous `/` = landing (URL stays `/`) · Sign in visible
+**Final journey E2E (v0.13.1): 7/7 PASS — RE-VERIFIED LIVE on frms-demo.powerbyte.app (2026-08-14 late session; evidence: screenshots/demo-landing-signin-desktop.png + -mobile.png)** — anonymous `/` = landing (URL stays `/`) · Sign in visible
 desktop+mobile · login → rendered `/dashboard` in 7.5s · logged-in `/` forwards to `/dashboard` ·
 stale foreign-tenant URLs safe (v0.12.5) · geojson 200 · 0 console errors.
 `origin/main` = local main @ `752c6a5` (v0.13.1, pushed). Dev rebuilt FRESH per release.
