@@ -95,13 +95,16 @@ export function DataTable<TData, TValue>({
           />
         </div>
       )}
-      <div className="rounded-lg border">
+      <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-20 bg-card">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-muted-foreground font-medium">
+                  <TableHead
+                    key={header.id}
+                    className="group/head relative border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -119,9 +122,13 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() ? "selected" : undefined}
+                  className="hover:bg-accent data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_20%,transparent)] data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_30%,transparent)] dark:data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_8%,transparent)] dark:data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_14%,transparent)]"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="border-r px-3 py-2 text-sm last:border-r-0"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -131,10 +138,10 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 p-0 text-center"
+                  className="h-56 p-0 text-center text-muted-foreground"
                 >
                   {emptyState ?? (
                     <span className="text-sm text-muted-foreground">No results.</span>
@@ -246,16 +253,16 @@ export function DataTableColumnHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="-ml-3 h-8"
+      className="-ml-2 h-7 px-2 text-xs"
       onClick={() => column.toggleSorting(sorted === "asc")}
     >
       <span>{title}</span>
       {sorted === "asc" ? (
-        <ArrowUp className="ml-2 h-4 w-4" />
+        <ArrowUp className="ml-2 size-3.5" />
       ) : sorted === "desc" ? (
-        <ArrowDown className="ml-2 h-4 w-4" />
+        <ArrowDown className="ml-2 size-3.5" />
       ) : (
-        <ArrowUpDown className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="ml-2 size-3.5" />
       )}
     </Button>
   );

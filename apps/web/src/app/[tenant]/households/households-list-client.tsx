@@ -58,21 +58,28 @@ export function HouseholdsListClient() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center">
-          <SearchInput
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search household no., head, or barangay..."
-            className="w-full sm:w-auto"
-          />
+      <div className="sticky top-0 z-30 -mx-4 bg-background">
+        <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+          <Home className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">All Households</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {data ? data.total : "-"}
+          </span>
+          <div className="ml-auto flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            <SearchInput
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search household no., head, or barangay..."
+              className="w-full sm:w-56"
+            />
+            <Button asChild size="sm">
+              <Link href={`/${params.tenant}/households/new`}>
+                <Plus className="mr-2 size-4" />
+                Create Household
+              </Link>
+            </Button>
+          </div>
         </div>
-        <Button asChild>
-          <Link href={`/${params.tenant}/households/new`}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Household
-          </Link>
-        </Button>
       </div>
 
       <DataTable
