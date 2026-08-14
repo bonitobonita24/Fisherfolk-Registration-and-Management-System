@@ -22,6 +22,24 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 
 ⏳ Not yet — deploy to frms-demo (owner-gated); remote demo seed heal at that moment.
 
+## 2026-08-14 (late night) — v0.14.0 SHIPPED to frms-demo (merge + version + deploy, owner-authorized)
+
+**In your words:** "merge + version + deploy then save session stop loop."
+
+✅ Done
+- Merged `feat/nexacrm-reskin` + `feat/demo-seed-repair` → main; full gate green (tsc/lint/402 tests/build).
+- **Released v0.14.0** (minor; 8 feat + 3 fix; CHANGELOG + tag + version-sync incl. landing footer) and pushed `--follow-tags`.
+- CI built `sha-2132762` → **promoted to demo** (`push-to-demo.sh`: DB backed up pre-push, no pending migrations, redeployed).
+- **Remote demo data heal** (4-script chain via verified SSH tunnel :15436, `DEMO_SEED_PASSWORD` from vault so logins unchanged): 500/500 fisherfolk categories+barangays healed, 30/30 notifications entity-ref'd, 300 vessels re-pointed to 30 real photos + QR, 500 fisherfolk QR backfilled.
+- **Live smoke on frms-demo.powerbyte.app: 9/9 PASS** (login, YoY chart live, categories non-zero, vessel photo 640px via /api/media + QR, 16 compact notification rows, click-through → fisherfolk record, 0 console errors). Footer shows v0.14.0.
+- Dev rebuilt off released main — `dev-freshness-check` FRESH.
+
+💬 Notes
+- 🔴 New global lesson: `bash.pipeline.tail-masks-exit-code-in-chained-seeds` (first heal run silently failed — tail ate exit codes + pgrep self-matched the tunnel check; fixed with set -e + real TCP probe).
+- Advisory still open (non-blocking): formal axe sweep + Rule-31 fidelity re-baseline.
+- `playwright-core` added as root devDep (live-smoke harness).
+
+
 handoff lives in `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
 ## 2026-08-14 (latest) — Pushed held docs commits to origin/main
