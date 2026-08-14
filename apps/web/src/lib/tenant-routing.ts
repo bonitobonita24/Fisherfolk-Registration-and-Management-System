@@ -23,6 +23,13 @@ export const RESERVED_PREFIXES = [
   "/sitemap.xml",
 ] as const;
 
+/**
+ * App-level (tenant-agnostic) top-level routes. On a custom-domain host these
+ * must be served as-is — rewriting them under the tenant slug would 404 the
+ * login page (`/admin` → `/<slug>/admin`).
+ */
+export const APP_LEVEL_PREFIXES = ["/admin", "/login", "/platform"] as const;
+
 export interface TenantRouteResolution {
   /** Resolved tenant slug, or null when none could be determined. */
   slug: string | null;
@@ -33,6 +40,12 @@ export interface TenantRouteResolution {
    * is already in the correct internal form and no rewrite is needed.
    */
   rewriteTo: string | null;
+  /**
+   * Visible-URL redirect (inverse masking): on a custom-domain host a
+   * slug-prefixed path (`/<slug>/dashboard`) redirects to its clean form
+   * (`/dashboard`) so the slug never shows in the address bar. Null otherwise.
+   */
+  redirectTo: string | null;
 }
 
 /** Lowercase a Host header and drop any `:port` suffix. */
@@ -49,6 +62,12 @@ export function normalizeHost(host: string | null | undefined): string | null {
 
 function isReserved(pathname: string): boolean {
   return RESERVED_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
+function isAppLevel(pathname: string): boolean {
+  return APP_LEVEL_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 }
@@ -91,32 +110,45 @@ export function resolveTenantRoute(
   if (slugFromHost) {
     // Reserved paths (api, _next, assets) are tenant-agnostic — never rewrite.
     if (isReserved(pathname)) {
-      return { slug: slugFromHost, source: "host", rewriteTo: null };
+      return { slug: slugFromHost, source: "host", rewriteTo: null, redirectTo: null };
     }
-    // Already in internal /<slug>/... form → no rewrite needed.
+    // App-level routes (login, platform) are served as-is on any host —
+    // rewriting them under the slug would 404 the login page.
+    if (isAppLevel(pathname)) {
+      return { slug: slugFromHost, source: "host", rewriteTo: null, redirectTo: null };
+    }
+    // Slug-prefixed URL on the custom domain → redirect to the clean form
+    // (inverse masking) so the slug never shows in the address bar.
     if (
       pathname === `/${slugFromHost}` ||
       pathname.startsWith(`/${slugFromHost}/`)
     ) {
-      return { slug: slugFromHost, source: "host", rewriteTo: null };
+      const stripped = pathname.slice(`/${slugFromHost}`.length) || "/";
+      return {
+        slug: slugFromHost,
+        source: "host",
+        rewriteTo: null,
+        redirectTo: stripped,
+      };
     }
     const suffix = pathname === "/" ? "" : pathname;
     return {
       slug: slugFromHost,
       source: "host",
       rewriteTo: `/${slugFromHost}${suffix}`,
+      redirectTo: null,
     };
   }
 
   // Subdirectory routing (primary app host or unknown host).
   if (isReserved(pathname)) {
-    return { slug: null, source: "none", rewriteTo: null };
+    return { slug: null, source: "none", rewriteTo: null, redirectTo: null };
   }
   const seg = firstSegment(pathname);
   if (seg) {
-    return { slug: seg, source: "path", rewriteTo: null };
+    return { slug: seg, source: "path", rewriteTo: null, redirectTo: null };
   }
-  return { slug: null, source: "none", rewriteTo: null };
+  return { slug: null, source: "none", rewriteTo: null, redirectTo: null };
 }
 
 /**
