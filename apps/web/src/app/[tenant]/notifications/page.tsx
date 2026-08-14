@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import {
   Bell,
+  Check,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -14,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { notificationHref } from "@/lib/notification-href";
 import { trpc } from "@/lib/trpc/client";
 
 const TYPE_ICON: Record<string, typeof Info> = {
@@ -28,13 +30,6 @@ const TYPE_ICON_CLASS: Record<string, string> = {
   SUCCESS: "text-green-500",
   WARNING: "text-yellow-500",
   ERROR: "text-red-500",
-};
-
-const ENTITY_ROUTES: Record<string, string> = {
-  EditRequest: "edit-requests",
-  Fisherfolk: "fisherfolk",
-  Vessel: "vessels",
-  Violation: "violations",
 };
 
 function formatRelativeTime(date: Date): string {
@@ -52,9 +47,15 @@ function formatRelativeTime(date: Date): string {
 
 function NotificationsSkeleton() {
   return (
-    <div className="space-y-3" aria-hidden="true">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Skeleton key={i} className="h-20 w-full rounded-lg" />
+    <div
+      className="divide-y divide-border rounded-lg border border-border"
+      aria-hidden="true"
+    >
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+          <Skeleton className="h-4 w-4 shrink-0 rounded-full" />
+          <Skeleton className="h-4 w-full" />
+        </div>
       ))}
     </div>
   );
@@ -100,11 +101,9 @@ export default function NotificationsPage() {
     if (!notif.isRead) {
       markRead.mutate({ id: notif.id });
     }
-    if (notif.entityType && notif.entityId) {
-      const segment = ENTITY_ROUTES[notif.entityType];
-      if (segment) {
-        router.push(`/${tenant}/${segment}/${notif.entityId}`);
-      }
+    const href = notificationHref(tenant, notif.entityType, notif.entityId);
+    if (href) {
+      router.push(href);
     }
   }
 
@@ -147,72 +146,90 @@ export default function NotificationsPage() {
           </CardContent>
         </Card>
       ) : (
-        <ul className="space-y-2" aria-label="Notifications list">
+        <ul
+          className="divide-y divide-border rounded-lg border border-border bg-card"
+          aria-label="Notifications list"
+        >
           {notifications.map((notif) => {
             const Icon = TYPE_ICON[notif.type] ?? Info;
             const iconClass = TYPE_ICON_CLASS[notif.type] ?? "text-gray-400";
-            const isClickable =
-              !!notif.entityType &&
-              !!notif.entityId &&
-              !!ENTITY_ROUTES[notif.entityType];
+            const href = notificationHref(
+              tenant,
+              notif.entityType,
+              notif.entityId,
+            );
+            const isActionable = !!href || !notif.isRead;
+
+            const rowContent = (
+              <>
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${iconClass}`}
+                  aria-hidden="true"
+                />
+                <span className="flex min-w-0 flex-1 items-baseline gap-2">
+                  <span
+                    className={`truncate text-sm ${
+                      notif.isRead
+                        ? "font-normal text-foreground"
+                        : "font-medium text-foreground"
+                    }`}
+                  >
+                    {notif.title}
+                  </span>
+                  <span className="hidden min-w-0 flex-1 truncate text-xs text-muted-foreground sm:inline">
+                    {notif.message}
+                  </span>
+                </span>
+                {!notif.isRead && (
+                  <Badge
+                    variant="default"
+                    className="h-4 shrink-0 px-1.5 text-[10px] leading-none"
+                  >
+                    New
+                  </Badge>
+                )}
+                <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                  {formatRelativeTime(new Date(notif.createdAt))}
+                </span>
+              </>
+            );
 
             return (
-              <li key={notif.id}>
-                <Card
-                  className={
-                    notif.isRead ? "bg-card" : "border-primary/40 bg-accent/40"
-                  }
-                >
-                  <CardContent className="flex items-start gap-3 py-4">
-                    <Icon
-                      className={`mt-0.5 h-5 w-5 shrink-0 ${iconClass}`}
-                      aria-hidden="true"
-                    />
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium text-foreground">
-                          {notif.title}
-                        </p>
-                        {!notif.isRead && (
-                          <Badge
-                            variant="default"
-                            className="h-4 px-1.5 text-[10px] leading-none"
-                          >
-                            New
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {notif.message}
-                      </p>
-                      <p className="text-xs text-muted-foreground/70">
-                        {formatRelativeTime(new Date(notif.createdAt))}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      {isClickable && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRowClick(notif)}
-                        >
-                          View
-                        </Button>
-                      )}
-                      {!notif.isRead && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => markRead.mutate({ id: notif.id })}
-                          disabled={markRead.isPending}
-                          aria-label={`Mark "${notif.title}" as read`}
-                        >
-                          Mark as read
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+              <li
+                key={notif.id}
+                className={`group flex items-center transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                  isActionable ? "hover:bg-accent" : ""
+                } ${notif.isRead ? "" : "bg-accent/40"}`}
+              >
+                {isActionable ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRowClick(notif)}
+                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={
+                      href
+                        ? `Open "${notif.title}"`
+                        : `Mark "${notif.title}" as read`
+                    }
+                  >
+                    {rowContent}
+                  </button>
+                ) : (
+                  <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-2.5">
+                    {rowContent}
+                  </div>
+                )}
+                {!notif.isRead && (
+                  <button
+                    type="button"
+                    onClick={() => markRead.mutate({ id: notif.id })}
+                    disabled={markRead.isPending}
+                    className="mr-2 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-background hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100 disabled:opacity-50"
+                    aria-label={`Mark "${notif.title}" as read`}
+                  >
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                )}
               </li>
             );
           })}
