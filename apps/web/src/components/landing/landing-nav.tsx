@@ -58,6 +58,9 @@ export function LandingNav() {
 
         <div className="flex items-center gap-1.5">
           <ThemeToggle />
+          <Button asChild size="sm" className="hidden md:inline-flex">
+            <a href="/admin">Sign in</a>
+          </Button>
           <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
@@ -81,6 +84,11 @@ export function LandingNav() {
                       {l.label}
                     </a>
                   ))}
+                  <Button asChild size="sm" className="mt-3">
+                    <a href="/admin" onClick={() => setOpen(false)}>
+                      Sign in
+                    </a>
+                  </Button>
                 </div>
               </SheetContent>
             </Sheet>
