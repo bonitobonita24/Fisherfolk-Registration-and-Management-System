@@ -4,6 +4,31 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.14.0 — 2026-08-14
+
+### [FEATURE]
+- nexacrm wave 4 — forms + operations screens (`c4eff7d`)
+- nexacrm wave 3 — record detail pages + vessel identification compression (`17df57c`)
+- compact clickable rows + deep links (`aa4fb4d`)
+- nexacrm wave 2 — record list screens (`c9aae27`)
+- year-over-year comparison chart (`e8f92ee`)
+- vessel photos + QR backfill for demo tenant (`3fd282b`)
+- nexacrm wave 1 — shell + dashboard (`bb766e1`)
+- nexacrm wave 0 — design tokens (`ecd8e8a`)
+
+### [FIXED]
+- notification entity refs for demo tenant (`8622073`)
+- bell popover scroll + view-all footer (`00df9e0`)
+- assign demo categoryIds + real barangay names + households target (`98157dd`)
+
+### [DOCS]
+- nexacrm redesign + demo polish batch — swarm session log (`6b6815c`)
+- NexaCRM port map — token/shell/idiom authority for reskin waves (`40079f0`)
+- log held-docs-commit push (752c6a5..c101981); main clean (`c121a17`)
+- final live journey smoke on frms-demo v0.13.1 — 7/7 PASS (Sign in nav verified desktop+mobile) (`e01faf9`)
+- landing-first demo root (v0.13.0–v0.13.1), journey E2E 7/7 PASS (`6a65635`)
+
+
 ## v0.13.1 — 2026-08-14
 
 ### [FIXED]
