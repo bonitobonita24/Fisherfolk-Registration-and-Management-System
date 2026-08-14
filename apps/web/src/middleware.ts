@@ -27,6 +27,10 @@ const PUBLIC_PATHS = [
   "/api/health",
   "/api/trpc",
   "/api/media",
+  // public/ static data files (e.g. barangay boundary geojson). Middleware
+  // runs BEFORE public/-file serving, so without this the tenant cross-check
+  // reads "data" as a slug and 307s the fetch to the dashboard.
+  "/data",
 ];
 
 /**
