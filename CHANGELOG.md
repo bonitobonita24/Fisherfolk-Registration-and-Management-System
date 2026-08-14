@@ -4,6 +4,12 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.4 — 2026-08-14
+
+### [FIXED]
+- serve /data public static files — tenant cross-check swallowed them (`a58e34d`)
+
+
 ## v0.12.3 — 2026-08-14
 
 ### [FIXED]
