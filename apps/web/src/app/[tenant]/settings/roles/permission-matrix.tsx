@@ -45,11 +45,11 @@ export function PermissionMatrix({ grid, onChange, disabled = false }: Permissio
         </TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead scope="col" className="w-40">
+            <TableHead scope="col" className="w-40 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">
               Feature
             </TableHead>
             {MATRIX_ACTIONS.map((action) => (
-              <TableHead key={action} scope="col" className="text-center align-bottom">
+              <TableHead key={action} scope="col" className="border-r px-3 text-center align-bottom text-xs font-medium text-muted-foreground last:border-r-0">
                 <div className="flex flex-col items-center gap-1">
                   <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {MATRIX_ACTION_LABELS[action]}
@@ -73,7 +73,7 @@ export function PermissionMatrix({ grid, onChange, disabled = false }: Permissio
         <TableBody>
           {FEATURE_ROWS.map((featureKey) => (
             <TableRow key={featureKey}>
-              <TableHead scope="row" className="text-left text-sm font-medium">
+              <TableHead scope="row" className="border-r px-3 py-2 text-left text-sm font-medium last:border-r-0">
                 <div className="flex items-center justify-between gap-2">
                   <span>{FEATURE_LABELS[featureKey]}</span>
                   <Button
@@ -90,7 +90,7 @@ export function PermissionMatrix({ grid, onChange, disabled = false }: Permissio
                 </div>
               </TableHead>
               {MATRIX_ACTIONS.map((action) => (
-                <TableCell key={action} className="text-center">
+                <TableCell key={action} className="border-r px-3 py-2 text-center text-sm last:border-r-0">
                   <Checkbox
                     checked={grid[featureKey][action]}
                     disabled={disabled}

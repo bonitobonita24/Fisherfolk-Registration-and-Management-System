@@ -42,6 +42,15 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ── Shared Recharts tick/grid props ──────────────────────────────────────────
+const gridProps = { strokeDasharray: "3 3", stroke: "hsl(var(--border))" } as const;
+const tickProps = {
+  tick: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
+  tickLine: false,
+  axisLine: false,
+  tickMargin: 8,
+} as const;
+
 // ── Static chart configs ──────────────────────────────────────────────────────
 const trendsConfig = {
   count: { label: "Registrations", color: "hsl(var(--chart-1))" },
@@ -112,12 +121,14 @@ export function AnalyticsClient() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* ── Registration Trends ───────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Registration Trends</CardTitle>
-          <CardDescription>Annual new fisherfolk registrations</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Registration Trends</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Annual new fisherfolk registrations
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {trendsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (trends?.length ?? 0) === 0 ? (
@@ -131,9 +142,9 @@ export function AnalyticsClient() {
                 data={trends ?? []}
                 margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="year" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <CartesianGrid {...gridProps} vertical={false} />
+                <XAxis dataKey="year" {...tickProps} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   type="monotone"
@@ -150,12 +161,14 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Age Pyramid ───────────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Age Pyramid</CardTitle>
-          <CardDescription>Distribution by age bucket and sex</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Age Pyramid</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Distribution by age bucket and sex
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {agePyramidLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (agePyramid?.length ?? 0) === 0 ? (
@@ -169,9 +182,9 @@ export function AnalyticsClient() {
                 data={agePyramid ?? []}
                 margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="bucket" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <CartesianGrid {...gridProps} vertical={false} />
+                <XAxis dataKey="bucket" {...tickProps} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
                 <Bar
@@ -191,12 +204,14 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Voter Eligibility ─────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Voter Eligibility</CardTitle>
-          <CardDescription>COMELEC registration status</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Voter Eligibility</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            COMELEC registration status
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {voterLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : voterTotal === 0 ? (
@@ -233,12 +248,14 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Registered by Barangay ────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Registered by Barangay</CardTitle>
-          <CardDescription>Top 12 barangays by count</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Registered by Barangay</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 12 barangays by count
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {barangayLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : top12Barangay.length === 0 ? (
@@ -253,15 +270,13 @@ export function AnalyticsClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="barangay"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
@@ -276,14 +291,16 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Senior Citizens by Barangay ───────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">
             Senior Citizens by Barangay
           </CardTitle>
-          <CardDescription>Top 15 barangays, age 60+</CardDescription>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 15 barangays, age 60+
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {seniorsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : top15Seniors.length === 0 ? (
@@ -298,15 +315,13 @@ export function AnalyticsClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="barangay"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
@@ -321,12 +336,14 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Violation Hotspots ────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Violation Hotspots</CardTitle>
-          <CardDescription>Top 15 barangays by violations</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Violation Hotspots</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 15 barangays by violations
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {violationsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : top15Violations.length === 0 ? (
@@ -341,15 +358,13 @@ export function AnalyticsClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="barangay"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
@@ -364,12 +379,14 @@ export function AnalyticsClient() {
       </Card>
 
       {/* ── Category Distribution ─────────────────────────────────────────── */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-base">Category Distribution</CardTitle>
-          <CardDescription>Fisherfolk count per activity category</CardDescription>
+      <Card className="overflow-hidden py-0 lg:col-span-2">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Category Distribution</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Fisherfolk count per activity category
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {demoLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : categories.length === 0 ? (
@@ -383,16 +400,15 @@ export function AnalyticsClient() {
                 data={categories}
                 margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
                 <XAxis
                   dataKey="name"
-                  tickLine={false}
-                  axisLine={false}
                   angle={-30}
                   textAnchor="end"
                   interval={0}
+                  {...tickProps}
                 />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="count"

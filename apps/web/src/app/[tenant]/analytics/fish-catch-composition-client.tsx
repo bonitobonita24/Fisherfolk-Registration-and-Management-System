@@ -30,6 +30,15 @@ function EmptyState({ message }: { message: string }) {
   );
 }
 
+// ── Shared Recharts tick/grid props ──────────────────────────────────────────
+const gridProps = { strokeDasharray: "3 3", stroke: "hsl(var(--border))" } as const;
+const tickProps = {
+  tick: { fontSize: 12, fill: "hsl(var(--muted-foreground))" },
+  tickLine: false,
+  axisLine: false,
+  tickMargin: 8,
+} as const;
+
 // ── Static chart configs ──────────────────────────────────────────────────────
 const speciesConfig = {
   totalKg: { label: "Catch (kg)", color: "hsl(var(--chart-1))" },
@@ -77,12 +86,14 @@ export function FishCatchCompositionClient() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* ── Catch by Species ──────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Catch by Species (Top 10)</CardTitle>
-          <CardDescription>Total landed weight by common name</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Catch by Species (Top 10)</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Total landed weight by common name
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {bySpeciesLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (bySpecies?.length ?? 0) === 0 ? (
@@ -96,17 +107,15 @@ export function FishCatchCompositionClient() {
                 data={bySpecies ?? []}
                 margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
                 <XAxis
                   dataKey="commonName"
-                  tickLine={false}
-                  axisLine={false}
                   angle={-30}
                   textAnchor="end"
                   interval={0}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="totalKg"
@@ -120,12 +129,14 @@ export function FishCatchCompositionClient() {
       </Card>
 
       {/* ── Catch by Gear Type ────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Catch by Gear Type</CardTitle>
-          <CardDescription>Total landed weight by fishing gear</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Catch by Gear Type</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Total landed weight by fishing gear
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {byGearTypeLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : gearTypeData.length === 0 ? (
@@ -139,17 +150,15 @@ export function FishCatchCompositionClient() {
                 data={gearTypeData}
                 margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
                 <XAxis
                   dataKey="gearTypeLabel"
-                  tickLine={false}
-                  axisLine={false}
                   angle={-30}
                   textAnchor="end"
                   interval={0}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="totalKg"
@@ -163,14 +172,16 @@ export function FishCatchCompositionClient() {
       </Card>
 
       {/* ── CPUE by Gear Type ─────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">
             Catch per Unit Effort by Gear (kg/hr)
           </CardTitle>
-          <CardDescription>Landed weight per fishing hour, by gear</CardDescription>
+          <CardDescription className="text-xs text-muted-foreground">
+            Landed weight per fishing hour, by gear
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {byGearTypeLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : gearTypeData.length === 0 ? (
@@ -184,17 +195,15 @@ export function FishCatchCompositionClient() {
                 data={gearTypeData}
                 margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid {...gridProps} vertical={false} />
                 <XAxis
                   dataKey="gearTypeLabel"
-                  tickLine={false}
-                  axisLine={false}
                   angle={-30}
                   textAnchor="end"
                   interval={0}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
-                <YAxis tickLine={false} axisLine={false} width={56} />
+                <YAxis {...tickProps} width={56} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
                   dataKey="cpueHr"
@@ -208,14 +217,16 @@ export function FishCatchCompositionClient() {
       </Card>
 
       {/* ── Catch by Fishing-Ground Barangay ──────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">
             Catch by Fishing-Ground Barangay
           </CardTitle>
-          <CardDescription>Top 15 barangays by landed weight</CardDescription>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 15 barangays by landed weight
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {byBarangayLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (byBarangay?.length ?? 0) === 0 ? (
@@ -230,15 +241,13 @@ export function FishCatchCompositionClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="barangay"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
@@ -253,12 +262,14 @@ export function FishCatchCompositionClient() {
       </Card>
 
       {/* ── Top Fisherfolk by Catch ───────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Top Fisherfolk by Catch</CardTitle>
-          <CardDescription>Top 10 fisherfolk by total landed weight</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Top Fisherfolk by Catch</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 10 fisherfolk by total landed weight
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {topFishersLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (topFishers?.length ?? 0) === 0 ? (
@@ -273,15 +284,13 @@ export function FishCatchCompositionClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar
@@ -296,12 +305,14 @@ export function FishCatchCompositionClient() {
       </Card>
 
       {/* ── Top Vessels by Catch ──────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Top Vessels by Catch</CardTitle>
-          <CardDescription>Top 10 vessels by total landed weight</CardDescription>
+      <Card className="overflow-hidden py-0">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Top Vessels by Catch</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            Top 10 vessels by total landed weight
+          </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {topVesselsLoading ? (
             <Shimmer className="h-[300px] w-full" />
           ) : (topVessels?.length ?? 0) === 0 ? (
@@ -316,15 +327,13 @@ export function FishCatchCompositionClient() {
                 layout="vertical"
                 margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" tickLine={false} axisLine={false} />
+                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+                <XAxis type="number" {...tickProps} />
                 <YAxis
                   type="category"
                   dataKey="name"
                   width={130}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fontSize: 11 }}
+                  {...tickProps}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar

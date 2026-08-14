@@ -76,14 +76,14 @@ export function BarangayAliases() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Barangay Aliases</CardTitle>
-        <p className="text-sm text-muted-foreground">
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Barangay Aliases</CardTitle>
+        <p className="text-xs text-muted-foreground">
           Maps common misspellings or variants of a barangay name to the
           canonical name, applied automatically during data import.
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-6 py-5">
         {/* ── Add form row ─────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[180px] space-y-1.5">
@@ -94,6 +94,7 @@ export function BarangayAliases() {
               value={fromLabel}
               onChange={(e) => setFromLabel(e.target.value)}
               disabled={createAlias.isPending}
+              className="h-9"
             />
           </div>
           <div className="flex-1 min-w-[180px] space-y-1.5">
@@ -103,10 +104,10 @@ export function BarangayAliases() {
               onValueChange={setToLabel}
               disabled={createAlias.isPending}
             >
-              <SelectTrigger id="alias-to">
+              <SelectTrigger id="alias-to" className="h-9">
                 <SelectValue placeholder="Select canonical name" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-60">
                 {(barangayList ?? []).map((name) => (
                   <SelectItem key={name} value={name}>
                     {name}
@@ -115,7 +116,7 @@ export function BarangayAliases() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleAdd} disabled={addDisabled}>
+          <Button size="sm" onClick={handleAdd} disabled={addDisabled}>
             {createAlias.isPending ? "Adding…" : "Add"}
           </Button>
         </div>
@@ -134,19 +135,25 @@ export function BarangayAliases() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>From (variant / typo)</TableHead>
-                  <TableHead>To (canonical)</TableHead>
-                  <TableHead className="w-12" />
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">
+                    From (variant / typo)
+                  </TableHead>
+                  <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">
+                    To (canonical)
+                  </TableHead>
+                  <TableHead className="w-12 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0" />
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {aliases.map((alias) => (
                   <TableRow key={alias.id}>
-                    <TableCell className="font-mono text-sm">
+                    <TableCell className="border-r px-3 py-2 font-mono text-sm last:border-r-0">
                       {alias.fromLabel}
                     </TableCell>
-                    <TableCell>{alias.toLabel}</TableCell>
-                    <TableCell>
+                    <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
+                      {alias.toLabel}
+                    </TableCell>
+                    <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                       <Button
                         variant="ghost"
                         size="icon"

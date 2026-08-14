@@ -73,17 +73,19 @@ export function TenantsClient() {
   return (
     <div className="space-y-4">
       {/* ── Toolbar ───────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-1 py-1.5">
         <Input
           placeholder="Search tenants…"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          className="max-w-sm"
+          className="h-8 w-full max-w-sm sm:w-56"
           aria-label="Search tenants"
         />
-        <CreateTenantDialog
-          onCreated={() => void utils.tenant.list.invalidate()}
-        />
+        <div className="ml-auto">
+          <CreateTenantDialog
+            onCreated={() => void utils.tenant.list.invalidate()}
+          />
+        </div>
       </div>
 
       {/* ── Table ─────────────────────────────────────────────────────────── */}
@@ -91,13 +93,13 @@ export function TenantsClient() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Users</TableHead>
-              <TableHead className="text-right">Fisherfolk</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Name</TableHead>
+              <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Slug</TableHead>
+              <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Status</TableHead>
+              <TableHead className="border-r px-3 text-right text-xs font-medium text-muted-foreground last:border-r-0">Users</TableHead>
+              <TableHead className="border-r px-3 text-right text-xs font-medium text-muted-foreground last:border-r-0">Fisherfolk</TableHead>
+              <TableHead className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Created</TableHead>
+              <TableHead className="border-r px-3 text-right text-xs font-medium text-muted-foreground last:border-r-0">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -122,25 +124,25 @@ export function TenantsClient() {
             ) : (
               (data?.items ?? []).map((t) => (
                 <TableRow key={t.id}>
-                  <TableCell className="font-medium">{t.name}</TableCell>
-                  <TableCell className="font-mono text-sm">{t.slug}</TableCell>
-                  <TableCell>
+                  <TableCell className="border-r px-3 py-2 text-sm font-medium last:border-r-0">{t.name}</TableCell>
+                  <TableCell className="border-r px-3 py-2 font-mono text-sm last:border-r-0">{t.slug}</TableCell>
+                  <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                     <Badge
                       variant={t.status === "ACTIVE" ? "default" : "secondary"}
                     >
                       {t.status === "ACTIVE" ? "Active" : "Suspended"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="border-r px-3 py-2 text-right text-sm last:border-r-0">
                     {t._count.users}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="border-r px-3 py-2 text-right text-sm last:border-r-0">
                     {t._count.fisherfolk}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                     {new Date(t.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="border-r px-3 py-2 text-right text-sm last:border-r-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button

@@ -164,21 +164,21 @@ export function ReportFilters({
   } = visibility;
 
   return (
-    <Card className="print:hidden">
-      <CardHeader>
-        <CardTitle className="text-base">Report Hub — Faceted Query</CardTitle>
+    <Card className="overflow-hidden py-0 print:hidden">
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Report Hub — Faceted Query</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-6 py-5">
         <div className="space-y-1.5">
           <Label htmlFor="hub-domain">Domain</Label>
           <Select
             value={domain}
             onValueChange={(v) => onDomainChange(v as ReportDomain)}
           >
-            <SelectTrigger id="hub-domain" className="w-full sm:w-72">
+            <SelectTrigger id="hub-domain" className="h-9 w-full sm:w-72">
               <SelectValue placeholder="Select domain…" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-56">
               {DOMAINS.map((d) => (
                 <SelectItem key={d} value={d}>
                   {DOMAIN_LABELS[d]}
@@ -240,6 +240,7 @@ export function ReportFilters({
                   value={ageMin}
                   onChange={(e) => setAgeMin(e.target.value)}
                   placeholder="Any"
+                  className="h-9"
                 />
               </div>
               <div className="space-y-1.5">
@@ -252,6 +253,7 @@ export function ReportFilters({
                   value={ageMax}
                   onChange={(e) => setAgeMax(e.target.value)}
                   placeholder="Any"
+                  className="h-9"
                 />
               </div>
               <div className="space-y-1.5">
@@ -260,10 +262,10 @@ export function ReportFilters({
                   value={vesselOwner}
                   onValueChange={(v) => setVesselOwner(v as "any" | "yes" | "no")}
                 >
-                  <SelectTrigger id="hub-vessel-owner">
+                  <SelectTrigger id="hub-vessel-owner" className="h-9">
                     <SelectValue placeholder="Any" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-52">
                     <SelectItem value="any">Any</SelectItem>
                     <SelectItem value="yes">Owner</SelectItem>
                     <SelectItem value="no">Non-owner</SelectItem>
@@ -277,10 +279,10 @@ export function ReportFilters({
             <div className="space-y-1.5">
               <Label htmlFor="hub-program">Program</Label>
               <Select value={programId} onValueChange={setProgramId}>
-                <SelectTrigger id="hub-program">
+                <SelectTrigger id="hub-program" className="h-9">
                   <SelectValue placeholder="Any program" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-60">
                   <SelectItem value="any">Any program</SelectItem>
                   {(facets?.programs ?? []).map((p) => (
                     <SelectItem key={p.id} value={p.id}>
@@ -296,10 +298,10 @@ export function ReportFilters({
             <div className="space-y-1.5">
               <Label htmlFor="hub-gear-type">Gear type</Label>
               <Select value={gearType} onValueChange={setGearType}>
-                <SelectTrigger id="hub-gear-type">
+                <SelectTrigger id="hub-gear-type" className="h-9">
                   <SelectValue placeholder="Any gear type" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="w-52">
                   <SelectItem value="any">Any gear type</SelectItem>
                   {(facets?.gearTypes ?? []).map((g) => (
                     <SelectItem key={g} value={g}>
@@ -320,6 +322,7 @@ export function ReportFilters({
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-9"
                 />
               </div>
               <div className="space-y-1.5">
@@ -329,6 +332,7 @@ export function ReportFilters({
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
+                  className="h-9"
                 />
               </div>
             </>

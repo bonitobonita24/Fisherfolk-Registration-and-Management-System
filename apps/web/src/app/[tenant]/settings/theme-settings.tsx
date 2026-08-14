@@ -80,10 +80,10 @@ export function ThemeSettings() {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Accent Colors</CardTitle>
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="text-sm font-medium">Accent Colors</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           <div className="space-y-3 animate-pulse">
             <div className="h-4 w-1/3 rounded bg-muted" />
             <div className="h-9 w-full rounded bg-muted" />
@@ -97,15 +97,15 @@ export function ThemeSettings() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Accent Colors</CardTitle>
-        <p className="text-sm text-muted-foreground">
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">Accent Colors</CardTitle>
+        <p className="text-xs text-muted-foreground">
           Set the primary (orange) and secondary (navy) accent colors for
           your organization. Changes apply to everyone in this tenant. The
           dark background is unaffected.
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-6 py-5">
         {/* ── Primary color row ──────────────────────────────────────────────── */}
         <div className="space-y-1.5">
           <Label htmlFor="primary-hex">Primary color (orange)</Label>
@@ -124,7 +124,7 @@ export function ThemeSettings() {
               onChange={(e) => setPrimary(e.target.value)}
               placeholder="#F97316"
               pattern="^#[0-9a-fA-F]{6}$"
-              className="font-mono"
+              className="h-9 font-mono"
               aria-label="Primary color hex value"
             />
           </div>
@@ -153,7 +153,7 @@ export function ThemeSettings() {
               onChange={(e) => setSecondary(e.target.value)}
               placeholder="#1E3A5F"
               pattern="^#[0-9a-fA-F]{6}$"
-              className="font-mono"
+              className="h-9 font-mono"
               aria-label="Secondary color hex value"
             />
           </div>
@@ -179,11 +179,12 @@ export function ThemeSettings() {
 
         {/* ── Action buttons ─────────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <Button onClick={handleSave} disabled={saveDisabled}>
+          <Button size="sm" onClick={handleSave} disabled={saveDisabled}>
             {update.isPending ? "Saving…" : "Save"}
           </Button>
           <Button
             variant="outline"
+            size="sm"
             onClick={handleReset}
             disabled={update.isPending}
           >

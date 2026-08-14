@@ -8,7 +8,7 @@ interface FormActionsProps {
 
 export function FormActions({ children, className }: FormActionsProps) {
   return (
-    <div className={cn("flex items-center justify-end gap-3 border-t pt-4", className)}>
+    <div className={cn("flex items-center justify-end gap-2 border-t pt-4", className)}>
       {children}
     </div>
   );

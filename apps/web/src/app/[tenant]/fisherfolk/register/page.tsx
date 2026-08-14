@@ -25,15 +25,17 @@ export default async function FisherfolkRegisterPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">
-          Register Fisherfolk
-        </h1>
-        <p className="text-muted-foreground">
-          Search for existing records first, then register a new one. The ID
-          number is generated automatically; photo, signature, and category
-          assignment are added after the basic record is saved.
-        </p>
+      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+        <div className="min-w-0">
+          <h1 className="truncate text-base font-semibold tracking-tight">
+            Register Fisherfolk
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Search for existing records first, then register a new one. The ID
+            number is generated automatically; photo, signature, and category
+            assignment are added after the basic record is saved.
+          </p>
+        </div>
       </div>
       <DuplicateSearchClient />
     </div>

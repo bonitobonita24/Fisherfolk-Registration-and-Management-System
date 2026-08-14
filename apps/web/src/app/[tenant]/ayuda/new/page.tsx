@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
+import { PageHeader } from "@/components/shared";
 import { AyudaFormClient } from "./ayuda-form-client";
 
 interface NewAyudaProgramPageProps {
@@ -20,13 +21,10 @@ export default async function NewAyudaProgramPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">New Ayuda Program</h1>
-        <p className="text-muted-foreground">
-          Create an assistance program. It starts as a draft until you publish
-          it.
-        </p>
-      </div>
+      <PageHeader
+        title="New Ayuda Program"
+        description="Create an assistance program. It starts as a draft until you publish it."
+      />
       <AyudaFormClient />
     </div>
   );

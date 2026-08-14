@@ -27,21 +27,25 @@ export default async function SettingsPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Settings</h1>
-      <p className="text-muted-foreground">
-        Manage tenant settings including categories, violation types, and email configuration.
-      </p>
+      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+        <div>
+          <h1 className="truncate text-base font-semibold tracking-tight">Settings</h1>
+          <p className="text-xs text-muted-foreground">
+            Manage tenant settings including categories, violation types, and email configuration.
+          </p>
+        </div>
+      </div>
 
       {/* ID Card Template — admin design surface (one-time task) */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
             <CreditCard className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             ID Card Template
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
+          <p className="text-xs text-muted-foreground">
             Design and activate the ID card template used by the ID Generator.
             The active template is loaded automatically when encoders print IDs.
           </p>
@@ -58,14 +62,14 @@ export default async function SettingsPage({
       {/* Role Builder — data-driven custom-role permission matrix, owner-only */}
       {isAdmin ? (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="border-b px-6 py-5">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium">
               <ShieldCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               Role Builder
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
+            <p className="text-xs text-muted-foreground">
               Create custom roles with a per-feature permission matrix and
               assign them to Encoder, Viewer, and Bantay Dagat users.
             </p>

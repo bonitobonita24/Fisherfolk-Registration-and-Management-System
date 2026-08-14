@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
+import { PageHeader } from "@/components/shared";
 import { FishCatchFormClient } from "./fish-catch-form-client";
 
 interface FishCatchRegisterPageProps {
@@ -25,13 +26,10 @@ export default async function FishCatchRegisterPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Record Fish Catch</h1>
-        <p className="text-muted-foreground">
-          Log a fish catch landing — fisherfolk, gear, effort, and species
-          composition.
-        </p>
-      </div>
+      <PageHeader
+        title="Record Fish Catch"
+        description="Log a fish catch landing — fisherfolk, gear, effort, and species composition."
+      />
       <FishCatchFormClient />
     </div>
   );

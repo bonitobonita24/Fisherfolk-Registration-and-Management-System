@@ -82,9 +82,9 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
   return (
     <div className="space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 p-3 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b px-6 py-5">
           <div>
-            <CardTitle className="text-sm">Custom Roles</CardTitle>
+            <CardTitle className="text-sm font-medium">Custom Roles</CardTitle>
             <CardDescription className="text-xs">
               Build roles below Tenant Admin with a per-feature permission
               matrix. Custom roles can never grant Billing or User
@@ -96,7 +96,7 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
             New Role
           </Button>
         </CardHeader>
-        <CardContent className="p-3 pt-0">
+        <CardContent className="px-6 py-5">
           {isLoading ? (
             <p className="text-sm text-muted-foreground animate-pulse">
               Loading custom roles…
@@ -113,11 +113,11 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
                 </TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead scope="col">Name</TableHead>
-                    <TableHead scope="col">Description</TableHead>
-                    <TableHead scope="col">Users</TableHead>
-                    <TableHead scope="col">Status</TableHead>
-                    <TableHead scope="col" className="text-right">
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Name</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Description</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Users</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Status</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-right text-xs font-medium text-muted-foreground last:border-r-0">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -125,17 +125,17 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
                 <TableBody>
                   {roles.map((role) => (
                     <TableRow key={role.id}>
-                      <TableCell className="font-medium">{role.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="border-r px-3 py-2 text-sm font-medium last:border-r-0">{role.name}</TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm text-muted-foreground last:border-r-0">
                         {role.description || "—"}
                       </TableCell>
-                      <TableCell>{role.userCount}</TableCell>
-                      <TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">{role.userCount}</TableCell>
+                      <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                         <Badge variant={role.isActive ? "default" : "secondary"}>
                           {role.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="border-r px-3 py-2 text-right text-sm last:border-r-0">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button

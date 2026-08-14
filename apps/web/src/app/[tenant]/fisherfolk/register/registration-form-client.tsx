@@ -14,7 +14,7 @@ import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -220,7 +220,8 @@ export function RegistrationFormClient({
   const isSubmitting = createMutation.isPending;
 
   return (
-    <Card className="space-y-6 p-6">
+    <Card>
+      <CardContent className="space-y-6 px-6 py-5">
       <StepIndicator current={step} />
 
       <Form {...form}>
@@ -290,6 +291,7 @@ export function RegistrationFormClient({
           </div>
         </form>
       </Form>
+      </CardContent>
     </Card>
   );
 }
@@ -305,7 +307,7 @@ function StepIndicator({ current }: { current: StepNumber }) {
         return (
           <li key={label} className="flex items-center gap-2">
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+              className={`flex size-7 items-center justify-center rounded-full text-xs font-medium ${
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : isComplete

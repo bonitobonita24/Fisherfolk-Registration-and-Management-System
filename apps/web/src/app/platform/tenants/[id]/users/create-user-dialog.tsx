@@ -125,7 +125,7 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>Create User</Button>
+        <Button size="sm">Create User</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -146,6 +146,7 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
               onChange={(e) => setField("name", e.target.value)}
               disabled={create.isPending}
               aria-describedby={errors.name ? "cu-name-err" : undefined}
+              className="h-9"
             />
             {errors.name && (
               <p id="cu-name-err" className="text-xs text-destructive">
@@ -164,6 +165,7 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
               onChange={(e) => setField("username", e.target.value)}
               disabled={create.isPending}
               aria-describedby={errors.username ? "cu-username-err" : undefined}
+              className="h-9"
             />
             {errors.username && (
               <p id="cu-username-err" className="text-xs text-destructive">
@@ -183,10 +185,11 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
               <SelectTrigger
                 id="cu-role"
                 aria-describedby={errors.role ? "cu-role-err" : undefined}
+                className="h-9"
               >
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-52">
                 {ROLES.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
                     {r.label}
@@ -212,6 +215,7 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
               onChange={(e) => setField("password", e.target.value)}
               disabled={create.isPending}
               aria-describedby={errors.password ? "cu-password-err" : undefined}
+              className="h-9"
             />
             {errors.password && (
               <p id="cu-password-err" className="text-xs text-destructive">
@@ -230,12 +234,13 @@ export function CreateUserDialog({ tenantId, onCreated }: CreateUserDialogProps)
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => handleOpenChange(false)}
               disabled={create.isPending}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={create.isPending}>
+            <Button type="submit" size="sm" disabled={create.isPending}>
               {create.isPending ? "Creating…" : "Create User"}
             </Button>
           </DialogFooter>

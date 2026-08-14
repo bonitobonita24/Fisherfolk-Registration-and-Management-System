@@ -142,7 +142,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>Create Tenant</Button>
+        <Button size="sm">Create Tenant</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -160,6 +160,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
               onChange={(e) => handleNameChange(e.target.value)}
               disabled={create.isPending}
               aria-describedby={errors.name ? "ct-name-err" : undefined}
+              className="h-9"
             />
             {errors.name && (
               <p id="ct-name-err" className="text-xs text-destructive">
@@ -183,7 +184,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
               onChange={(e) => handleSlugChange(e.target.value)}
               disabled={create.isPending}
               aria-describedby={errors.slug ? "ct-slug-err" : undefined}
-              className="font-mono"
+              className="h-9 font-mono"
             />
             {errors.slug && (
               <p id="ct-slug-err" className="text-xs text-destructive">
@@ -209,6 +210,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
               aria-describedby={
                 errors.adminUsername ? "ct-username-err" : undefined
               }
+              className="h-9"
             />
             {errors.adminUsername && (
               <p id="ct-username-err" className="text-xs text-destructive">
@@ -229,6 +231,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
               aria-describedby={
                 errors.adminFullName ? "ct-fullname-err" : undefined
               }
+              className="h-9"
             />
             {errors.adminFullName && (
               <p id="ct-fullname-err" className="text-xs text-destructive">
@@ -250,6 +253,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
               aria-describedby={
                 errors.adminPassword ? "ct-password-err" : undefined
               }
+              className="h-9"
             />
             {errors.adminPassword && (
               <p id="ct-password-err" className="text-xs text-destructive">
@@ -259,7 +263,7 @@ export function CreateTenantDialog({ onCreated }: CreateTenantDialogProps) {
           </div>
 
           <DialogFooter>
-            <Button type="submit" disabled={create.isPending}>
+            <Button type="submit" size="sm" disabled={create.isPending}>
               {create.isPending ? "Creating…" : "Create Tenant"}
             </Button>
           </DialogFooter>

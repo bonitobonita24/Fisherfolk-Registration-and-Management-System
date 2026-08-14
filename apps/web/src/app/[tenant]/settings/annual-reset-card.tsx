@@ -38,14 +38,14 @@ export function AnnualResetCard({ currentYear }: AnnualResetCardProps) {
 
   return (
     <Card className="border-destructive/30">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-base text-destructive">
+      <CardHeader className="border-b px-6 py-5">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-destructive">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
           Annual Registration Reset
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground max-w-prose">
+      <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
+        <p className="text-xs text-muted-foreground max-w-prose">
           Marks every fisherfolk still registered under a previous year as
           Inactive, closing out the {currentYear} registration cycle.
           Fisherfolk registered for the current year are unaffected. This can
@@ -53,7 +53,7 @@ export function AnnualResetCard({ currentYear }: AnnualResetCardProps) {
         </p>
         <ConfirmDialog
           variant="destructive"
-          trigger={<Button variant="destructive">Run Annual Reset</Button>}
+          trigger={<Button variant="destructive" size="sm">Run Annual Reset</Button>}
           title="Run annual registration reset?"
           description={`This marks every fisherfolk still registered under a year before ${currentYear} as Inactive, closing out the ${currentYear} registration cycle. Fisherfolk already registered for ${currentYear} are unaffected. This action can be run again safely.`}
           confirmLabel="Yes, reset registrations"

@@ -208,16 +208,16 @@ function FisherfolkSelectStep({
 
       {/* Recently registered — quick select */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <CardHeader className="gap-1.5 border-b px-6 py-5">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Clock className="size-4 text-muted-foreground" aria-hidden="true" />
             Recently registered
           </CardTitle>
           <p className="text-xs text-muted-foreground">
             Newest registrations first — tick up to {MAX_SELECTION} to print.
           </p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 py-5">
           {recentLoading ? (
             <p className="py-4 text-center text-sm text-muted-foreground" role="status">
               Loading recent registrations…
@@ -296,13 +296,13 @@ function FisherfolkSelectStep({
 
       {/* Search for anyone else */}
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Search className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <CardHeader className="border-b px-6 py-5">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium">
+            <Search className="size-4 text-muted-foreground" aria-hidden="true" />
             Find other fisherfolk
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 px-6 py-5">
           <div className="relative">
             <Search
               className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
@@ -311,7 +311,7 @@ function FisherfolkSelectStep({
             <Input
               id="fisherfolk-search"
               placeholder="Search by name or ID number…"
-              className="pl-8"
+              className="h-9 pl-8"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Search all fisherfolk by name or registration ID"
@@ -341,13 +341,13 @@ function FisherfolkSelectStep({
                   <TableRow>
                     <TableHead
                       scope="col"
-                      className="w-10"
+                      className="w-10 border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0"
                       aria-label="Row selection checkbox"
                     />
-                    <TableHead scope="col">Name</TableHead>
-                    <TableHead scope="col">Registered</TableHead>
-                    <TableHead scope="col">Registration</TableHead>
-                    <TableHead scope="col">Print Status</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Name</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Registered</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Registration</TableHead>
+                    <TableHead scope="col" className="border-r px-3 text-xs font-medium text-muted-foreground last:border-r-0">Print Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -367,7 +367,7 @@ function FisherfolkSelectStep({
                         aria-selected={isSelected}
                         className={blocked ? "opacity-60" : undefined}
                       >
-                        <TableCell>
+                        <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                           <Checkbox
                             id={`search-${subject.id}`}
                             checked={isSelected}
@@ -380,7 +380,7 @@ function FisherfolkSelectStep({
                             }
                           />
                         </TableCell>
-                        <TableCell className="font-medium">
+                        <TableCell className="border-r px-3 py-2 text-sm font-medium last:border-r-0">
                           <label
                             htmlFor={`search-${subject.id}`}
                             className={
@@ -392,10 +392,10 @@ function FisherfolkSelectStep({
                             {subject.name}
                           </label>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
+                        <TableCell className="border-r px-3 py-2 text-xs text-muted-foreground last:border-r-0">
                           {formatRegisteredDate(subject.registeredAt)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="border-r px-3 py-2 text-sm last:border-r-0">
                           {subject.renewalCount > 0 ? (
                             <Badge
                               variant="outline"
@@ -412,7 +412,7 @@ function FisherfolkSelectStep({
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="px-3 py-2">
                           {blocked ? (
                             <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
                               <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -467,6 +467,7 @@ function FisherfolkSelectStep({
           )}
         </div>
         <Button
+          size="sm"
           onClick={handleProceed}
           disabled={selected.size === 0}
           className="gap-2"

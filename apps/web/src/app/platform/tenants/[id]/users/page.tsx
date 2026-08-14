@@ -9,13 +9,17 @@ export default async function TenantUsersPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">
-        Tenant User Management
-      </h1>
-      <p className="text-muted-foreground">
-        Manage users within this tenant. Create accounts, reset passwords, or
-        deactivate access.
-      </p>
+      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
+        <div>
+          <h1 className="truncate text-base font-semibold tracking-tight">
+            Tenant User Management
+          </h1>
+          <p className="text-xs text-muted-foreground">
+            Manage users within this tenant. Create accounts, reset passwords, or
+            deactivate access.
+          </p>
+        </div>
+      </div>
       <UsersClient tenantId={id} />
     </div>
   );
