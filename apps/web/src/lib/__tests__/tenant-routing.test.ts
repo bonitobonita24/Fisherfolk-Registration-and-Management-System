@@ -87,7 +87,12 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
   });
 
   it("never rewrites reserved paths (api/_next/assets) on a custom domain", () => {
-    for (const p of ["/api/trpc/x", "/_next/static/a.js", "/favicon.ico"]) {
+    for (const p of [
+      "/api/trpc/x",
+      "/_next/static/a.js",
+      "/favicon.ico",
+      "/data/calapan-barangays.geojson",
+    ]) {
       const r = resolveTenantRoute({
         host: "fisherfolk.calapancity.gov.ph",
         pathname: p,

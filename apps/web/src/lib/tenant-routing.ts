@@ -18,6 +18,7 @@ export const RESERVED_PREFIXES = [
   "/api",
   "/_next",
   "/static",
+  "/data", // public/ static assets (e.g. barangay geojson) — never tenant-scoped
   "/favicon.ico",
   "/robots.txt",
   "/sitemap.xml",
