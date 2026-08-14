@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { BrandMark } from "./brand-mark";
 
-const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.12.5";
+const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.12.6";
 
 const MODULE_LINKS = [
   { href: "#features", label: "Modules" },

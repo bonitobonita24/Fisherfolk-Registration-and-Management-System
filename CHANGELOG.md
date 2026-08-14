@@ -4,6 +4,12 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.6 — 2026-08-14
+
+### [FIXED]
+- clean callbackUrl on custom-domain hosts — post-login nav stalled on 308 (`fabbfa5`)
+
+
 ## v0.12.5 — 2026-08-14
 
 ### [FIXED]
