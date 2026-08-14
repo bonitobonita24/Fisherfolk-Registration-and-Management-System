@@ -4,6 +4,12 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.12.2 — 2026-08-14
+
+### [FIXED]
+- guard inverse-mask redirect against middleware re-run on rewrite (`1abc071`)
+
+
 ## v0.12.1 — 2026-08-14
 
 ### [FIXED]
