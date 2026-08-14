@@ -1,6 +1,33 @@
 # FRMS — Project State
 
-## Current State (2026-08-14, latest) — 🚀 DEMO DEPLOYED: `frms-demo.powerbyte.app/demo` = official "Calapan City" demo (v0.12.0, verified 8/8)
+## Current State (2026-08-14, latest) — 🚀 DEMO AT SUBDOMAIN ROOT: `frms-demo.powerbyte.app` = official "Calapan City" demo via custom-domain masking (v0.12.4, live-verified)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner: `/demo` on the demo subdomain is redundant — serve the demo at the subdomain root. Implemented via
+the custom-domain tenant mechanism: `tenants.custom_domain='frms-demo.powerbyte.app'` + stack env
+`TENANT_CUSTOM_DOMAINS={"frms-demo.powerbyte.app":"demo"}`. Slug `demo` retained internally, never visible.
+
+**✅ DONE (this chunk):** four releases fixing the never-activated masking path, each live-verified:
+- **v0.12.1** `6f97255` — APP_LEVEL_PREFIXES (`/admin`,`/login`,`/platform`) exempt from custom-domain
+  rewriting (login 404'd under the slug) + inverse-mask 308 (`/<slug>/x` → `/x`, resolver `redirectTo`).
+- **v0.12.2** `607366e` — 🔴 Next RE-RUNS middleware on rewritten URLs → inverse-mask self-looped every
+  clean URL (308 → itself). Fix: rewrites carry `x-tenant-internal-rewrite: 1`; second pass skips the
+  redirect and falls through to auth. Lesson `nextjs.middleware.rerun-on-rewrite-loop`.
+- **v0.12.3** `3c2b9e3` — new `app/[tenant]/page.tsx` (bare `/<slug>` 404'd → post-login landing broke);
+  `/data` added to resolver RESERVED_PREFIXES.
+- **v0.12.4** `bc60d15` — 🔴 middleware tenant cross-check read `data` as a slug and 307'd
+  `public/data/calapan-barangays.geojson` to the dashboard (SILENT — density map lost its data on ALL
+  hosts). Fix: `/data` in PUBLIC_PATHS. Lesson `nextjs.middleware.swallows-public-static-files`.
+**Final live E2E:** login → rendered `/dashboard` clean URL · sidebar navs clean · photos render ·
+`/demo/dashboard` 308 → `/dashboard` · geojson 200 `application/geo+json` · 0 console errors.
+`origin/main` = local main @ `bc60d15` (v0.12.4, pushed). Dev rebuilt FRESH per release.
+**Optional polish (open, low-prio):** emit clean (non-slug) hrefs on custom-domain hosts to avoid the
+per-click 308 hop; real Calapan barangay names in the demo seed so the density map plots.
+
+---
+
+## Previous (2026-08-14) — 🚀 DEMO DEPLOYED: `frms-demo.powerbyte.app/demo` = official "Calapan City" demo (v0.12.0, verified 8/8)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
