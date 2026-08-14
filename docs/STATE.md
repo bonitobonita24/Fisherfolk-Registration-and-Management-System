@@ -19,9 +19,18 @@ the custom-domain tenant mechanism: `tenants.custom_domain='frms-demo.powerbyte.
 - **v0.12.4** `bc60d15` — 🔴 middleware tenant cross-check read `data` as a slug and 307'd
   `public/data/calapan-barangays.geojson` to the dashboard (SILENT — density map lost its data on ALL
   hosts). Fix: `/data` in PUBLIC_PATHS. Lesson `nextjs.middleware.swallows-public-static-files`.
-**Final live E2E:** login → rendered `/dashboard` clean URL · sidebar navs clean · photos render ·
-`/demo/dashboard` 308 → `/dashboard` · geojson 200 `application/geo+json` · 0 console errors.
-`origin/main` = local main @ `bc60d15` (v0.12.4, pushed). Dev rebuilt FRESH per release.
+- **v0.12.5** `4df70c6` — 🔴 owner hit `ERR_TOO_MANY_REDIRECTS` on stale `/calapan-city/dashboard`: a
+  foreign-tenant session (old-demo JWT survived the DB wipe — same auth secret) looped on the custom
+  domain (rewrite prefixes host slug ⇄ cross-check bounces to session slug). Fix: on a custom-domain
+  host a session for a different tenant is cleared (`authjs.session-token` + `__Secure-` variant) →
+  redirect `/admin`.
+- **v0.12.6** `8451794` — 🔴 login hung at "Signing in…": anonymous redirects carried the REWRITTEN
+  `/demo` as callbackUrl; post-login `router.push` stalls on the inverse-mask 308 (client RSC nav).
+  Fix: custom-domain hosts issue CLEAN callbackUrls (slug stripped; bare tenant root → `/dashboard`).
+**Final live E2E (v0.12.6):** root → `callbackUrl=%2Fdashboard` → login lands rendered `/dashboard` in
+**5.2s** (no hang) · sidebar navs clean · stale `/calapan-city/dashboard` = clean 404, session preserved,
+NO loop · geojson 200 `application/geo+json` · 0 console errors.
+`origin/main` = local main @ `8451794` (v0.12.6, pushed). Dev rebuilt FRESH per release.
 **Optional polish (open, low-prio):** emit clean (non-slug) hrefs on custom-domain hosts to avoid the
 per-click 308 hop; real Calapan barangay names in the demo seed so the density map plots.
 
