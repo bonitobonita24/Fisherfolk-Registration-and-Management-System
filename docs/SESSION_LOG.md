@@ -2,6 +2,20 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-15 (later) — Released v0.14.1 (a11y + auth fixes) to origin + dev refresh
+
+**In your words:** Resume the session; push the held a11y + auth-hardening fixes to origin; confirm I can test it locally; then hand off all pending tasks/decisions, save session, and stop.
+
+✅ Done
+- **Released v0.14.1** — owner authorized the held push. Generated consolidated changelog + version-sync (7 package.json + landing footer `_APP_VERSION`) in release commit `bf751bc`, annotated tag `v0.14.1`. Typecheck clean. `git push --follow-tags` → **`main` == `origin/main`**, tag pushed. Ships: `[FIXED]` auth session fail-open on transient DB error + `[FIXED]` WCAG 2.2 AA static fixes (keyboard/skip-link/heading semantics).
+- **Local dev fully deployed** off shipped sha — rebuilt `frms_dev_app` off `bf751bc`, freshness GREEN, `/admin` → 200, footer reads v0.14.1. Testable at http://localhost:44387 (login `webmaster@localhost.com`, tenant `calapan-city`).
+
+💬 Decisions/notes
+- Staging stack is torn down (build-only CI) so the push builds an image but lands nowhere live; **production stays manual** — v0.14.1 NOT auto-promoted to prod.
+- Session-save docs commit (STATE.md + SESSION_LOG.md) is LOCAL per HARD HOLD — not pushed without explicit word.
+
+⏳ Not yet / Next — (optional) promote v0.14.1 → prod (manual); push the session-save docs commit; per-page heading-level polish; manual keyboard/SR pass + Rule-31 re-baseline (advisory). **No open [WHAT].**
+
 ## 2026-08-15 — Post-reboot health check + a11y remediation + auth robustness fix (swarm)
 
 **In your words:** My PC rebooted/hung overnight — verify nothing is corrupted from the last milestone; bring the dev stack back cleanly; run the axe a11y sweep; then fix what it found and investigate the session drop-outs; merge and save.

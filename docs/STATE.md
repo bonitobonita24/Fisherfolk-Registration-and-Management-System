@@ -1,6 +1,30 @@
 # FRMS — Project State
 
-## Current State (2026-08-15, latest) — ✅ Post-reboot recovery verified + a11y remediation + auth fix merged to LOCAL main (HARD HOLD)
+## Current State (2026-08-15, latest) — 🚀 a11y + auth fail-open fixes RELEASED as v0.14.1 & PUSHED to origin (main == origin, full bar met)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner authorized the held push. Cut **v0.14.1** (patch — two `fix:` commits) via `gen-release-notes --apply`: `CHANGELOG.md` entry + version-sync (all 7 `package.json` + `landing-footer.tsx` `_APP_VERSION` fallback 0.14.0→0.14.1) in release commit `bf751bc`, annotated tag `v0.14.1`. Typecheck re-verified clean. `git push --follow-tags` → **`main` == `origin/main`**, tag pushed. Local dev **rebuilt off `bf751bc`** — freshness GREEN, `/admin` 200, footer now reads v0.14.1.
+
+**✅ DONE THIS SESSION:**
+- Resume health check: git clean, tree clean, tag `v0.14.0` intact, demo 200 — confirmed the 5 held commits from the prior session were sound.
+- **Released v0.14.1** (release `bf751bc`, tag pushed) — ships: `[FIXED]` auth session fail-open on transient DB error (`0963346`) + `[FIXED]` WCAG 2.2 AA static fixes — keyboard/skip-link/heading semantics (`5a0b6e2`).
+- Pushed `main` → `origin/main` (authorized). Rebuilt dev off shipped sha — FRESH.
+
+**Git:** local `main` == `origin/main` @ `bf751bc` (before this session-save docs commit). Tree otherwise clean (untracked scratch `.qa-learnings/`, `_tempfiles/` only). Session-save docs commit (STATE.md + SESSION_LOG.md) lands LOCAL per HARD HOLD — push on next explicit word.
+
+**Deploy trajectory:** push trips Model-A CI (`docker-publish.yml`) → builds image. Staging stack is TORN DOWN (build-only CI) → no live staging landing. **Production stays MANUAL** — v0.14.1 not promoted to prod (say the word to promote).
+
+**⏳ OPEN / NEXT (all un-gated or advisory — NO open [WHAT]):**
+- Optional: promote v0.14.1 → production (manual, owner word).
+- Optional: push the session-save docs commit to origin.
+- Optional: per-page heading-level polish (CardTitle h3 can skip h1→h3 on h2-less pages — best-practice, not AA).
+- Advisory: manual keyboard/screen-reader pass + Rule-31 design-fidelity re-baseline.
+- Incidental: dev `calapan-city` tenant has 0 vessel records (data state, not a bug).
+
+---
+
+## Current State (2026-08-15) — ✅ Post-reboot recovery verified + a11y remediation + auth fix merged to LOCAL main (HARD HOLD)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
