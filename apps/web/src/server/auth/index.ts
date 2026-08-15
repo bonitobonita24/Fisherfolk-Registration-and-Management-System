@@ -101,21 +101,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // V28 hardening — verify securityVersion is still valid on every
       // session read. Forces re-auth when role/tenant/status changes.
       if (typeof token.userId === "string" && token.userId.length > 0) {
-        const dbUser = await platformPrisma.user.findUnique({
-          where: { id: token.userId },
-          select: {
-            securityVersion: true,
-            status: true,
-            tenant: { select: { status: true } },
-          },
-        });
-        if (
-          !dbUser ||
-          dbUser.status !== "ACTIVE" ||
-          dbUser.securityVersion !== token.securityVersion ||
-          dbUser.tenant?.status === "SUSPENDED"
-        ) {
-          throw new Error("SESSION_INVALIDATED");
+        try {
+          const dbUser = await platformPrisma.user.findUnique({
+            where: { id: token.userId },
+            select: {
+              securityVersion: true,
+              status: true,
+              tenant: { select: { status: true } },
+            },
+          });
+          if (
+            !dbUser ||
+            dbUser.status !== "ACTIVE" ||
+            dbUser.securityVersion !== token.securityVersion ||
+            dbUser.tenant?.status === "SUSPENDED"
+          ) {
+            throw new Error("SESSION_INVALIDATED");
+          }
+        } catch (err) {
+          // Fail-CLOSED on a definitive invalidation (deleted/inactive user,
+          // securityVersion bump, suspended tenant) — re-throw it. Fail-OPEN
+          // on any OTHER error (transient DB/pool failure): a DB availability
+          // hiccup must NOT be misread as session invalidation and log the
+          // user out. Keep the session; the next successful read re-checks.
+          if (err instanceof Error && err.message === "SESSION_INVALIDATED") {
+            throw err;
+          }
+          console.error(
+            "[auth] securityVersion check skipped (transient DB error, fail-open):",
+            err,
+          );
         }
       }
 
