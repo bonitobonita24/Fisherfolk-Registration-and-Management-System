@@ -1,6 +1,27 @@
 # FRMS — Project State
 
-## Current State (2026-08-14, latest) — 🚀 DEMO AT SUBDOMAIN ROOT: `frms-demo.powerbyte.app` = official "Calapan City" demo via custom-domain masking (v0.12.4, live-verified)
+## Current State (2026-08-15, latest) — ✅ Post-reboot recovery verified + a11y remediation + auth fix merged to LOCAL main (HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+PC rebooted overnight → full health check: `git fsck` clean (no corruption, dangling commits normal), tree clean, `v0.14.0` intact, demo live (200). Docker fleet auto-restarted; FRMS dev rebuilt off main, **freshness green, serves 200**.
+
+**✅ DONE THIS SESSION (all LOCAL on `main`, 4 ahead of origin — HARD HOLD, nothing pushed):**
+- **A11y sweep** (3-worker swarm: static jsx-a11y + 2× runtime axe-core 4.10.2, 15 routes, WCAG 2.0/2.1/2.2 A+AA): **0 runtime axe violations**; static 0 critical/2 serious/4 moderate/3 minor. Artifacts: `test-artifacts/a11y-static-report.md`, `a11y-runtime-report-W2.md`, `-W3.md`, `a11y-sweep-consolidated-2026-08-15.md`.
+- **A11y fixes** `fix/a11y-wcag-static` → merge `1535d3f` (commit `5a0b6e2`): ID-template drag keyboard ops (2.1.1, composes with dnd-kit) · skip-to-content link (2.4.1) · `CardTitle`→`<h3>` (1.3.1, tsc-safe across 86 usages) · register headings h3→h2. Gates: tsc·lint·402 tests·build all ✓.
+- **Auth robustness fix** `fix/auth-session-failopen` → merge `5e49e73` (commit `0963346`): `server/auth/index.ts` securityVersion check now fails-CLOSED on definitive invalidation, fails-OPEN on transient DB error (fixes the mid-session logout-to-`/admin` seen during headless browsing; root cause = un-try/catch'd per-request Prisma read throwing on pool blips). Gates green. Background security-review flag = intentional/acknowledged.
+
+**Git:** local `main` @ `5e49e73`, **4 commits ahead of `origin/main` @ `8e48ce2`** — HARD HOLD (push would trip Model-A CI + staging auto-deploy; separate owner decision). Feature branches `fix/a11y-wcag-static` + `fix/auth-session-failopen` retained. Dev FRESH off `5e49e73`.
+
+**⏳ OPEN / NEXT (all un-gated or advisory):**
+- Push `main`→origin = owner-gated `[WHAT]` (deploy consequence).
+- Optional: per-page heading-level polish (CardTitle h3 can skip h1→h3 on h2-less pages — best-practice, not AA).
+- Advisory: manual keyboard/screen-reader pass + Rule-31 design-fidelity re-baseline.
+- Incidental: dev `calapan-city` tenant has 0 vessel records (data state, not a bug).
+
+---
+
+## Current State (2026-08-14) — 🚀 DEMO AT SUBDOMAIN ROOT: `frms-demo.powerbyte.app` = official "Calapan City" demo via custom-domain masking (v0.12.4, live-verified)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

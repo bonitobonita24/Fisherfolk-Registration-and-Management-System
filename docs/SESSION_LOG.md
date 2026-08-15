@@ -2,6 +2,25 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-15 — Post-reboot health check + a11y remediation + auth robustness fix (swarm)
+
+**In your words:** My PC rebooted/hung overnight — verify nothing is corrupted from the last milestone; bring the dev stack back cleanly; run the axe a11y sweep; then fix what it found and investigate the session drop-outs; merge and save.
+
+✅ Done (all LOCAL on `main`, 4 ahead of origin — HARD HOLD, nothing pushed/deployed)
+- **Reboot health check** — `git fsck` clean (dangling commits normal, zero errors), HEAD `8e48ce2` == origin, tree clean, tag `v0.14.0` intact, demo live (HTTP 200). No corruption, no lost work — reboot landed on a clean v0.14.0 checkpoint.
+- **Docker recovery** — whole fleet auto-restarted after reboot; FRMS dev stack all healthy. Found dev image 17 min behind main (docs-only commit `8e48ce2`) → **rebuilt dev off main, freshness green**, serves 200.
+- **A11y sweep (3-worker swarm)** — 1 static (jsx-a11y) + 2 runtime (axe-core 4.10.2, headless, WCAG 2.0/2.1/2.2 A+AA) across 15 routes. **Result: 0 runtime axe violations** everywhere; static found 0 critical / 2 serious / 4 moderate / 3 minor. Reports in `test-artifacts/a11y-*`.
+- **A11y remediation** (`fix/a11y-wcag-static` → merged `1535d3f`) — keyboard ops for ID-template drag editor (SC 2.1.1, composes with dnd-kit), skip-to-content link (SC 2.4.1), `CardTitle`→`<h3>` for heading outline (SC 1.3.1, safe across 86 usages), register result headings h3→h2. Gates: tsc ✓ · lint ✓ · 402 tests ✓ · build ✓.
+- **Session-expiry investigation + fix** (`fix/auth-session-failopen` → merged `0963346`/`5e49e73`) — root cause: the V28 `securityVersion` session check (`server/auth/index.ts`) ran a Prisma read on every request with NO try/catch, so a transient DB/pool error was misread as invalidation → logout to `/admin`. Fix: fail-CLOSED on definitive invalidation, fail-OPEN on transient DB error. Gates green.
+
+💬 Decisions/notes
+- Ruled out the v0.12.5 custom-domain cookie-deletion as the logout cause (dead code on localhost — `TENANT_CUSTOM_DOMAINS` unset in dev).
+- `CardTitle`→`<h3>` can create h1→h3 skips on pages without an h2 — a *best-practice* imperfection (axe heading-order isn't AA-tagged), NOT an AA violation; still a net SC 1.3.1 gain. Optional per-page heading follow-up remains.
+- Auth fail-open flagged by background commit security-review → acknowledged as intentional (availability-vs-security tradeoff; definitive invalidation still fail-closed).
+- Incidental: dev `calapan-city` tenant has 0 vessel records (vessels/detail unaudited — data state, not a bug).
+
+⏳ Not yet / Next — push `main` to origin (would trip Model-A CI + staging auto-deploy) is a separate owner-gated decision; optional per-page heading-level polish; formal keyboard/screen-reader manual pass + Rule-31 design-fidelity re-baseline (advisory).
+
 ## 2026-08-14 — NexaCRM whole-app redesign + demo polish batch (6 queued tasks, swarm)
 
 **In your words:** Redesign everything with the NexaCRM shadcn/studio Pro template first, then fill the blank dashboard charts, fix the oversized/non-clickable notifications page, make the bell list scrollable, add real sample images + scannable QR codes, and compress the sparse vessel detail layout.
