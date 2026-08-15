@@ -60,6 +60,17 @@ function DraggableElement({
   const rotationSuffix =
     baseStyle.transform !== undefined ? ` ${baseStyle.transform}` : "";
 
+  // WCAG SC 2.1.1 (Keyboard): compose dnd-kit's own keyboard-drag handler
+  // (Space/Enter pick-up, arrow-key nudge) with selection-on-Enter/Space so
+  // keyboard users can select the element the same way pointer users click it.
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    listeners?.onKeyDown?.(e);
+    if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+      if (e.key !== "Enter") e.preventDefault();
+      onSelect(element.id);
+    }
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -79,11 +90,14 @@ function DraggableElement({
       }}
       {...listeners}
       {...attributes}
+      role="button"
+      tabIndex={0}
       aria-label={`Draggable element: ${element.type}${element.type === "variable" ? ` (${element.variableKey})` : ""}`}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(element.id);
       }}
+      onKeyDown={handleKeyDown}
     >
       {children}
     </div>
@@ -170,6 +184,9 @@ export function TemplateCanvas({
       <div
         style={{ display: "inline-block" }}
         onClick={() => onSelectElement?.(null)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") onSelectElement?.(null);
+        }}
       >
         <IdCardRenderer
           elements={elements}

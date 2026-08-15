@@ -26,6 +26,12 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
 
   return (
     <div className="flex h-full w-full overflow-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:shadow focus:ring-2 focus:ring-ring"
+      >
+        Skip to main content
+      </a>
       {/* Desktop sidebar — collapses to icon rail (w-14) when toggled.
           NexaCRM: sidebar sits directly on the page; border moved to the content box. */}
       <div
@@ -62,7 +68,7 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           onMenuClick={() => setMobileOpen(true)}
           onToggleSidebar={toggleSidebar}
         />
-        <main className="flex-1 overflow-y-auto bg-background px-4 pb-4">
+        <main id="main-content" className="flex-1 overflow-y-auto bg-background px-4 pb-4">
           {children}
         </main>
       </div>
