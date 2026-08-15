@@ -4,6 +4,17 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.14.1 — 2026-08-15
+
+### [FIXED]
+- fail-open on transient DB error in session securityVersion check (`0963346`)
+- WCAG 2.2 AA static fixes — keyboard, skip-link, heading semantics (`5a0b6e2`)
+
+### [DOCS]
+- 2026-08-15 save — reboot health check + a11y remediation + auth fail-open fix (`bba3436`)
+- v0.14.0 ship log + chore: playwright-core root devDep (live-smoke harness) (`8e48ce2`)
+
+
 ## v0.14.0 — 2026-08-14
 
 ### [FEATURE]
