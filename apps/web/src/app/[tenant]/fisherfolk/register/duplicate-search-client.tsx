@@ -292,9 +292,9 @@ function ResultsPanel({
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" />
           <div className="space-y-1">
-            <h3 className="text-sm font-medium text-foreground">
+            <h2 className="text-sm font-medium text-foreground">
               No matching records found
-            </h3>
+            </h2>
             <p className="text-xs text-muted-foreground">
               No active fisherfolk in this tenant match the search criteria.
               You can safely proceed to register a new record.
@@ -335,10 +335,10 @@ function ResultsPanel({
           }`}
         />
         <div className="space-y-1">
-          <h3 className="text-sm font-medium text-foreground">
+          <h2 className="text-sm font-medium text-foreground">
             {matches.length} possible {matches.length === 1 ? "match" : "matches"}{" "}
             found
-          </h3>
+          </h2>
           <p className="text-xs text-muted-foreground">
             Review the records below before creating a duplicate. If this is a
             genuinely different person, you may proceed.
