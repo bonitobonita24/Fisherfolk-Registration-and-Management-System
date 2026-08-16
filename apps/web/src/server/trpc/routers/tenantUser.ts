@@ -126,7 +126,7 @@ export const tenantUserRouter = createTRPCRouter({
       await platformPrisma.auditLog.create({
         data: {
           tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "CREATE",
           entityType: "User",
           entityId: user.id,
@@ -175,7 +175,7 @@ export const tenantUserRouter = createTRPCRouter({
       await platformPrisma.auditLog.create({
         data: {
           tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "UPDATE",
           entityType: "User",
           entityId: userId,
@@ -232,7 +232,7 @@ export const tenantUserRouter = createTRPCRouter({
       await platformPrisma.auditLog.create({
         data: {
           tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "UPDATE",
           entityType: "User",
           entityId: userId,
