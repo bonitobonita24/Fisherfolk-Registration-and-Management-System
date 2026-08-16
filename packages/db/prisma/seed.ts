@@ -129,13 +129,14 @@ async function main() {
   // Dedicated platform tenant — owns the tenant-manager (super_admin) account
   // so the platform manager never appears in an LGU tenant's staff list. It is
   // invisible to the client (they only ever see their own LGU app, never
-  // /platform). Owner-set 2026-07-09.
+  // /tm). Owner-set 2026-07-09; slug renamed platform→tm (Milestone 3 — site
+  // access & tenancy standard, /platform route retired to a redirect shim).
   const platformTenant = await prisma.tenant.upsert({
-    where: { slug: "platform" },
+    where: { slug: "tm" },
     update: {},
     create: {
       name: "Powerbyte Platform Administration",
-      slug: "platform",
+      slug: "tm",
       accentColor: "#4F8EF7",
       currentRegistrationYear: new Date().getFullYear(),
       barangayList: [],
@@ -148,12 +149,12 @@ async function main() {
 
   // ── Accounts (3-tier RBAC — owner-set 2026-07-10) ──────────────────────────
   //  • TENANT SUPERADMIN (webmaster) → role `tenant_superadmin`, belongs to the
-  //    LGU tenant. Runs the FRMS app; has NO /platform access. Identity is
+  //    LGU tenant. Runs the FRMS app; has NO /tm access. Identity is
   //    env-driven via the SUPERADMIN_* vars (historical name kept to avoid
   //    churn) — staging/prod inject the universal owner-admin cred; local dev
   //    falls back to the documented localhost cred.
   //  • TENANT MANAGER (tenantadmin) → role `tenant_manager`, belongs to the
-  //    `platform` tenant. The SOLE platform/tenant manager (/platform/tenants).
+  //    `tm` tenant. The SOLE platform/tenant manager (/tm/tenants).
   //    Identity is env-driven via TENANTADMIN_*. The real prod-grade password
   //    lives ONLY in the gitignored .env.* — the default literal below is a
   //    throwaway local placeholder, never the real secret.

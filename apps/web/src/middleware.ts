@@ -86,7 +86,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return NextResponse.next();
     }
     if (user.role === "tenant_manager") {
-      return NextResponse.redirect(new URL("/platform/tenants", req.url));
+      return NextResponse.redirect(new URL("/tm/tenants", req.url));
     }
     if (user.tenantSlug) {
       // On a custom-domain host matching the session's tenant, redirect to
@@ -127,8 +127,8 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
 
   const { role, tenantSlug, tenantId, customView } = session.user;
 
-  // Platform routes — tenant_manager only
-  if (pathname.startsWith("/platform")) {
+  // Management-site routes — tenant_manager only
+  if (pathname.startsWith("/tm")) {
     if (role !== "tenant_manager") {
       return NextResponse.redirect(new URL("/admin", req.url));
     }
@@ -194,6 +194,19 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
 }
 
 export default auth((req: NextRequest & { auth: unknown }) => {
+  // Legacy `/platform` → `/tm` redirect shim (Milestone 3 site-access-tenancy
+  // rename). Fires BEFORE the custom-domain masking dance and the auth guard
+  // in `route()` so an old bookmark, OAuth callbackUrl, or a stale reverse-proxy
+  // path lands on the new `/tm` login/app flow instead of a 404 — anonymous
+  // visitors still get bounced to `/admin` by `route()` afterwards, same as a
+  // direct `/tm` hit today.
+  const { pathname: legacyPathname } = req.nextUrl;
+  if (legacyPathname === "/platform" || legacyPathname.startsWith("/platform/")) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/tm" + legacyPathname.slice("/platform".length);
+    return NextResponse.redirect(url, 308);
+  }
+
   // Custom-domain masking: if the Host matches a verified custom domain, rewrite
   // INTERNALLY to the tenant's `/<slug>/...` route before auth/route runs. The
   // browser keeps the custom domain in the URL bar. Inert while the map is empty

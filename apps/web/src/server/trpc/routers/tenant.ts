@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { platformPrisma } from "@frms/db";
 
+import { isReservedTenantSlug } from "@/lib/tenant-routing";
+
 import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
@@ -119,6 +121,13 @@ export const tenantRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { name, slug, admin } = input;
+
+      if (isReservedTenantSlug(slug)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This slug is reserved and cannot be used for a tenant.",
+        });
+      }
 
       const existingTenant = await platformPrisma.tenant.findUnique({
         where: { slug },

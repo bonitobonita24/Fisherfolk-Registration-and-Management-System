@@ -94,7 +94,7 @@ export function UsersClient({ tenantId }: UsersClientProps) {
       {/* ── Back link + tenant name ──────────────────────────────────────── */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Link
-          href="/platform/tenants"
+          href="/tm/tenants"
           className="flex items-center gap-1 hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />

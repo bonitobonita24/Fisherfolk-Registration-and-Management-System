@@ -27,9 +27,34 @@ export const RESERVED_PREFIXES = [
 /**
  * App-level (tenant-agnostic) top-level routes. On a custom-domain host these
  * must be served as-is — rewriting them under the tenant slug would 404 the
- * login page (`/admin` → `/<slug>/admin`).
+ * login page (`/admin` → `/<slug>/admin`). `/platform` is retained alongside
+ * its successor `/tm` (Milestone 3 rename) so the legacy path's redirect shim
+ * is itself treated as app-level and never mistaken for a tenant slug.
  */
-export const APP_LEVEL_PREFIXES = ["/admin", "/login", "/platform"] as const;
+export const APP_LEVEL_PREFIXES = ["/admin", "/login", "/tm", "/platform"] as const;
+
+/**
+ * Slugs a new tenant may never claim — either an app-level route
+ * (`APP_LEVEL_PREFIXES` minus the leading slash), the legacy `/platform`
+ * redirect-shim target, or a reserved/system path segment. Checked at tenant
+ * creation (Milestone 3 — site access & tenancy standard) so a future tenant
+ * can never shadow `/tm`, `/admin`, `/login`, `/api`, or the retired
+ * `/platform` shim.
+ */
+export const RESERVED_TENANT_SLUGS = [
+  "tm",
+  "platform",
+  "admin",
+  "login",
+  "api",
+  "demo",
+] as const;
+
+export function isReservedTenantSlug(slug: string): boolean {
+  return (RESERVED_TENANT_SLUGS as readonly string[]).includes(
+    slug.toLowerCase(),
+  );
+}
 
 export interface TenantRouteResolution {
   /** Resolved tenant slug, or null when none could be determined. */

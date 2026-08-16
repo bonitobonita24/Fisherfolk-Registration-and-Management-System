@@ -73,8 +73,8 @@ describe("resolveTenantRoute — custom domain (masking)", () => {
     expect(r.rewriteTo).toBeNull();
   });
 
-  it("serves app-level routes (/admin, /login, /platform) as-is on a custom domain", () => {
-    for (const p of ["/admin", "/login", "/platform/tenants"]) {
+  it("serves app-level routes (/admin, /login, /tm) as-is on a custom domain", () => {
+    for (const p of ["/admin", "/login", "/tm/tenants"]) {
       const r = resolveTenantRoute({
         host: "fisherfolk.calapancity.gov.ph",
         pathname: p,
