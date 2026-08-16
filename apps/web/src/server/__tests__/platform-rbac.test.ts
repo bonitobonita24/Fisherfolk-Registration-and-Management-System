@@ -23,8 +23,10 @@ import type { Session } from "next-auth";
 
 import { platformPrisma, prisma } from "@frms/db";
 import type { ExtendedPrismaClient } from "@frms/db";
+import { hasPlatformPermission } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
 
+import { resolveActorPlatformMatrix } from "../rbac/resolve-platform";
 import type { TRPCContext } from "../trpc/context";
 import { customRoleRouter } from "../trpc/routers/customRole";
 import { platformRoleRouter } from "../trpc/routers/platformRole";
@@ -326,6 +328,84 @@ describe.skipIf(!hasDb)("platformRoleRouter — hard-filtered to scope='platform
     });
 
     await platformPrisma.customRole.delete({ where: { id: tenantRole.id } });
+  });
+});
+
+// ─── Milestone 5 — seeded platform roles/accounts resolve correctly ────────
+//
+// Exercises the REAL rows written by `packages/db/prisma/seed.ts` (not
+// test-created fixtures) — proves the seed's BILLING/TECH SUPPORT curated
+// roles + the ADMIN default (`tenant_manager` with no platform customRoleId)
+// resolve through the actual `resolveActorPlatformMatrix()` DB loader into
+// the matrix `hasPlatformPermission()` expects. Requires `pnpm db:seed` (or
+// an equivalent seeded dev DB) to have run first — skips gracefully (0
+// assertions reached, not a false failure) if the seeded rows are absent.
+describe.skipIf(!hasDb)("seeded platform roles (Milestone 5) — resolve via the real DB loader", () => {
+  function ctxFor(userId: string): TRPCContext {
+    return {
+      session: {
+        user: { id: userId, name: "Seed Verify", email: `${userId}@local` },
+        expires: new Date(Date.now() + 3_600_000).toISOString(),
+      } as unknown as Session,
+      userId,
+      role: "tenant_manager",
+      tenantId: null,
+      tenantSlug: null,
+      db: platformPrisma as unknown as ExtendedPrismaClient,
+      req: new Request("http://localhost/api/trpc"),
+    };
+  }
+
+  it("seeded BILLING account resolves billing=true, tenant_management/data_overrides/tech_support=false", async () => {
+    const billingUser = await platformPrisma.user.findFirst({
+      where: { email: "tenantbilling@powerbyteitsolutions.com", role: "tenant_manager" },
+    });
+    expect(billingUser).not.toBeNull();
+    if (!billingUser) return;
+
+    const actor = await resolveActorPlatformMatrix(ctxFor(billingUser.id));
+    expect(hasPlatformPermission(actor, "billing", "view")).toBe(true);
+    expect(hasPlatformPermission(actor, "billing", "write")).toBe(true);
+    expect(hasPlatformPermission(actor, "billing", "update")).toBe(true);
+    expect(hasPlatformPermission(actor, "billing", "delete")).toBe(true);
+    expect(hasPlatformPermission(actor, "tenant_management", "view")).toBe(false);
+    expect(hasPlatformPermission(actor, "data_overrides", "view")).toBe(false);
+    expect(hasPlatformPermission(actor, "tech_support", "view")).toBe(false);
+  });
+
+  it("seeded TECH SUPPORT account resolves data_overrides+tech_support=true, billing/tenant_management=false", async () => {
+    const techUser = await platformPrisma.user.findFirst({
+      where: { email: "tenanttech@powerbyteitsolutions.com", role: "tenant_manager" },
+    });
+    expect(techUser).not.toBeNull();
+    if (!techUser) return;
+
+    const actor = await resolveActorPlatformMatrix(ctxFor(techUser.id));
+    for (const key of ["data_overrides", "tech_support"] as const) {
+      expect(hasPlatformPermission(actor, key, "view")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "write")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "update")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "delete")).toBe(true);
+    }
+    expect(hasPlatformPermission(actor, "billing", "view")).toBe(false);
+    expect(hasPlatformPermission(actor, "tenant_management", "view")).toBe(false);
+  });
+
+  it("seeded ADMIN (tenant_manager, no platform customRole) resolves all four keys true", async () => {
+    const adminUser = await platformPrisma.user.findFirst({
+      where: { email: "tenantadmin@powerbyteitsolutions.com", role: "tenant_manager" },
+    });
+    expect(adminUser).not.toBeNull();
+    if (!adminUser) return;
+    expect(adminUser.customRoleId).toBeNull();
+
+    const actor = await resolveActorPlatformMatrix(ctxFor(adminUser.id));
+    for (const key of ["billing", "tenant_management", "data_overrides", "tech_support"] as const) {
+      expect(hasPlatformPermission(actor, key, "view")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "write")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "update")).toBe(true);
+      expect(hasPlatformPermission(actor, key, "delete")).toBe(true);
+    }
   });
 });
 

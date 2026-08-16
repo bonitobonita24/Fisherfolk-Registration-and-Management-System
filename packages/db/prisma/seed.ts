@@ -311,10 +311,166 @@ async function main() {
 
   verifyFeatureRegistry();
 
+  // ── Platform-scope roles + accounts (Milestone 5 — Site Access & Tenancy
+  // Bootstrap Standard, docs/SITE_ACCESS_STANDARD.md §2) ──────────────────
+  //  • ADMIN = the existing `tenant_manager` account above (no platform
+  //    customRoleId) — already the full platform ceiling per
+  //    hasPlatformPermission()'s Platform Actor Model. No new role needed.
+  //  • BILLING = scope='platform' CustomRole granting ONLY `billing`
+  //    (view/write/update/delete=true). NOT tenant_management,
+  //    NOT data_overrides, NOT tech_support.
+  //  • TECH SUPPORT = scope='platform' CustomRole granting `data_overrides`
+  //    + `tech_support` (view/write/update/delete=true each). NOT billing,
+  //    NOT tenant_management.
+  //  Neither curated role is granted `tenant_management` — that key stays
+  //  ADMIN-exclusive, so only an un-matrixed tenant_manager can manage
+  //  platform roles/tenants, per the standard.
+  // `tenantId` is nullable and part of the `@@unique([tenantId, name])`
+  // constraint, so a platform-scope row (tenantId: null) is upserted via
+  // findFirst + create/update rather than the compound-unique `.upsert()`
+  // shorthand (idempotent either way; avoids a null-in-composite-key cast).
+  async function upsertPlatformRole(name: string, description: string) {
+    const existing = await prisma.customRole.findFirst({
+      where: { scope: "platform", name },
+    });
+    if (existing) {
+      return prisma.customRole.update({
+        where: { id: existing.id },
+        data: { isActive: true, description },
+      });
+    }
+    return prisma.customRole.create({
+      data: { tenantId: null, scope: "platform", name, description, isActive: true },
+    });
+  }
+
+  const billingRole = await upsertPlatformRole(
+    "BILLING",
+    "Platform billing operations only — no tenant management or tech support access.",
+  );
+  const techSupportRole = await upsertPlatformRole(
+    "TECH SUPPORT",
+    "Platform data-override + tech-support tooling — no billing or tenant management access.",
+  );
+
+  console.log(`  ✅ Platform CustomRole "BILLING" ready: ${billingRole.id}`);
+  console.log(`  ✅ Platform CustomRole "TECH SUPPORT" ready: ${techSupportRole.id}`);
+
+  const fullGrant = { view: true, write: true, update: true, delete: true };
+
+  const billingGrants: Array<{ permissionKey: "billing" | "tenant_management" | "data_overrides" | "tech_support" }> = [
+    { permissionKey: "billing" },
+  ];
+  const techSupportGrants: Array<{ permissionKey: "billing" | "tenant_management" | "data_overrides" | "tech_support" }> = [
+    { permissionKey: "data_overrides" },
+    { permissionKey: "tech_support" },
+  ];
+
+  for (const grant of billingGrants) {
+    await prisma.platformRolePermission.upsert({
+      where: { roleId_permissionKey: { roleId: billingRole.id, permissionKey: grant.permissionKey } },
+      update: fullGrant,
+      create: { roleId: billingRole.id, permissionKey: grant.permissionKey, ...fullGrant },
+    });
+  }
+  // Explicitly ensure BILLING never carries tenant_management/data_overrides/
+  // tech_support rows (defensive — a prior partial seed run should not leave
+  // stray grants behind).
+  await prisma.platformRolePermission.deleteMany({
+    where: {
+      roleId: billingRole.id,
+      permissionKey: { in: ["tenant_management", "data_overrides", "tech_support"] },
+    },
+  });
+
+  for (const grant of techSupportGrants) {
+    await prisma.platformRolePermission.upsert({
+      where: { roleId_permissionKey: { roleId: techSupportRole.id, permissionKey: grant.permissionKey } },
+      update: fullGrant,
+      create: { roleId: techSupportRole.id, permissionKey: grant.permissionKey, ...fullGrant },
+    });
+  }
+  await prisma.platformRolePermission.deleteMany({
+    where: {
+      roleId: techSupportRole.id,
+      permissionKey: { in: ["billing", "tenant_management"] },
+    },
+  });
+
+  console.log(`  ✅ Platform role permissions granted (BILLING: billing; TECH SUPPORT: data_overrides+tech_support)`);
+
+  // Platform accounts — role `tenant_manager`, belong to the `tm` tenant,
+  // each bound to its curated platform CustomRole. DEV-LOCAL default
+  // passwords only — the real vault values are OWNER-GATED and never
+  // hardcoded here (see ~/.claude/CLAUDE.md "Universal login credentials").
+  const tenantBillingUsername = process.env["TENANTBILLING_USERNAME"] ?? "tenantbilling@powerbyteitsolutions.com";
+  const tenantBillingEmail = process.env["TENANTBILLING_EMAIL"] ?? tenantBillingUsername;
+  const tenantBillingPassword = process.env["TENANTBILLING_PASSWORD"] ?? "Billing_LocalDevOnly_ChangeMe";
+  const tenantBillingName = process.env["TENANTBILLING_NAME"] ?? "Platform Billing";
+  const tenantBillingHash = await bcrypt.hash(tenantBillingPassword, 12);
+
+  const tenantBilling = await prisma.user.upsert({
+    where: { tenantId_email: { email: tenantBillingEmail, tenantId: platformTenant.id } },
+    update: {
+      username: tenantBillingUsername,
+      passwordHash: tenantBillingHash,
+      role: "tenant_manager",
+      name: tenantBillingName,
+      customRoleId: billingRole.id,
+      status: "ACTIVE",
+    },
+    create: {
+      tenantId: platformTenant.id,
+      email: tenantBillingEmail,
+      username: tenantBillingUsername,
+      passwordHash: tenantBillingHash,
+      name: tenantBillingName,
+      role: "tenant_manager",
+      customRoleId: billingRole.id,
+      securityVersion: 1,
+      status: "ACTIVE",
+    },
+  });
+
+  console.log(`  ✅ Platform BILLING account ready: ${tenantBilling.username}`);
+
+  const tenantTechUsername = process.env["TENANTTECH_USERNAME"] ?? "tenanttech@powerbyteitsolutions.com";
+  const tenantTechEmail = process.env["TENANTTECH_EMAIL"] ?? tenantTechUsername;
+  const tenantTechPassword = process.env["TENANTTECH_PASSWORD"] ?? "Tech_LocalDevOnly_ChangeMe";
+  const tenantTechName = process.env["TENANTTECH_NAME"] ?? "Platform Tech Support";
+  const tenantTechHash = await bcrypt.hash(tenantTechPassword, 12);
+
+  const tenantTech = await prisma.user.upsert({
+    where: { tenantId_email: { email: tenantTechEmail, tenantId: platformTenant.id } },
+    update: {
+      username: tenantTechUsername,
+      passwordHash: tenantTechHash,
+      role: "tenant_manager",
+      name: tenantTechName,
+      customRoleId: techSupportRole.id,
+      status: "ACTIVE",
+    },
+    create: {
+      tenantId: platformTenant.id,
+      email: tenantTechEmail,
+      username: tenantTechUsername,
+      passwordHash: tenantTechHash,
+      name: tenantTechName,
+      role: "tenant_manager",
+      customRoleId: techSupportRole.id,
+      securityVersion: 1,
+      status: "ACTIVE",
+    },
+  });
+
+  console.log(`  ✅ Platform TECH SUPPORT account ready: ${tenantTech.username}`);
+
   console.log("\n✅ Seed complete!");
   console.log(`   Tenant superadmin:        ${appAdminUsername} / [see CREDENTIALS.md]`);
-  console.log(`   Tenant manager (platform):${tenantAdminUsername} / [see CREDENTIALS.md]`);
+  console.log(`   Tenant manager (platform, ADMIN):${tenantAdminUsername} / [see CREDENTIALS.md]`);
   console.log(`   Tenant admin (LGU):       ${lguAdmin.username} / [see CREDENTIALS.md]`);
+  console.log(`   Platform BILLING:         ${tenantBilling.username} / [see CREDENTIALS.md]`);
+  console.log(`   Platform TECH SUPPORT:    ${tenantTech.username} / [see CREDENTIALS.md]`);
 }
 
 main()
