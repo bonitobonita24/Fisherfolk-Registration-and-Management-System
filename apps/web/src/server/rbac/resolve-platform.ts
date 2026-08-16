@@ -16,16 +16,16 @@
  * paths share no function.
  *
  * SECURITY CONTRACT
- *   - Deny-by-default: any DB miss (no user row, no customRoleId, an
- *     inactive platform role, or — defense-in-depth — a customRoleId that
- *     resolves to a `scope !== "platform"` role, which should be
- *     structurally unreachable given the assignment guard in
- *     `platformRole.ts`) falls back to a FAIL-CLOSED empty matrix
- *     (`{ role, matrix: {} }`), NEVER to the ADMIN ceiling. Only a
- *     genuinely absent `customRoleId` resolves to the ADMIN ceiling
- *     (`{ role }`, no matrix) — that is the deliberate "no platform custom
- *     role = ADMIN" default from the Platform Actor Model, not a fallback
- *     from a corrupted/mismatched assignment.
+ *   - Deny-by-default: a missing/demoted/deleted user row, an inactive
+ *     platform role, or — defense-in-depth — a customRoleId that resolves
+ *     to a `scope !== "platform"` role (which should be structurally
+ *     unreachable given the assignment guard in `platformRole.ts`) all fall
+ *     back to a FAIL-CLOSED empty matrix (`{ role, matrix: {} }`), NEVER to
+ *     the ADMIN ceiling. Only a FOUND user row with a genuinely absent
+ *     `customRoleId` resolves to the ADMIN ceiling (`{ role }`, no matrix)
+ *     — that is the deliberate "no platform custom role = ADMIN" default
+ *     from the Platform Actor Model, not a fallback from a NULL row or a
+ *     corrupted/mismatched assignment.
  *   - `role` MUST already be server-resolved (this module trusts `ctx.role`
  *     exactly as far as `enforceAuth` in `../trpc/trpc.ts` does — it does
  *     not re-verify the session).
@@ -100,8 +100,16 @@ async function computePlatformActorMatrix(
     },
   });
 
-  if (!user?.customRoleId) {
-    // No platform custom role assigned — the deliberate ADMIN default.
+  if (!user) {
+    // No matching row (missing/demoted/deleted account) — fail CLOSED. This
+    // is NOT the "no platform custom role = ADMIN" default below; a NULL
+    // user must never resolve to the ADMIN ceiling.
+    return { role, matrix: {} };
+  }
+
+  if (!user.customRoleId) {
+    // Found user row, genuinely no platform custom role assigned — the
+    // deliberate ADMIN default from the Platform Actor Model.
     return { role };
   }
 

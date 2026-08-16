@@ -4,10 +4,10 @@ import { z } from "zod";
 
 import { platformPrisma } from "@frms/db";
 
-import { createTRPCRouter, tenantSuperadminProcedure } from "../trpc";
+import { createTRPCRouter, platformOrTenantAdminProcedure } from "../trpc";
 
 export const tenantUserRouter = createTRPCRouter({
-  list: tenantSuperadminProcedure
+  list: platformOrTenantAdminProcedure("tenant_management", "view")
     .input(
       z
         .object({
@@ -68,7 +68,7 @@ export const tenantUserRouter = createTRPCRouter({
       return { items, total, page, limit, tenant };
     }),
 
-  create: tenantSuperadminProcedure
+  create: platformOrTenantAdminProcedure("tenant_management", "write")
     .input(
       z
         .object({
@@ -144,7 +144,7 @@ export const tenantUserRouter = createTRPCRouter({
       return user;
     }),
 
-  resetPassword: tenantSuperadminProcedure
+  resetPassword: platformOrTenantAdminProcedure("tenant_management", "update")
     .input(
       z
         .object({
@@ -186,7 +186,7 @@ export const tenantUserRouter = createTRPCRouter({
       return { id: userId };
     }),
 
-  setStatus: tenantSuperadminProcedure
+  setStatus: platformOrTenantAdminProcedure("tenant_management", "update")
     .input(
       z
         .object({

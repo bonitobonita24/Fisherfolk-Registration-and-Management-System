@@ -169,3 +169,42 @@ export const platformMatrixProcedure = (
       }
       return next({ ctx });
     });
+
+/**
+ * platformOrTenantAdminProcedure(key, action) — dual-purpose guard for
+ * routers that serve BOTH a `tenant_superadmin` managing their OWN tenant
+ * (legit self-service) AND a platform `tenant_manager` doing cross-tenant
+ * break-glass management (e.g. tenantUser.ts). Security-fix follow-up to
+ * the M2 platform-management gap: `tenantSuperadminProcedure` alone admits
+ * `tenant_manager` unconditionally, which let a curated BILLING/TECH SUPPORT
+ * platform account (no `tenant_management` grant) manage arbitrary tenants'
+ * users. Single reusable implementation — do not duplicate this branch per
+ * router/procedure.
+ *
+ * Dispatch:
+ *   - `role === "tenant_manager"` — MUST hold `hasPlatformPermission(actor,
+ *     key, action)` via `resolveActorPlatformMatrix()` (ADMIN ceiling passes,
+ *     a curated role without the `tenant_management` grant is FORBIDDEN).
+ *   - `role === "tenant_superadmin"` — passes unconditionally, preserving
+ *     existing self-service behavior; the router's own input/ctx checks
+ *     (e.g. scoping by the input `tenantId`) still apply downstream.
+ *   - any other role — FORBIDDEN (mirrors `tenantSuperadminProcedure`'s
+ *     `requireRole("tenant_manager", "tenant_superadmin")`).
+ */
+export const platformOrTenantAdminProcedure = (
+  key: PlatformPermissionKey,
+  action: PermissionAction,
+) =>
+  protectedProcedure.use(async ({ ctx, next }) => {
+    if (ctx.role === "tenant_manager") {
+      const actor = await resolveActorPlatformMatrix(ctx);
+      if (!hasPlatformPermission(actor, key, action)) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return next({ ctx });
+    }
+    if (ctx.role === "tenant_superadmin") {
+      return next({ ctx });
+    }
+    throw new TRPCError({ code: "FORBIDDEN" });
+  });

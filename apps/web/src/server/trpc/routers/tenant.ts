@@ -10,8 +10,8 @@ import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
   createTRPCRouter,
+  platformMatrixProcedure,
   protectedProcedure,
-  tenantManagerProcedure,
 } from "../trpc";
 
 export const tenantRouter = createTRPCRouter({
@@ -105,7 +105,7 @@ export const tenantRouter = createTRPCRouter({
       return updated;
     }),
 
-  create: tenantManagerProcedure
+  create: platformMatrixProcedure("tenant_management", "write")
     .input(
       z
         .object({
@@ -200,7 +200,7 @@ export const tenantRouter = createTRPCRouter({
       };
     }),
 
-  reassignOwner: tenantManagerProcedure
+  reassignOwner: platformMatrixProcedure("tenant_management", "update")
     .input(
       z
         .object({
@@ -278,7 +278,7 @@ export const tenantRouter = createTRPCRouter({
       };
     }),
 
-  setStatus: tenantManagerProcedure
+  setStatus: platformMatrixProcedure("tenant_management", "update")
     .input(
       z
         .object({
@@ -318,7 +318,7 @@ export const tenantRouter = createTRPCRouter({
       return { id: updated.id, status: updated.status };
     }),
 
-  list: tenantManagerProcedure
+  list: platformMatrixProcedure("tenant_management", "view")
     .input(
       z
         .object({

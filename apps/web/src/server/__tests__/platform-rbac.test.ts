@@ -30,6 +30,8 @@ import { resolveActorPlatformMatrix } from "../rbac/resolve-platform";
 import type { TRPCContext } from "../trpc/context";
 import { customRoleRouter } from "../trpc/routers/customRole";
 import { platformRoleRouter } from "../trpc/routers/platformRole";
+import { tenantRouter } from "../trpc/routers/tenant";
+import { tenantUserRouter } from "../trpc/routers/tenantUser";
 import { createCallerFactory } from "../trpc/trpc";
 
 // ─── DB gate ─────────────────────────────────────────────────────────────────
@@ -48,6 +50,7 @@ let adminUserId: string; // tenant_manager, no platform customRole => ADMIN ceil
 let billingUserId: string; // tenant_manager, assigned a BILLING-only platform role
 let tenantAdminUserId: string; // tenant-scoped, tenant_admin (non-platform)
 let encoderUserId: string; // tenant-scoped, encoder (non-platform)
+let tenantSuperadminUserId: string; // tenant-scoped, tenant_superadmin — M6 regression guard
 let billingRoleId: string;
 
 let _userCounter = 0;
@@ -156,6 +159,7 @@ beforeAll(async () => {
   billingUserId = await mkTenantManagerUser("billing");
   tenantAdminUserId = await mkTenantScopedUser("tenant_admin", "tadmin");
   encoderUserId = await mkTenantScopedUser("encoder", "encoder");
+  tenantSuperadminUserId = await mkTenantScopedUser("tenant_superadmin", "tsuperadmin");
 });
 
 afterAll(async () => {
@@ -170,6 +174,7 @@ afterAll(async () => {
     billingUserId,
     tenantAdminUserId,
     encoderUserId,
+    tenantSuperadminUserId,
   ].filter((id): id is string => Boolean(id));
   await platformPrisma.auditLog.deleteMany({ where: { userId: { in: actorUserIds } } });
   await platformPrisma.rolePermission.deleteMany({ where: { tenantId } });
@@ -426,3 +431,185 @@ describe.skipIf(!hasDb)("non-platform roles never reach platformMatrixProcedure'
     await expect(encoderAsPlatform.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });
+
+// ─── M6 security fix — tenant.* platform-management gate ──────────────────
+//
+// Confirmed HIGH finding: `tenant.create/reassignOwner/setStatus/list` were
+// gated on the bare `tenant_manager` enum role (`tenantManagerProcedure`),
+// letting a curated BILLING/TECH SUPPORT platform account (no
+// `tenant_management` grant) suspend/create tenants and reassign ownership.
+// Now gated via `platformMatrixProcedure("tenant_management", <action>)`.
+
+const tenantCallerFactory = createCallerFactory(tenantRouter);
+const tenantCaller = (userId: string) => tenantCallerFactory(makePlatformCtx(userId));
+
+describe.skipIf(!hasDb)("tenant.* — M6 platform-management gate", () => {
+  const createdIds: string[] = [];
+
+  afterAll(async () => {
+    if (!hasDb) return;
+    for (const id of createdIds) {
+      await platformPrisma.auditLog.deleteMany({ where: { tenantId: id } });
+      await platformPrisma.user.deleteMany({ where: { tenantId: id } });
+      await platformPrisma.tenant.delete({ where: { id } }).catch(() => {
+        /* already cleaned up */
+      });
+    }
+  });
+
+  it("BILLING (tenant_manager, no tenant_management grant) is FORBIDDEN on create/list/setStatus/reassignOwner", async () => {
+    const billing = tenantCaller(billingUserId);
+
+    await expect(
+      billing.create({
+        name: "M6 Should Fail",
+        slug: `m6-forbid-${RUN}`,
+        admin: {
+          username: mkUsername("m6forbid"),
+          fullName: "Should Fail",
+          password: "SecurePassw0rd!xYz",
+        },
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    await expect(billing.list({ page: 1, limit: 20 })).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
+
+    await expect(
+      billing.setStatus({ id: tenantId, status: "SUSPENDED" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    await expect(
+      billing.reassignOwner({ tenantId, newOwnerId: adminUserId }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("ADMIN (tenant_manager, no platform customRole) is ALLOWED on create/list/setStatus/reassignOwner", async () => {
+    const admin = tenantCaller(adminUserId);
+    const slug = `m6-allow-${RUN}`;
+    const ownerUsername = mkUsername("m6allow-owner");
+
+    const created = await admin.create({
+      name: "M6 Allow Tenant",
+      slug,
+      admin: {
+        username: ownerUsername,
+        fullName: "Owner",
+        password: "SecurePassw0rd!xYz",
+      },
+    });
+    createdIds.push(created.id);
+    expect(created.status).toBe("ACTIVE");
+
+    const list = await admin.list({ page: 1, limit: 100, search: slug });
+    expect(list.items.some((t) => t.id === created.id)).toBe(true);
+
+    const suspended = await admin.setStatus({ id: created.id, status: "SUSPENDED" });
+    expect(suspended.status).toBe("SUSPENDED");
+
+    const owner = await platformPrisma.user.findFirst({
+      where: { tenantId: created.id, role: "tenant_superadmin" },
+    });
+    expect(owner).not.toBeNull();
+
+    const second = await platformPrisma.user.create({
+      data: {
+        tenantId: created.id,
+        email: `${ownerUsername}-2@local`,
+        username: `${ownerUsername}-2`,
+        passwordHash: "not-real",
+        name: "Second User",
+        role: "tenant_admin",
+        status: "ACTIVE",
+      },
+    });
+
+    const reassigned = await admin.reassignOwner({
+      tenantId: created.id,
+      newOwnerId: second.id,
+    });
+    expect(reassigned.newOwnerId).toBe(second.id);
+  });
+});
+
+// ─── M6 security fix — tenantUser.* platform-management gate ──────────────
+//
+// tenantUser.ts is dual-purpose: a tenant_superadmin managing THEIR OWN
+// tenant's users (self-service, must keep working) vs a platform
+// tenant_manager doing cross-tenant break-glass (must now require the
+// `tenant_management` platform grant). Gated via the shared
+// `platformOrTenantAdminProcedure("tenant_management", <action>)`.
+
+const tenantUserCallerFactory = createCallerFactory(tenantUserRouter);
+
+describe.skipIf(!hasDb)("tenantUser.* — M6 platform-management gate", () => {
+  it("BILLING (tenant_manager, no tenant_management grant) is FORBIDDEN on list/create/resetPassword/setStatus", async () => {
+    const billing = tenantUserCallerFactory(makePlatformCtx(billingUserId));
+
+    await expect(billing.list({ tenantId, page: 1, limit: 20 })).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
+
+    await expect(
+      billing.create({
+        tenantId,
+        name: "Should Fail",
+        username: mkUsername("m6tu-forbid"),
+        role: "encoder",
+        password: "SecurePassw0rd!xYz",
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    await expect(
+      billing.resetPassword({
+        tenantId,
+        userId: encoderUserId,
+        newPassword: "SecurePassw0rd!xYz",
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    await expect(
+      billing.setStatus({ tenantId, userId: encoderUserId, status: "DEACTIVATED" }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("ADMIN (tenant_manager, no platform customRole) is ALLOWED on tenantUser.list", async () => {
+    const admin = tenantUserCallerFactory(makePlatformCtx(adminUserId));
+    const result = await admin.list({ tenantId, page: 1, limit: 20 });
+    expect(result.tenant.id).toBe(tenantId);
+  });
+
+  it("regression guard: tenant_superadmin can STILL manage their own tenant's users", async () => {
+    const superadmin = tenantUserCallerFactory(
+      makeTenantCtx(tenantSuperadminUserId, "tenant_superadmin"),
+    );
+    const result = await superadmin.list({ tenantId, page: 1, limit: 20 });
+    expect(result.tenant.id).toBe(tenantId);
+  });
+});
+
+// ─── M6 security fix — resolveActorPlatformMatrix fail-closed on NULL user ─
+
+describe.skipIf(!hasDb)(
+  "resolveActorPlatformMatrix — fail-closed (not ADMIN) for a non-existent user id",
+  () => {
+    it("returns an empty matrix, never the ADMIN ceiling, for a missing user row", async () => {
+      const actor = await resolveActorPlatformMatrix({
+        role: "tenant_manager",
+        userId: "m6-nonexistent-user-id-zzz999",
+        req: new Request("http://localhost/api/trpc"),
+      });
+
+      expect(actor.matrix).toEqual({});
+      for (const key of [
+        "billing",
+        "tenant_management",
+        "data_overrides",
+        "tech_support",
+      ] as const) {
+        expect(hasPlatformPermission(actor, key, "view")).toBe(false);
+      }
+    });
+  },
+);
