@@ -55,9 +55,17 @@ The subscriber's space. `tenant_superadmin` is the client's topmost access (owne
 billing + account management + creates the ONE real admin account + full app access + role creator). Standard
 app-design RBAC applies below.
 
-**URL scheme (post-login landing; ONE login form, role-routed):**
-- Admin-tier (`tenant_superadmin`, `tenant_admin`) → `/{slug}/admin`
-- Regular users (any app role) → `/{slug}/login`
+**URL scheme (per-tenant login FORM; role-routed post-auth; global `/admin` dropped):**
+- `/{slug}/` — **OPTIONAL public marketing/landing page** (per-app-project — e.g. FerryBook wants it, an
+  LGU app like FRMS may not). When ENABLED it is **public/unauthenticated**, shown *before* login. When
+  DISABLED, `/{slug}/` redirects to `/{slug}/login` (or the dashboard if already authenticated). Controlled
+  by a per-app/per-tenant flag (e.g. `tenantLandingEnabled`).
+- `/{slug}/login` — the tenant's own sign-in **FORM** (each tenant has its own; there is NO global `/admin`
+  staff login — platform staff sign in at `/tm`).
+- `/{slug}/admin` — **admin-tier landing** (`tenant_superadmin` + `tenant_admin`) after authentication.
+- Regular (non-admin) users authenticate at `/{slug}/login` and land in the app.
+
+Tenant surface order: `/{slug}/` (optional public landing) → `/{slug}/login` (auth) → `/{slug}/admin` (admin-tier).
 
 **Per-environment accounts (usernames; passwords → vault):**
 
@@ -87,9 +95,14 @@ tenant IS the demo.
 | Surface | URL |
 |---|---|
 | Platform management | `<domain>.com/tm` (real envs only) |
+| Client tenant — **optional public landing** | `/{client-slug}/` (per-app flag; public when enabled, else → `/{slug}/login`) |
+| Client tenant — login form | `/{client-slug}/login` |
 | Client tenant — admin-tier landing | `/{client-slug}/admin` |
-| Client tenant — regular user login/landing | `/{client-slug}/login` |
 | Demo | `demo.<domain>.com/admin` or `{app}-demo.powerbyte.app/admin` |
+
+**Reserved slugs** (client slugs may never collide): `tm`, `demo`, `admin`, `login`, `api`. When the optional
+tenant landing is enabled, `/{slug}/` root joins `/{slug}/login` as a **public/unauthenticated** path — the
+public route exception must match those exactly (never `startsWith`).
 
 ## 6 — Delta from current FRMS implementation (rehab scope)
 
