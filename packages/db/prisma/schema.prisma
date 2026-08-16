@@ -219,6 +219,27 @@ enum FeatureKey {
   data_management
 }
 
+// Discriminates a CustomRole as tenant-scoped (existing custom-role system,
+// gated on FeatureKey) or platform-scoped (the /tm platform-tier custom-role
+// system, gated on the DISTINCT PlatformPermissionKey vocabulary below). See
+// docs/SITE_ACCESS_STANDARD.md §2 + ~/.claude/library/tenant-rbac-standard.md.
+enum RoleScope {
+  tenant
+  platform
+}
+
+// PHYSICALLY SEPARATE from FeatureKey — the platform-tier permission
+// vocabulary (BILLING / TECH SUPPORT curated role sets under /tm). Deliberate
+// non-overlap with FeatureKey is the anti-escalation guardrail: a platform
+// custom role can never be granted a tenant-domain FeatureKey permission,
+// and vice versa. See docs/SITE_ACCESS_STANDARD.md §2.
+enum PlatformPermissionKey {
+  billing
+  tenant_management
+  data_overrides
+  tech_support
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model Tenant {
@@ -928,21 +949,50 @@ model FishCatchSpecies {
 // not exist — see enum FeatureKey above). See
 // ~/.claude/rules/tenant-rbac-standard.md §4 for the full spec.
 model CustomRole {
-  id          String   @id @default(cuid())
-  tenantId    String   @map("tenant_id")
+  id          String    @id @default(cuid())
+  // NULLABLE — tenant-scoped rows keep tenant_id set (existing behavior,
+  // preserved by the default below); platform-scoped rows (scope=platform)
+  // have tenant_id = NULL. Enforced by the "scope_tenant_consistency" CHECK
+  // constraint hand-added to the migration (cannot be expressed natively by
+  // Prisma). See docs/SITE_ACCESS_STANDARD.md §2.
+  tenantId    String?   @map("tenant_id")
+  scope       RoleScope @default(tenant) @map("scope")
   name        String
   description String?
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  permissions RolePermission[]
-  users       User[]
+  tenant              Tenant?                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  permissions         RolePermission[]
+  platformPermissions PlatformRolePermission[]
+  users               User[]
 
   @@unique([tenantId, name])
   @@index([tenantId])
   @@map("custom_roles")
+}
+
+// One row per (platform role, platform permission key) — mirrors
+// RolePermission's strict CRUD split, but scoped to PlatformPermissionKey
+// (the /tm platform-tier vocabulary), NOT FeatureKey. Deliberately has NO
+// tenantId column — platform roles are global. See
+// docs/SITE_ACCESS_STANDARD.md §2 + ~/.claude/library/tenant-rbac-standard.md.
+model PlatformRolePermission {
+  id             String                @id @default(cuid())
+  roleId         String                @map("role_id")
+  permissionKey  PlatformPermissionKey @map("permission_key")
+  view           Boolean               @default(false)
+  write          Boolean               @default(false)
+  update         Boolean               @default(false)
+  delete         Boolean               @default(false)
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @updatedAt @map("updated_at")
+
+  role CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionKey])
+  @@map("platform_role_permissions")
 }
 
 // One row per (role, feature) — a STRICT CRUD split: `write` = create-only,

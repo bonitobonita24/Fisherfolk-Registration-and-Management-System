@@ -231,3 +231,26 @@ export const FishCatchSource = {
 } as const;
 export type FishCatchSource =
   (typeof FishCatchSource)[keyof typeof FishCatchSource];
+
+// Mirrors Prisma `enum RoleScope` (packages/db/prisma/schema.prisma).
+// Discriminates CustomRole rows as tenant-scoped vs platform-scoped
+// (/tm platform-tier). See docs/SITE_ACCESS_STANDARD.md §2.
+export const RoleScope = {
+  TENANT: "tenant",
+  PLATFORM: "platform",
+} as const;
+export type RoleScope = (typeof RoleScope)[keyof typeof RoleScope];
+
+// Mirrors Prisma `enum PlatformPermissionKey` (packages/db/prisma/schema.prisma).
+// PHYSICALLY SEPARATE from FeatureKey (packages/shared/src/rbac/feature-key.ts)
+// — the anti-escalation guardrail so a platform custom role can never be
+// granted a tenant-domain FeatureKey permission, and vice versa. See
+// docs/SITE_ACCESS_STANDARD.md §2.
+export const PlatformPermissionKey = {
+  BILLING: "billing",
+  TENANT_MANAGEMENT: "tenant_management",
+  DATA_OVERRIDES: "data_overrides",
+  TECH_SUPPORT: "tech_support",
+} as const;
+export type PlatformPermissionKey =
+  (typeof PlatformPermissionKey)[keyof typeof PlatformPermissionKey];
