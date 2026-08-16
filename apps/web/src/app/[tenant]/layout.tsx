@@ -27,6 +27,18 @@ export default async function TenantLayout({
     return <>{children}</>;
   }
 
+  // GUARD EXCEPTION (optional per-tenant public landing, default OFF — see
+  // lib/tenant-landing.ts): `/{tenant}` root must render pre-auth ONLY when
+  // TENANT_LANDING_ENABLED is on. middleware.ts marks a request that matched
+  // its `tenantRootSlug` check (exact single-segment match, flag-gated) with
+  // this header — an unauthenticated visitor never reaches this layout's
+  // auth redirect below, and the placeholder renders standalone (no
+  // AppShell). The flag is OFF by default, so this header is never set and
+  // this branch never fires — zero behaviour change for FRMS.
+  if (hdrs.get("x-tenant-public-root-route") === "1") {
+    return <>{children}</>;
+  }
+
   const session = await auth();
 
   if (!session?.user) {

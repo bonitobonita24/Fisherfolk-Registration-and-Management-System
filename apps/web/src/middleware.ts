@@ -6,13 +6,67 @@ import {
   storageOriginFromEnv,
 } from "@/lib/security-headers";
 import {
+  isReservedTenantSlug,
   normalizeHost,
   parseCustomDomainMap,
   resolveTenantRoute,
 } from "@/lib/tenant-routing";
 import { canAccessRouteSegment } from "@/lib/route-feature-map";
+import { isTenantLandingEnabled } from "@/lib/tenant-landing";
 import type { Actor, FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
+
+/**
+ * Request headers ONLY middleware may ever set — each is a guard-EXCEPTION
+ * marker a downstream layout reads to skip its auth redirect
+ * (`x-tenant-login-route`, `x-tenant-public-root-route`) or a loop-guard
+ * marker for the custom-domain rewrite (`x-tenant-internal-rewrite`). If a
+ * client could forge one of these on an ordinary request, a future layout
+ * change could end up trusting it. Middleware already redirects unauth/
+ * cross-tenant requests BEFORE any layout runs today (defense in depth), but
+ * every response that continues the request onward is built from THIS
+ * sanitized base — never raw `req.headers` — so a client-supplied copy of any
+ * of these three headers can never reach a downstream layout/page.
+ * See docs/SITE_ACCESS_STANDARD.md §3.
+ *
+ * `x-tenant-internal-rewrite` gets ONE deliberate carve-out: the loop-guard
+ * check below (`isInternalRewrite`) reads it straight off the raw incoming
+ * `req.headers`, not the sanitized base. That marker is middleware's own
+ * signal to ITSELF across the internal re-invocation Next.js performs on a
+ * `NextResponse.rewrite()` target (see the GUARD comment lower in this
+ * file) — sanitizing it there would erase the very re-invocation it's meant
+ * to detect and reopen the custom-domain redirect loop it exists to close.
+ * Forging it only skips a cosmetic inverse-masking redirect (documented
+ * pre-existing risk, auth untouched) and — per this file — it can never
+ * reach a page, since every downstream-facing response still strips it.
+ */
+const MIDDLEWARE_ONLY_HEADERS = [
+  "x-tenant-login-route",
+  "x-tenant-public-root-route",
+  "x-tenant-internal-rewrite",
+] as const;
+
+/**
+ * Strip any client-supplied copy of the middleware-only guard headers and
+ * return a fresh `Headers` every downstream header-construction path
+ * (`passLoginRoute`, `passPublicTenantRoot`, `passthrough`, the rewrite
+ * branch) must build FROM — never from raw `req.headers` directly.
+ */
+function sanitizedHeaders(req: NextRequest): Headers {
+  const headers = new Headers(req.headers);
+  for (const name of MIDDLEWARE_ONLY_HEADERS) headers.delete(name);
+  return headers;
+}
+
+/**
+ * The forge-proof replacement for a bare `NextResponse.next()`: continues the
+ * request with the client-supplied guard-header copies stripped, so a
+ * request that isn't an exact login/public-root match can never carry a
+ * forged marker into a downstream layout.
+ */
+function passthrough(req: NextRequest): NextResponse {
+  return NextResponse.next({ request: { headers: sanitizedHeaders(req) } });
+}
 
 // `/api/media` self-authenticates in its route handler (requireRouteAuth +
 // tenant-scoped MediaObject lookup + rate-limit + egress audit — see
@@ -20,14 +74,17 @@ import type { UserRole } from "@frms/shared/types";
 // URL-routing below: its path second segment is "media", not a tenant slug, so
 // without this an authed request would 307-redirect to /<slug>/dashboard and
 // every image/signature/attachment would fail to load.
-// `/admin` and `/login` are legacy global-sign-in bookmarks (Milestone 4a —
-// site-access-tenancy standard): the global staff login is DROPPED, so both
-// now silently redirect to `/` (the public marketing landing) — see
-// app/admin/page.tsx + app/login/page.tsx. `/` is handled explicitly in
-// route() so anonymous visitors see it instead of being bounced to sign-in,
-// while authenticated users are still routed to their app. The REAL sign-in
-// forms now live at `/{tenant-slug}/login` (per tenant) and `/tm/login`
-// (platform staff) — see loginRouteSlug() below.
+// `/admin` is a legacy global-sign-in bookmark (Milestone 4a — site-access-
+// tenancy standard): the global staff login is DROPPED, so it silently
+// redirects to `/` (the public marketing landing) — see app/admin/page.tsx.
+// `/login` (Milestone 4b) is the PUBLIC tenant picker — the generic answer
+// to "how does a visitor reach their org's login" — see app/login/page.tsx;
+// it stays public (never wrapped in AppShell) and forwards to the real
+// per-tenant form. `/` is handled explicitly in route() so anonymous
+// visitors see it instead of being bounced to sign-in, while authenticated
+// users are still routed to their app. The REAL sign-in forms live at
+// `/{tenant-slug}/login` (per tenant) and `/tm/login` (platform staff) — see
+// loginRouteSlug() below.
 const PUBLIC_PATHS = [
   "/admin",
   "/login",
@@ -69,8 +126,36 @@ function loginRouteSlug(pathname: string): string | null {
  * (GUARD EXCEPTION — see docs/SITE_ACCESS_STANDARD.md §3, §5).
  */
 function passLoginRoute(req: NextRequest): NextResponse {
-  const headers = new Headers(req.headers);
+  const headers = sanitizedHeaders(req);
   headers.set("x-tenant-login-route", "1");
+  return NextResponse.next({ request: { headers } });
+}
+
+/**
+ * Matches the bare tenant-root path `/{slug}` — an EXACT single-segment
+ * match, never a prefix (same discipline as `loginRouteSlug`), and never a
+ * reserved/app-level slug (`tm`, `platform`, `admin`, `login`, `api`,
+ * `demo` — see `isReservedTenantSlug`). Only consulted when
+ * `TENANT_LANDING_ENABLED` is on; the caller is responsible for that check.
+ */
+const TENANT_ROOT_RE = /^\/([^/]+)$/;
+
+function tenantRootSlug(pathname: string): string | null {
+  const m = TENANT_ROOT_RE.exec(pathname);
+  const slug = m?.[1];
+  if (!slug || isReservedTenantSlug(slug)) return null;
+  return slug;
+}
+
+/**
+ * Pass the request through, marking it as the public per-tenant landing root
+ * so the tenant layout can skip its normal auth-redirect guard for exactly
+ * this path (GUARD EXCEPTION, same pattern as `passLoginRoute`). Only ever
+ * reached when `TENANT_LANDING_ENABLED` is on.
+ */
+function passPublicTenantRoot(req: NextRequest): NextResponse {
+  const headers = sanitizedHeaders(req);
+  headers.set("x-tenant-public-root-route", "1");
   return NextResponse.next({ request: { headers } });
 }
 
@@ -134,8 +219,27 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // Bare per-tenant root (`/{slug}`, EXACT match) — only public when the
+  // per-tenant landing flag is on (V32/Rule-34 addendum: optional per-tenant
+  // marketing slot, default OFF). Flag off → falls through unchanged to the
+  // normal tenant-route handling below (current FRMS behaviour preserved).
+  const rootSlug = isTenantLandingEnabled() ? tenantRootSlug(pathname) : null;
+  if (rootSlug) {
+    const user = session?.user;
+    if (!user) {
+      return passPublicTenantRoot(req);
+    }
+    if (user.role === "tenant_manager") {
+      return NextResponse.redirect(new URL("/tm/tenants", req.url));
+    }
+    const landingSlug = user.tenantSlug ?? rootSlug;
+    return NextResponse.redirect(
+      new URL(`/${landingSlug}${tenantLandingSuffix(user.role)}`, req.url),
+    );
+  }
+
   if (isPublicPath(pathname)) {
-    return NextResponse.next();
+    return passthrough(req);
   }
 
   // The root `/` is the PUBLIC marketing landing. Anonymous visitors see it;
@@ -143,7 +247,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   if (pathname === "/") {
     const user = session?.user;
     if (!user) {
-      return NextResponse.next();
+      return passthrough(req);
     }
     if (user.role === "tenant_manager") {
       return NextResponse.redirect(new URL("/tm/tenants", req.url));
@@ -162,7 +266,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return NextResponse.redirect(new URL(dashboardPath, req.url));
     }
     // Authenticated but no tenant context — fall through to the landing.
-    return NextResponse.next();
+    return passthrough(req);
   }
 
   if (!session?.user) {
@@ -209,7 +313,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       }
       return NextResponse.redirect(new URL("/", req.url));
     }
-    return NextResponse.next();
+    return passthrough(req);
   }
 
   // Tenant routes — extract slug from URL and cross-check with session
@@ -259,14 +363,14 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     if (!canAccessRouteSegment(actor, pathname)) {
       if (!tenantSlug) {
         // No tenant to redirect to — fall through rather than risk a loop.
-        return NextResponse.next();
+        return passthrough(req);
       }
       return NextResponse.redirect(
         new URL(`/${tenantSlug}/dashboard`, req.url),
       );
     }
 
-    return NextResponse.next();
+    return passthrough(req);
   }
 
   // Signed-in but no tenant context on a tenant-shaped path (e.g. a
@@ -318,7 +422,7 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   if (rewriteTo && rewriteTo !== req.nextUrl.pathname) {
     const url = req.nextUrl.clone();
     url.pathname = rewriteTo;
-    const headers = new Headers(req.headers);
+    const headers = sanitizedHeaders(req);
     headers.set("x-tenant-internal-rewrite", "1");
     return withCsp(NextResponse.rewrite(url, { request: { headers } }));
   }
