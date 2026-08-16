@@ -829,3 +829,29 @@ the 2026-06-30 "Rule 1 waiver (extended)" and the 2026-07-11 M1/N waivers). Wher
 candidate text and the shipped code diverged, the **code won** (entity fields taken from
 `packages/db/prisma/schema.prisma`, analytics/report shapes from the shipped routers).
 Locked: yes
+
+---
+
+## Site Access & Tenancy Bootstrap Standard — [WHAT] locked (2026-08-16, owner-approved)
+Decision: Adopt the per-environment tenancy topology + access-routing standard defined in the owner's
+`NEW SITE CREDENTIALS.pdf`, captured canonically in `docs/SITE_ACCESS_STANDARD.md`. Locked sub-decisions:
+  (a) **3-layer model per real env**: `/tm` Tenant Management Site (platform/SaaS owner) → `/{client-slug}`
+      Client Tenant → optional Demo Tenant.
+  (b) **Management slug rename `platform` → `tm`** (routes `/platform/*` → `/tm/*`).
+  (c) **Platform-tier RBAC gains two curated roles**: `tenant_billing` (BILLING) + `tenant_tech`
+      (TECH SUPPORT), alongside the default `tenant_manager` (ADMIN). The `/tm` site gets its own internal
+      role/permission-set system (default ADMIN, can create more).
+  (d) **Per-tenant URL scheme (ONE login form, role-routed post-login)**: admin-tier
+      (`tenant_superadmin` + `tenant_admin`) land at `/{slug}/admin`; regular users login/land at `/{slug}/login`.
+  (e) **Demo stays a SEPARATE deployment** (not merged into prod), always a client-facing subdomain
+      (`demo.<domain>.com/admin` or `{app}-demo.powerbyte.app/admin`), with **NO `/tm` platform layer**.
+  (f) **Fleet-wide standard** — authored globally (tenant-rbac-standard.md + framework rbac.md + SOPS vault),
+      FRMS is the reference implementation, then broadcast to other tenant apps (never cross-seat repo edits).
+  (g) **Demo accounts renamed**: `tenant_superadmin` = `superadmin@demo.com`, `tenant_admin` = `admin@admin.com`.
+  (h) **Platform passwords are distinct per role**; all passwords live ONLY in the SOPS vault, never in repo.
+Rationale: resolves the tenant-URL confusion by giving every environment one uniform, self-documenting
+access shape; cleanly separates the SaaS platform owner (`/tm`) from the client's top access
+(`tenant_superadmin`); keeps demo isolated as its own subdomain deployment. Owner clarified: `/tm` = server/
+real-app owner (SaaS operator); `tenant_superadmin` = per-tenant client topmost access; demo needs no
+Tenant Manager because it is always a single-tenant subdomain.
+Locked: yes. HARD HOLD — local commits only; deploys + live re-seeds owner-gated.
