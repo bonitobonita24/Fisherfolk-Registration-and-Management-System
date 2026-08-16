@@ -16,6 +16,7 @@ import { idTemplateRouter } from "./routers/idTemplate";
 import { idPrintRouter } from "./routers/idPrint";
 import { kanbanTaskRouter } from "./routers/kanbanTask";
 import { notificationRouter } from "./routers/notification";
+import { platformRoleRouter } from "./routers/platformRole";
 import { reportRouter } from "./routers/report";
 import { tenantRouter } from "./routers/tenant";
 import { tenantUserRouter } from "./routers/tenantUser";
@@ -43,6 +44,7 @@ export const appRouter = createTRPCRouter({
   idPrint: idPrintRouter,
   kanbanTask: kanbanTaskRouter,
   notification: notificationRouter,
+  platformRole: platformRoleRouter,
   report: reportRouter,
   settings: settingsRouter,
   tenant: tenantRouter,

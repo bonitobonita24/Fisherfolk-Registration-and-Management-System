@@ -3,11 +3,18 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { runWithTenant } from "@frms/db";
-import { hasPermission, type FeatureKey, type PermissionAction } from "@frms/shared/rbac";
+import {
+  hasPermission,
+  hasPlatformPermission,
+  type FeatureKey,
+  type PermissionAction,
+  type PlatformPermissionKey,
+} from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
 
 import { rateLimiters } from "../lib/rate-limit";
 import { resolveActorMatrix } from "../rbac/resolve";
+import { resolveActorPlatformMatrix } from "../rbac/resolve-platform";
 import type { TRPCContext } from "./context";
 
 const t = initTRPC.context<TRPCContext>().create({
@@ -130,3 +137,35 @@ export const matrixProcedure = (feature: FeatureKey, action: PermissionAction) =
     }
     return next({ ctx });
   });
+
+/**
+ * platformMatrixProcedure(key, action) — Milestone 2 platform-tier
+ * counterpart to `matrixProcedure`. CODE-DISJOINT from it by design: this
+ * resolves ONLY `PlatformPermissionKey` grants via
+ * `resolveActorPlatformMatrix()` / `hasPlatformPermission()`, never the
+ * tenant-domain `FeatureKey` path.
+ *
+ * Requires `role === "tenant_manager"` (the only role that can ever be a
+ * platform actor — see docs/SITE_ACCESS_STANDARD.md §2) BEFORE resolving the
+ * matrix, so a non-platform caller is rejected with FORBIDDEN without a DB
+ * round trip. Then denies with FORBIDDEN unless `hasPlatformPermission()`
+ * grants `action` on `key`. Deny-by-default throughout.
+ *
+ * Use this instead of `tenantManagerProcedure` on any platform (`/tm`)
+ * router whose authorization should follow the platform BILLING/TECH
+ * SUPPORT curated-role matrix rather than an unconditional
+ * tenant_manager-always-wins check.
+ */
+export const platformMatrixProcedure = (
+  key: PlatformPermissionKey,
+  action: PermissionAction,
+) =>
+  protectedProcedure
+    .use(requireRole("tenant_manager"))
+    .use(async ({ ctx, next }) => {
+      const actor = await resolveActorPlatformMatrix(ctx);
+      if (!hasPlatformPermission(actor, key, action)) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+      return next({ ctx });
+    });
