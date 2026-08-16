@@ -1,5 +1,6 @@
 import type React from "react";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
 import { AppShell } from "@/components/app-shell";
@@ -15,10 +16,22 @@ export default async function TenantLayout({
   children,
   params,
 }: TenantLayoutProps) {
+  // GUARD EXCEPTION (Milestone 4a — site-access-tenancy standard §3):
+  // `/{tenant}/login` must render pre-auth. middleware.ts marks a request
+  // that matched its `loginRouteSlug` check with this header — an
+  // unauthenticated visitor never reaches this layout's auth redirect below,
+  // and the login page renders standalone (no AppShell, which needs a real
+  // session's name/role/tenantSlug).
+  const hdrs = await headers();
+  if (hdrs.get("x-tenant-login-route") === "1") {
+    return <>{children}</>;
+  }
+
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/admin");
+    const { tenant: tenantForRedirect } = await params;
+    redirect(`/${tenantForRedirect}/login`);
   }
 
   const { tenant } = await params;

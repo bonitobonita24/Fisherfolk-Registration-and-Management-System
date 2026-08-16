@@ -20,10 +20,14 @@ import type { UserRole } from "@frms/shared/types";
 // URL-routing below: its path second segment is "media", not a tenant slug, so
 // without this an authed request would 307-redirect to /<slug>/dashboard and
 // every image/signature/attachment would fail to load.
-// `/admin` is the staff/administrator sign-in (relocated from `/login`, which
-// is retained as a silent redirect). `/` is the public marketing landing —
-// handled explicitly in route() so anonymous visitors see it instead of being
-// bounced to sign-in, while authenticated users are still routed to their app.
+// `/admin` and `/login` are legacy global-sign-in bookmarks (Milestone 4a —
+// site-access-tenancy standard): the global staff login is DROPPED, so both
+// now silently redirect to `/` (the public marketing landing) — see
+// app/admin/page.tsx + app/login/page.tsx. `/` is handled explicitly in
+// route() so anonymous visitors see it instead of being bounced to sign-in,
+// while authenticated users are still routed to their app. The REAL sign-in
+// forms now live at `/{tenant-slug}/login` (per tenant) and `/tm/login`
+// (platform staff) — see loginRouteSlug() below.
 const PUBLIC_PATHS = [
   "/admin",
   "/login",
@@ -36,6 +40,39 @@ const PUBLIC_PATHS = [
   // reads "data" as a slug and 307s the fetch to the dashboard.
   "/data",
 ];
+
+/** Roles that land on the tenant's `/admin`-tier post-login landing. */
+const ADMIN_TIER_ROLES = new Set(["tenant_superadmin", "tenant_admin"]);
+
+function tenantLandingSuffix(role: string | undefined): "/admin" | "/dashboard" {
+  return role !== undefined && ADMIN_TIER_ROLES.has(role) ? "/admin" : "/dashboard";
+}
+
+/**
+ * Matches a per-tenant or platform-staff sign-in FORM route: `/{slug}/login`
+ * or `/tm/login`. Both share the same 2-segment shape, so one regex covers
+ * both — the second path segment distinguishes tenant vs platform, and the
+ * response header set below (`x-tenant-login-route`) tells the downstream
+ * layout ([tenant]/layout.tsx or tm/layout.tsx) to render the form instead
+ * of bouncing an unauthenticated visitor away.
+ */
+const LOGIN_ROUTE_RE = /^\/([^/]+)\/login$/;
+
+function loginRouteSlug(pathname: string): string | null {
+  const m = LOGIN_ROUTE_RE.exec(pathname);
+  return m ? (m[1] ?? null) : null;
+}
+
+/**
+ * Pass the request through, marking it as a login-route hit so the tenant/tm
+ * layout can skip its normal auth-redirect guard for exactly this path
+ * (GUARD EXCEPTION — see docs/SITE_ACCESS_STANDARD.md §3, §5).
+ */
+function passLoginRoute(req: NextRequest): NextResponse {
+  const headers = new Headers(req.headers);
+  headers.set("x-tenant-login-route", "1");
+  return NextResponse.next({ request: { headers } });
+}
 
 /**
  * Custom-domain "masking" map, parsed once per runtime from
@@ -74,6 +111,29 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     };
   } | null;
 
+  // A sign-in FORM route (`/{slug}/login` or `/tm/login`) is always reachable
+  // pre-auth — grant it as an EXACT 2-segment match, never startsWith, so it
+  // can never accidentally widen to a whole tenant subtree. An unauthenticated
+  // visitor renders the form (marked via the response header so the layout's
+  // auth guard skips it); an ALREADY-authenticated visitor is routed straight
+  // to their real landing instead of seeing a redundant sign-in screen.
+  const loginSlug = loginRouteSlug(pathname);
+  if (loginSlug) {
+    const user = session?.user;
+    if (!user) {
+      return passLoginRoute(req);
+    }
+    if (user.role === "tenant_manager") {
+      return NextResponse.redirect(new URL("/tm/tenants", req.url));
+    }
+    if (user.tenantSlug) {
+      return NextResponse.redirect(
+        new URL(`/${user.tenantSlug}${tenantLandingSuffix(user.role)}`, req.url),
+      );
+    }
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
   if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
@@ -94,10 +154,11 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       // through the inverse mask (extra hop, and client RSC navs stall on it).
       const rootHostSlug =
         customDomainToSlug[normalizeHost(req.headers.get("host")) ?? ""];
+      const landingSuffix = tenantLandingSuffix(user.role);
       const dashboardPath =
         rootHostSlug !== undefined && rootHostSlug === user.tenantSlug
-          ? "/dashboard"
-          : `/${user.tenantSlug}/dashboard`;
+          ? landingSuffix
+          : `/${user.tenantSlug}${landingSuffix}`;
       return NextResponse.redirect(new URL(dashboardPath, req.url));
     }
     // Authenticated but no tenant context — fall through to the landing.
@@ -105,10 +166,21 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   }
 
   if (!session?.user) {
-    const loginUrl = new URL("/admin", req.url);
-    // On a custom-domain host `pathname` is the internally REWRITTEN
-    // `/<slug>/...` form. Hand the login page the CLEAN path instead: the
-    // post-login `router.push(callbackUrl)` must not hit the inverse-mask 308
+    // Route the unauthenticated deep-link to the RIGHT sign-in form: platform
+    // paths go to /tm/login, everything else to the tenant's own
+    // /{slug}/login — never the dropped global /admin (Rule 34 / site-access
+    // standard §3). On a custom-domain host `pathname` is already the
+    // internally REWRITTEN `/<slug>/...` form (see resolveTenantRoute), so
+    // the first path segment is reliably the real tenant slug either way.
+    if (pathname.startsWith("/tm")) {
+      const loginUrl = new URL("/tm/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    const tenantSlugFromUrl = pathname.split("/")[1] ?? "";
+    const loginUrl = new URL(`/${tenantSlugFromUrl}/login`, req.url);
+    // Hand the login page the CLEAN callback path: the post-login
+    // `router.push(callbackUrl)` must not hit the inverse-mask 308
     // (client-side RSC navigation stalls on it) — the clean path rewrites
     // straight to the tenant route. Bare tenant root → /dashboard directly.
     const hostSlug =
@@ -130,7 +202,12 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   // Management-site routes — tenant_manager only
   if (pathname.startsWith("/tm")) {
     if (role !== "tenant_manager") {
-      return NextResponse.redirect(new URL("/admin", req.url));
+      if (tenantSlug) {
+        return NextResponse.redirect(
+          new URL(`/${tenantSlug}${tenantLandingSuffix(role)}`, req.url),
+        );
+      }
+      return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();
   }
@@ -146,14 +223,16 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       const hostSlug =
         customDomainToSlug[normalizeHost(req.headers.get("host")) ?? ""];
       if (hostSlug !== undefined && hostSlug !== tenantSlug) {
-        const res = NextResponse.redirect(new URL("/admin", req.url));
+        const res = NextResponse.redirect(
+          new URL(`/${hostSlug}/login`, req.url),
+        );
         res.cookies.delete("authjs.session-token");
         res.cookies.delete("__Secure-authjs.session-token");
         return res;
       }
       // Session tenant doesn't match URL tenant — redirect to correct tenant
       return NextResponse.redirect(
-        new URL(`/${tenantSlug}/dashboard`, req.url),
+        new URL(`/${tenantSlug}${tenantLandingSuffix(role)}`, req.url),
       );
     }
 
@@ -190,7 +269,14 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
     return NextResponse.next();
   }
 
-  return NextResponse.redirect(new URL("/admin", req.url));
+  // Signed-in but no tenant context on a tenant-shaped path (e.g. a
+  // tenant_manager hitting `/{slug}/...` directly) — send platform staff
+  // home, everyone else to the public landing (safe, never the dropped
+  // global /admin).
+  if (role === "tenant_manager") {
+    return NextResponse.redirect(new URL("/tm/tenants", req.url));
+  }
+  return NextResponse.redirect(new URL("/", req.url));
 }
 
 export default auth((req: NextRequest & { auth: unknown }) => {
@@ -198,8 +284,8 @@ export default auth((req: NextRequest & { auth: unknown }) => {
   // rename). Fires BEFORE the custom-domain masking dance and the auth guard
   // in `route()` so an old bookmark, OAuth callbackUrl, or a stale reverse-proxy
   // path lands on the new `/tm` login/app flow instead of a 404 — anonymous
-  // visitors still get bounced to `/admin` by `route()` afterwards, same as a
-  // direct `/tm` hit today.
+  // visitors still get bounced to `/tm/login` by `route()` afterwards, same as
+  // a direct `/tm` hit today.
   const { pathname: legacyPathname } = req.nextUrl;
   if (legacyPathname === "/platform" || legacyPathname.startsWith("/platform/")) {
     const url = req.nextUrl.clone();

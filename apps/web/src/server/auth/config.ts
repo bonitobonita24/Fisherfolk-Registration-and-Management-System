@@ -105,9 +105,15 @@ export const authConfig = {
     },
   },
   secret: process.env.AUTH_SECRET ?? "",
+  // Auth.js `pages.signIn`/`error` are STATIC — they can't target a specific
+  // tenant's `/{slug}/login`. This points at the `/login` redirect shim
+  // (→ `/`, the public marketing landing) as a safe tenant-agnostic fallback;
+  // the REAL per-tenant/platform sign-in routing happens in middleware.ts
+  // (loginRouteSlug / the unauthenticated deep-link handler), which always
+  // knows the tenant slug from the request path.
   pages: {
-    signIn: "/admin",
-    error: "/admin",
+    signIn: "/login",
+    error: "/login",
   },
   providers: [],
   callbacks: {

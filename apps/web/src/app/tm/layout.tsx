@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { PlatformHeaderActions } from "./platform-header-actions";
 
@@ -9,10 +10,17 @@ interface PlatformLayoutProps {
 export default async function PlatformLayout({
   children,
 }: PlatformLayoutProps) {
+  // GUARD EXCEPTION (Milestone 4a — site-access-tenancy standard §2):
+  // `/tm/login` must render pre-auth — same mechanism as `[tenant]/layout.tsx`.
+  const hdrs = await headers();
+  if (hdrs.get("x-tenant-login-route") === "1") {
+    return <>{children}</>;
+  }
+
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/admin");
+    redirect("/tm/login");
   }
 
   if (session.user.role !== "tenant_manager") {
