@@ -249,3 +249,23 @@ only open follow-ups — both non-blocking, batch outcome ✅ COMPLETE)_
     The working copy stays on disk (deploy.sh re-copies it each sync); only git tracking is removed. Then re-run the framework sync (`deploy.sh`) so the `starter/admincn/` line lands in this app's `.gitignore` (V32.48.1 adds it automatically).
   - **Verify:** `git ls-files starter/admincn | wc -l` → 0 after. Mark `- [x]` when done.
   - Answer: _(seat executes)_
+
+---
+
+## Site Access & Tenancy Bootstrap Standard rollout — owner-gated (opened 2026-08-16/17)
+
+Phase 0 (global authoring) + Phase 1 (FRMS reference impl) are DONE and validated, all LOCAL/HARD HOLD.
+The following require the owner's explicit word — the full-auto loop must DEFER, never act:
+
+- [ ] **Merge + push the standard to main.** Merge FRMS `feat/site-access-tenancy-standard` → main and AIEF
+      `feat/v32.50-site-access-standard` → main, then push. HARD HOLD — no merge/push without owner word.
+- [ ] **Phase 0b — SOPS vault edit.** Add platform accounts `tenantbilling@`/`tenanttech@` + demo
+      `superadmin@demo.com` to `Server-Setups/secrets/universal-login-credentials.enc.yaml` (fresh
+      passwords). Was gated behind FRMS validation → now validated; awaits owner go. Must land before any
+      live re-seed.
+- [ ] **Phase 2 — per-app adoption.** Implement the standard in Marine-Guardian / Orqafy / FerryBook /
+      CueLane (broadcast notes already dropped in each app's memory). Done in EACH app's OWN seat, never
+      cross-repo from here. Owner decides ordering/timing.
+- [ ] **Phase 3 / deploy backlog.** Promote the standard through dev→staging→prod→demo when ready. ALSO
+      still-pending from earlier: prod is 101 commits behind (missing v0.14.0 NexaCRM + v0.14.1 a11y/auth),
+      demo 7 behind — deploying those is a separate owner-gated call.

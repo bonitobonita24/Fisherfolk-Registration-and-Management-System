@@ -1,6 +1,41 @@
 # FRMS — Project State
 
-## Current State (2026-08-15, latest) — 🚀 a11y + auth fail-open fixes RELEASED as v0.14.1 & PUSHED to origin (main == origin, full bar met)
+## Current State (2026-08-16/17, latest) — ⭐ Site Access & Tenancy Bootstrap Standard: Phase 0 (fleet-wide) + Phase 1 (FRMS reference impl) DONE, LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]  ·  **FULL AUTO MODE engaged** (no approval questions; work un-gated items, defer `[WHAT]`s, never push/deploy without owner word).
+
+### 🧭 Boot orientation
+A new fleet standard was authored and proven on FRMS this session. Two branches hold the work, both LOCAL (nothing pushed):
+- **FRMS repo** branch `feat/site-access-tenancy-standard` — the reference implementation (8 commits `5bb7f12`→`8239d96`). HEAD `8239d96`.
+- **AIEF repo** (`~/UbuntuDevFiles/1_COMPANY_DEV/Powerbyte-AIEF`) branch `feat/v32.50-site-access-standard` — framework V32.50 (`68b5338`, `ea88b78`).
+- Global `~/.claude/` files + fleet memory/broadcast notes already written (Phase 0).
+Canonical spec: `docs/SITE_ACCESS_STANDARD.md` + `docs/SITE_ACCESS_ADOPTION_PLAN.md`. Model memory: `project_site_access_reference_impl_0816.md`.
+
+### ⏳ NEXT un-gated work (full auto — do this first, no asking)
+1. **UX follow-up (un-gated):** restricted platform roles (BILLING/TECH) currently land on `/tm/tenants` they can't use → 403 + React-Query retries + console errors. Build a role-aware platform landing OR a graceful "restricted access" state so a non-tenant_management platform role lands somewhere usable. Security is already correct (403 is right); this is UX. Verify with the dev stack (already serving this branch) + the browser.
+2. After (1): run the lint-gated build (`pnpm --filter @frms/web build`) + platform-rbac tests (DATABASE_URL from .env.dev) as the done-gate — see lesson `monorepo.turbo-next.worker-done-gate-must-run-lint-gated-build`.
+
+### 🚧 OPEN [WHAT] — owner-gated, DEFERRED (see PENDING_DECISIONS.md — do NOT act)
+- Merge `feat/site-access-tenancy-standard` (+ AIEF `feat/v32.50-site-access-standard`) → main + push (HARD HOLD).
+- Phase 0b: SOPS vault edit (add tenantbilling@/tenanttech@ + demo superadmin@demo.com) — now that FRMS is validated, awaits owner word.
+- Phase 2: per-app adoption implementations (MG/Orqafy/FerryBook/CueLane) — done in each app's OWN seat, never from here.
+- Phase 3 / earlier deploy backlog: prod is 101 commits behind (missing v0.14.0 NexaCRM + v0.14.1 a11y/auth), demo 7 behind — all deploys owner-gated.
+
+### ✅ DONE THIS SESSION
+- Tenant/account audit across prod/dev/demo (URLs + vault-verified passwords).
+- Locked the Site Access standard (spec + adoption plan + DECISIONS_LOG).
+- Phase 0: global library + tenant-rbac carve-out + CLAUDE.md TARGET block + ROUTER; AIEF V32.50 (Rule 41, rbac.md E/F, Scenario 50, Checklist §22, alignment PASS); authoring memory + 4 broadcast notes.
+- Phase 1: FRMS M1–M6 + build fix — data-driven platform RBAC (scope discriminator, disjoint vocab, CHECK constraint), `/platform`→`/tm`+shim, per-tenant `/{slug}/login`+`/tm/login`+role landing, forge-proof headers, `/login` picker, optional `/{slug}/` landing (OFF), canManage dedup, seed ADMIN/BILLING/TECH.
+- secure-code-guardian review: 1 HIGH found + FIXED (M6) + 16/16 tests; live smoke passed (all routing/guards correct, BILLING 403 on tenant.list proven in-browser).
+
+### Git / HARD HOLD state
+- FRMS: on `feat/site-access-tenancy-standard` @ `8239d96`, main untouched at v0.14.1 (`bf751bc`/`365ff17` pushed). Branch is LOCAL, NOT merged, NOT pushed.
+- AIEF: on `feat/v32.50-site-access-standard`, LOCAL, NOT pushed.
+- Dev stack rebuilt off the FRMS branch (serves branch code, not main). Untracked scratch: `.qa-learnings/`, `_tempfiles/`.
+
+---
+
+## Current State (2026-08-15) — 🚀 a11y + auth fail-open fixes RELEASED as v0.14.1 & PUSHED to origin (main == origin, full bar met)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
