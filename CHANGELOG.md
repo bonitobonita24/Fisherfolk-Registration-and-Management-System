@@ -4,6 +4,28 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.15.0 — 2026-08-17
+
+### [FEATURE]
+- M5 — seed platform ADMIN/BILLING/TECH roles + accounts + resolution tests (`6ab1151`)
+- M4b — forge-proof guard headers + /login picker + optional /{slug}/ landing + canManage dedup (`e61c64d`)
+- M4a — per-tenant /{slug}/login + /tm/login, role-routed landing, drop global /admin (`639b5f2`)
+- M3 — rename /platform management site to /tm + redirect shim (`7f44ac8`)
+- M2 — platform RBAC resolver + platformRole router + cross-scope guards (`2b43679`)
+- M1 — platform-scope custom-role schema foundation (`5bb7f12`)
+
+### [FIXED]
+- drop redundant ctx.userId! assertions in tenantUser (M6 fallout) (`8239d96`)
+- M6 — close platform-authz escalation (HIGH from secure-code-guardian) (`0a488d3`)
+
+### [DOCS]
+- 2026-08-16/17 save — Site Access Standard Phase 0 + Phase 1 (FRMS ref impl) done (`f9c4b03`)
+- per-tenant login form model + optional /{slug}/ landing page (`a30f29f`)
+- fleet adoption plan for Site Access & Tenancy Bootstrap Standard (`6312a9d`)
+- lock Site Access & Tenancy Bootstrap Standard (`29a4419`)
+- 2026-08-15 — v0.14.1 release + dev refresh; session save (`365ff17`)
+
+
 ## v0.14.1 — 2026-08-15
 
 ### [FIXED]
