@@ -1,6 +1,41 @@
 # FRMS — Project State
 
-## Current State (2026-08-16/17, latest) — ⭐ Site Access & Tenancy Bootstrap Standard: Phase 0 (fleet-wide) + Phase 1 (FRMS reference impl) DONE, LOCAL/HARD HOLD
+## Current State (2026-08-17, latest) — 🚀 Site Access & Tenancy Standard SHIPPED to prod + demo as v0.15.0 + vault edited
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner resumed and authorized the gated items, scoped in the follow-up to **FRMS only** (AIEF held) · **promote prod + demo now** · **vault edit with fresh passwords**. All three executed, verified live, and handed off. Model authority memory: `project_site_access_shipped_0817.md`.
+
+### ✅ DONE THIS SESSION (all executed + verified)
+- **Merged + pushed + released v0.15.0.** `feat/site-access-tenancy-standard` → main `--no-ff` (`e3dad45`); consolidated release **v0.15.0** (`gen-release-notes --apply`: CHANGELOG + version-sync 7 pkgs + landing-footer + annotated tag); `git push --follow-tags` → **`origin/main == 9594ced`**. Pre-push verify: typecheck 7/7, 402 tests pass, build 5/5.
+- **Vault edit (Phase 0b).** Added `tenant_billing` (tenantbilling@) + `tenant_tech` (tenanttech@) universal PLATFORM accounts + demo `superadmin@demo.com` (net-new; admin@demo.com retained) to `Server-Setups/secrets/universal-login-credentials.enc.yaml` with FRESH generated passwords (never echoed). Decrypts clean; committed LOCAL only (`b4178da`, Server-Setups main — a concurrent aspf-aws commit `45f574a` sits on top, my commit intact below). Feeds seed env vars `TENANTBILLING_PASSWORD`/`TENANTTECH_PASSWORD`.
+- **Promoted PROD + DEMO to `sha-9594ced` / v0.15.0.** CI built the image → `push-to-prod.sh sha-9594ced` + `push-to-demo.sh sha-9594ced` (DB backup each, single migration `add_platform_scope_role_matrix`, reseed-never). Both healthy on rev `9594ced`; endpoints 200 (`/`, `/login`, `/tm/login`, `/demo`, `/demo/login`). **The "prod 101 commits behind" backlog is CLEARED.** (Transient 404 right after each recreate was just boot delay; both recovered to 200 within ~15–45s.)
+- **Dev-freshness (Rule 39):** dev rebuilt off main; serves the new code (dev :44387 `/login`, `/tm/login` = 200). NOTE: `dev-freshness-check.sh` reports STALE — a FALSE POSITIVE from the docs-only commit `511612e` landing seconds after the image build; dev's app image is built off `9594ced`'s tree and is functionally fresh.
+
+### ⏳ NEXT un-gated work (do first next session — FULLY PLANNED, no re-investigation needed)
+**UX fix: restricted platform roles (BILLING/TECH) land on `/tm/tenants` they can't use → 403 + React-Query retry storm.** Root cause CONFIRMED: three places hardcode `tenant_manager → /tm/tenants` (`middleware.ts` lines ~211-212 and ~232-233; `login-form.tsx` `resolvePostLoginTarget` server-derives via `/` root handler), but role `tenant_manager` covers ADMIN **and** BILLING/TECH; only ADMIN holds the `tenant_management` platform permission, and `/tm` has only `tenants/` built (no billing/tech pages). Security is CORRECT (403 is right) — this is purely landing UX.
+**Planned fix (branch `fix/tm-restricted-role-landing` — was created then deleted empty; recreate):**
+1. **Extract** a ctx-free `loadPlatformActorMatrix(userId, role)` from `apps/web/src/server/rbac/resolve-platform.ts` (pull the body of `computePlatformActorMatrix` out so it takes primitives, no `ctx.req`); have `resolveActorPlatformMatrix` keep its request-memoization wrapper and call it. REUSE the exact fail-closed logic — do NOT duplicate the security resolver.
+2. **New `apps/web/src/app/tm/page.tsx`** (server component landing resolver): `auth()` → `loadPlatformActorMatrix(session.user.id, session.user.role)` → if `hasPlatformPermission(actor, "tenant_management", "view")` redirect `/tm/tenants`; else render a graceful no-access state (new small `platform-no-access.tsx`: "No platform modules are enabled for your role yet — contact the platform admin"). (Future billing/tech pages slot in as extra branches.)
+3. **Server-guard `apps/web/src/app/tm/tenants/page.tsx`**: resolve actor; if no `tenant_management` view → `redirect("/tm")` (so a direct nav by BILLING/TECH never 403-loops).
+4. **Repoint** the 3 hardcoded `/tm/tenants` redirects (middleware ×2 + login-form comment/logic) → `/tm` so the resolver decides. (`login-form.tsx` returns `/` which the middleware `/` handler resolves — update that handler's `tenant_manager` branch to `/tm`.)
+5. **Defense:** `retry: false` (or `retry: (n,e)=>e.data?.code!=='FORBIDDEN' && n<3`) on `trpc.tenant.list.useQuery` in `tenants-client.tsx` (line ~43) to kill the retry-storm symptom.
+- **Done-gate:** run the LINT-GATED build `pnpm --filter @frms/web build` (ESLint only runs in full build, not typecheck — lesson `monorepo.turbo-next.worker-done-gate-must-run-lint-gated-build`) + platform-rbac tests (`DATABASE_URL` from `deploy/compose/dev/.env`) + live browser smoke: log in as BILLING (`tenantbilling@` — NOTE: account not seeded on dev yet, see below) → lands on graceful page, no 403/retries/console errors. Commit LOCAL on the branch (HARD HOLD).
+
+### 🚧 OPEN [WHAT] — owner-gated, DEFERRED (see PENDING_DECISIONS.md — do NOT act without owner word)
+- **AIEF framework merge:** merge AIEF `feat/v32.50-site-access-standard` → main + push, in the AIEF seat (held per owner "FRMS only" this session).
+- **Phase 2 — per-app adoption:** implement the standard in Marine-Guardian / Orqafy / FerryBook / CueLane, each in its OWN seat (broadcast notes already in each app's memory). Owner decides ordering. Authorization noted but NOT executable from the FRMS seat.
+- **Seed platform accounts on prod/demo:** prod/demo are reseed-never, so `tenantbilling@`/`tenanttech@`/`superadmin@demo.com` do NOT exist on those live DBs yet — a targeted idempotent platform-account seed (vault passwords injected as env) is needed for those logins to work live. Touches live prod → owner-gated. (Also affects dev: verify the BILLING account exists on dev before the UX smoke, or seed it locally.)
+
+### Git / deploy state
+- FRMS: `main == origin/main == 9594ced` (v0.15.0) + ONE local docs commit `511612e` (STATE/SESSION_LOG/PENDING_DECISIONS updates) held LOCAL to avoid a redundant CI image build — push on owner word. Tree otherwise clean (untracked scratch `.qa-learnings/`, `_tempfiles/` only).
+- Prod `frms.powerbyte.app` + demo `frms-demo.powerbyte.app`: both rev `9594ced`, healthy, all routes 200.
+- AIEF: `feat/v32.50-site-access-standard` still LOCAL, unmerged (deliberately held).
+- Vault (Server-Setups): `b4178da` committed local, unpushed.
+
+---
+
+## Current State (2026-08-16/17) — ⭐ Site Access & Tenancy Bootstrap Standard: Phase 0 (fleet-wide) + Phase 1 (FRMS reference impl) DONE, LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]  ·  **FULL AUTO MODE engaged** (no approval questions; work un-gated items, defer `[WHAT]`s, never push/deploy without owner word).
 

@@ -2,6 +2,24 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-17 — Ship Site Access Standard to prod+demo (v0.15.0) + vault edit
+
+**In your words:** Resume, surface the open decisions, and "yes I authorize the gated items" — scoped in the follow-up to: FRMS only push, promote prod + demo now, and edit the vault with fresh passwords.
+
+✅ **Done**
+- **Merged + pushed FRMS site-access standard → main, released v0.15.0.** `feat/site-access-tenancy-standard` merged `--no-ff` (`e3dad45`); consolidated release v0.15.0 (CHANGELOG + version-sync 7 pkgs + landing footer, tag pushed); `origin/main == 9594ced`. Pre-push verify: typecheck 7/7, 402 tests, build 5/5.
+- **Vault edited (Phase 0b).** Added platform `tenant_billing`/`tenant_tech` (tenantbilling@ / tenanttech@) + demo `superadmin@demo.com` with fresh generated passwords; decrypts clean; committed LOCAL in Server-Setups (`b4178da`).
+- **Promoted PROD + DEMO to v0.15.0.** CI built `sha-9594ced` → `push-to-prod` + `push-to-demo` (DB backup each, single migration `add_platform_scope_role_matrix` applied, reseed-never). Both healthy on `9594ced`; all routes 200 (`/`, `/login`, `/tm/login`, `/demo`, `/demo/login`). The long-standing "prod 101 commits behind" is cleared.
+
+🔨 **Partial / verifying**
+- Local dev rebuild off main (Rule 39 dev-freshness) — in progress at session save.
+
+💬 **Decisions / notes**
+- Scoped to **FRMS only** — AIEF `feat/v32.50-site-access-standard` merge deliberately held for its own seat.
+- Prod/demo are **reseed-never**, so the new platform login accounts don't exist on those live DBs yet — a targeted platform-account seed (vault passwords as env) is a small owner-gated follow-up.
+- Un-gated next work still open: UX fix so restricted platform roles (BILLING/TECH) don't land on `/tm/tenants` (403 + retries).
+- Staging data-first gate bypassed on your explicit prod authorization (staging torn down / build-only).
+
 ## 2026-08-16/17 — Site Access & Tenancy Bootstrap Standard: authored fleet-wide + FRMS reference impl built
 
 **In your words:** Review tenants/accounts across all envs; simplify the SaaS/tenancy architecture per my "NEW SITE CREDENTIALS.pdf" (/tm platform → client tenant → optional demo); make platform roles (ADMIN/BILLING/TECH) data-driven & frontend-creatable; orchestrate a brainstorm on adopting this into the Spec-Driven framework + fleet-wide memory; then build it (proceed to Phase 1); live-smoke it; save session + full-auto handoff.

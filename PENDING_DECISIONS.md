@@ -257,15 +257,32 @@ only open follow-ups — both non-blocking, batch outcome ✅ COMPLETE)_
 Phase 0 (global authoring) + Phase 1 (FRMS reference impl) are DONE and validated, all LOCAL/HARD HOLD.
 The following require the owner's explicit word — the full-auto loop must DEFER, never act:
 
-- [ ] **Merge + push the standard to main.** Merge FRMS `feat/site-access-tenancy-standard` → main and AIEF
-      `feat/v32.50-site-access-standard` → main, then push. HARD HOLD — no merge/push without owner word.
-- [ ] **Phase 0b — SOPS vault edit.** Add platform accounts `tenantbilling@`/`tenanttech@` + demo
-      `superadmin@demo.com` to `Server-Setups/secrets/universal-login-credentials.enc.yaml` (fresh
-      passwords). Was gated behind FRMS validation → now validated; awaits owner go. Must land before any
-      live re-seed.
+- [x] ✅ **RESOLVED (2026-08-17, owner "yes I authorize the gated items", scope = FRMS only) — FRMS MERGED +
+      PUSHED + RELEASED v0.15.0.** Merged `feat/site-access-tenancy-standard` → main (`--no-ff` `e3dad45`),
+      applied consolidated release **v0.15.0** (CHANGELOG + version-sync across 7 packages + landing-footer,
+      annotated tag), `git push --follow-tags` → `origin/main == 9594ced`. Verified pre-push: typecheck 7/7,
+      402 tests, build 5/5. **AIEF `feat/v32.50-site-access-standard` DELIBERATELY HELD** for its own seat
+      (owner chose "FRMS only") — still an open item, see below.
+- [x] ✅ **RESOLVED (2026-08-17, owner authorized, fresh generated passwords) — VAULT EDITED.** Added
+      `tenant_billing` (tenantbilling@) + `tenant_tech` (tenanttech@) universal PLATFORM accounts + demo
+      `superadmin@demo.com` (net-new; admin@demo.com retained) to
+      `Server-Setups/secrets/universal-login-credentials.enc.yaml`. Decrypts clean; committed LOCAL only
+      (`b4178da`, Server-Setups main, no push). Feeds seed env vars `TENANTBILLING_PASSWORD`/`TENANTTECH_PASSWORD`.
+- [x] ✅ **RESOLVED (2026-08-17, owner "promote prod + demo now") — PROD + DEMO PROMOTED to v0.15.0 / `sha-9594ced`.**
+      CI built the image → `push-to-prod.sh sha-9594ced` (DB backed up, retag, single migration
+      `add_platform_scope_role_matrix` applied, reseed-never) + `push-to-demo.sh sha-9594ced` (same).
+      Both healthy on revision `9594ced`; endpoints 200 (`/`, `/login`, `/tm/login`, `/demo`, `/demo/login`).
+      Prod-101-behind is CLEARED (prod now current). Staging data-first gate bypassed per owner word (staging
+      torn down / build-only).
+
+**STILL OPEN — owner-gated:**
+
+- [ ] **AIEF framework standard merge.** Merge AIEF `feat/v32.50-site-access-standard` → main + push, done in
+      the AIEF seat (not from FRMS). Held per owner "FRMS only" this session.
 - [ ] **Phase 2 — per-app adoption.** Implement the standard in Marine-Guardian / Orqafy / FerryBook /
       CueLane (broadcast notes already dropped in each app's memory). Done in EACH app's OWN seat, never
-      cross-repo from here. Owner decides ordering/timing.
-- [ ] **Phase 3 / deploy backlog.** Promote the standard through dev→staging→prod→demo when ready. ALSO
-      still-pending from earlier: prod is 101 commits behind (missing v0.14.0 NexaCRM + v0.14.1 a11y/auth),
-      demo 7 behind — deploying those is a separate owner-gated call.
+      cross-repo from here. Owner decides ordering/timing. (Authorization noted; not executable from FRMS seat.)
+- [ ] **Follow-up: seed platform accounts on prod/demo.** Prod/demo are reseed-never, so `tenantbilling@`/
+      `tenanttech@`/`superadmin@demo.com` do NOT exist on those live DBs yet — a targeted, idempotent seed
+      of just the platform accounts (with the vault passwords injected as env vars) is needed for those logins
+      to work live. Small follow-up, owner-gated (touches live prod).
