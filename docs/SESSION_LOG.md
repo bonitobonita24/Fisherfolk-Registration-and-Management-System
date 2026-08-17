@@ -2,6 +2,27 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-16/17 — Site Access & Tenancy Bootstrap Standard: authored fleet-wide + FRMS reference impl built
+
+**In your words:** Review tenants/accounts across all envs; simplify the SaaS/tenancy architecture per my "NEW SITE CREDENTIALS.pdf" (/tm platform → client tenant → optional demo); make platform roles (ADMIN/BILLING/TECH) data-driven & frontend-creatable; orchestrate a brainstorm on adopting this into the Spec-Driven framework + fleet-wide memory; then build it (proceed to Phase 1); live-smoke it; save session + full-auto handoff.
+
+✅ Done
+- **Tenant/account audit** — inventoried prod (calapan-city + platform), dev (+calapan-demo), demo (frms-demo); every account + URL + vault-verified password mapped. Confirmed prod is **101 commits behind** (missing v0.14.0+v0.14.1), demo **7 behind** — deploys never promoted (owner-gated).
+- **Locked the "Site Access & Tenancy Bootstrap Standard"** (spec `docs/SITE_ACCESS_STANDARD.md` + `docs/SITE_ACCESS_ADOPTION_PLAN.md` + DECISIONS_LOG): 3-layer `/tm`→`/{slug}`→`/demo`; data-driven platform roles (reuse custom-role builder + `scope` discriminator, distinct platform vocab, tenant guardrail intact, ADMIN-only role mgmt); per-tenant `/{slug}/login` form (global `/admin` dropped); optional `/{slug}/` landing (FerryBook exemplar).
+- **Phase 0 — authored globally (6-lens multi-agent brainstorm → synthesis):** `~/.claude/library/site-access-standard.md` (NEW) + `tenant-rbac-standard.md` carve-out + `CLAUDE.md` TARGET-labelled universal-login + ROUTER row; **AIEF framework V32.49→V32.50** (branch `feat/v32.50-site-access-standard`: Rule 41 + rbac.md Part E/F + Scenario 50 + Security Checklist §22 + phase hooks + 15 mirror files, alignment PASS); AIEF authoring memory + broadcast notes to MG/Orqafy/FerryBook/CueLane (Flairr/Yelli out-of-scope).
+- **Phase 1 — FRMS reference implementation** (branch `feat/site-access-tenancy-standard`, 8 commits M1–M6 + build fix): scope discriminator + PlatformRolePermission + CHECK constraint · disjoint platform resolver + platformRole router · `/platform`→`/tm` + shim · per-tenant `/{slug}/login` + `/tm/login` + role-routed landing · forge-proofed guard headers + `/login` picker + optional landing + canManage dedup · seed ADMIN/BILLING/TECH.
+- **secure-code-guardian review** found 1 HIGH (BILLING/TECH bypassed their matrix on existing tenant/tenantUser routers) — **fixed in M6** (re-gated on platform matrix; fail-closed resolver) + proven with 16/16 tests.
+- **Live smoke (dev rebuilt off branch):** all routing/shim/guard flows correct (no redirect loops); per-tenant + platform logins work; **BILLING gets 403 on tenant.list proven in-browser** (escalation fix live). 0 console errors on tenant login.
+- **Lesson logged** (`monorepo.turbo-next.worker-done-gate-must-run-lint-gated-build`): typecheck+tests ≠ lint-gated build; verify container actually recreated after a dev rebuild (start.sh exits 0 even on app-build failure).
+
+🔨 Follow-up (un-gated, next session / full auto)
+- **UX gap:** restricted platform roles (BILLING/TECH) land on `/tm/tenants` they can't use → 403 + retries. Needs role-aware platform landing or a graceful restricted-state.
+
+💬 Decisions / HARD HOLD
+- Everything is LOCAL, HARD HOLD, nothing pushed. Merge to main + push, the SOPS vault edit (now FRMS-validated), the per-app Phase-2 implementations, and any deploy are all owner-gated `[WHAT]`s in `PENDING_DECISIONS.md`.
+- Dev stack currently serves the **branch** code (not main/v0.14.1) — the active work; rebuild to main on request.
+- Pre-existing (not this branch): `customRole`/`tenant` routers trust a client `tenantId` without `=== ctx.tenantId` — flagged for a separate look.
+
 ## 2026-08-15 (later) — Released v0.14.1 (a11y + auth fixes) to origin + dev refresh
 
 **In your words:** Resume the session; push the held a11y + auth-hardening fixes to origin; confirm I can test it locally; then hand off all pending tasks/decisions, save session, and stop.

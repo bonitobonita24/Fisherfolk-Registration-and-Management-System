@@ -11,6 +11,14 @@
  * §4 "Only `tenant_superadmin` (and platform `tenant_manager`) may
  * create/edit/assign custom roles."
  *
+ * SCOPE HARD-FILTER (Milestone 2, docs/SITE_ACCESS_STANDARD.md §2) — every
+ * query/mutation in this router is additionally constrained to
+ * `scope: "tenant"` on every `CustomRole` lookup, so this router can NEVER
+ * return, edit, delete, or assign a `scope: "platform"` role. The
+ * platform-tier counterpart (`platformRole.ts`) is the code-disjoint mirror:
+ * it is hard-filtered to `scope: "platform", tenantId: null` and never
+ * touches `RolePermission` (only `PlatformRolePermission`).
+ *
  * DB ACCESS PATTERN — mirrors tenantUser.ts: writes go through
  * `platformPrisma` (the unguarded client) with an EXPLICIT `tenantId` in
  * every where-clause, because `tenant_manager` callers have `tenantId:
@@ -114,7 +122,7 @@ export const customRoleRouter = createTRPCRouter({
       await assertTenantExists(tenantId);
 
       const roles = await platformPrisma.customRole.findMany({
-        where: { tenantId },
+        where: { tenantId, scope: "tenant" },
         orderBy: { createdAt: "desc" },
         include: {
           permissions: {
@@ -143,7 +151,7 @@ export const customRoleRouter = createTRPCRouter({
       const { tenantId, id } = input;
 
       const role = await platformPrisma.customRole.findFirst({
-        where: { id, tenantId },
+        where: { id, tenantId, scope: "tenant" },
         include: {
           permissions: {
             select: { featureKey: true, view: true, write: true, update: true, delete: true },
@@ -182,7 +190,7 @@ export const customRoleRouter = createTRPCRouter({
       await assertTenantExists(tenantId);
 
       const existing = await platformPrisma.customRole.findFirst({
-        where: { tenantId, name },
+        where: { tenantId, name, scope: "tenant" },
         select: { id: true },
       });
       if (existing) {
@@ -198,6 +206,7 @@ export const customRoleRouter = createTRPCRouter({
         const role = await tx.customRole.create({
           data: {
             tenantId,
+            scope: "tenant",
             name,
             description: description ?? null,
           },
@@ -259,14 +268,14 @@ export const customRoleRouter = createTRPCRouter({
       const { tenantId, id, name, description, permissions } = input;
 
       const before = await platformPrisma.customRole.findFirst({
-        where: { id, tenantId },
+        where: { id, tenantId, scope: "tenant" },
         select: { id: true, name: true, description: true },
       });
       if (!before) throw new TRPCError({ code: "NOT_FOUND" });
 
       if (name && name !== before.name) {
         const dup = await platformPrisma.customRole.findFirst({
-          where: { tenantId, name, id: { not: id } },
+          where: { tenantId, name, id: { not: id }, scope: "tenant" },
           select: { id: true },
         });
         if (dup) {
@@ -348,7 +357,7 @@ export const customRoleRouter = createTRPCRouter({
       const { tenantId, id } = input;
 
       const role = await platformPrisma.customRole.findFirst({
-        where: { id, tenantId },
+        where: { id, tenantId, scope: "tenant" },
         select: { id: true, name: true },
       });
       if (!role) throw new TRPCError({ code: "NOT_FOUND" });
@@ -420,7 +429,7 @@ export const customRoleRouter = createTRPCRouter({
 
       if (customRoleId) {
         const role = await platformPrisma.customRole.findFirst({
-          where: { id: customRoleId, tenantId },
+          where: { id: customRoleId, tenantId, scope: "tenant" },
           select: { id: true },
         });
         if (!role) throw new TRPCError({ code: "NOT_FOUND", message: "Custom role not found." });

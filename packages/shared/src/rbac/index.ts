@@ -9,3 +9,14 @@ export {
   type PermissionAction,
   type PermissionMatrix,
 } from "./permissions";
+export {
+  PLATFORM_PERMISSION_KEYS,
+  type PlatformPermissionKey,
+} from "./platform-permission-key";
+export {
+  PLATFORM_ADMIN_CEILING,
+  hasPlatformPermission,
+  intersectWithPlatformCeiling,
+  type PlatformActor,
+  type PlatformPermissionMatrix,
+} from "./platform-permissions";

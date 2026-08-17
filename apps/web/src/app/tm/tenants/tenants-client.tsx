@@ -156,7 +156,7 @@ export function TenantsClient() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link href={`/platform/tenants/${t.id}/users`}>
+                          <Link href={`/tm/tenants/${t.id}/users`}>
                             Manage users
                           </Link>
                         </DropdownMenuItem>

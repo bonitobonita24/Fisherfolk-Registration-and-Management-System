@@ -158,7 +158,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/admin" })}>
+            <DropdownMenuItem onClick={() => void signOut({ callbackUrl: "/" })}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </DropdownMenuItem>

@@ -1,5 +1,6 @@
 import type React from "react";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
 import { AppShell } from "@/components/app-shell";
@@ -15,10 +16,34 @@ export default async function TenantLayout({
   children,
   params,
 }: TenantLayoutProps) {
+  // GUARD EXCEPTION (Milestone 4a — site-access-tenancy standard §3):
+  // `/{tenant}/login` must render pre-auth. middleware.ts marks a request
+  // that matched its `loginRouteSlug` check with this header — an
+  // unauthenticated visitor never reaches this layout's auth redirect below,
+  // and the login page renders standalone (no AppShell, which needs a real
+  // session's name/role/tenantSlug).
+  const hdrs = await headers();
+  if (hdrs.get("x-tenant-login-route") === "1") {
+    return <>{children}</>;
+  }
+
+  // GUARD EXCEPTION (optional per-tenant public landing, default OFF — see
+  // lib/tenant-landing.ts): `/{tenant}` root must render pre-auth ONLY when
+  // TENANT_LANDING_ENABLED is on. middleware.ts marks a request that matched
+  // its `tenantRootSlug` check (exact single-segment match, flag-gated) with
+  // this header — an unauthenticated visitor never reaches this layout's
+  // auth redirect below, and the placeholder renders standalone (no
+  // AppShell). The flag is OFF by default, so this header is never set and
+  // this branch never fires — zero behaviour change for FRMS.
+  if (hdrs.get("x-tenant-public-root-route") === "1") {
+    return <>{children}</>;
+  }
+
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/admin");
+    const { tenant: tenantForRedirect } = await params;
+    redirect(`/${tenantForRedirect}/login`);
   }
 
   const { tenant } = await params;

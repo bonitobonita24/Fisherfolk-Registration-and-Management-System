@@ -1,13 +1,11 @@
 import { auth } from "@/server/auth";
+import { canManage as canManageRole } from "@/lib/rbac/can-manage";
 import { TodoBoardClient } from "./todo-board-client";
 
 export default async function TodoPage() {
   const session = await auth();
   const role = session?.user.role;
-  const canManage =
-    role === "tenant_manager" ||
-    role === "tenant_superadmin" ||
-    role === "tenant_admin";
+  const canManage = canManageRole(role);
 
   return (
     <div className="space-y-6">
