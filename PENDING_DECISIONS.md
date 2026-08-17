@@ -282,16 +282,14 @@ The following require the owner's explicit word — the full-auto loop must DEFE
 - [ ] **Phase 2 — per-app adoption.** Implement the standard in Marine-Guardian / Orqafy / FerryBook /
       CueLane (broadcast notes already dropped in each app's memory). Done in EACH app's OWN seat, never
       cross-repo from here. Owner decides ordering/timing. (Authorization noted; not executable from FRMS seat.)
-- [ ] **`/tm` platform-role UX fixes — merge + ship decision (2 LOCAL branches, HARD HOLD).** Built + verified
-      2026-08-17, LOCAL only:
-      - `fix/tm-platform-role-landing` (`3139296` landing + `7918902` badge): permission-aware `/tm` landing so
-        restricted BILLING/TECH accounts get a neutral no-access panel instead of a 403-looping `/tm/tenants`,
-        plus the header badge shows the real tier ("BILLING"/"TECH SUPPORT"/"Admin") not a hardcoded "super admin".
-        Verified: typecheck 7/7 · lint · 402 tests · platform-rbac 16/16 · live on rebuilt dev (BILLING → no-access
-        panel, badge "BILLING", 0 console errors, 0 `tenant.list` calls).
-      - `chore/seed-platform-accounts` (`4aa3b6e`): the scoped seed script (already RUN on prod+demo above).
-      - **Owner `[WHAT]`:** merge these to `main` + push? A push trips Model-A CI and (for the landing branch)
-        would need a prod/demo promote for the fixed UX to reach live. Held for owner word.
+- [x] ✅ **RESOLVED (2026-08-17, owner "yes merge & ship") — MERGED + PUSHED + RELEASED v0.15.1 + PROMOTED to
+      PROD + DEMO.** Both branches merged `--no-ff` to `main` (`abce6c3` landing+badge, `5cdb90c` seed script),
+      re-verified merged (typecheck 7/7 · lint · **572 tests** · build), released **v0.15.1** (`4cd1bfe`, CHANGELOG
+      + version-sync 7 pkgs + footer + tag), `git push --follow-tags` → `origin/main == 4cd1bfe`. CI built
+      `sha-4cd1bfe`; promoted via `push-to-prod.sh` + `push-to-demo.sh` (DB backed up each, no pending migrations —
+      code-only, reseed-never). Both live + healthy on `sha-4cd1bfe`: `/api/health` 200, `/tm` → 307→login (new
+      landing route confirmed deployed), all routes green. Dev rebuilt off main (Rule 39). The `/tm` BILLING/TECH
+      UX is now FIXED live everywhere (no-access panel + real tier badge), and the seeded accounts authenticate.
 - [x] ✅ **RESOLVED (2026-08-17, owner "do B", scope confirmed: prod + demo; skip superadmin@demo.com) —
       PLATFORM ACCOUNTS SEEDED ON PROD + DEMO.** New scoped idempotent script
       `packages/db/scripts/seed-platform-accounts.ts` (branch `chore/seed-platform-accounts` `4aa3b6e`,

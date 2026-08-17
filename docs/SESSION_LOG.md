@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-17 — /tm platform-role UX fixes + platform-account seed → shipped v0.15.1 to prod+demo
+
+**In your words:** Resume; then "do the UX fix" for restricted platform roles; then "do A and B but plan first" (A = accurate role badge, B = seed platform accounts on prod/demo); then "yes merge & ship."
+
+✅ **Done + shipped (v0.15.1, prod + demo live)**
+- **Permission-aware `/tm` landing.** Restricted BILLING/TECH accounts (tenant_manager + platform custom role, no `tenant_management`) were hard-landed on `/tm/tenants` → 403 + `tenant.list` retry loop. Now: new `/tm` server-component landing resolves the platform matrix → tenant_management→`/tm/tenants`, else a neutral no-access panel; guarded `/tm/tenants` at the source; rewired 4 middleware redirects `/tm/tenants`→`/tm`. Verified live on dev: BILLING → no-access panel, **0 console errors, 0 tenant.list calls**.
+- **(A) Accurate role badge.** `/tm` header badge showed a hardcoded "super admin" for everyone; now shows the real tier ("BILLING"/"TECH SUPPORT"/"Admin"), derived from the cached platform actor. Verified live (badge reads "BILLING").
+- **(B) Platform accounts seeded on live prod + demo.** New scoped idempotent `packages/db/scripts/seed-platform-accounts.ts` (lifts only the platform blocks from seed.ts; refuses dev-default passwords); ran on both live DBs via the push-to-prod SSH-tunnel pattern (DB backed up first each; vault passwords via `sops -d --extract`, never echoed). DB-verified on both: `tenantbilling@`=BILLING/`billing`, `tenanttech@`=TECH SUPPORT/`data_overrides,tech_support`.
+- **Merge + ship.** Both branches merged `--no-ff` → main; re-verified (typecheck 7/7 · lint · **572 tests** · build); released **v0.15.1** (`4cd1bfe`, pushed); CI built `sha-4cd1bfe`; promoted prod + demo (backups, no pending migrations — code-only); both healthy, `/tm`→307→login confirms the new route live. Dev rebuilt (Rule 39).
+
+💬 **Decisions / notes**
+- `superadmin@demo.com` **skipped** (owner) — the live demo tenant already has its one allowed tenant_superadmin (`demo-super@calapan-demo.local`, Rule 34); stays a vault target.
+- Found (out of scope, not fixed): dev `tenantadmin@` login hash doesn't match the current CREDENTIALS.md value (a dev-reseed drift; a `pnpm db:seed` on dev would realign).
+- Reusable lesson logged: `deploy.seed.scoped-platform-accounts-reseed-never` (Phase 2 apps will need the same pattern).
+
 ## 2026-08-17 — Ship Site Access Standard to prod+demo (v0.15.0) + vault edit
 
 **In your words:** Resume, surface the open decisions, and "yes I authorize the gated items" — scoped in the follow-up to: FRMS only push, promote prod + demo now, and edit the vault with fresh passwords.
