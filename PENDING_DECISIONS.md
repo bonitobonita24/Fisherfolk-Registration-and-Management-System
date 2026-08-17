@@ -282,7 +282,29 @@ The following require the owner's explicit word — the full-auto loop must DEFE
 - [ ] **Phase 2 — per-app adoption.** Implement the standard in Marine-Guardian / Orqafy / FerryBook /
       CueLane (broadcast notes already dropped in each app's memory). Done in EACH app's OWN seat, never
       cross-repo from here. Owner decides ordering/timing. (Authorization noted; not executable from FRMS seat.)
-- [ ] **Follow-up: seed platform accounts on prod/demo.** Prod/demo are reseed-never, so `tenantbilling@`/
-      `tenanttech@`/`superadmin@demo.com` do NOT exist on those live DBs yet — a targeted, idempotent seed
-      of just the platform accounts (with the vault passwords injected as env vars) is needed for those logins
-      to work live. Small follow-up, owner-gated (touches live prod).
+- [ ] **`/tm` platform-role UX fixes — merge + ship decision (2 LOCAL branches, HARD HOLD).** Built + verified
+      2026-08-17, LOCAL only:
+      - `fix/tm-platform-role-landing` (`3139296` landing + `7918902` badge): permission-aware `/tm` landing so
+        restricted BILLING/TECH accounts get a neutral no-access panel instead of a 403-looping `/tm/tenants`,
+        plus the header badge shows the real tier ("BILLING"/"TECH SUPPORT"/"Admin") not a hardcoded "super admin".
+        Verified: typecheck 7/7 · lint · 402 tests · platform-rbac 16/16 · live on rebuilt dev (BILLING → no-access
+        panel, badge "BILLING", 0 console errors, 0 `tenant.list` calls).
+      - `chore/seed-platform-accounts` (`4aa3b6e`): the scoped seed script (already RUN on prod+demo above).
+      - **Owner `[WHAT]`:** merge these to `main` + push? A push trips Model-A CI and (for the landing branch)
+        would need a prod/demo promote for the fixed UX to reach live. Held for owner word.
+- [x] ✅ **RESOLVED (2026-08-17, owner "do B", scope confirmed: prod + demo; skip superadmin@demo.com) —
+      PLATFORM ACCOUNTS SEEDED ON PROD + DEMO.** New scoped idempotent script
+      `packages/db/scripts/seed-platform-accounts.ts` (branch `chore/seed-platform-accounts` `4aa3b6e`,
+      LOCAL) lifts ONLY the `tm` platform tenant + BILLING/TECH SUPPORT CustomRoles + grants + the
+      `tenantbilling@`/`tenanttech@` users from `prisma/seed.ts` (byte-faithful upserts; touches NO
+      tenant/LGU/demo data; hard-refuses without real vault passwords). Ran against both live DBs via the
+      `push-to-prod.sh` SSH-tunnel pattern (DB backed up first each: `frms-{prod,demo}-backup-pre-platform-seed-*.sql.gz`;
+      vault passwords injected via `sops -d --extract`, never echoed). Verified on BOTH: `tenantbilling@` =
+      tenant_manager/ACTIVE/tier=BILLING/grants=`billing`; `tenanttech@` = tenant_manager/ACTIVE/tier=TECH SUPPORT/
+      grants=`data_overrides,tech_support`. The `/tm` BILLING/TECH logins now authenticate live.
+      - **`superadmin@demo.com` SKIPPED** (owner decision 2026-08-17): the live demo tenant already has its one
+        allowed `tenant_superadmin` (`demo-super@calapan-demo.local`, Rule 34); superadmin@demo.com stays a vault
+        TARGET, revisit later. No code, no live mutation for it.
+      - **Note:** prod/demo run v0.15.0 (no A/landing UX yet), so a BILLING login there still hits the OLD
+        `/tm/tenants` 403-loop until the `/tm` UX branch below ships to those envs. Account seeding (this item)
+        is complete and independent.
