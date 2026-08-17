@@ -53,6 +53,13 @@ import type { TRPCContext } from "../trpc/context";
 export interface ResolvedPlatformActor {
   role: UserRole;
   matrix?: PlatformPermissionMatrix;
+  /**
+   * Display name of the assigned scope='platform' CustomRole, when one is
+   * active (e.g. "BILLING", "TECH SUPPORT"). Absent for the un-matrixed ADMIN
+   * default and for every fail-closed/deny path. Purely for UI labelling —
+   * NEVER an authorization input (permission decisions use `matrix` only).
+   */
+  customRoleName?: string;
 }
 
 /** Minimal ctx shape this module needs — narrower than the full TRPCContext. */
@@ -122,7 +129,7 @@ export async function loadPlatformActorMatrix(
     where: { id: userId, role: "tenant_manager" },
     select: {
       customRoleId: true,
-      customRole: { select: { isActive: true, scope: true } },
+      customRole: { select: { isActive: true, scope: true, name: true } },
     },
   });
 
@@ -174,5 +181,5 @@ export async function loadPlatformActorMatrix(
     };
   }
 
-  return { role, matrix };
+  return { role, matrix, customRoleName: user.customRole.name };
 }

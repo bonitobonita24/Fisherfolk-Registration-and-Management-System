@@ -25,11 +25,13 @@ import { cache } from "react";
 import {
   hasPlatformPermission,
   type PermissionAction,
-  type PlatformActor,
   type PlatformPermissionKey,
 } from "@frms/shared/rbac";
 
-import { loadPlatformActorMatrix } from "./resolve-platform";
+import {
+  loadPlatformActorMatrix,
+  type ResolvedPlatformActor,
+} from "./resolve-platform";
 
 /**
  * Resolve the platform actor for an authenticated session user id.
@@ -39,7 +41,7 @@ import { loadPlatformActorMatrix } from "./resolve-platform";
  * fail-closed for any other role regardless.
  */
 export const resolvePlatformActorForSession = cache(
-  async (userId: string): Promise<PlatformActor> =>
+  async (userId: string): Promise<ResolvedPlatformActor> =>
     loadPlatformActorMatrix("tenant_manager", userId),
 );
 
@@ -54,4 +56,16 @@ export async function sessionHasPlatformPermission(
 ): Promise<boolean> {
   const actor = await resolvePlatformActorForSession(userId);
   return hasPlatformPermission(actor, key, action);
+}
+
+/**
+ * Human-readable label for a platform account's tier, for UI display only
+ * (e.g. the `/tm` header badge) — NEVER an authorization input. A restricted
+ * account shows its assigned platform CustomRole name ("BILLING",
+ * "TECH SUPPORT"); the un-matrixed platform manager (full ceiling) shows
+ * "Admin". Shares the `cache()`d actor, so it adds no DB round trip.
+ */
+export async function resolvePlatformRoleLabel(userId: string): Promise<string> {
+  const actor = await resolvePlatformActorForSession(userId);
+  return actor.customRoleName ?? "Admin";
 }

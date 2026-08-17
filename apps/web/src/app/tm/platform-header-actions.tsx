@@ -7,13 +7,18 @@ import { Button } from "@/components/ui/button";
 
 interface PlatformHeaderActionsProps {
   username: string;
+  /** Platform tier label — "Admin", "BILLING", "TECH SUPPORT", etc. */
+  roleLabel: string;
 }
 
-export function PlatformHeaderActions({ username }: PlatformHeaderActionsProps) {
+export function PlatformHeaderActions({
+  username,
+  roleLabel,
+}: PlatformHeaderActionsProps) {
   return (
     <div className="flex items-center gap-3">
-      <span className="rounded bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
-        super admin
+      <span className="rounded bg-secondary px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-secondary-foreground">
+        {roleLabel}
       </span>
       <span className="hidden text-sm text-muted-foreground sm:inline">
         {username}
