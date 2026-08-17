@@ -53,6 +53,13 @@ import type { TRPCContext } from "../trpc/context";
 export interface ResolvedPlatformActor {
   role: UserRole;
   matrix?: PlatformPermissionMatrix;
+  /**
+   * Display name of the assigned scope='platform' CustomRole, when one is
+   * active (e.g. "BILLING", "TECH SUPPORT"). Absent for the un-matrixed ADMIN
+   * default and for every fail-closed/deny path. Purely for UI labelling —
+   * NEVER an authorization input (permission decisions use `matrix` only).
+   */
+  customRoleName?: string;
 }
 
 /** Minimal ctx shape this module needs — narrower than the full TRPCContext. */
@@ -91,12 +98,38 @@ async function computePlatformActorMatrix(
 ): Promise<ResolvedPlatformActor> {
   const role = ctx.role as UserRole; // "tenant_manager" — checked by the caller.
   const userId = ctx.userId as string;
+  return loadPlatformActorMatrix(role, userId);
+}
+
+/**
+ * The pure `(role, userId)` → resolved-platform-actor loader — the shared
+ * core of both the tRPC resolver above and the server-component resolver
+ * (`./platform-access.ts`). Takes no tRPC ctx and does NOT memoize (the tRPC
+ * caller wraps it with the request-scoped WeakMap; server components dedupe
+ * via React `cache()`), so it can run wherever `platformPrisma` is reachable.
+ *
+ * Same fail-closed SECURITY CONTRACT as documented at the top of this module:
+ * a non-`tenant_manager` role short-circuits to a matrix-less actor (which
+ * `hasPlatformPermission()` denies wholesale), a missing/mismatched/inactive
+ * platform role resolves to an EMPTY matrix (never the ADMIN ceiling), and
+ * only a found user row with a genuinely absent `customRoleId` resolves to
+ * the ADMIN default.
+ */
+export async function loadPlatformActorMatrix(
+  role: UserRole,
+  userId: string,
+): Promise<ResolvedPlatformActor> {
+  if (role !== "tenant_manager") {
+    // Not a platform actor — nothing to resolve; hasPlatformPermission()
+    // denies every key/action for this role regardless of `matrix`.
+    return { role };
+  }
 
   const user = await platformPrisma.user.findFirst({
     where: { id: userId, role: "tenant_manager" },
     select: {
       customRoleId: true,
-      customRole: { select: { isActive: true, scope: true } },
+      customRole: { select: { isActive: true, scope: true, name: true } },
     },
   });
 
@@ -148,5 +181,5 @@ async function computePlatformActorMatrix(
     };
   }
 
-  return { role, matrix };
+  return { role, matrix, customRoleName: user.customRole.name };
 }
