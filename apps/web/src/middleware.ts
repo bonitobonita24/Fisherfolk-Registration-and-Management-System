@@ -209,7 +209,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return passLoginRoute(req);
     }
     if (user.role === "tenant_manager") {
-      return NextResponse.redirect(new URL("/tm/tenants", req.url));
+      return NextResponse.redirect(new URL("/tm", req.url));
     }
     if (user.tenantSlug) {
       return NextResponse.redirect(
@@ -230,7 +230,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return passPublicTenantRoot(req);
     }
     if (user.role === "tenant_manager") {
-      return NextResponse.redirect(new URL("/tm/tenants", req.url));
+      return NextResponse.redirect(new URL("/tm", req.url));
     }
     const landingSlug = user.tenantSlug ?? rootSlug;
     return NextResponse.redirect(
@@ -250,7 +250,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
       return passthrough(req);
     }
     if (user.role === "tenant_manager") {
-      return NextResponse.redirect(new URL("/tm/tenants", req.url));
+      return NextResponse.redirect(new URL("/tm", req.url));
     }
     if (user.tenantSlug) {
       // On a custom-domain host matching the session's tenant, redirect to
@@ -378,7 +378,7 @@ function route(req: NextRequest & { auth: unknown }): NextResponse {
   // home, everyone else to the public landing (safe, never the dropped
   // global /admin).
   if (role === "tenant_manager") {
-    return NextResponse.redirect(new URL("/tm/tenants", req.url));
+    return NextResponse.redirect(new URL("/tm", req.url));
   }
   return NextResponse.redirect(new URL("/", req.url));
 }
