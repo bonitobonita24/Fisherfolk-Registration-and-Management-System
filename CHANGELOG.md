@@ -4,6 +4,20 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.15.1 — 2026-08-17
+
+### [FIXED]
+- show real platform tier in header badge, not hardcoded "super admin" (`7918902`)
+- permission-aware /tm landing for restricted platform roles (`3139296`)
+
+### [DOCS]
+- platform-account seed DONE on prod+demo; track /tm UX branches (`b09b46a`)
+- 2026-08-17 — ship Site Access Standard v0.15.0 to prod+demo + vault edit (`7568597`)
+
+### [CHORE]
+- scoped idempotent platform-accounts seed for reseed-never envs (`4aa3b6e`)
+
+
 ## v0.15.0 — 2026-08-17
 
 ### [FEATURE]
