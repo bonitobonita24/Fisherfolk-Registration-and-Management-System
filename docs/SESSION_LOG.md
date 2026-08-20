@@ -2,6 +2,25 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-20 — Fisherfolk Profile-tab relayout + demo category alignment → shipped v0.16.0 to prod+demo
+
+**In your words:** Resume + push the held docs commit; then a UI relayout batch — (1) move most fisherfolk fields into a new default "Profile" tab, keep only Photo/Signature/QR + ID/RSBSA/Status in the left column, (1.a) make Photo/Signature/QR click-to-zoom, (1.b) make the QR a scannable patrol-app ID; (2) "what is the Map menu?"; then a new task — the official demo's fisherfolk categories were invented, make them match the first real tenant /calapan-city (real taxonomy, random records). Then "that's all good", "push now", "go for it all".
+
+✅ **Done + shipped (v0.16.0, prod + demo + dev all live/fresh, 200)**
+- **Pushed** the held docs commit `072b462` to origin (docs-only, no release).
+- **(1/1.a) Fisherfolk detail relayout.** Left rail trimmed to Photo/Signature/QR + ID Number/RSBSA/Status; everything Last Name→Household moved verbatim into a new **Profile** tab (first + default) in the existing shadcn Tabs; Photo/Signature/QR now click-to-zoom via a `ZoomableImage` reusing shadcn Dialog. One file (`fisherfolk-detail-client.tsx`), typecheck+build green. Branch `feat/fisherfolk-detail-relayout` (`b7b4870`).
+- **(1.b) Patrol QR** — no change needed; owner chose keep-v1. QR already encodes PII-free `{v:1,id,regNo,tenantId}` with a `parseQRPayload` decoder ready for the mobile app.
+- **(2) Map menu** — explained: barangay density map (fisherfolk/vessels/ayuda/violations), points approximated at barangay centers; scout confirmed all toggles live, no dead controls.
+- **Demo category alignment.** Categories are per-tenant `Category` rows (not an enum). Authored idempotent transactional `apps/web/scripts/align-demo-categories.ts` (+ fixed the two demo seed scripts) — replaces the demo's 8 invented categories with calapan-city's 6 official (Boat Owner/Operator, Capture Fishing, Gleaning, Vendor, Fish Processing, Aquaculture), randomly reassigns all 500 demo fisherfolk weighted to **measured** calapan-city proportions (Capture 48% · Boat 28% · Vendor 16% · Gleaning 5% · Aqua 2% · Processing 1%). Branch `fix/demo-category-alignment` (`9b77d27`). **Applied live to frms-demo** (backup taken; slug confirmed `demo`; 7 invented deleted, Aquaculture kept; 500 rows reassigned; reseed-never respected).
+- **Released v0.16.0.** Merged both branches `--no-ff`→main, typecheck clean, `gen-release-notes --apply` (version synced across 7 package.json + landing footer), tag `v0.16.0`, pushed `--follow-tags` (`main==origin`). CI built `sha-03f2c4d`.
+- **Promoted to demo + prod** (push-to-demo/prod, exact `sha-03f2c4d`, DB backups each, no pending migrations, health 200 both). **Dev rebuilt** off main → FRESH (Rule 39). Relayout now live for real users on frms.powerbyte.app.
+
+💬 **Decisions / notes**
+- QR: keep v1 payload (owner). Category reassignment: random-across-6 + mirror calapan-city proportions (owner).
+- Demo *data* fix + code relayout both live now. Prisma flagged 6→7 major update available (informational, not acted on).
+- **Cross-scope note:** alignment rewrote `fisherfolk.categoryIds` on the demo tenant (consumed by demo dashboard/Map/charts — data-driven, self-heal). Backup: `/root/frms-demo-backup-pre-categoryalign-20260820-055127.sql.gz`.
+- Still open (cross-seat, not FRMS): AIEF `feat/v32.50-site-access-standard` merge (own seat) · Phase 2 per-app adoption.
+
 ## 2026-08-17 — /tm platform-role UX fixes + platform-account seed → shipped v0.15.1 to prod+demo
 
 **In your words:** Resume; then "do the UX fix" for restricted platform roles; then "do A and B but plan first" (A = accurate role badge, B = seed platform accounts on prod/demo); then "yes merge & ship."
