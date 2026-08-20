@@ -47,7 +47,11 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
-import { DetailField, FieldRail } from "@/components/shared/detail-field";
+import {
+  DefinitionGrid,
+  DetailField,
+  FieldRail,
+} from "@/components/shared/detail-field";
 import { GEAR_TYPE_LABELS } from "@frms/shared/constants";
 
 interface Props {
@@ -425,96 +429,111 @@ export function FisherfolkDetailClient({ id }: Props) {
                 <CardHeader className="px-6 pb-4 pt-0">
                   <CardTitle className="text-sm font-medium">Profile</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 px-6 py-0">
-                  <DetailField label="Last Name" value={record.lastName} />
-                  <DetailField label="First Name" value={record.firstName} />
-                  <DetailField label="Middle Name" value={record.middleName} />
-                  <DetailField label="Suffix" value={record.suffix} />
-                  <DetailField
-                    label="Date of Birth"
-                    value={formatDate(record.dateOfBirth)}
-                  />
-                  <DetailField label="Sex" value={record.sex} />
-                  <DetailField label="Civil Status" value={record.civilStatus} />
-                  <DetailField label="Contact Number" value={record.contactNumber} />
+                <CardContent className="space-y-5 px-6 py-0">
+                  <DefinitionGrid columns={4}>
+                    <DetailField label="Last Name" value={record.lastName} />
+                    <DetailField label="First Name" value={record.firstName} />
+                    <DetailField label="Middle Name" value={record.middleName} />
+                    <DetailField label="Suffix" value={record.suffix} />
+                  </DefinitionGrid>
 
                   <Separator />
 
-                  <DetailField label="Barangay" value={record.barangay} />
-                  <DetailField
-                    label="Date Joined"
-                    value={formatDate(record.dateJoined)}
-                  />
-                  <DetailField
-                    label="Registration Year"
-                    value={record.registrationYear}
-                  />
-                  <DetailField
-                    label="Renewal Status"
-                    value={
-                      <span className="inline-flex items-center gap-1.5">
-                        <StatusBadge
-                          status={isRenewed ? "RENEWED" : "NEW"}
-                          color={isRenewed ? "orange" : "green"}
-                          icon={isRenewed ? RefreshCw : Sparkles}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {isRenewed
-                            ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
-                            : "New registration"}
-                        </span>
-                      </span>
-                    }
-                  />
-                  <DetailField label="Remarks" value={record.remarks} />
+                  <DefinitionGrid columns={4}>
+                    <DetailField
+                      label="Date of Birth"
+                      value={formatDate(record.dateOfBirth)}
+                    />
+                    <DetailField label="Sex" value={record.sex} />
+                    <DetailField label="Barangay" value={record.barangay} />
+                    <DetailField
+                      label="Contact Number"
+                      value={record.contactNumber}
+                    />
+                  </DefinitionGrid>
 
                   <Separator />
 
-                  <DetailField
-                    label="Household"
-                    value={
-                      record.household ? (
-                        <Link
-                          href={`/${params.tenant}/households/${record.household.id}`}
-                          className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                          {record.household.householdNumber}
-                          <Badge variant="secondary">
-                            {record.household.headId === record.id
-                              ? "Head"
-                              : "Member"}
-                          </Badge>
-                        </Link>
-                      ) : (
-                        "No household"
-                      )
-                    }
-                  />
-
-                  <DetailField
-                    label="ID Release Status"
-                    value={
-                      isAlreadyReleased ? (
-                        <span className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            className="h-4 w-4 shrink-0 text-green-600"
-                            aria-hidden="true"
+                  <DefinitionGrid columns={3}>
+                    <DetailField label="Civil Status" value={record.civilStatus} />
+                    <DetailField
+                      label="Date Joined"
+                      value={formatDate(record.dateJoined)}
+                    />
+                    <DetailField
+                      label="Registration Year"
+                      value={record.registrationYear}
+                    />
+                    <DetailField
+                      label="Renewal Status"
+                      value={
+                        <span className="inline-flex items-center gap-1.5">
+                          <StatusBadge
+                            status={isRenewed ? "RENEWED" : "NEW"}
+                            color={isRenewed ? "orange" : "green"}
+                            icon={isRenewed ? RefreshCw : Sparkles}
                           />
-                          <span>
-                            Released {formatDate(record.idReleasedAt)}
-                            {record.idReleasedBy
-                              ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
-                              : ""}
+                          <span className="text-xs text-muted-foreground">
+                            {isRenewed
+                              ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
+                              : "New registration"}
                           </span>
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-2 text-muted-foreground">
-                          <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
-                          Not yet released
-                        </span>
-                      )
-                    }
-                  />
+                      }
+                    />
+                    <DetailField
+                      label="Household"
+                      value={
+                        record.household ? (
+                          <Link
+                            href={`/${params.tenant}/households/${record.household.id}`}
+                            className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {record.household.householdNumber}
+                            <Badge variant="secondary">
+                              {record.household.headId === record.id
+                                ? "Head"
+                                : "Member"}
+                            </Badge>
+                          </Link>
+                        ) : (
+                          "No household"
+                        )
+                      }
+                    />
+                    <DetailField
+                      label="ID Release Status"
+                      value={
+                        isAlreadyReleased ? (
+                          <span className="inline-flex items-center gap-2">
+                            <CheckCircle
+                              className="h-4 w-4 shrink-0 text-green-600"
+                              aria-hidden="true"
+                            />
+                            <span>
+                              Released {formatDate(record.idReleasedAt)}
+                              {record.idReleasedBy
+                                ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
+                                : ""}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 text-muted-foreground">
+                            <Clock
+                              className="h-4 w-4 shrink-0"
+                              aria-hidden="true"
+                            />
+                            Not yet released
+                          </span>
+                        )
+                      }
+                    />
+                    <DetailField
+                      label="Remarks"
+                      value={record.remarks}
+                      className="sm:col-span-2 lg:col-span-3"
+                    />
+                  </DefinitionGrid>
                 </CardContent>
               </Card>
             </TabsContent>
