@@ -17,7 +17,12 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
 
 ## 🔴 Open
 
-_(none FRMS-seat right now — all this-session asks shipped; see Done)_
+- 🔴 **Profile tab — horizontal grouped layout (fix the empty right-half).** The Profile tab currently stacks every field vertically in one narrow column, leaving most of the panel width empty (see 2026-08-21 screenshot). Re-lay it out horizontally, grouped by related data:
+  - **Row 1 (name group):** Last Name · First Name · Middle Name · **Suffix** (suffix at the end).
+  - **Row 2 (core identity/contact):** Date of Birth · Sex · Address (Barangay) · Contact Number.
+  - **Row 3 (other / less-important details):** the remaining fields (Civil Status, Date Joined, Registration Year, Renewal Status, Remarks, Household, ID Release Status).
+  - **[HOW] hint:** the existing `DefinitionGrid columns={2|3}` primitive in `apps/web/src/components/shared/detail-field.tsx` already does responsive multi-column — use it instead of the vertical `FieldRail` stacking. File: `apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx` (Profile TabsContent). Responsive: collapse to fewer columns on narrow screens.
+  - **General principle (owner-set 2026-08-21):** before stacking fields vertically, ASSESS the space — if vertical layout leaves too much empty space / gaps, arrange horizontally and group by related data. Applies to any detail/profile layout, not just this one.
 
 ### ↗️ Cross-seat (tracked here, executed from another folder — mirror of PENDING_DECISIONS.md)
 - 🔴 **AIEF framework standard merge** — merge `feat/v32.50-site-access-standard` → main + push, from the **Powerbyte-AIEF** seat (not this folder). FRMS is the shipped reference implementation.
