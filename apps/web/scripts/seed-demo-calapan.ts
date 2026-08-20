@@ -461,15 +461,16 @@ async function main(): Promise<void> {
   // Same defs/slugs as seed-demo-calapan-extras.ts CATEGORY_DEFS: its later
   // upsert (update:{}) is a no-op against these rows, so both scripts stay
   // idempotent regardless of run order.
+  // OFFICIAL calapan-city taxonomy — VERBATIM name/slug/displayColor/iconEmoji/
+  // displayOrder from packages/db/prisma/seed.ts `defaultCategories` (uniform
+  // color/emoji, like the real tenant). Index === displayOrder-1.
   const CATEGORY_DEFS: Array<{ name: string; emoji: string; color: string }> = [
-    { name: "Municipal Fisherfolk", emoji: "🎣", color: "#2563eb" },
-    { name: "Commercial", emoji: "🚢", color: "#0891b2" },
-    { name: "Fish Vendor", emoji: "🐟", color: "#059669" },
-    { name: "Aquaculture", emoji: "🦐", color: "#7c3aed" },
-    { name: "Gleaner", emoji: "🐚", color: "#d97706" },
-    { name: "Fish Processor", emoji: "🏭", color: "#dc2626" },
-    { name: "Bantay Dagat Volunteer", emoji: "🛟", color: "#0284c7" },
-    { name: "Senior Fisherfolk", emoji: "👴", color: "#65a30d" },
+    { name: "Boat Owner/Operator", emoji: "🐟", color: "#4F8EF7" },
+    { name: "Capture Fishing", emoji: "🐟", color: "#4F8EF7" },
+    { name: "Gleaning", emoji: "🐟", color: "#4F8EF7" },
+    { name: "Vendor", emoji: "🐟", color: "#4F8EF7" },
+    { name: "Fish Processing", emoji: "🐟", color: "#4F8EF7" },
+    { name: "Aquaculture", emoji: "🐟", color: "#4F8EF7" },
   ];
   const slugifyCategory = (name: string): string =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -496,10 +497,11 @@ async function main(): Promise<void> {
   }
   console.log(`  ✅ Categories ready: ${categoryIdList.length} (assignable to fisherfolk).`);
 
-  // Weighted category pick: Municipal Fisherfolk dominates (realistic for a
-  // coastal LGU), long tail across the rest; ~35% carry a second category.
-  // Index-aligned with CATEGORY_DEFS above.
-  const CATEGORY_WEIGHTS = [40, 8, 12, 6, 8, 6, 5, 10];
+  // Weighted category pick MIRRORS the real calapan-city proportions (measured
+  // read-only 2026-08-20: Boat Owner/Operator 27.9% · Capture Fishing 48.9% ·
+  // Gleaning 5.4% · Vendor 15.5% · Fish Processing 0.8% · Aquaculture 1.6%);
+  // ~35% carry a second category. Index-aligned with CATEGORY_DEFS above.
+  const CATEGORY_WEIGHTS = [28, 48, 5, 16, 1, 2];
   const totalCategoryWeight = CATEGORY_WEIGHTS.reduce((a, b) => a + b, 0);
   function pickWeightedCategoryIndex(): number {
     let roll = rng() * totalCategoryWeight;

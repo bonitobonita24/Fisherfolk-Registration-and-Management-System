@@ -166,15 +166,18 @@ const NOTIFICATION_MESSAGES: Array<{
   { type: "SUCCESS", title: "ID batch printed", message: "An ID print batch completed successfully.", entityType: "IdBatch" },
 ];
 
+// OFFICIAL calapan-city taxonomy — VERBATIM name/slug/displayColor/iconEmoji/
+// displayOrder from packages/db/prisma/seed.ts `defaultCategories`. Must stay in
+// lockstep with seed-demo-calapan.ts CATEGORY_DEFS: this later upsert (update:{})
+// is a no-op against rows that script already created, so both stay idempotent
+// regardless of run order.
 const CATEGORY_DEFS: Array<{ name: string; emoji: string; color: string }> = [
-  { name: "Municipal Fisherfolk", emoji: "🎣", color: "#2563eb" },
-  { name: "Commercial", emoji: "🚢", color: "#0891b2" },
-  { name: "Fish Vendor", emoji: "🐟", color: "#059669" },
-  { name: "Aquaculture", emoji: "🦐", color: "#7c3aed" },
-  { name: "Gleaner", emoji: "🐚", color: "#d97706" },
-  { name: "Fish Processor", emoji: "🏭", color: "#dc2626" },
-  { name: "Bantay Dagat Volunteer", emoji: "🛟", color: "#0284c7" },
-  { name: "Senior Fisherfolk", emoji: "👴", color: "#65a30d" },
+  { name: "Boat Owner/Operator", emoji: "🐟", color: "#4F8EF7" },
+  { name: "Capture Fishing", emoji: "🐟", color: "#4F8EF7" },
+  { name: "Gleaning", emoji: "🐟", color: "#4F8EF7" },
+  { name: "Vendor", emoji: "🐟", color: "#4F8EF7" },
+  { name: "Fish Processing", emoji: "🐟", color: "#4F8EF7" },
+  { name: "Aquaculture", emoji: "🐟", color: "#4F8EF7" },
 ];
 
 const AUDIT_ACTIONS = [
