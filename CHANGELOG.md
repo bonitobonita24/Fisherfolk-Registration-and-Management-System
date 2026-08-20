@@ -4,6 +4,18 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.16.0 — 2026-08-20
+
+### [FEATURE]
+- move profile fields to a default Profile tab + click-to-zoom media (`b7b4870`)
+
+### [FIXED]
+- align demo tenant categories to official calapan-city taxonomy (`9b77d27`)
+
+### [DOCS]
+- /tm platform-role UX fixes + platform seed shipped as v0.15.1 (`072b462`)
+
+
 ## v0.15.1 — 2026-08-17
 
 ### [FIXED]
