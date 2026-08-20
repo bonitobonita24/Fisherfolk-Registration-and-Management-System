@@ -24,6 +24,12 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
   - **[HOW] hint:** the existing `DefinitionGrid columns={2|3}` primitive in `apps/web/src/components/shared/detail-field.tsx` already does responsive multi-column — use it instead of the vertical `FieldRail` stacking. File: `apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx` (Profile TabsContent). Responsive: collapse to fewer columns on narrow screens.
   - **General principle (owner-set 2026-08-21):** before stacking fields vertically, ASSESS the space — if vertical layout leaves too much empty space / gaps, arrange horizontally and group by related data. Applies to any detail/profile layout, not just this one.
 
+- 🔴 **🏗️ BIG — Full UX/UI redesign adopting the Cargorix template (like Marine-Guardian).** Redesign the ENTIRE app's UX/UI using `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip` (shadcn + Next.js Cargorix template), the same adoption MG did (ref MG memory `project_cargorix_theme_3pane_0819`).
+  - **Step 1 (MANDATORY FIRST): analyze the whole template** — unzip + study its structure, app-shell, theme tokens, component set, layout archetypes — and produce an **adoption plan** for how to FULLY adopt it onto our CURRENT design layout (INHERIT-not-REPLACE: keep our tRPC/Prisma/Auth.js/data layer; adopt the UI shell/theme/components).
+  - **Retain our current ACCENT color** — orange / tangerine — through the reskin (map it into the template's theme tokens; don't inherit the template's accent).
+  - **This is a MAJOR multi-phase task** → **summon Architect-agent orchestration to plan + brainstorm FIRST** (PM → Architect(s) → scoped worker waves), per plan-first-dispatch. Do NOT dive into edits inline. Produce a written adoption plan for owner review before any build.
+  - Owner-set 2026-08-21. HARD HOLD — plan first, build in waves, nothing ships without owner word.
+
 ### ↗️ Cross-seat (tracked here, executed from another folder — mirror of PENDING_DECISIONS.md)
 - 🔴 **AIEF framework standard merge** — merge `feat/v32.50-site-access-standard` → main + push, from the **Powerbyte-AIEF** seat (not this folder). FRMS is the shipped reference implementation.
 - 🔴 **Phase 2 — per-app adoption** of the Site Access & Tenancy Standard in **Marine-Guardian / Orqafy / FerryBook**, each from its own seat.
