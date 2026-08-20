@@ -2,6 +2,27 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-21 — Profile-tab horizontal layout + fleet design principle; Cargorix redesign queued
+
+**In your words:** Work the queued todos first-come-first-served; Profile fields shouldn't stack vertically with an empty right half — arrange horizontally grouped (Last/First/Middle/Suffix; DOB/Sex/Address/Contact; then other details). Approved it as "absolutely perfect" → make it a design principle (horizontal+grouped on PC/tablet, vertical only on mobile). Also queued a BIG task: full UX/UI redesign adopting the Cargorix template. Then: save session, no reboot — resting the PC.
+
+✅ **Done + verified**
+- **Profile-tab horizontal grouped layout** — regrouped the Profile tab into 3 responsive `DefinitionGrid` bands (Name / identity+contact / other-details); composed values (Renewal Status badge, Household link, ID Release) intact. `feat/profile-tab-horizontal-layout` (`979ffa0`) → **merged to main** (`d11be8d`). typecheck+build green; dev rebuilt off branch, owner eyeballed live at :44387 → "absolutely perfect."
+- **Promoted to a FLEET DESIGN PRINCIPLE** — `~/.claude/library/design-defaults.md` **Entry 6**: related fields = responsive horizontal grouped grid; PC 3–4 col · tablet 2–3 col · mobile-only vertical stack; use the grid primitive, read-views not forms. Now auto-applies every seat. FRMS memory `feedback_horizontal_grouped_layout_over_vertical_gaps` upgraded to match.
+- **Pushed** earlier held docs commits (session log + todo queue) to origin during the session.
+
+📋 **Interim todo queue live** — `docs/OWNER_TODO_QUEUE.md` (until Squirlnote launches; read-first, append every ask). Squirlnote project also mirrored (tasks + accomplishments).
+
+🔨 **Queued (next), NOT started**
+- **🏗️ BIG — Full UX/UI redesign adopting the Cargorix template** (`_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip`, like MG's Cargorix adoption). Step 1 = analyze the whole template + produce an adoption plan onto our current layout (INHERIT-not-REPLACE data layer); retain the orange/tangerine accent. MAJOR → summon Architect orchestration to plan+brainstorm FIRST. HARD HOLD.
+
+⏳ **Awaiting owner word (on return)**
+- **Deploy the Profile-tab layout to prod/demo** — it's on dev + main only; not yet live for real users. A promotion cuts ~v0.17.0. HARD HOLD.
+- **Push main** — currently 4 commits ahead of origin (Profile-tab merge + docs), HELD.
+- **Kick off the Cargorix redesign** architect planning.
+
+💬 **Notes** — cross-seat items still open (AIEF v32.50 merge · Phase 2 per-app). Prisma 6→7 upgrade available (informational).
+
 ## 2026-08-20 — Fisherfolk Profile-tab relayout + demo category alignment → shipped v0.16.0 to prod+demo
 
 **In your words:** Resume + push the held docs commit; then a UI relayout batch — (1) move most fisherfolk fields into a new default "Profile" tab, keep only Photo/Signature/QR + ID/RSBSA/Status in the left column, (1.a) make Photo/Signature/QR click-to-zoom, (1.b) make the QR a scannable patrol-app ID; (2) "what is the Map menu?"; then a new task — the official demo's fisherfolk categories were invented, make them match the first real tenant /calapan-city (real taxonomy, random records). Then "that's all good", "push now", "go for it all".
