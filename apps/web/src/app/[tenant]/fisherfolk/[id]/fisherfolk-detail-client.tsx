@@ -18,6 +18,7 @@ import {
   RefreshCw,
   Ship,
   Sparkles,
+  UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -60,6 +62,45 @@ function formatDate(value: Date | string | null | undefined): string {
     month: "long",
     day: "numeric",
   });
+}
+
+/** Thumbnail that opens an enlarged view in a Dialog when clicked. */
+function ZoomableImage({
+  src,
+  alt,
+  thumbnailClassName,
+  enlargedClassName,
+  ariaLabel,
+}: {
+  src: string;
+  alt: string;
+  thumbnailClassName: string;
+  enlargedClassName?: string;
+  ariaLabel: string;
+}) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          aria-label={ariaLabel}
+          className="block w-full cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <img src={src} alt={alt} className={thumbnailClassName} />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="flex max-h-[85vh] w-fit max-w-[90vw] items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-[90vw]">
+        <img
+          src={src}
+          alt={alt}
+          className={
+            enlargedClassName ??
+            "max-h-[85vh] max-w-full rounded-lg object-contain"
+          }
+        />
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function FisherfolkDetailClient({ id }: Props) {
@@ -269,10 +310,11 @@ export function FisherfolkDetailClient({ id }: Props) {
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">Photo</p>
               {record.photo && photoUrlResp?.url ? (
-                <img
+                <ZoomableImage
                   src={photoUrlResp.url}
                   alt={`Portrait of ${record.fullName}`}
-                  className="aspect-square w-full rounded-lg border bg-muted object-cover"
+                  thumbnailClassName="aspect-square w-full rounded-lg border bg-muted object-cover"
+                  ariaLabel="Enlarge photo"
                 />
               ) : (
                 <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
@@ -285,10 +327,12 @@ export function FisherfolkDetailClient({ id }: Props) {
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">Signature</p>
               {record.signature && signatureUrlResp?.url ? (
-                <img
+                <ZoomableImage
                   src={signatureUrlResp.url}
                   alt={`${record.fullName} signature`}
-                  className="aspect-square w-full rounded-lg border bg-white object-contain"
+                  thumbnailClassName="aspect-square w-full rounded-lg border bg-white object-contain"
+                  enlargedClassName="max-h-[85vh] max-w-full rounded-lg bg-white object-contain p-4"
+                  ariaLabel="Enlarge signature"
                 />
               ) : (
                 <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border bg-muted">
@@ -301,10 +345,12 @@ export function FisherfolkDetailClient({ id }: Props) {
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">QR Code</p>
               {qrDataUrl ? (
-                <img
+                <ZoomableImage
                   src={qrDataUrl}
                   alt={`${record.idNumber} QR code`}
-                  className="aspect-square w-full rounded-lg border bg-white p-1"
+                  thumbnailClassName="aspect-square w-full rounded-lg border bg-white p-1"
+                  enlargedClassName="max-h-[85vh] max-w-full rounded-lg bg-white object-contain p-6"
+                  ariaLabel="Enlarge QR code"
                 />
               ) : (
                 <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
@@ -319,90 +365,16 @@ export function FisherfolkDetailClient({ id }: Props) {
           <DetailField label="ID Number" value={record.idNumber} />
           <DetailField label="RSBSA Number" value={record.rsbsaNumber} />
           <DetailField label="Status" value={record.status} />
-          <DetailField label="Last Name" value={record.lastName} />
-          <DetailField label="First Name" value={record.firstName} />
-          <DetailField label="Middle Name" value={record.middleName} />
-          <DetailField label="Suffix" value={record.suffix} />
-          <DetailField label="Date of Birth" value={formatDate(record.dateOfBirth)} />
-          <DetailField label="Sex" value={record.sex} />
-          <DetailField label="Civil Status" value={record.civilStatus} />
-          <DetailField label="Contact Number" value={record.contactNumber} />
-
-          <Separator />
-
-          <DetailField label="Barangay" value={record.barangay} />
-          <DetailField label="Date Joined" value={formatDate(record.dateJoined)} />
-          <DetailField label="Registration Year" value={record.registrationYear} />
-          <DetailField
-            label="Renewal Status"
-            value={
-              <span className="inline-flex items-center gap-1.5">
-                <StatusBadge
-                  status={isRenewed ? "RENEWED" : "NEW"}
-                  color={isRenewed ? "orange" : "green"}
-                  icon={isRenewed ? RefreshCw : Sparkles}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {isRenewed
-                    ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
-                    : "New registration"}
-                </span>
-              </span>
-            }
-          />
-          <DetailField label="Remarks" value={record.remarks} />
-
-          <Separator />
-
-          <DetailField
-            label="Household"
-            value={
-              record.household ? (
-                <Link
-                  href={`/${params.tenant}/households/${record.household.id}`}
-                  className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  {record.household.householdNumber}
-                  <Badge variant="secondary">
-                    {record.household.headId === record.id ? "Head" : "Member"}
-                  </Badge>
-                </Link>
-              ) : (
-                "No household"
-              )
-            }
-          />
-
-          <DetailField
-            label="ID Release Status"
-            value={
-              isAlreadyReleased ? (
-                <span className="inline-flex items-center gap-2">
-                  <CheckCircle
-                    className="h-4 w-4 shrink-0 text-green-600"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    Released {formatDate(record.idReleasedAt)}
-                    {record.idReleasedBy
-                      ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
-                      : ""}
-                  </span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  Not yet released
-                </span>
-              )
-            }
-          />
         </FieldRail>
 
         {/* RIGHT — tabbed related-record sections */}
         <div className="min-w-0">
-          <Tabs defaultValue="vessels">
+          <Tabs defaultValue="profile">
             <TabsList className="h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
+              <TabsTrigger value="profile" className="shrink-0 gap-1.5">
+                <UserRound className="size-3.5" aria-hidden="true" />
+                Profile
+              </TabsTrigger>
               <TabsTrigger value="vessels" className="shrink-0 gap-1.5">
                 <Ship className="size-3.5" aria-hidden="true" />
                 Vessels
@@ -447,6 +419,105 @@ export function FisherfolkDetailClient({ id }: Props) {
                 ToDos
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="profile" className="min-w-0 pt-4">
+              <Card className="gap-0 py-5">
+                <CardHeader className="px-6 pb-4 pt-0">
+                  <CardTitle className="text-sm font-medium">Profile</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 px-6 py-0">
+                  <DetailField label="Last Name" value={record.lastName} />
+                  <DetailField label="First Name" value={record.firstName} />
+                  <DetailField label="Middle Name" value={record.middleName} />
+                  <DetailField label="Suffix" value={record.suffix} />
+                  <DetailField
+                    label="Date of Birth"
+                    value={formatDate(record.dateOfBirth)}
+                  />
+                  <DetailField label="Sex" value={record.sex} />
+                  <DetailField label="Civil Status" value={record.civilStatus} />
+                  <DetailField label="Contact Number" value={record.contactNumber} />
+
+                  <Separator />
+
+                  <DetailField label="Barangay" value={record.barangay} />
+                  <DetailField
+                    label="Date Joined"
+                    value={formatDate(record.dateJoined)}
+                  />
+                  <DetailField
+                    label="Registration Year"
+                    value={record.registrationYear}
+                  />
+                  <DetailField
+                    label="Renewal Status"
+                    value={
+                      <span className="inline-flex items-center gap-1.5">
+                        <StatusBadge
+                          status={isRenewed ? "RENEWED" : "NEW"}
+                          color={isRenewed ? "orange" : "green"}
+                          icon={isRenewed ? RefreshCw : Sparkles}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {isRenewed
+                            ? `Last renewed ${formatDate(latestRenewal?.renewedAt)}`
+                            : "New registration"}
+                        </span>
+                      </span>
+                    }
+                  />
+                  <DetailField label="Remarks" value={record.remarks} />
+
+                  <Separator />
+
+                  <DetailField
+                    label="Household"
+                    value={
+                      record.household ? (
+                        <Link
+                          href={`/${params.tenant}/households/${record.household.id}`}
+                          className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          {record.household.householdNumber}
+                          <Badge variant="secondary">
+                            {record.household.headId === record.id
+                              ? "Head"
+                              : "Member"}
+                          </Badge>
+                        </Link>
+                      ) : (
+                        "No household"
+                      )
+                    }
+                  />
+
+                  <DetailField
+                    label="ID Release Status"
+                    value={
+                      isAlreadyReleased ? (
+                        <span className="inline-flex items-center gap-2">
+                          <CheckCircle
+                            className="h-4 w-4 shrink-0 text-green-600"
+                            aria-hidden="true"
+                          />
+                          <span>
+                            Released {formatDate(record.idReleasedAt)}
+                            {record.idReleasedBy
+                              ? ` by ${record.idReleasedBy.name ?? record.idReleasedBy.email}`
+                              : ""}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 text-muted-foreground">
+                          <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
+                          Not yet released
+                        </span>
+                      )
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="vessels" className="min-w-0 pt-4">
               <Card className="gap-0 py-5">
