@@ -17,13 +17,6 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
 
 ## 🔴 Open
 
-- 🔴 **Profile tab — horizontal grouped layout (fix the empty right-half).** The Profile tab currently stacks every field vertically in one narrow column, leaving most of the panel width empty (see 2026-08-21 screenshot). Re-lay it out horizontally, grouped by related data:
-  - **Row 1 (name group):** Last Name · First Name · Middle Name · **Suffix** (suffix at the end).
-  - **Row 2 (core identity/contact):** Date of Birth · Sex · Address (Barangay) · Contact Number.
-  - **Row 3 (other / less-important details):** the remaining fields (Civil Status, Date Joined, Registration Year, Renewal Status, Remarks, Household, ID Release Status).
-  - **[HOW] hint:** the existing `DefinitionGrid columns={2|3}` primitive in `apps/web/src/components/shared/detail-field.tsx` already does responsive multi-column — use it instead of the vertical `FieldRail` stacking. File: `apps/web/src/app/[tenant]/fisherfolk/[id]/fisherfolk-detail-client.tsx` (Profile TabsContent). Responsive: collapse to fewer columns on narrow screens.
-  - **General principle (owner-set 2026-08-21):** before stacking fields vertically, ASSESS the space — if vertical layout leaves too much empty space / gaps, arrange horizontally and group by related data. Applies to any detail/profile layout, not just this one.
-
 - 🔴 **🏗️ BIG — Full UX/UI redesign adopting the Cargorix template (like Marine-Guardian).** Redesign the ENTIRE app's UX/UI using `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip` (shadcn + Next.js Cargorix template), the same adoption MG did (ref MG memory `project_cargorix_theme_3pane_0819`).
   - **Step 1 (MANDATORY FIRST): analyze the whole template** — unzip + study its structure, app-shell, theme tokens, component set, layout archetypes — and produce an **adoption plan** for how to FULLY adopt it onto our CURRENT design layout (INHERIT-not-REPLACE: keep our tRPC/Prisma/Auth.js/data layer; adopt the UI shell/theme/components).
   - **Retain our current ACCENT color** — orange / tangerine — through the reskin (map it into the template's theme tokens; don't inherit the template's accent).
@@ -40,6 +33,9 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
 - Prisma 6→7 major upgrade available (informational; flagged during v0.16.0 migrate — not acted on).
 
 ---
+
+## ✅ Recently done (trace)
+- **2026-08-21 — Profile tab horizontal grouped layout** (`feat/profile-tab-horizontal-layout` → merged main). Name / identity+contact / other-details bands via responsive `DefinitionGrid`. Owner: "absolutely perfect." **Promoted this into a FLEET design principle** → `~/.claude/library/design-defaults.md` **Entry 6** (horizontal grouped grid on PC/tablet, vertical only on mobile). NOT yet deployed to prod/demo (awaiting owner word).
 
 ## ✅ Recently done (trace — 2026-08-20, shipped v0.16.0)
 - **Fisherfolk detail relayout** — left rail = Photo/Signature/QR + ID/RSBSA/Status; all other fields → new default **Profile** tab; Photo/Signature/QR **click-to-zoom**. (`b7b4870`) — live prod+demo.
