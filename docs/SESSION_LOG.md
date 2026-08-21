@@ -2,6 +2,19 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-21 (cont.) — Profile-tab layout SHIPPED to prod + demo as v0.17.0
+
+**In your words:** Push main; then promote to prod/demo once CI is green; Cargorix planning goes to the next-session handoff.
+
+✅ **Done + verified**
+- **Pushed `main` → origin + released v0.17.0** — consolidated changelog (1 `feat` Profile-tab layout + docs), version-synced across 7 packages + landing footer, annotated tag. `main == origin/main` (`4e99d62`), tree clean. Model-A CI already green for `sha-4e99d62`.
+- **Promoted v0.17.0 to PROD + DEMO** — `push-to-prod.sh` + `push-to-demo.sh` (`sha-4e99d62`): DB backed up each, migrations no-op (19 applied, 0 pending), reseed-never. Both healthy — `/api/health` 200 (after ~15–25s boot; transient 404 during recreate is the known boot-delay pattern), `/` 200, `/login` 200, `/demo` 308 (trailing-slash redirect, normal). **Real users on frms.powerbyte.app now see the horizontal grouped Profile tab.**
+
+🔨 **Queued for NEXT session (owner directive: "next session handoff")**
+- **🏗️ BIG — Cargorix full UX/UI redesign.** Architect-first: analyze `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip`, produce an adoption plan (INHERIT-not-REPLACE data layer, retain orange/tangerine accent) before any build. HARD HOLD.
+
+---
+
 ## 2026-08-21 — Profile-tab horizontal layout + fleet design principle; Cargorix redesign queued
 
 **In your words:** Work the queued todos first-come-first-served; Profile fields shouldn't stack vertically with an empty right half — arrange horizontally grouped (Last/First/Middle/Suffix; DOB/Sex/Address/Contact; then other details). Approved it as "absolutely perfect" → make it a design principle (horizontal+grouped on PC/tablet, vertical only on mobile). Also queued a BIG task: full UX/UI redesign adopting the Cargorix template. Then: save session, no reboot — resting the PC.

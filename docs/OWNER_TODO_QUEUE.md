@@ -35,7 +35,7 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
 ---
 
 ## ✅ Recently done (trace)
-- **2026-08-21 — Profile tab horizontal grouped layout** (`feat/profile-tab-horizontal-layout` → merged main). Name / identity+contact / other-details bands via responsive `DefinitionGrid`. Owner: "absolutely perfect." **Promoted this into a FLEET design principle** → `~/.claude/library/design-defaults.md` **Entry 6** (horizontal grouped grid on PC/tablet, vertical only on mobile). NOT yet deployed to prod/demo (awaiting owner word).
+- **2026-08-21 — Profile tab horizontal grouped layout SHIPPED to prod + demo as v0.17.0** (`feat/profile-tab-horizontal-layout` → merged main). Name / identity+contact / other-details bands via responsive `DefinitionGrid`. Owner: "absolutely perfect." **Promoted this into a FLEET design principle** → `~/.claude/library/design-defaults.md` **Entry 6** (horizontal grouped grid on PC/tablet, vertical only on mobile). **Released v0.17.0** (`4e99d62`, tag pushed, `main==origin`); CI built `sha-4e99d62`; **promoted prod + demo** (backups taken, no pending migrations, reseed-never) — both healthy (`/api/health` 200 after boot; `/`, `/login`, `/demo` all up). Real users now see the new layout.
 
 ## ✅ Recently done (trace — 2026-08-20, shipped v0.16.0)
 - **Fisherfolk detail relayout** — left rail = Photo/Signature/QR + ID/RSBSA/Status; all other fields → new default **Profile** tab; Photo/Signature/QR **click-to-zoom**. (`b7b4870`) — live prod+demo.

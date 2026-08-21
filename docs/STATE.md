@@ -1,8 +1,22 @@
 # FRMS — Project State
 
-## Current State (2026-08-17, latest) — 🚀 Site Access & Tenancy Standard SHIPPED to prod + demo as v0.15.0 + vault edited
+## Current State (2026-08-21, latest) — 🚀 Profile-tab horizontal layout SHIPPED to prod + demo as v0.17.0; Cargorix redesign queued NEXT
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner authorized: push main → released **v0.17.0**, then promoted prod + demo once CI was green. Cargorix UX/UI redesign deferred to the **next-session handoff** (owner's directive). Model authority memory: `project_v0170_shipped_cargorix_next_0821.md`.
+
+### ✅ DONE THIS SESSION (2026-08-21, all executed + verified)
+- **Pushed main + released v0.17.0.** `gen-release-notes --apply --version 0.17.0`: consolidated CHANGELOG (1 `feat` = horizontal grouped Profile-tab layout + 6 docs), version-sync across 7 packages + landing footer, annotated tag; `git push --follow-tags` → **`origin/main == 4e99d62`**, tree clean. Model-A CI already green for `sha-4e99d62`.
+- **Promoted PROD + DEMO to `sha-4e99d62` / v0.17.0.** `push-to-prod.sh` + `push-to-demo.sh`: DB backed up each, **migrations no-op** (19 applied, 0 pending — UI+docs only), reseed-never. Both healthy: `/api/health` 200 (after ~15–25s boot; the transient 404 right after recreate is the known boot-delay pattern), `/` 200, `/login` 200, `/demo` 308 (trailing-slash redirect, cosmetic). **Real users now see the new Profile layout.**
+- **Dev-freshness (Rule 39):** dev already rebuilt off the Profile-tab branch (now on main); the only delta since is the version-sync commit (cosmetic footer string) — functionally fresh.
+
+### ⏳ NEXT — Cargorix full UX/UI redesign (BIG, architect-first, HARD HOLD)
+Adopt `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip` (like MG `project_cargorix_theme_3pane_0819`). **Step 1 (mandatory first): analyze the whole template + produce an adoption plan** onto the current layout — INHERIT-not-REPLACE (keep tRPC/Prisma/Auth.js/data), **retain the orange/tangerine accent** (map into template theme tokens). MAJOR → summon Architect orchestration to plan+brainstorm FIRST (PM → Architect → scoped worker waves per plan-first-dispatch); do NOT edit inline. Written plan for owner review before any build. Detail in `docs/OWNER_TODO_QUEUE.md`.
+
+---
+
+## Prior State (2026-08-17) — 🚀 Site Access & Tenancy Standard SHIPPED to prod + demo as v0.15.0 + vault edited
 
 Owner resumed and authorized the gated items, scoped in the follow-up to **FRMS only** (AIEF held) · **promote prod + demo now** · **vault edit with fresh passwords**. All three executed, verified live, and handed off. Model authority memory: `project_site_access_shipped_0817.md`.
 
