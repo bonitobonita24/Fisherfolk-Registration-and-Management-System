@@ -17,11 +17,11 @@ Legend: 🔴 not started · 🟡 partial · ✅ done (kept briefly for trace) ·
 
 ## 🔴 Open
 
-- 🔴 **🏗️ BIG — Full UX/UI redesign adopting the Cargorix template (like Marine-Guardian).** Redesign the ENTIRE app's UX/UI using `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip` (shadcn + Next.js Cargorix template), the same adoption MG did (ref MG memory `project_cargorix_theme_3pane_0819`).
-  - **Step 1 (MANDATORY FIRST): analyze the whole template** — unzip + study its structure, app-shell, theme tokens, component set, layout archetypes — and produce an **adoption plan** for how to FULLY adopt it onto our CURRENT design layout (INHERIT-not-REPLACE: keep our tRPC/Prisma/Auth.js/data layer; adopt the UI shell/theme/components).
-  - **Retain our current ACCENT color** — orange / tangerine — through the reskin (map it into the template's theme tokens; don't inherit the template's accent).
-  - **This is a MAJOR multi-phase task** → **summon Architect-agent orchestration to plan + brainstorm FIRST** (PM → Architect(s) → scoped worker waves), per plan-first-dispatch. Do NOT dive into edits inline. Produce a written adoption plan for owner review before any build.
-  - Owner-set 2026-08-21. HARD HOLD — plan first, build in waves, nothing ships without owner word.
+- 🟡 **🏗️ BIG — Full UX/UI redesign adopting the Cargorix template (like Marine-Guardian).** PLANNING DONE; paused before Wave 0.
+  - ✅ **Step 1 DONE (2026-08-21): analysis + adoption plan.** Architect orchestration (PM → 2 scout architects → Plan synthesis) → **`docs/CARGORIX_ADOPTION_PLAN.md`**. Verdict: Cargorix = design-language donor, NOT component donor (`@base-ui` vs Radix + Tailwind v4/oklch vs v3/HSL) → **Path A** reskin on FRMS's existing Radix primitives, 6 waves.
+  - ✅ **Decisions locked** (`docs/DECISIONS_LOG.md`): Tailwind **v3** · keep **Manrope** · **prioritized modules first** · Wave-4 extras = **all 3** (⌘K, theme customizer tenant-admin-scoped, density toggle) · **defer** draft-first create flow. RETAIN orange/tangerine + per-tenant override + RBAC nav + DefinitionGrid (non-negotiable each wave).
+  - 🔴 **NEXT (awaiting owner "go"): Wave 0 spike** — token remap to tangerine + oklch→HSL on ONE list + ONE detail page + prove per-tenant override → before/after screenshots for review. Then Waves 1–5.
+  - Branch `docs/cargorix-adoption-plan` (LOCAL / HARD HOLD, no app code touched). Owner-set 2026-08-21.
 
 ### ↗️ Cross-seat (tracked here, executed from another folder — mirror of PENDING_DECISIONS.md)
 - 🔴 **AIEF framework standard merge** — merge `feat/v32.50-site-access-standard` → main + push, from the **Powerbyte-AIEF** seat (not this folder). FRMS is the shipped reference implementation.

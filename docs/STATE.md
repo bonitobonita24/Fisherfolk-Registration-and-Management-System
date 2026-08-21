@@ -11,8 +11,11 @@ Owner authorized: push main → released **v0.17.0**, then promoted prod + demo 
 - **Promoted PROD + DEMO to `sha-4e99d62` / v0.17.0.** `push-to-prod.sh` + `push-to-demo.sh`: DB backed up each, **migrations no-op** (19 applied, 0 pending — UI+docs only), reseed-never. Both healthy: `/api/health` 200 (after ~15–25s boot; the transient 404 right after recreate is the known boot-delay pattern), `/` 200, `/login` 200, `/demo` 308 (trailing-slash redirect, cosmetic). **Real users now see the new Profile layout.**
 - **Dev-freshness (Rule 39):** dev already rebuilt off the Profile-tab branch (now on main); the only delta since is the version-sync commit (cosmetic footer string) — functionally fresh.
 
-### ⏳ NEXT — Cargorix full UX/UI redesign (BIG, architect-first, HARD HOLD)
-Adopt `_tempfiles/shadcn-nextjs-cargorix-app-template-1.0.0.zip` (like MG `project_cargorix_theme_3pane_0819`). **Step 1 (mandatory first): analyze the whole template + produce an adoption plan** onto the current layout — INHERIT-not-REPLACE (keep tRPC/Prisma/Auth.js/data), **retain the orange/tangerine accent** (map into template theme tokens). MAJOR → summon Architect orchestration to plan+brainstorm FIRST (PM → Architect → scoped worker waves per plan-first-dispatch); do NOT edit inline. Written plan for owner review before any build. Detail in `docs/OWNER_TODO_QUEUE.md`.
+### 🎨 CARGORIX REDESIGN — planning DONE; paused before Wave 0 (HARD HOLD)
+Architect orchestration ran (PM → 2 scout architects → Plan synthesis). Plan: **`docs/CARGORIX_ADOPTION_PLAN.md`** — Path A (design-language reskin on FRMS's existing Radix primitives; Cargorix's `@base-ui` + Tailwind-v4/oklch are NOT adopted wholesale), 6 waves. **Decisions locked** (`docs/DECISIONS_LOG.md`): Tailwind **v3** · keep **Manrope** · **prioritized modules first** · Wave-4 extras = **all 3** (⌘K, theme customizer [tenant-admin-scoped], density toggle) · **defer** draft-first create flow. Non-negotiable KEEP each wave: orange accent + per-tenant `#tenant-theme-root` override, RBAC nav, tRPC/Prisma/Auth seams, SidebarFooter white-label, DefinitionGrid idiom; gov WCAG 2.2 AA axe gate.
+Branch `docs/cargorix-adoption-plan` (3 commits, LOCAL / HARD HOLD — no app code touched yet).
+
+**NEXT un-gated (on owner "go"): Wave 0 spike.** Remap tokens to tangerine in `apps/web/src/app/globals.css` + build the oklch→HSL conversion; apply to ONE fisherfolk list + ONE detail page (exercises DefinitionGrid + Tabs + rail); prove the per-tenant override still wins → before/after screenshots (light+dark) for owner review. Own branch, local. Owner PAUSED before starting it.
 
 ---
 

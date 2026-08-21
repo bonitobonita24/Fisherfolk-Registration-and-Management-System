@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-21 (cont.) — Cargorix redesign: analysis + adoption plan (architect orchestration)
+
+**In your words:** Start Cargorix; summon architect agent orchestration and use the better skill; produce the plan first — then pause and save.
+
+✅ **Done + verified**
+- **Architect orchestration ran** (PM → 2 scout architects [FRMS baseline + Cargorix donor, both loaded `frontend-design`] → 1 Plan-architect synthesis). Convergent verdict: **Cargorix is a design-language donor, NOT a component donor** — its `@base-ui/react` primitives + Tailwind-v4/oklch tokens can't graft onto FRMS's Radix + Tailwind-v3 stack.
+- **Adoption plan written** → `docs/CARGORIX_ADOPTION_PLAN.md`: Path A (reskin on FRMS Radix primitives, keep tRPC/Prisma/Auth/RBAC + orange accent + per-tenant theme + DefinitionGrid), 6 waves (0 spike → 5 module polish), full risk register + WCAG/HARD-HOLD guardrails.
+- **7 gating decisions answered + locked** (`docs/DECISIONS_LOG.md`): stay on Tailwind **v3** · keep **Manrope** · **prioritized modules first** · Wave-4 extras = **all three** (⌘K command menu, theme customizer [tenant-admin-scoped], density toggle) · **defer** draft-first create flow.
+- All on branch `docs/cargorix-adoption-plan` (3 commits, LOCAL / HARD HOLD — **no app code touched**).
+
+⏳ **Next (paused at owner's word)**
+- **Wave 0 — the spike.** Token remap to tangerine in `globals.css` + oklch→HSL conversion, applied to one fisherfolk list + one detail page, proving the per-tenant theme override still wins → before/after screenshots (light+dark) for owner review. Awaiting owner "go".
+
+---
+
 ## 2026-08-21 (cont.) — Profile-tab layout SHIPPED to prod + demo as v0.17.0
 
 **In your words:** Push main; then promote to prod/demo once CI is green; Cargorix planning goes to the next-session handoff.
