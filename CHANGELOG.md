@@ -4,6 +4,20 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.17.0 — 2026-08-21
+
+### [FEATURE]
+- horizontal grouped Profile-tab layout (name / identity / other) (`979ffa0`)
+
+### [DOCS]
+- 2026-08-21 Profile-tab layout + design principle; Cargorix queued (`dd3270b`)
+- Profile-tab layout done + promoted to design-defaults Entry 6 (`84ccd53`)
+- queue full Cargorix-template UX/UI redesign (big, architect-planned) (`bb05ada`)
+- queue Profile-tab horizontal grouped layout + space-assessment principle (`479158f`)
+- add interim owner todo queue (until Squirlnote launches) (`3e14127`)
+- v0.16.0 relayout + demo category alignment shipped to prod+demo (`e07de96`)
+
+
 ## v0.16.0 — 2026-08-20
 
 ### [FEATURE]
