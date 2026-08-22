@@ -2,6 +2,26 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-22 — Cargorix redesign: Wave 0 spike (token-remap PoC)
+
+**In your words:** Go, start Wave 0. Then — save session, stop the reboot loop.
+
+✅ **Done + verified**
+- **Wave 0 spike shipped** to branch `feat/cargorix-wave-0-spike` (`68a49cf`, LOCAL / HARD HOLD). Path A1 (stay Tailwind v3) confirmed.
+- **oklch→HSL converter** (`scripts/cargorix/oklch-to-hsl.mjs`) — translates the donor's v4 oklch tokens to FRMS's v3 HSL triplets; sanity-checked.
+- **Token remap** in `globals.css` — warmed the neutral `--accent` to an orange wash + **added the 3 Cargorix sidebar tokens FRMS was missing** (`--sidebar-primary/-foreground/-ring`), wired in `tailwind.config.ts`. All contrast pairs AA-pass (≥6.76). Finalized table → `docs/CARGORIX_WAVE0_TOKENS.md`.
+- **Tenant-override proven intact** — Register button flips orange→purple on `#tenant-theme-root` after the remap (`--primary`/`--ring`/`--secondary` untouched). **axe 20→20 (no new violations), 0 console errors, zero data-layer changes.**
+
+🔵 **Caught a real trap (Rule 39):** FRMS dev serves a *prebuilt image with no source bind-mount* — host edits don't hot-reload; the CSS only went live after a dev rebuild from source. First before/after were stale until then.
+
+💬 **Notes**
+- Wave 0 is intentionally subtle in static views (accent paints on hover/selected; sidebar-primary consumed only in Wave 2). Bold tangerine lands Waves 2–3. Offered a punchier-accent tweak (taste `[WHAT]`) — not taken.
+
+⏳ **Next (HARD HOLD, await owner "go")**
+- **Wave 1** — full token set + typography (Manrope) + app-wide dark-parity pass. Then Waves 2→5 per `docs/CARGORIX_ADOPTION_PLAN.md`.
+
+---
+
 ## 2026-08-21 (cont.) — Cargorix redesign: analysis + adoption plan (architect orchestration)
 
 **In your words:** Start Cargorix; summon architect agent orchestration and use the better skill; produce the plan first — then pause and save.
