@@ -25,8 +25,8 @@
     --secondary-foreground: 0 0% 100%;   /* KEEP — tenant-overridden fallback */
     --muted: 0 0% 94.5%;
     --muted-foreground: 0 0% 40%;
-    --accent: 0 0% 94.5%;                /* CHANGED ROLE: was teal identity; now neutral hover wash (NexaCRM) */
-    --accent-foreground: 0 0% 20%;
+    --accent: 25 100% 95.5%;             /* Cargorix W0: warm orange hover/selected wash (was neutral) — AA 12.95 vs accent-fg */
+    --accent-foreground: 25 45% 16%;     /* Cargorix W0: warm dark on the peach wash */
     --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 92.2%;
@@ -41,9 +41,12 @@
     /* NEW: sidebar token family (NexaCRM surface model) */
     --sidebar: 0 0% 97.6%;
     --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 25 95% 53%;                /* Cargorix W0: orange active-nav identity (token FRMS was missing) */
+    --sidebar-primary-foreground: 29 79% 6%;      /* Cargorix W0 */
     --sidebar-accent: 0 0% 94.5%;
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 92.2%;
+    --sidebar-ring: 20 100% 47%;                  /* Cargorix W0: focus ring matches app --ring (orange) */
   }
 
   .dark {
@@ -59,8 +62,8 @@
     --secondary-foreground: 0 0% 98%;    /* KEEP */
     --muted: 0 0% 19.2%;
     --muted-foreground: 0 0% 70.2%;
-    --accent: 0 0% 16.1%;
-    --accent-foreground: 0 0% 92.2%;
+    --accent: 25 22% 15%;                /* Cargorix W0: warm dark hover/selected wash (was neutral) — AA 12.26 vs accent-fg */
+    --accent-foreground: 25 30% 91%;     /* Cargorix W0: warm light on the dark wash */
     --destructive: 358 75% 59%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 13.3%;
@@ -73,9 +76,12 @@
     --chart-5: 322 65% 54.5%;
     --sidebar: 0 0% 9.8%;
     --sidebar-foreground: 0 0% 92.2%;
+    --sidebar-primary: 25 95% 53%;                /* Cargorix W0: orange active-nav identity (token FRMS was missing) */
+    --sidebar-primary-foreground: 29 79% 6%;      /* Cargorix W0 */
     --sidebar-accent: 0 0% 16.1%;
     --sidebar-accent-foreground: 0 0% 92.2%;
     --sidebar-border: 0 0% 13.3%;
+    --sidebar-ring: 20 100% 47%;                  /* Cargorix W0: focus ring matches app --ring (orange) */
   }
 }
 
