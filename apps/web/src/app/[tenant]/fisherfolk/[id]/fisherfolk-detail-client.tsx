@@ -295,6 +295,9 @@ export function FisherfolkDetailClient({ id }: Props) {
     </>
   );
 
+  const detailTabTrigger =
+    "shrink-0 gap-1.5 rounded-none border-b-2 border-transparent -mb-px text-muted-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:font-semibold";
+
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
@@ -375,50 +378,50 @@ export function FisherfolkDetailClient({ id }: Props) {
         <div className="min-w-0">
           <Tabs defaultValue="profile">
             <TabsList className="h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
-              <TabsTrigger value="profile" className="shrink-0 gap-1.5">
+              <TabsTrigger value="profile" className={detailTabTrigger}>
                 <UserRound className="size-3.5" aria-hidden="true" />
                 Profile
               </TabsTrigger>
-              <TabsTrigger value="vessels" className="shrink-0 gap-1.5">
+              <TabsTrigger value="vessels" className={detailTabTrigger}>
                 <Ship className="size-3.5" aria-hidden="true" />
                 Vessels
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.vessels.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="violations" className="shrink-0 gap-1.5">
+              <TabsTrigger value="violations" className={detailTabTrigger}>
                 <AlertTriangle className="size-3.5" aria-hidden="true" />
                 Violations
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.violations.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="ayuda" className="shrink-0 gap-1.5">
+              <TabsTrigger value="ayuda" className={detailTabTrigger}>
                 <HeartHandshake className="size-3.5" aria-hidden="true" />
                 Ayuda
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.ayudaBeneficiaries.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="fish-catches" className="shrink-0 gap-1.5">
+              <TabsTrigger value="fish-catches" className={detailTabTrigger}>
                 <Fish className="size-3.5" aria-hidden="true" />
                 Fish Catches
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.fishCatches.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="renewals" className="shrink-0 gap-1.5">
+              <TabsTrigger value="renewals" className={detailTabTrigger}>
                 <History className="size-3.5" aria-hidden="true" />
                 Renewals
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.renewals.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger value="activity" className="shrink-0 gap-1.5">
+              <TabsTrigger value="activity" className={detailTabTrigger}>
                 <Activity className="size-3.5" aria-hidden="true" />
                 Activity
               </TabsTrigger>
-              <TabsTrigger value="todos" className="shrink-0 gap-1.5">
+              <TabsTrigger value="todos" className={detailTabTrigger}>
                 <ListChecks className="size-3.5" aria-hidden="true" />
                 ToDos
               </TabsTrigger>
