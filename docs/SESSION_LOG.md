@@ -2,6 +2,20 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-23 (evening) — Cargorix Wave 2 (App-Shell reskin) + remember-me bug fix
+
+**In your words:** Start Wave 2 now → (mid-session) the "remember me" setting on login isn't working → save session.
+
+✅ **Done + verified (both LOCAL / HARD HOLD — nothing pushed)**
+- **Cargorix Wave 2 — App-Shell Trio floating-card reskin** (`feat/cargorix-wave-2-app-shell`, `0a08369`). 3 files, tokens-only, RBAC `nav-items.ts` untouched: canvas gutter + detached rounded **header card** above a **framed content card**; **orange active-nav finally lands** as a tenant-driven `--primary` left-rail bar over a warm accent wash — deliberately *not* orange-as-text (avoids the Wave-1 AA trap). Live-verified on rebuilt dev (light + dark, 0 console errors): rail = orange 4×20px; **active-nav contrast 12.96**, inactive 4.83; white-label footer + RBAC nav groups intact. Screenshots in `screenshots/`.
+- **Remember-me bug FIXED** (`fix/remember-me-session-cookie`, `3a88589`). Root cause: Auth.js v5 has no per-login hook for the cookie's Max-Age (static `session.maxAge`, pinned to 30d), so *every* login's cookie was written persistent — checking/unchecking looked identical. Fix wraps `handlers.POST`: an unchecked sign-in now downgrades the session-token cookie to a **session cookie** (clears on browser close); security attributes preserved. **Live-proven** on the real dev pipeline (unchecked → no Max-Age; checked → +30d) + 11 unit tests + 413 web tests green.
+
+💬 **Notes / decisions**
+- Dev was **rebuilt off a throwaway `verify/wave2-plus-rememberme` merge** so both changes run live now for review. Two clean feature branches kept for independent merge. **HARD HOLD stands** — merge/push is your call.
+- Logged the Auth.js-v5 remember-me footgun to the global lessons ledger.
+- 🐛 Still open (unrelated, agent-found): `/fisherfolk/new` create route 400s.
+- 2 open PENDING_DECISIONS `[WHAT]` remain but both are non-executable from the FRMS seat (AIEF merge · Phase 2 per-app adoption).
+
 ## 2026-08-23 — Cargorix Wave 1 (tokens) + active-tab highlight
 
 **In your words:** Proceed to Wave 2 · hold it (don't push) · highlight where the active tab is on the Fisherfolk detail menu · save session.

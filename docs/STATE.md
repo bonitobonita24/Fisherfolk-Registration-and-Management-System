@@ -1,8 +1,22 @@
 # FRMS — Project State
 
-## Current State (2026-08-23, latest) — 🎨 Cargorix reskin Wave 1 (tokens) DONE + active-tab highlight fix; Wave 2 APPROVED next (all LOCAL / HARD HOLD)
+## Current State (2026-08-23, latest) — 🎨 Cargorix Wave 2 (App-Shell floating-card reskin) DONE + 🔴 remember-me cookie bug FIXED; both live-verified on dev, all LOCAL / HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner: "Start Wave 2 now" → mid-session "remember me isn't working" → "save session". Both done + live-verified on a rebuilt dev, nothing pushed. Model authority memory: `project_cargorix_wave2_rememberme_0823.md`.
+
+**✅ Done this session (LOCAL / HARD HOLD):**
+- **Cargorix Wave 2 — App-Shell Trio reskin.** Branch `feat/cargorix-wave-2-app-shell` `0a08369` (stacks on Wave 1 + active-tab). 3 files (`app-shell.tsx`/`header.tsx`/`sidebar.tsx`), tokens-only, RBAC `nav-items.ts` untouched. Floating-card layout (canvas gutter + detached header card + framed content card); **orange active-nav** = tenant-driven `--primary` left-rail (4×20px) over a warm `bg-accent` wash + `text-accent-foreground` (NOT orange-as-text → avoids Wave-1 AA trap). Verified live both themes: rail `rgb(249,116,21)`, active-nav AA **12.96**, inactive 4.83, white-label footer + nav groups intact, 0 console errors. Screenshots `screenshots/wave2-dashboard-{light,lightmode}.png`. tsc clean.
+- **Remember-me cookie bug FIXED.** Branch `fix/remember-me-session-cookie` `3a88589` (off main). New `apps/web/src/server/auth/remember-me.ts` (+`.test.ts`) + wrapped `handlers.POST` in `auth/index.ts`. Auth.js v5 has no per-login cookie-Max-Age hook (static `session.maxAge`=30d ceiling) → every cookie was persistent, masking the per-login JWT exp. Now unchecked = SESSION cookie (strip Max-Age/Expires; keep HttpOnly/Secure/SameSite/Path). **Live-proven** via CSRF+/callback on running dev (false→no Max-Age, true→+30d) + 11 unit + 413 web tests green.
+
+**Dev / branches:** dev container REBUILT off throwaway `verify/wave2-plus-rememberme` (merge of both) → **dev runs BOTH now** for review at `http://localhost:44387/calapan-city`. Two clean feature branches kept for independent merge. 🔴 Rule-39: FRMS dev = prebuilt image, no HMR — rebuild to see source changes.
+
+**⏳ Next un-gated:** merge decision (owner-gated) for either/both branches · Cargorix Wave 3+ (`docs/CARGORIX_ADOPTION_PLAN.md` on `docs/cargorix-adoption-plan`) · 🐛 `/fisherfolk/new` 400 (agent-found, unrelated).
+**Open [WHAT] (non-executable from FRMS seat):** AIEF `feat/v32.50-site-access-standard` merge (AIEF seat) · Phase 2 per-app adoption (each app's own seat).
+
+---
+
 
 Owner: "proceed to Wave 2 · hold it (no push) · highlight the active detail-tab menu · save session." Wave 1 executed + verified PASS via PM→Architect→Executor→QA orchestration; a targeted active-tab-highlight fix added on owner request (Image #1). Nothing pushed. Model authority memory: `project_cargorix_wave1_done_0823.md`.
 
