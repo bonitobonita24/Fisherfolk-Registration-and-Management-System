@@ -1,6 +1,31 @@
 # FRMS — Project State
 
-## Current State (2026-08-21, latest) — 🚀 Profile-tab horizontal layout SHIPPED to prod + demo as v0.17.0; Cargorix redesign queued NEXT
+## Current State (2026-08-23, latest) — 🎨 Cargorix reskin Wave 1 (tokens) DONE + active-tab highlight fix; Wave 2 APPROVED next (all LOCAL / HARD HOLD)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Owner: "proceed to Wave 2 · hold it (no push) · highlight the active detail-tab menu · save session." Wave 1 executed + verified PASS via PM→Architect→Executor→QA orchestration; a targeted active-tab-highlight fix added on owner request (Image #1). Nothing pushed. Model authority memory: `project_cargorix_wave1_done_0823.md`.
+
+### ✅ DONE THIS SESSION (2026-08-23, executed + verified)
+- **Cargorix Wave 1 — cool-tinted neutral/surface token adoption.** Branch `feat/cargorix-wave-1-tokens` (off the Wave 0 spike branch), commit **`aae3379`**. Orchestration: Architect (general-purpose) read the donor `_tempfiles/cargorix-template/.../globals.css` + FRMS globals.css, ran the W0 oklch→HSL converter per token, produced the exact neutral diff + AA table → **spec-executor** applied **27 token lines** to `apps/web/src/app/globals.css` (`:root` + `.dark`) → **QA worker** (Playwright+axe) verified. Owner decisions locked pre-build: **adopt cool-tinted neutrals** (background/foreground/card/popover/muted/border/input + sidebar surfaces) + **keep the faithful pale accent** (W0 `--accent` unchanged).
+  - **Frozen (untouched):** `--primary`, `--secondary`, `--ring`, `--accent`, `--sidebar-primary`, `--sidebar-ring`, `--chart-1..5`, `--destructive*`, `--radius`. Per-tenant `#tenant-theme-root` override chain untouched; **zero** tRPC/Prisma/Auth/data-layer files (verified by diff).
+  - **Verify PASS:** dev rebuilt off branch (Rule 39, FRESH); 8 screenshots (light+dark) in `screenshots/cargorix-wave1/` (`w1-*`). axe WCAG 2.2 AA = only **pre-existing** color-contrast patterns (sidebar section labels at `muted-foreground/70`; frozen orange links/avatar), **NO new regressions** vs W0 baseline, 0 non-contrast issues, 0 app console errors. Cool neutrals landed, orange identity preserved, DefinitionGrid Profile-tab structure intact, dark mode clean (deep cool-dark). One AA nudge by architect: light `--muted-foreground` L44.5→42.3 → 4.51:1.
+- **Active-tab highlight fix** (owner request, Image #1). Branch `fix/fisherfolk-detail-active-tab` (off wave-1), commit **`e397bb0`** (+11/−8, one file `fisherfolk-detail-client.tsx`). Detail tab bar active state now = **orange (`--primary`) bottom-border + semibold high-contrast `foreground` text**; inactive = `muted-foreground`. Shared `detailTabTrigger` class const applied to all 8 triggers. AA-safe (active TEXT stays foreground; orange is the underline indicator, not the text — orange text would fail AA on the light card). Executor rebuilt dev + confirmed classes live in served chunk; visual screenshots captured by a follow-up QA worker (`screenshots/cargorix-wave1/tab-active-*.png`).
+
+### 🎨 CARGORIX — Wave 2 APPROVED as NEXT (owner "yes proceed to wave 2")
+Wave 2 = **App-Shell Trio** (`components/app-shell.tsx` / `sidebar.tsx` / `header.tsx`): floating rounded-card header (`bg-card rounded-xl border backdrop-blur`), grouped/collapsible sidebar w/ icon-rail collapse + 2-level sub styling, framed content box, and the **ORANGE active-nav** (finally consumes the W0-staged `--sidebar-primary`). **KEEP:** RBAC-filtered `NAV_GROUPS` (read-only `nav-items.tsx`), SidebarFooter white-label, header YearSelect/RegistrationTypeSelect Suspense, NotificationBell + ThemeToggle + user menu, mobile Sheet/drawer. **No ⌘K yet** (Wave 4). Watch items: RBAC nav parity per role + tenant-accent regression. Plan authority: `docs/CARGORIX_ADOPTION_PLAN.md` §5 Wave 2 (on branch `docs/cargorix-adoption-plan`). Per-wave discipline: branch, INHERIT-not-REPLACE, verify-all-pages + axe, HARD HOLD.
+
+### 🚧 OPEN / HELD
+- **HARD HOLD — no push** (owner "yes hold it"). All three reskin branches LOCAL/unpushed: `feat/cargorix-wave-0-spike` → `feat/cargorix-wave-1-tokens` → `fix/fisherfolk-detail-active-tab`. Adoption plan on `docs/cargorix-adoption-plan`. `main == origin/main @ 4e99d62` (v0.17.0) unchanged.
+- **agent-found bug (out of scope, NOT fixed):** `/fisherfolk/new` create route 400s — calls `fisherfolk.getById` with `id="new"`. Pre-existing routing bug, unrelated to the reskin. Needs its own ticket/fix (do NOT fold into a reskin wave).
+- Carried owner-gated (unchanged): AIEF framework merge (own seat), Site-Access Phase 2 per-app (own seats), M4 Report-Hub back-port, prior deploy backlog. See PENDING_DECISIONS.md.
+
+### Git / branch state
+- On `fix/fisherfolk-detail-active-tab` (chain: off `feat/cargorix-wave-1-tokens` off `feat/cargorix-wave-0-spike`). All LOCAL/unpushed. `main == origin/main @ 4e99d62`. Dev rebuilt off the tab-fix branch (FRESH, serves the reskin). Untracked scratch: `.qa-learnings/`, `_tempfiles/`, `screenshots/` (gitignored).
+
+---
+
+## Current State (2026-08-21) — 🚀 Profile-tab horizontal layout SHIPPED to prod + demo as v0.17.0; Cargorix redesign queued NEXT
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

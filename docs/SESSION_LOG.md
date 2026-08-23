@@ -2,6 +2,25 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-23 — Cargorix Wave 1 (tokens) + active-tab highlight
+
+**In your words:** Proceed to Wave 2 · hold it (don't push) · highlight where the active tab is on the Fisherfolk detail menu · save session.
+
+✅ **Done + verified**
+- **Cargorix Wave 1 shipped** to branch `feat/cargorix-wave-1-tokens` (`aae3379`, LOCAL / HARD HOLD). Adopted Cargorix's **cool-tinted neutral/surface palette** (backgrounds, cards, sidebar, borders, muted) — converted donor oklch→HSL, applied to light + dark (27 token lines in `globals.css`). Your two locked calls: cool neutrals in, faithful pale accent kept.
+- **Orange identity fully preserved** — `--primary`/`--secondary`/`--ring`/`--accent`/`--sidebar-primary`/charts/radius frozen; per-tenant theme override untouched; **zero** data-layer files. Ran PM→Architect→Executor→QA agent orchestration.
+- **Verify PASS** — dev rebuilt (Rule 39, FRESH); axe WCAG 2.2 AA = only pre-existing contrast patterns, **no new regressions**, 0 console errors; DefinitionGrid Profile-tab intact; dark mode clean. 8 before/after screenshots delivered.
+- **Active-tab highlight fix** (`fix/fisherfolk-detail-active-tab`, `e397bb0`) — the Fisherfolk detail tab bar's active tab now shows a clear **orange underline + bold text** (inactive = muted); AA-safe (active text stays high-contrast, orange is the indicator).
+
+💬 **Notes / decisions**
+- **Wave 2 approved** as next (App-Shell Trio — floating card header, grouped sidebar, and the *orange active-nav* finally lands). **HARD HOLD stands** — nothing pushed (your "hold it").
+- 🐛 **Found an unrelated pre-existing bug** (not touched): `/fisherfolk/new` create route 400s (calls `getById` with `id="new"`). Logged for its own fix.
+
+⏳ **Next**
+- **Wave 2 — App-Shell Trio** per `docs/CARGORIX_ADOPTION_PLAN.md` §5. Branch-per-wave, verify + axe, HARD HOLD.
+
+---
+
 ## 2026-08-22 — Cargorix redesign: Wave 0 spike (token-remap PoC)
 
 **In your words:** Go, start Wave 0. Then — save session, stop the reboot loop.
