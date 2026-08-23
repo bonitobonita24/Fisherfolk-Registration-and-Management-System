@@ -58,9 +58,9 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           />
         </SheetContent>
       </Sheet>
-      {/* Main column — NexaCRM framed content box (header + scroll area) */}
-      <div className="flex flex-1 flex-col overflow-hidden bg-background md:border md:border-border xl:rounded-tl-3xl">
-        {/* S3 will add onToggleSidebar prop to Header and expose a header-level toggle button */}
+      {/* Main column — Cargorix floating-card layout: a subtle canvas gutter holding
+          a detached rounded header card above a framed content card. */}
+      <div className="flex flex-1 flex-col overflow-hidden bg-muted/30 p-2 md:p-3">
         <Header
           userName={userName}
           role={role}
@@ -68,7 +68,10 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
           onMenuClick={() => setMobileOpen(true)}
           onToggleSidebar={toggleSidebar}
         />
-        <main id="main-content" className="flex-1 overflow-y-auto bg-background px-4 pb-4">
+        <main
+          id="main-content"
+          className="mt-2 flex-1 overflow-y-auto rounded-xl border border-border bg-card px-4 py-4 md:mt-3"
+        >
           {children}
         </main>
       </div>

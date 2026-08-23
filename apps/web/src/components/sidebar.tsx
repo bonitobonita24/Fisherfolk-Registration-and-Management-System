@@ -121,9 +121,12 @@ export function Sidebar({
                       const linkCn = cn(
                         "relative flex items-center rounded-md text-sm transition-colors",
                         isCollapsed ? "justify-center px-2 py-1.5" : "gap-2.5 px-2 py-1.5",
+                        // Active: warm accent wash + AA-safe warm-dark text, plus a tenant-primary
+                        // (orange by default, runtime tenant-overridden) left-rail indicator that
+                        // "lands" brand identity on the active nav item without orange-as-text (Wave-1 AA trap).
                         isActive
-                          ? "bg-[color-mix(in_oklab,hsl(var(--foreground))_12%,transparent)] text-sidebar-accent-foreground font-medium dark:bg-[color-mix(in_oklab,hsl(var(--foreground))_5%,transparent)]"
-                          : "text-muted-foreground hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_12%,transparent)] hover:text-sidebar-accent-foreground dark:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_5%,transparent)]",
+                          ? "bg-accent font-medium text-accent-foreground before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-primary before:content-['']"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
                       );
                       return (
                         <li key={item.href}>

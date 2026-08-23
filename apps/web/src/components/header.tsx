@@ -87,7 +87,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
   const onDashboard = pathname?.endsWith("/dashboard") ?? false;
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 bg-muted/40 px-4">
+    <header className="flex h-12 shrink-0 items-center gap-2 rounded-xl border border-border bg-card/80 px-4 backdrop-blur-sm supports-[backdrop-filter]:bg-card/70">
       {/* Mobile: always-present drawer trigger */}
       <Button
         variant="ghost"
