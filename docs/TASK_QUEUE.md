@@ -6,12 +6,15 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-- 🟡 **Import `08-14-26` masterlist batch → dev + prod.** 92 new fisherfolk (+94 photos +94 signatures) from
-  `_tempfiles/08-14-26/`. Tool: generalized `apps/web/scripts/import-tempfiles.ts` (`--dir`) + telegram-ledger
-  fix. Dev DONE+verifying; prod pending (owner-approved both envs). Done-criterion: 94/94 records present with
-  photo+signature + media_objects ledger rows, on dev AND prod; browser render confirmed. `<source: owner 2026-08-24>`
+_(none)_
 
 ## ✅ Done recently
+
+- ✅ **Import `08-14-26` masterlist batch → dev + prod.** 92 new fisherfolk (+94 photos +94 signatures) from
+  `_tempfiles/08-14-26/`, via generalized `import-tempfiles.ts --dir`. Verified BOTH envs: 94/94 records with
+  photo+signature, 188/188 telegram media_objects ledger rows, total 3089→3181. Render proven: dev in-browser
+  (image/jpeg 40KB via /api/media); prod bot getFile→HTTP 200 40043 bytes. Prod DB backed up first
+  (`frms-prod-backup-pre-masterlist-import-20260824-005753.sql.gz`). (owner-approved both envs, 2026-08-24)
 
 - ✅ **Legacy `fmo.powerbyte.app` reconcile.** Old PHP/SQLite app (3016 recs) is 100% already in FRMS; the lone
   "missing" (VILLANUEVA M-JAY ALEJO, malformed ID `2024-17505000-007796`) already exists under corrected ID
