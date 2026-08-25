@@ -2,6 +2,24 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-25 — Post-hang verification of 08-14-26 masterlist import + branch push
+
+**In your words:** Laptop hung overnight and the session got interrupted — check the last session's approved tasks against ground truth to see what actually finished. Then: push the held branch.
+
+✅ **Done + verified (live ground-truth counts, not doc claims)**
+- **All approved import work confirmed complete despite the hang** — the interruption struck *after* everything committed:
+  - FRMS **dev** `calapan-city = 3181` ✅ (+ `calapan-demo = 500`, separate tenant → 3681 total, expected)
+  - FRMS **prod** `calapan-city = 3181` ✅
+  - Live **FMO** old app SQLite `fisherfolk = 3181` ✅ (6423 upload files) — reconciliation holds, FRMS == FMO, 0 real people missing.
+  - Media-ledger fix + import commits all present on the branch.
+- **Pushed `feat/import-tool-dir-arg` → origin** (owner-authorized). New tracking branch, **0/0 synced**; all 5 commits up (import-tool `--dir` + telegram `media_objects` ledger fix `29a6cbd` + 4 docs/session commits). **`main` untouched — no auto-deploy triggered.** HARD HOLD cleared.
+
+💬 **Notes**
+- FMO `with_img_and_sig = 3153` (28 without both) = pre-existing legacy data quality in the older 3108, **not** the backfill (73/73 verified last session).
+- Feature branch pushed, not merged — merge to `main` (→ Model-A CI + staging) stays a separate explicit call.
+
+---
+
 ## 2026-08-21 (cont.) — Cargorix redesign: analysis + adoption plan (architect orchestration)
 
 **In your words:** Start Cargorix; summon architect agent orchestration and use the better skill; produce the plan first — then pause and save.
