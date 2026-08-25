@@ -6,15 +6,17 @@
  * WITHOUT ever overwriting an asset a record already has.
  *
  * Usage (run from apps/web):
- *   pnpm exec tsx scripts/import-tempfiles.ts [--tenant calapan-city] [--dry]
+ *   pnpm exec tsx scripts/import-tempfiles.ts [--tenant calapan-city] \
+ *     [--dir <folder>] [--xlsx <name>] [--dry]
  *
- * Fixed input paths (relative to repo root — this script runs from apps/web,
- * so repo root is two levels up):
- *   masterlist  : .tempfiles/Complete Masterlist.xlsx
- *   photos      : .tempfiles/PHOTO
- *   signatures  : .tempfiles/SIGNATURE
- *   missing pix : .tempfiles/missingpix/PHOTO
- *   missing sig : .tempfiles/missingpix/SIGNATURE
+ * Input paths resolve under a base folder (default ".tempfiles" at repo root;
+ * override with --dir, absolute or repo-root-relative — this script runs from
+ * apps/web, so repo root is two levels up):
+ *   masterlist  : <dir>/Complete Masterlist.xlsx  (or first *.xlsx, or --xlsx)
+ *   photos      : <dir>/PHOTO
+ *   signatures  : <dir>/SIGNATURE
+ *   missing pix : <dir>/missingpix/PHOTO
+ *   missing sig : <dir>/missingpix/SIGNATURE
  *
  * Three phases, always in this order:
  *   Phase 1 — INCREMENTAL upsert of the masterlist rows (mirrors the
@@ -74,9 +76,85 @@ import {
   type ValidationContext,
   type RowReport,
 } from "../src/lib/import/validate";
-import { storeImportedAsset } from "../src/lib/import/asset-storage";
+import { compressImageToUnder } from "../src/lib/import/asset-storage";
+import { uploadFile, TelegramAdapter, getStorageBackend } from "@frms/storage";
 import { omitUndefined } from "../src/server/lib/prisma-input";
 import { buildQRPayload } from "../src/lib/qr-code";
+
+/**
+ * Compress + upload a fisherfolk asset AND (on the telegram backend) write its
+ * media_objects ledger row.
+ *
+ * Correction over the bare `storeImportedAsset` helper: that helper calls the
+ * S3/MinIO `uploadFile` and never touches the ledger, so under
+ * STORAGE_BACKEND=telegram it (a) uploads to the wrong backend and (b) leaves
+ * no ledger row — and the app's /api/media proxy resolves a telegram key via
+ * media_objects (tenantId + storageKey → telegramFileId), so the image 404s.
+ * Here we mirror the canonical write path (src/server/trpc/routers/upload.ts +
+ * scripts/upload-local-assets.ts): on telegram, upload via TelegramAdapter and
+ * upsert the ledger row from the result's telegram fields; on minio/s3, keep
+ * the plain uploadFile path (served via presigned URLs — no ledger needed).
+ * Returns the storage key written onto the fisherfolk record.
+ */
+async function storeAssetWithLedger(
+  prisma: PrismaClient,
+  chatId: string,
+  params: {
+    tenantId: string;
+    idNumber: string;
+    kind: "photo" | "signature";
+    buffer: Buffer;
+    originalFilename: string;
+  },
+): Promise<string> {
+  const { tenantId, kind, buffer, originalFilename } = params;
+  const entityType =
+    kind === "photo" ? "fisherfolk-photo" : "fisherfolk-signature";
+
+  const { buffer: compressed, mimeType } = await compressImageToUnder(buffer);
+
+  if (getStorageBackend() === "telegram") {
+    if (chatId === "") {
+      throw new Error(
+        "telegram backend requires a chatId (tenant.telegramChannelId ?? TELEGRAM_DEFAULT_CHANNEL_ID)",
+      );
+    }
+    const res = await new TelegramAdapter().upload({
+      tenantId,
+      entityType,
+      originalFilename,
+      mimeType,
+      buffer: compressed,
+      chatId,
+    });
+    const ledger = {
+      entityType,
+      backend: "telegram",
+      telegramChatId: res.telegramChatId ?? chatId,
+      telegramFileId: res.telegramFileId ?? null,
+      telegramMessageId:
+        res.telegramMessageId != null ? BigInt(res.telegramMessageId) : null,
+      sizeBytes: compressed.length,
+      mimeType,
+      migratedAt: new Date(),
+    };
+    await prisma.mediaObject.upsert({
+      where: { tenantId_storageKey: { tenantId, storageKey: res.key } },
+      create: { tenantId, storageKey: res.key, ...ledger },
+      update: ledger,
+    });
+    return res.key;
+  }
+
+  const res = await uploadFile({
+    tenantId,
+    entityType,
+    originalFilename,
+    mimeType,
+    buffer: compressed,
+  });
+  return res.key;
+}
 
 // ── CLI arg parsing ───────────────────────────────────────────────────────────
 
@@ -99,25 +177,47 @@ const dry = hasFlag("dry");
 // ── Fixed paths (repo root is two levels up from apps/web) ───────────────────
 
 const REPO_ROOT = path.resolve(process.cwd(), "../..");
-const MASTERLIST_PATH = path.join(
-  REPO_ROOT,
-  ".tempfiles",
-  "Complete Masterlist.xlsx",
-);
-const PHOTOS_DIR = path.join(REPO_ROOT, ".tempfiles", "PHOTO");
-const SIGS_DIR = path.join(REPO_ROOT, ".tempfiles", "SIGNATURE");
-const MISSING_PHOTOS_DIR = path.join(
-  REPO_ROOT,
-  ".tempfiles",
-  "missingpix",
-  "PHOTO",
-);
-const MISSING_SIGS_DIR = path.join(
-  REPO_ROOT,
-  ".tempfiles",
-  "missingpix",
-  "SIGNATURE",
-);
+
+// Base folder holding the masterlist + PHOTO/ + SIGNATURE/ (+ optional
+// missingpix/). Override with --dir <path> (absolute, or relative to repo
+// root); defaults to the legacy ".tempfiles" location for backward compat.
+const dirArg = getArg("dir");
+const BASE_DIR = dirArg
+  ? path.isAbsolute(dirArg)
+    ? dirArg
+    : path.join(REPO_ROOT, dirArg)
+  : path.join(REPO_ROOT, ".tempfiles");
+
+/**
+ * Resolve the masterlist workbook inside BASE_DIR. Prefers an explicit
+ * --xlsx <name>, then the canonical "Complete Masterlist.xlsx", then the
+ * first *.xlsx found (case-insensitive). Worksheet parsed is always the
+ * first sheet (see parseImportWorkbook).
+ */
+function resolveMasterlistPath(): string {
+  const explicit = getArg("xlsx");
+  if (explicit) {
+    return path.isAbsolute(explicit) ? explicit : path.join(BASE_DIR, explicit);
+  }
+  const canonical = path.join(BASE_DIR, "Complete Masterlist.xlsx");
+  if (fs.existsSync(canonical)) return canonical;
+  try {
+    const firstXlsx = fs
+      .readdirSync(BASE_DIR)
+      .filter((n) => n.toLowerCase().endsWith(".xlsx") && !n.startsWith("~$"))
+      .sort()[0];
+    if (firstXlsx) return path.join(BASE_DIR, firstXlsx);
+  } catch {
+    /* dir missing — fall through to canonical (existence checked in main) */
+  }
+  return canonical;
+}
+
+const MASTERLIST_PATH = resolveMasterlistPath();
+const PHOTOS_DIR = path.join(BASE_DIR, "PHOTO");
+const SIGS_DIR = path.join(BASE_DIR, "SIGNATURE");
+const MISSING_PHOTOS_DIR = path.join(BASE_DIR, "missingpix", "PHOTO");
+const MISSING_SIGS_DIR = path.join(BASE_DIR, "missingpix", "SIGNATURE");
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -157,9 +257,19 @@ async function main(): Promise<void> {
 
     const tenant = await prisma.tenant.findUniqueOrThrow({
       where: { slug: tenantSlug },
-      select: { id: true, barangayList: true, currentRegistrationYear: true },
+      select: { id: true, barangayList: true, currentRegistrationYear: true, telegramChannelId: true },
     });
     const tenantId = tenant.id;
+    // Telegram channel for asset uploads: per-tenant override, else the env
+    // default. Only required when STORAGE_BACKEND=telegram (guarded in
+    // storeAssetWithLedger); minio/s3 ignore it.
+    const chatId =
+      tenant.telegramChannelId ??
+      process.env["TELEGRAM_DEFAULT_CHANNEL_ID"] ??
+      "";
+    console.log(
+      `🗄️  Storage backend: ${getStorageBackend()}${getStorageBackend() === "telegram" ? ` (chat ${chatId || "MISSING"})` : ""}`,
+    );
     console.log(`    tenant id: ${tenantId}\n`);
 
     const aliases = await prisma.barangayAlias.findMany({
@@ -398,7 +508,7 @@ async function main(): Promise<void> {
       } else {
         try {
           const buffer = fs.readFileSync(path.join(PHOTOS_DIR, photoFilename));
-          photoKey = await storeImportedAsset({
+          photoKey = await storeAssetWithLedger(prisma, chatId, {
             tenantId,
             idNumber,
             kind: "photo",
@@ -420,7 +530,7 @@ async function main(): Promise<void> {
       } else {
         try {
           const buffer = fs.readFileSync(path.join(SIGS_DIR, sigFilename));
-          sigKey = await storeImportedAsset({
+          sigKey = await storeAssetWithLedger(prisma, chatId, {
             tenantId,
             idNumber,
             kind: "signature",
@@ -536,7 +646,7 @@ async function main(): Promise<void> {
           const buffer = fs.readFileSync(
             path.join(MISSING_PHOTOS_DIR, photoFilename),
           );
-          photoKey = await storeImportedAsset({
+          photoKey = await storeAssetWithLedger(prisma, chatId, {
             tenantId,
             idNumber: dbIdNumber,
             kind: "photo",
@@ -563,7 +673,7 @@ async function main(): Promise<void> {
           const buffer = fs.readFileSync(
             path.join(MISSING_SIGS_DIR, sigFilename),
           );
-          sigKey = await storeImportedAsset({
+          sigKey = await storeAssetWithLedger(prisma, chatId, {
             tenantId,
             idNumber: dbIdNumber,
             kind: "signature",
