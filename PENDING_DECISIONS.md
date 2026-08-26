@@ -275,13 +275,18 @@ The following require the owner's explicit word — the full-auto loop must DEFE
       Prod-101-behind is CLEARED (prod now current). Staging data-first gate bypassed per owner word (staging
       torn down / build-only).
 
-**STILL OPEN — owner-gated:**
+**OWNER-AUTHORIZED 2026-08-27 — but CROSS-SEAT (not executable from the FRMS seat):**
 
-- [ ] **AIEF framework standard merge.** Merge AIEF `feat/v32.50-site-access-standard` → main + push, done in
-      the AIEF seat (not from FRMS). Held per owner "FRMS only" this session.
-- [ ] **Phase 2 — per-app adoption.** Implement the standard in Marine-Guardian / Orqafy / FerryBook /
-      CueLane (broadcast notes already dropped in each app's memory). Done in EACH app's OWN seat, never
-      cross-repo from here. Owner decides ordering/timing. (Authorization noted; not executable from FRMS seat.)
+> Owner ("on the next session do this Cargorix redesign and the two open PENDING_DECISIONS")
+> has AUTHORIZED both below. They stay `[ ]` here because they are **not FRMS-seat work** —
+> each must be executed from its OWN seat. The authorization travels to those seats; a FRMS
+> session should surface them as authorized-but-belonging-elsewhere and NOT attempt them.
+
+- [ ] **AIEF framework standard merge** — ⚠ AIEF SEAT. Merge AIEF `feat/v32.50-site-access-standard` → main +
+      push. Owner-authorized 2026-08-27. Do this from the Powerbyte-AIEF seat (never from FRMS).
+- [ ] **Phase 2 — per-app site-access adoption** — ⚠ PER-APP SEAT. Implement the site-access standard in
+      Marine-Guardian / Orqafy / FerryBook / CueLane (broadcast notes already in each app's memory).
+      Owner-authorized 2026-08-27; owner decides ordering. Done in EACH app's OWN seat, never cross-repo from FRMS.
 - [x] ✅ **RESOLVED (2026-08-17, owner "yes merge & ship") — MERGED + PUSHED + RELEASED v0.15.1 + PROMOTED to
       PROD + DEMO.** Both branches merged `--no-ff` to `main` (`abce6c3` landing+badge, `5cdb90c` seed script),
       re-verified merged (typecheck 7/7 · lint · **572 tests** · build), released **v0.15.1** (`4cd1bfe`, CHANGELOG

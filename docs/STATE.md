@@ -4,7 +4,11 @@
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-Owner: "yes do it all in full Auto mode." Executed end-to-end: finished the deferred server-`redirect()` 308 fix, merged the two bugfix branches + host-aware links to `main`, released **v0.18.0**, pushed origin (Model-A CI + Docker Build green), promoted **prod + demo** to `sha-8430f7a`, rebuilt dev (Rule 39 FRESH). Full bar met; tree clean & pushed. Cargorix redesign remains the queued NEXT big item (planning done, paused before Wave 0 — unchanged).
+Owner: "yes do it all in full Auto mode." Executed end-to-end: finished the deferred server-`redirect()` 308 fix, merged the two bugfix branches + host-aware links to `main`, released **v0.18.0**, pushed origin (Model-A CI + Docker Build green), promoted **prod + demo** to `sha-8430f7a`, rebuilt dev (Rule 39 FRESH). Full bar met; tree clean & pushed. Then owner: "save session; on the next session do the Cargorix redesign and the two open PENDING_DECISIONS."
+
+### ⏳ NEXT SESSION — owner-directed queue (2026-08-27)
+1. **🎨 Cargorix redesign — START Wave 0 spike.** ✅ FRMS-seat work, owner said "go". Plan = `docs/CARGORIX_ADOPTION_PLAN.md` (Path A design-language reskin, 6 waves; decisions locked in `docs/DECISIONS_LOG.md`). Wave 0 = build the oklch→HSL token converter + remap accent to tangerine in `apps/web/src/app/globals.css`, apply to ONE fisherfolk list + ONE detail page (exercises DefinitionGrid + Tabs + rail), prove the per-tenant `#tenant-theme-root` override still wins → before/after screenshots (light+dark) for owner review. Own branch, LOCAL. Non-negotiable KEEPs each wave: orange→tangerine accent + per-tenant override, RBAC nav, tRPC/Prisma/Auth seams, SidebarFooter white-label, DefinitionGrid idiom, gov WCAG 2.2 AA axe gate. NOTE Rule 39 trap: FRMS dev = prebuilt image, no bind-mount — REBUILD to see changes.
+2. **Two owner-authorized PENDING_DECISIONS (2026-08-27) — ⚠ CROSS-SEAT, NOT FRMS.** (a) AIEF `feat/v32.50-site-access-standard` merge → do from the **Powerbyte-AIEF seat**. (b) Phase-2 per-app site-access adoption (MG/Orqafy/FerryBook/CueLane) → do from **each app's OWN seat**. A FRMS session must SURFACE these as authorized-but-elsewhere and NOT attempt them (focus-lock stays FRMS). See `PENDING_DECISIONS.md`.
 
 ### ✅ DONE THIS SESSION (2026-08-26, all executed + verified)
 - **Redirect-guard 308 fix (finished the deferred 🟡).** 12 RSC `redirect()` guards → async `tenantHref()` (`cba0295`). Non-masked hosts (dev, prod) byte-identical — invariant unit-tested; tsc + lint + 410 tests + `next build` all green.
