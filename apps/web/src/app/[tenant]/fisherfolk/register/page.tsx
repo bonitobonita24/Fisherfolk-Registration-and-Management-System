@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { DuplicateSearchClient } from "./duplicate-search-client";
 
 interface RegisterPageProps {
@@ -20,7 +21,7 @@ export default async function FisherfolkRegisterPage({
     role !== "encoder"
   ) {
     const { tenant } = await params;
-    redirect(`/${tenant}/fisherfolk`);
+    redirect(await tenantHref(tenant, "/fisherfolk"));
   }
 
   return (

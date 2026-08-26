@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/server/auth";
 import { resolvePlatformRoleLabel } from "@/server/rbac/platform-access";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { PlatformHeaderActions } from "./platform-header-actions";
 
 interface PlatformLayoutProps {
@@ -25,7 +26,7 @@ export default async function PlatformLayout({
   }
 
   if (session.user.role !== "tenant_manager") {
-    redirect(`/${session.user.tenantSlug}/dashboard`);
+    redirect(await tenantHref(session.user.tenantSlug!, "/dashboard"));
   }
 
   // Label the header badge with the account's actual platform tier (BILLING /
