@@ -111,7 +111,7 @@ export function Sidebar({
                       aria-hidden="true"
                     />
                   ) : (
-                    <p className="px-2 pb-1 pt-3 text-[0.6875rem] font-medium text-muted-foreground/70">
+                    <p className="px-2 pb-1 pt-3 text-[0.6875rem] font-medium text-muted-foreground">
                       {group.label}
                     </p>
                   )}
