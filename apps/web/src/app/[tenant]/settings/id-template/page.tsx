@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 
 import { auth } from "@/server/auth";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { TemplateEditor } from "./_components/template-editor";
 
 /**
@@ -18,6 +19,7 @@ export default async function IdTemplateSettingsPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant } = await params;
+  const idGeneratorHref = await tenantHref(tenant, "/id-generator");
   const session = await auth();
   const role = session?.user?.role;
   const isAdmin = role === "tenant_manager" || role === "tenant_superadmin";
@@ -44,7 +46,7 @@ export default async function IdTemplateSettingsPage({
               Only administrators can design and activate ID card templates.
               If you need to print IDs, use the{" "}
               <Link
-                href={`/${tenant}/id-generator`}
+                href={idGeneratorHref}
                 className="font-medium underline underline-offset-2"
               >
                 ID Generator
@@ -66,7 +68,7 @@ export default async function IdTemplateSettingsPage({
             Design the ID card template once — the <strong>active</strong>{" "}
             template is automatically used by the{" "}
             <Link
-              href={`/${tenant}/id-generator`}
+              href={idGeneratorHref}
               className="font-medium underline underline-offset-2"
             >
               ID Generator

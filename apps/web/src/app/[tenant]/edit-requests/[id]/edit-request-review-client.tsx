@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -100,7 +101,7 @@ function DiffRow({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export function EditRequestReviewClient({ id }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -136,7 +137,7 @@ export function EditRequestReviewClient({ id }: Props) {
     onSuccess: async () => {
       toast.success("Edit request approved.");
       await utils.editRequest.list.invalidate();
-      router.push(`/${params.tenant}/edit-requests`);
+      router.push(tenantHref("/edit-requests"));
     },
     onError: (err) => {
       toast.error(`Approval failed: ${err.message}`);
@@ -148,7 +149,7 @@ export function EditRequestReviewClient({ id }: Props) {
       toast.success("Edit request rejected.");
       setRejectOpen(false);
       await utils.editRequest.list.invalidate();
-      router.push(`/${params.tenant}/edit-requests`);
+      router.push(tenantHref("/edit-requests"));
     },
     onError: (err) => {
       toast.error(`Rejection failed: ${err.message}`);
@@ -168,7 +169,7 @@ export function EditRequestReviewClient({ id }: Props) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/edit-requests`}>
+          <Link href={tenantHref("/edit-requests")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
@@ -217,7 +218,7 @@ export function EditRequestReviewClient({ id }: Props) {
   return (
     <div className="space-y-4">
       <RecordHeader
-        backHref={`/${params.tenant}/edit-requests`}
+        backHref={tenantHref("/edit-requests")}
         backLabel="Back to edit requests"
         title="Edit Request Review"
         meta={
@@ -236,7 +237,7 @@ export function EditRequestReviewClient({ id }: Props) {
         </CardHeader>
         <CardContent className="px-6 py-5">
           <Link
-            href={`/${params.tenant}/fisherfolk/${fisherfolk.id}`}
+            href={tenantHref(`/fisherfolk/${fisherfolk.id}`)}
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             {fisherfolk.fullName}

@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Menu, LogOut, Settings, PanelLeft } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -29,7 +30,6 @@ interface HeaderProps {
   role: string;
   onMenuClick?: () => void;
   onToggleSidebar?: () => void;
-  tenantSlug?: string;
 }
 
 // Isolated so useSearchParams() doesn't force the whole Header (and thus
@@ -72,7 +72,7 @@ function DashboardHeaderFilters() {
   );
 }
 
-export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlug }: HeaderProps) {
+export function Header({ userName, role, onMenuClick, onToggleSidebar }: HeaderProps) {
   const initials =
     userName
       .trim()
@@ -85,6 +85,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
 
   const pathname = usePathname();
   const onDashboard = pathname?.endsWith("/dashboard") ?? false;
+  const tenantHref = useTenantHref();
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 bg-muted/40 px-4">
@@ -152,7 +153,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar, tenantSlu
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/${tenantSlug ?? ""}/settings`}>
+              <Link href={tenantHref("/settings")}>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>

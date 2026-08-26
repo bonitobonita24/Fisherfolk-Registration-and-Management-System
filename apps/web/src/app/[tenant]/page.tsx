@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
 import { isTenantLandingEnabled } from "@/lib/tenant-landing";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { TenantLandingPlaceholder } from "@/components/tenant-landing-placeholder";
 
 interface TenantRootPageProps {
@@ -29,12 +30,12 @@ export default async function TenantRootPage({ params }: TenantRootPageProps) {
   const { tenant } = await params;
 
   if (!isTenantLandingEnabled()) {
-    redirect(`/${tenant}/dashboard`);
+    redirect(await tenantHref(tenant, "/dashboard"));
   }
 
   const session = await auth();
   if (session?.user) {
-    redirect(`/${session.user.tenantSlug ?? tenant}/dashboard`);
+    redirect(await tenantHref(session.user.tenantSlug ?? tenant, "/dashboard"));
   }
 
   const t = await prisma.tenant.findUnique({

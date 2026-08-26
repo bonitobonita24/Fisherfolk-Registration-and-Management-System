@@ -20,8 +20,13 @@ const DETAIL_ROUTES: Record<string, string> = {
   AyudaProgram: "ayuda",
 };
 
+/**
+ * Returns the TENANT-RELATIVE href (e.g. `/fisherfolk/${id}`) for a
+ * notification's entity ref, or null when unresolvable. Callers prepend the
+ * tenant prefix with useTenantHref()/tenantHref() so the link is host-aware
+ * (subdirectory vs masked custom domain — see tenant-href.ts).
+ */
 export function notificationHref(
-  tenant: string,
   entityType: string | null,
   entityId: string | null,
 ): string | null {
@@ -30,14 +35,12 @@ export function notificationHref(
   // List-level targets (no [id] detail route).
   if (entityType === "ImportBatch") {
     // Segment is `import` (NOT data-import); batch id passed as a query param.
-    return entityId
-      ? `/${tenant}/import?batch=${entityId}`
-      : `/${tenant}/import`;
+    return entityId ? `/import?batch=${entityId}` : `/import`;
   }
-  if (entityType === "IdBatch") return `/${tenant}/id-generator`;
-  if (entityType === "Todo") return `/${tenant}/todo`;
+  if (entityType === "IdBatch") return `/id-generator`;
+  if (entityType === "Todo") return `/todo`;
 
   const segment = DETAIL_ROUTES[entityType];
   if (!segment || !entityId) return null;
-  return `/${tenant}/${segment}/${entityId}`;
+  return `/${segment}/${entityId}`;
 }

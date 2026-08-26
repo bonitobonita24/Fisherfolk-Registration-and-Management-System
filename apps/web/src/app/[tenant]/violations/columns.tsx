@@ -2,9 +2,9 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface ViolationListItem {
   id: string;
@@ -40,11 +40,11 @@ function formatTarget(item: ViolationListItem): string {
 }
 
 function SubjectCell({ row }: { row: Row<ViolationListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const item = row.original;
   return (
     <Link
-      href={`/${params.tenant}/violations/${item.id}`}
+      href={tenantHref(`/violations/${item.id}`)}
       className="font-medium text-primary hover:underline"
     >
       {item.subject}

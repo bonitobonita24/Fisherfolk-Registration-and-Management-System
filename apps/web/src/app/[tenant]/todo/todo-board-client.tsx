@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { Loader2, Link2, MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import {
   formatDueDate,
   isOverdue,
@@ -151,13 +151,13 @@ function SourceLink({
   sourceEntityType: string | null;
   sourceEntityId: string | null;
 }) {
-  const { tenant } = useParams<{ tenant: string }>();
-  const link = sourceEntityLink(sourceEntityType, sourceEntityId, tenant);
+  const tenantHref = useTenantHref();
+  const link = sourceEntityLink(sourceEntityType, sourceEntityId);
   if (!link) return null;
 
   return (
     <Link
-      href={link.href}
+      href={tenantHref(link.href)}
       onClick={(e) => e.stopPropagation()}
       className="relative z-10 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
     >

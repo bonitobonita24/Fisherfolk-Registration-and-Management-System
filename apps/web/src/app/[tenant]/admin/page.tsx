@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { tenantHref } from "@/lib/tenant-href.server";
 
 interface TenantAdminPageProps {
   params: Promise<{ tenant: string }>;
@@ -14,5 +15,5 @@ interface TenantAdminPageProps {
  */
 export default async function TenantAdminPage({ params }: TenantAdminPageProps) {
   const { tenant } = await params;
-  redirect(`/${tenant}/dashboard`);
+  redirect(await tenantHref(tenant, "/dashboard"));
 }

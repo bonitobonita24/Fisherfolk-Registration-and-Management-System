@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
 import { PageHeader } from "@/components/shared";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { FishCatchFormClient } from "./fish-catch-form-client";
 
 interface FishCatchRegisterPageProps {
@@ -21,7 +22,7 @@ export default async function FishCatchRegisterPage({
     role !== "encoder"
   ) {
     const { tenant } = await params;
-    redirect(`/${tenant}/fish-catches`);
+    redirect(await tenantHref(tenant, "/fish-catches"));
   }
 
   return (

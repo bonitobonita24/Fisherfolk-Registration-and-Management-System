@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormSection, FormActions } from "@/components/shared";
@@ -48,8 +49,7 @@ function trimOpt(v: string): string | undefined {
 
 export function AyudaFormClient() {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -66,7 +66,7 @@ export function AyudaFormClient() {
     onSuccess: (record) => {
       toast.success("Program created as draft.");
       void utils.ayuda.listPrograms.invalidate();
-      router.push(`/${tenantSlug}/ayuda/${record.id}`);
+      router.push(tenantHref(`/ayuda/${record.id}`));
       router.refresh();
     },
     onError: (error) => {
@@ -159,7 +159,7 @@ export function AyudaFormClient() {
 
         <FormActions>
           <Button type="button" variant="outline" asChild>
-            <Link href={`/${tenantSlug}/ayuda`}>Cancel</Link>
+            <Link href={tenantHref("/ayuda")}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

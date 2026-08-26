@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   Check,
@@ -17,6 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notificationHref } from "@/lib/notification-href";
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 const TYPE_ICON: Record<string, typeof Info> = {
   INFO: Info,
@@ -62,8 +63,7 @@ function NotificationsSkeleton() {
 }
 
 export default function NotificationsPage() {
-  const params = useParams<{ tenant: string }>();
-  const tenant = params.tenant;
+  const tenantHref = useTenantHref();
   const router = useRouter();
 
   const utils = trpc.useUtils();
@@ -101,7 +101,8 @@ export default function NotificationsPage() {
     if (!notif.isRead) {
       markRead.mutate({ id: notif.id });
     }
-    const href = notificationHref(tenant, notif.entityType, notif.entityId);
+    const rel = notificationHref(notif.entityType, notif.entityId);
+    const href = rel ? tenantHref(rel) : null;
     if (href) {
       router.push(href);
     }
@@ -153,11 +154,8 @@ export default function NotificationsPage() {
           {notifications.map((notif) => {
             const Icon = TYPE_ICON[notif.type] ?? Info;
             const iconClass = TYPE_ICON_CLASS[notif.type] ?? "text-gray-400";
-            const href = notificationHref(
-              tenant,
-              notif.entityType,
-              notif.entityId,
-            );
+            const rel = notificationHref(notif.entityType, notif.entityId);
+            const href = rel ? tenantHref(rel) : null;
             const isActionable = !!href || !notif.isRead;
 
             const rowContent = (

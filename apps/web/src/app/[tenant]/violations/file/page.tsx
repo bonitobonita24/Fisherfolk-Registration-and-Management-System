@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
 import { PageHeader } from "@/components/shared";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { ViolationFormClient } from "./violation-form-client";
 
 interface FileViolationPageProps {
@@ -20,7 +21,7 @@ export default async function FileViolationPage({
     role !== "tenant_admin"
   ) {
     const { tenant } = await params;
-    redirect(`/${tenant}/violations`);
+    redirect(await tenantHref(tenant, "/violations"));
   }
 
   return (

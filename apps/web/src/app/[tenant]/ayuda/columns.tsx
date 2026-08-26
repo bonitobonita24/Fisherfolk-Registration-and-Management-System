@@ -2,9 +2,9 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface AyudaProgramListItem {
   id: string;
@@ -18,11 +18,11 @@ export interface AyudaProgramListItem {
 }
 
 function TitleCell({ row }: { row: Row<AyudaProgramListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const item = row.original;
   return (
     <Link
-      href={`/${params.tenant}/ayuda/${item.id}`}
+      href={tenantHref(`/ayuda/${item.id}`)}
       className="font-medium text-primary hover:underline"
     >
       {item.title}

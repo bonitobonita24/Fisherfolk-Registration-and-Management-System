@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
 import { GEAR_TYPE_LABELS, CATCH_DISPOSITION_LABELS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import {
   Card,
   CardContent,
@@ -39,7 +39,7 @@ function formatKg(value: number | null | undefined): string {
 }
 
 export function FishCatchDetailClient({ id }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
 
   const {
     data: record,
@@ -59,7 +59,7 @@ export function FishCatchDetailClient({ id }: Props) {
     return (
       <div className="space-y-4 pb-4">
         <RecordHeader
-          backHref={`/${params.tenant}/fish-catches`}
+          backHref={tenantHref("/fish-catches")}
           backLabel="Back to fish catches"
           title="Fish catch record"
         />
@@ -101,7 +101,7 @@ export function FishCatchDetailClient({ id }: Props) {
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
-        backHref={`/${params.tenant}/fish-catches`}
+        backHref={tenantHref("/fish-catches")}
         backLabel="Back to fish catches"
         title={record.referenceNo}
         meta={formatDate(record.landingDate)}
@@ -118,7 +118,7 @@ export function FishCatchDetailClient({ id }: Props) {
               label="Fisherfolk"
               value={
                 <Link
-                  href={`/${params.tenant}/fisherfolk/${record.fisherfolk.id}`}
+                  href={tenantHref(`/fisherfolk/${record.fisherfolk.id}`)}
                   className="text-primary hover:underline"
                 >
                   {fisherfolkName} · {record.fisherfolk.idNumber}
@@ -130,7 +130,7 @@ export function FishCatchDetailClient({ id }: Props) {
               value={
                 record.vessel ? (
                   <Link
-                    href={`/${params.tenant}/vessels/${record.vessel.id}`}
+                    href={tenantHref(`/vessels/${record.vessel.id}`)}
                     className="text-primary hover:underline"
                   >
                     {record.vessel.vesselName ?? record.vessel.mfvrNumber}

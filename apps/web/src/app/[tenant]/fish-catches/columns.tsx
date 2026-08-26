@@ -2,10 +2,10 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { GEAR_TYPE_LABELS, CATCH_DISPOSITION_LABELS } from "@frms/shared/constants";
 import type { GearType, CatchDisposition } from "@frms/shared/types";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface FishCatchListItem {
   id: string;
@@ -34,11 +34,11 @@ export interface FishCatchListItem {
 }
 
 function ReferenceNoCell({ row }: { row: Row<FishCatchListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const item = row.original;
   return (
     <Link
-      href={`/${params.tenant}/fish-catches/${item.id}`}
+      href={tenantHref(`/fish-catches/${item.id}`)}
       className="font-medium text-primary hover:underline"
     >
       {item.referenceNo}

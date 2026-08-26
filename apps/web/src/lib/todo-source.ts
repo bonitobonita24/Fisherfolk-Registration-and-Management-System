@@ -42,10 +42,14 @@ function isSourceEntityType(value: string): value is SourceEntityType {
   );
 }
 
+/**
+ * Returns the TENANT-RELATIVE href (e.g. `/fisherfolk/${id}`) + label for a
+ * todo source entity, or null. Callers prepend the tenant prefix with
+ * useTenantHref()/tenantHref() so the link is host-aware (see tenant-href.ts).
+ */
 export function sourceEntityLink(
   type: string | null | undefined,
   id: string | null | undefined,
-  tenant: string,
 ): { href: string; label: string } | null {
   if (type === null || type === undefined || type === "") {
     return null;
@@ -59,7 +63,7 @@ export function sourceEntityLink(
 
   const segment = SOURCE_ENTITY_ROUTES[type];
   return {
-    href: `/${tenant}/${segment}/${id}`,
+    href: `/${segment}/${id}`,
     label: SOURCE_ENTITY_LABELS[type],
   };
 }

@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 
 import { auth } from "@/server/auth";
 import { canManage as canManageRole } from "@/lib/rbac/can-manage";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/shared";
 import { ViolationsListClient } from "./violations-list-client";
@@ -13,6 +14,7 @@ interface ViolationsPageProps {
 
 export default async function ViolationsPage({ params }: ViolationsPageProps) {
   const { tenant } = await params;
+  const violationsFileHref = await tenantHref(tenant, "/violations/file");
   const session = await auth();
   const role = session?.user.role;
   const canManage = canManageRole(role);
@@ -25,7 +27,7 @@ export default async function ViolationsPage({ params }: ViolationsPageProps) {
         action={
           canManage && (
             <Button asChild>
-              <Link href={`/${tenant}/violations/file`}>
+              <Link href={violationsFileHref}>
                 <Plus className="mr-2 h-4 w-4" />
                 File Violation
               </Link>

@@ -2,11 +2,11 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface HouseholdListItem {
   id: string;
@@ -21,11 +21,11 @@ export interface HouseholdListItem {
 }
 
 function HouseholdNumberCell({ row }: { row: Row<HouseholdListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const item = row.original;
   return (
     <Link
-      href={`/${params.tenant}/households/${item.id}`}
+      href={tenantHref(`/households/${item.id}`)}
       className="font-medium text-primary hover:underline"
     >
       {item.householdNumber}

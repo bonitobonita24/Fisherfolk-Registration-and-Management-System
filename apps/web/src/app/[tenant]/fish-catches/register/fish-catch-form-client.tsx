@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -18,6 +18,7 @@ import {
 import type { GearType, CatchDisposition } from "@frms/shared/types";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -122,8 +123,7 @@ const EMPTY_SPECIES_ROW = {
 
 export function FishCatchFormClient() {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const [fisherfolkSearch, setFisherfolkSearch] = useState("");
   const [selectedFisherfolk, setSelectedFisherfolk] =
@@ -180,7 +180,7 @@ export function FishCatchFormClient() {
     onSuccess: (record) => {
       toast.success(`Fish catch record ${record.referenceNo} saved.`);
       void utils.fishCatch.list.invalidate();
-      router.push(`/${tenantSlug}/fish-catches/${record.id}`);
+      router.push(tenantHref(`/fish-catches/${record.id}`));
       router.refresh();
     },
     onError: (error) => {
@@ -880,7 +880,7 @@ export function FishCatchFormClient() {
         {/* Actions */}
         <FormActions>
           <Button type="button" variant="outline" asChild>
-            <Link href={`/${tenantSlug}/fish-catches`}>Cancel</Link>
+            <Link href={tenantHref("/fish-catches")}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

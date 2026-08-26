@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
   Plus,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared";
 import { SearchInput } from "@/components/shared/search-input";
@@ -30,7 +30,7 @@ import { columns } from "./columns";
 const PAGE_SIZES = [10, 20, 50] as const;
 
 export function HouseholdsListClient() {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(20);
   const [search, setSearch] = useState("");
@@ -73,7 +73,7 @@ export function HouseholdsListClient() {
               className="w-full sm:w-56"
             />
             <Button asChild size="sm">
-              <Link href={`/${params.tenant}/households/new`}>
+              <Link href={tenantHref("/households/new")}>
                 <Plus className="mr-2 size-4" />
                 Create Household
               </Link>
