@@ -4,6 +4,20 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.18.0 — 2026-08-26
+
+### [FEATURE]
+- host-aware in-app links — tenant-relative paths on masked custom-domain hosts, killing the demo 308-on-click (`266449b`)
+- host-aware server `redirect()` guards — 12 RSC guard sites emit clean paths on masked hosts (`cba0295`)
+
+### [FIXED]
+- invalid fisherfolk record id renders 404 not 400 (`2ed5cb9`)
+- import-tempfiles `--dir` arg + telegram `media_objects` ledger write (`29a6cbd`)
+
+### [DOCS]
+- 08-14-26 masterlist import (dev + prod + live FMO) + host-aware links session logs
+
+
 ## v0.17.0 — 2026-08-21
 
 ### [FEATURE]

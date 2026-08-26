@@ -1,0 +1,70 @@
+'use client'
+
+// Third-party Imports
+import { DownloadIcon, FileTextIcon } from 'lucide-react'
+import { toast } from 'sonner'
+
+// Type Imports
+import type { PurchaseOrder } from '@/types/entities/purchase-order'
+
+// Component Imports
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+
+type PoAttachmentsNotesProps = {
+  po: PurchaseOrder
+}
+
+const PoAttachmentsNotes = ({ po }: PoAttachmentsNotesProps) => {
+  return (
+    <Card className='gap-0 py-0'>
+      <CardHeader className='px-5 pt-5'>
+        <CardTitle>Attachments & Notes</CardTitle>
+      </CardHeader>
+      <CardContent className='space-y-6 p-4'>
+        <div className='space-y-2'>
+          <p className='text-muted-foreground text-xs'>Attachments</p>
+          {po.attachments.length === 0 ? (
+            <p className='text-muted-foreground text-sm'>No attachments on this purchase order.</p>
+          ) : (
+            <div className='space-y-2'>
+              {po.attachments.map(attachment => (
+                <div key={attachment.id} className='bg-muted flex items-center justify-between gap-3 rounded-md p-3'>
+                  <div className='flex min-w-0 items-center gap-3'>
+                    <div className='bg-background flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-md'>
+                      <FileTextIcon className='size-5' />
+                    </div>
+                    <div className='min-w-0'>
+                      <p className='truncate text-sm font-medium'>{attachment.name}</p>
+                      <p className='text-muted-foreground text-xs'>{attachment.sizeLabel}</p>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    aria-label={`Download ${attachment.name}`}
+                    onClick={() => toast('Downloading attachment')}
+                  >
+                    <DownloadIcon className='size-4' />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        <div className='space-y-2'>
+          <p className='text-muted-foreground text-xs'>Internal notes</p>
+          <p className='text-sm whitespace-pre-line'>{po.internalNotes || 'No internal notes added.'}</p>
+          <p className='text-muted-foreground text-xs'>Added by {po.buyer}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default PoAttachmentsNotes
