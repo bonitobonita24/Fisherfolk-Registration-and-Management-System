@@ -6,9 +6,20 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-_(none — queue clear as of 2026-08-26 v0.18.0 ship)_
+- 🟡 **Cargorix Wave 3 — components/shared/ wrapper layer.** Gated on owner sign-off (DefinitionGrid idiom).
+  Build on branch `feat/cargorix-stack-integrated`. See `PENDING_DECISIONS.md` 2026-08-27. `owner`
+- 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
+  files, drop/merge stale entries. `agent-found 2026-08-27`
 
 ## ✅ Done recently
+
+- ✅ **Cargorix Waves 0–2 integrated onto current main + verified.** New branch
+  `feat/cargorix-stack-integrated` (`3b2c9d8`): merged v0.18.0 `main` into the stacked waves (4 shell files
+  auto-merged w/ the tenantHref refactor, both changesets coexist), + `fix(a11y)` sidebar group-label
+  contrast 4.16→AA. Gate green (tsc/lint/410 tests/build); live render clean 0 console errors; axe WCAG 2.2
+  AA 0 violations/5 routes. LOCAL/HARD HOLD. (2026-08-27)
+
+## ✅ Older
 
 - ✅ **Server `redirect()` 308 on demo custom-domain — SHIPPED (v0.18.0).** The 12 RSC `redirect()` guard sites
   (`[tenant]/{layout,page}`, register/new pages, admin/kanban, `tm/layout`) now call the async `tenantHref()`

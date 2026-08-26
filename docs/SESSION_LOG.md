@@ -2,6 +2,30 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-27 — Full Auto: integrate Cargorix Waves 0-2 onto current main + verify
+
+**In your words:** verify Waves 0–2 first, then "do what should be next full auto mode, i need to sleep."
+
+✅ **Done + verified**
+- **Caught a stale handoff.** The prior note said "start Wave 0 spike" — but Waves 0, 1, and 2 were already
+  built (local unmerged branches). So the real work was integrating them onto the current v0.18.0 `main` and
+  verifying, not re-running Wave 0. Surfaced this to you before spending any effort.
+- **Integrated the stack.** New branch `feat/cargorix-stack-integrated`: merged current `main` into the
+  cleanly-stacked Waves 0→2. The four shell/nav files that both the v0.18.0 link refactor and the reskin had
+  touched merged cleanly; confirmed both sets of changes survived.
+- **Fixed one accessibility regression.** The reskinned sidebar section labels (Overview/Records/Operations/
+  Administration) fell just under the WCAG AA contrast minimum in dark mode (4.16:1 vs 4.5:1). One-line fix.
+- **Verified end-to-end.** Typecheck, lint, 410 tests, production build all green. Rebuilt dev, walked the
+  dashboard (light + dark), fisherfolk list, and the fisherfolk detail page — reskin looks right, the orange
+  identity and the DefinitionGrid layout are intact, zero console errors. Ran an axe WCAG 2.2 AA sweep across
+  five routes: clean after the fix. Screenshots sent to you.
+
+💬 **Decisions / next**
+- **Wave 3 is waiting on you.** It rebuilds the shared component layer including DefinitionGrid, which the plan
+  says needs your explicit sign-off. Review the screenshots and green-light it (or point me at the un-gated
+  alternative: tidying up the 5 old pending-decision items, several of which already look shipped).
+- Everything is LOCAL / HARD HOLD — nothing merged to main, nothing pushed or deployed.
+
 ## 2026-08-26 (cont.) — Full Auto: finish redirect 308 fix + ship v0.18.0 to prod + demo
 
 **In your words:** "yes do it all in full Auto mode" — do the whole lineup: finish the deferred redirect item, merge the bugfixes to main, push, and promote prod + demo.

@@ -1,6 +1,49 @@
 # FRMS — Project State
 
-## Current State (2026-08-26, latest) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
+## Current State (2026-08-27, latest) — 🎨 Cargorix Waves 0-2 INTEGRATED onto v0.18.0 main + verified; Wave 3 gated on owner
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Full-auto session, owner asleep ("do what should be next full auto mode, i need to sleep"). Owner had
+picked "verify Waves 0-2 first". The resume already-done cross-check CAUGHT that the prior handoff's
+"START Wave 0 spike" was **stale** — Waves 0, 1, AND 2 were already built as local unmerged branches
+(cleanly stacked wave-0 ⊆ wave-1 ⊆ wave-2). Real next step was integration + verification onto current main.
+
+### ✅ DONE THIS SESSION (2026-08-27, all executed + verified — LOCAL / HARD HOLD)
+- **New branch `feat/cargorix-stack-integrated`** off current `main` (`650757d`, v0.18.0).
+  - `c156411` — merged current `main` INTO the Cargorix stack (was 14 commits behind). The 4 overlapping
+    shell/nav files (`app-shell.tsx`, `header.tsx`, `sidebar.tsx`, `fisherfolk-detail-client.tsx`) — which
+    v0.18.0's `useTenantHref` refactor AND Wave 2's reskin both touched — **git 3-way auto-merged cleanly**;
+    only docs (SESSION_LOG/STATE) conflicted (took main). Confirmed BOTH changesets coexist.
+  - `3b2c9d8` — `fix(a11y)`: sidebar group labels (Overview/Records/Operations/Administration) were
+    `text-muted-foreground/70` @11px = 4.16:1 dark, **below 4.5:1 WCAG 2.2 AA** (SC 1.4.3). Dropped `/70`
+    → full muted-foreground (~7:1 dark / ~5.6:1 light). One line, `sidebar.tsx:114`.
+- **Verified (full Rule-32 bar):** tsc 7/7 · lint 0 · **410 tests** · `build` all green. Dev rebuilt off the
+  branch (FRESH, :44387). Live render — dashboard (light+dark), fisherfolk list, fisherfolk **detail** (the
+  highest merge-risk file: Photo/Sig/QR + orange active-tab + DefinitionGrid all intact, real photo loads),
+  full RBAC nav incl. Administration, tenant orange identity preserved, **0 console errors**. **axe-core
+  4.11.4 WCAG 2.2 AA** across 5 routes: 3 nodes/route → after fix = **0 violations.** Evidence:
+  `screenshots/cargorix-verify-0[1-5]-*.png` (sent to owner).
+- Originals preserved: `feat/cargorix-wave-{0,1,2}-*`, `docs/cargorix-adoption-plan` (holds the plan doc — not on main).
+
+### ⏳ NEXT SESSION — Wave 3 is GATED on owner (open [WHAT] in PENDING_DECISIONS.md)
+- **🎨 Cargorix Wave 3 — components/shared/ wrapper layer (highest leverage).** Rebuilds the shared wrapper
+  layer **including DefinitionGrid** — the plan's own guardrail requires **explicit owner sign-off on
+  DefinitionGrid** (the "absolutely perfect" idiom). Owner asked to verify first. So: owner reviews the
+  screenshots + green-lights Wave 3 before it starts. Build on `feat/cargorix-stack-integrated`. LOCAL.
+- **Un-gated alternative if owner prefers:** reconcile the 5 stale pre-existing `PENDING_DECISIONS.md` items
+  (2026-08-08 → 08-14; several look already-shipped per memory — verify vs git/deploy state, close or keep).
+- **Two owner-authorized PENDING items stay CROSS-SEAT / NOT FRMS** (AIEF site-access merge from AIEF seat;
+  Phase-2 per-app adoption from each app's own seat) — a FRMS session surfaces, never executes them.
+- **Maintenance:** launch-folder `MEMORY.md` is ~22KB (near read limit) — compact it (one line/entry) in a dedicated pass.
+
+### Git
+On `feat/cargorix-stack-integrated` @ `3b2c9d8`. `main == origin/main == 650757d` (untouched). Tree clean.
+Nothing merged to main, nothing pushed/deployed — **HARD HOLD holds** (full-auto never ships).
+
+---
+
+## Current State (2026-08-26) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

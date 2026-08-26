@@ -6,6 +6,17 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-27 — 🎨 Cargorix Wave 3 go/no-go (HARD HOLD — owner review gate)
+
+- [ ] **[WHAT] Green-light Cargorix Wave 3?** Waves 0–2 are now integrated onto current `main` (v0.18.0) on
+  branch `feat/cargorix-stack-integrated` (`3b2c9d8`) and fully verified (code gate + live render + axe WCAG
+  2.2 AA green; screenshots sent). **Wave 3 = the `components/shared/` wrapper layer, incl. DefinitionGrid.**
+  The adoption plan's own guardrail requires **explicit owner sign-off on DefinitionGrid** (the "absolutely
+  perfect" idiom) before it's altered — so Wave 3 is deferred until the owner (a) reviews the reskin
+  screenshots and (b) says go. **Recommendation:** review screenshots → if the look is approved, proceed to
+  Wave 3 (build on the integrated branch). If not, list the tweaks first. **Un-gated alternative** the loop
+  can do meanwhile: reconcile the 5 stale pending items below (several look already-shipped). All LOCAL/HARD HOLD.
+
 ### 2026-08-14 — 🚀 Push / merge authorization (HARD HOLD)
 
 - [x] ✅ **RESOLVED [WHAT] (2026-08-14, owner authorized both) — PUSHED + RELEASED `v0.11.0`.**
