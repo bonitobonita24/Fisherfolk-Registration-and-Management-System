@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ImageOff, X, Users } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { DataTable } from "@/components/shared/data-table";
 import { SearchInput } from "@/components/shared/search-input";
 import { EmptyState } from "@/components/shared";
@@ -24,7 +25,7 @@ const STATUSES = ["NEW", "ACTIVE", "RENEWED", "INACTIVE", "ARCHIVED"] as const;
 const PAGE_SIZES = [10, 20, 50] as const;
 
 export function FisherfolkListClient() {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -101,7 +102,7 @@ export function FisherfolkListClient() {
               </SelectContent>
             </Select>
             <Button asChild size="sm">
-              <Link href={`/${params.tenant}/fisherfolk/register`}>
+              <Link href={tenantHref("/fisherfolk/register")}>
                 <Plus className="mr-2 size-4" />
                 Register
               </Link>

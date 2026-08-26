@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -89,8 +89,6 @@ interface SearchOutcome {
 }
 
 export function DuplicateSearchClient() {
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
   const [outcome, setOutcome] = useState<SearchOutcome | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [proceedValues, setProceedValues] =
@@ -261,7 +259,6 @@ export function DuplicateSearchClient() {
       {outcome != null && (
         <ResultsPanel
           outcome={outcome}
-          tenantSlug={tenantSlug}
           onProceed={handleProceed}
           onSearchAgain={handleSearchAgain}
         />
@@ -272,14 +269,12 @@ export function DuplicateSearchClient() {
 
 interface ResultsPanelProps {
   outcome: SearchOutcome;
-  tenantSlug: string;
   onProceed: () => void;
   onSearchAgain: () => void;
 }
 
 function ResultsPanel({
   outcome,
-  tenantSlug,
   onProceed,
   onSearchAgain,
 }: ResultsPanelProps) {
@@ -349,7 +344,7 @@ function ResultsPanel({
       <ul className="space-y-3">
         {matches.map((match) => (
           <li key={match.id}>
-            <MatchCard match={match} tenantSlug={tenantSlug} />
+            <MatchCard match={match} />
           </li>
         ))}
       </ul>
@@ -389,11 +384,10 @@ function matchBadgeClass(matchType: MatchType): string {
 
 function MatchCard({
   match,
-  tenantSlug,
 }: {
   match: MatchCandidate;
-  tenantSlug: string;
 }) {
+  const tenantHref = useTenantHref();
   const dob = match.dateOfBirth
     ? new Date(match.dateOfBirth).toLocaleDateString()
     : "—";
@@ -426,7 +420,7 @@ function MatchCard({
 
       <div className="mt-3 flex justify-end">
         <Link
-          href={`/${tenantSlug}/fisherfolk/${match.id}`}
+          href={tenantHref(`/fisherfolk/${match.id}`)}
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
         >
           View existing record

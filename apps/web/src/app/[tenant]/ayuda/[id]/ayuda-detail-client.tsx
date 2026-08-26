@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
 import { LinkedTodos } from "@/components/todo/linked-todos";
 import { BulkFilterDialog } from "./bulk-filter-dialog";
@@ -335,7 +335,7 @@ function BeneficiariesTable({
   programId: string;
   canManage: boolean;
 }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const utils = trpc.useUtils();
   const [selectedBeneficiaryIds, setSelectedBeneficiaryIds] = useState<
     Set<string>
@@ -518,7 +518,7 @@ function BeneficiariesTable({
                   )}
                   <TableCell className="py-2 text-sm font-medium">
                     <Link
-                      href={`/${params.tenant}/fisherfolk/${b.fisherfolk.id}`}
+                      href={tenantHref(`/fisherfolk/${b.fisherfolk.id}`)}
                       className="text-primary hover:underline"
                     >
                       {b.fisherfolk.fullName}
@@ -592,7 +592,7 @@ function BeneficiariesTable({
 }
 
 export function AyudaDetailClient({ id, canManage }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const utils = trpc.useUtils();
   const [closeOpen, setCloseOpen] = useState(false);
 
@@ -663,7 +663,7 @@ export function AyudaDetailClient({ id, canManage }: Props) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/ayuda`}>
+          <Link href={tenantHref("/ayuda")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
@@ -686,7 +686,7 @@ export function AyudaDetailClient({ id, canManage }: Props) {
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
-        backHref={`/${params.tenant}/ayuda`}
+        backHref={tenantHref("/ayuda")}
         backLabel="Back to ayuda programs"
         title={record.title}
         meta={`Created ${formatDate(record.createdAt)}`}

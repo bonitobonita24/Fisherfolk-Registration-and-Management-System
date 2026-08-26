@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -12,6 +12,7 @@ import { Gender, CivilStatus } from "@frms/shared/types";
 import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,8 +114,7 @@ interface EditFormProps {
 
 function EditForm({ id, record }: EditFormProps) {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const utils = trpc.useUtils();
 
@@ -122,7 +122,7 @@ function EditForm({ id, record }: EditFormProps) {
     onSuccess: () => {
       toast.success("Record updated.");
       void utils.fisherfolk.getById.invalidate({ id });
-      router.push(`/${tenantSlug}/fisherfolk/${id}`);
+      router.push(tenantHref(`/fisherfolk/${id}`));
     },
     onError: (err) => {
       if (err.data?.code === "FORBIDDEN") {
@@ -138,7 +138,7 @@ function EditForm({ id, record }: EditFormProps) {
     onSuccess: () => {
       toast.success("Edit request submitted for admin approval.");
       void utils.fisherfolk.getById.invalidate({ id });
-      router.push(`/${tenantSlug}/fisherfolk/${id}`);
+      router.push(tenantHref(`/fisherfolk/${id}`));
     },
     onError: (err) => {
       toast.error(err.message);
@@ -547,7 +547,7 @@ function EditForm({ id, record }: EditFormProps) {
         {/* Actions */}
         <FormActions>
           <Button type="button" variant="outline" asChild>
-            <Link href={`/${tenantSlug}/fisherfolk/${id}`}>Cancel</Link>
+            <Link href={tenantHref(`/fisherfolk/${id}`)}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -567,8 +567,7 @@ interface FisherfolkEditFormClientProps {
 }
 
 export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) {
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const { data: record, isLoading, isError, error } = trpc.fisherfolk.getById.useQuery({ id });
 
@@ -581,7 +580,7 @@ export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) 
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${tenantSlug}/fisherfolk`}>
+          <Link href={tenantHref("/fisherfolk")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
@@ -606,7 +605,7 @@ export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) 
       {/* Page header */}
       <div className="flex items-center gap-3">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${tenantSlug}/fisherfolk/${id}`}>
+          <Link href={tenantHref(`/fisherfolk/${id}`)}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Link>

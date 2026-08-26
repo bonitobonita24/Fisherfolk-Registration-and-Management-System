@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import {
   AttachmentUpload,
   type UploadedAttachment,
@@ -67,8 +68,7 @@ function trimOpt(v: string): string | undefined {
 
 export function ViolationFormClient() {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const [violatorMode, setViolatorMode] = useState<"registered" | "name">(
     "registered",
@@ -103,7 +103,7 @@ export function ViolationFormClient() {
     onSuccess: (record) => {
       toast.success("Violation filed.");
       void utils.violation.list.invalidate();
-      router.push(`/${tenantSlug}/violations/${record.id}`);
+      router.push(tenantHref(`/violations/${record.id}`));
       router.refresh();
     },
     onError: (error) => {
@@ -447,7 +447,7 @@ export function ViolationFormClient() {
         {/* Actions */}
         <FormActions>
           <Button type="button" variant="outline" asChild>
-            <Link href={`/${tenantSlug}/violations`}>Cancel</Link>
+            <Link href={tenantHref("/violations")}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

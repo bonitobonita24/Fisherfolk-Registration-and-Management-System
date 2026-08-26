@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { Button } from "@/components/ui/button";
 
 export interface TenantLandingPlaceholderProps {
@@ -14,10 +15,11 @@ export interface TenantLandingPlaceholderProps {
  * Reached ONLY when TENANT_LANDING_ENABLED is on AND the visitor is
  * anonymous — see app/[tenant]/page.tsx.
  */
-export function TenantLandingPlaceholder({
+export async function TenantLandingPlaceholder({
   tenantName,
   tenantSlug,
 }: TenantLandingPlaceholderProps) {
+  const loginHref = await tenantHref(tenantSlug, "/login");
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center">
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">
@@ -27,7 +29,7 @@ export function TenantLandingPlaceholder({
         This is {tenantName}&apos;s public page.
       </p>
       <Button asChild>
-        <Link href={`/${tenantSlug}/login`}>Sign in</Link>
+        <Link href={loginHref}>Sign in</Link>
       </Button>
     </div>
   );

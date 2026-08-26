@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 
 import { auth } from "@/server/auth";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { Button } from "@/components/ui/button";
 import { IdGeneratorClient } from "./_components/id-generator-client";
 
@@ -11,6 +12,7 @@ export default async function IdGeneratorPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant } = await params;
+  const idTemplateHref = await tenantHref(tenant, "/settings/id-template");
   const session = await auth();
   const role = session?.user?.role;
   const isAdmin =
@@ -28,7 +30,7 @@ export default async function IdGeneratorPage({
         </div>
         {isAdmin && (
           <Button asChild variant="outline" size="sm" className="ml-auto shrink-0">
-            <Link href={`/${tenant}/settings/id-template`}>
+            <Link href={idTemplateHref}>
               <Settings className="mr-1.5 size-4" aria-hidden="true" />
               Manage ID template
             </Link>

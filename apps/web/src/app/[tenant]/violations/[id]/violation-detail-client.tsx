@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { ArrowLeft, ImageOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
 import { LinkedTodos } from "@/components/todo/linked-todos";
 import { Button } from "@/components/ui/button";
@@ -69,7 +69,7 @@ function EvidenceImage({ imageKey }: { imageKey: string }) {
 }
 
 export function ViolationDetailClient({ id, canManage }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
 
   const {
     data: record,
@@ -108,7 +108,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/violations`}>
+          <Link href={tenantHref("/violations")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
@@ -138,7 +138,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
-        backHref={`/${params.tenant}/violations`}
+        backHref={tenantHref("/violations")}
         backLabel="Back to violations"
         title={record.subject}
         meta={`Filed ${formatDate(record.createdAt)}`}
@@ -248,7 +248,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                   )}
                   <div className="min-w-0 space-y-1">
                     <Link
-                      href={`/${params.tenant}/fisherfolk/${targetFisherfolk.id}`}
+                      href={tenantHref(`/fisherfolk/${targetFisherfolk.id}`)}
                       className="block truncate text-sm font-medium text-foreground hover:underline"
                     >
                       {targetFisherfolk.fullName}
@@ -301,7 +301,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
               value={
                 targetVessel ? (
                   <Link
-                    href={`/${params.tenant}/vessels/${targetVessel.id}`}
+                    href={tenantHref(`/vessels/${targetVessel.id}`)}
                     className="flex items-center justify-between gap-2 hover:underline"
                   >
                     <span className="font-medium text-foreground">

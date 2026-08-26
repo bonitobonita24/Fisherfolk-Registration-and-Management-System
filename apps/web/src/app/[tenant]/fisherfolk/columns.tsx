@@ -2,10 +2,10 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { CheckCircle2, Clock3, RefreshCw, Sparkles } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface FisherfolkListItem {
   id: string;
@@ -20,11 +20,11 @@ export interface FisherfolkListItem {
 }
 
 function IdNumberCell({ row }: { row: Row<FisherfolkListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const item = row.original;
   return (
     <Link
-      href={`/${params.tenant}/fisherfolk/${item.id}`}
+      href={tenantHref(`/fisherfolk/${item.id}`)}
       className="font-medium text-primary hover:underline"
     >
       {item.idNumber}

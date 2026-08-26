@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
 import { trpc } from "@/lib/trpc/client";
 import {
@@ -10,6 +9,7 @@ import {
   URGENT_DESTRUCTIVE_CLASS,
 } from "@/lib/todo-source";
 import type { SourceEntityType } from "@/lib/todo-source";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import {
   Card,
   CardContent,
@@ -46,7 +46,7 @@ export function LinkedTodos({
   sourceEntityType,
   sourceEntityId,
 }: LinkedTodosProps) {
-  const { tenant } = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const { data, isLoading } = trpc.kanbanTask.list.useQuery({
     sourceEntityType,
     sourceEntityId,
@@ -79,7 +79,7 @@ export function LinkedTodos({
               return (
                 <li key={task.id}>
                   <Link
-                    href={`/${tenant}/todo`}
+                    href={tenantHref("/todo")}
                     className="flex flex-wrap items-center justify-between gap-2 rounded-md px-2 py-2 text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="flex-1 min-w-0 truncate font-medium text-foreground">
