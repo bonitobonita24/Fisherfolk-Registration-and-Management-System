@@ -1,54 +1,27 @@
 # FRMS — Project State
 
-## Current State (2026-08-23, latest) — 🎨 Cargorix Wave 2 (App-Shell floating-card reskin) DONE + 🔴 remember-me cookie bug FIXED; both live-verified on dev, all LOCAL / HARD HOLD
+## Current State (2026-08-26, latest) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-Owner: "Start Wave 2 now" → mid-session "remember me isn't working" → "save session". Both done + live-verified on a rebuilt dev, nothing pushed. Model authority memory: `project_cargorix_wave2_rememberme_0823.md`.
+Owner: "yes do it all in full Auto mode." Executed end-to-end: finished the deferred server-`redirect()` 308 fix, merged the two bugfix branches + host-aware links to `main`, released **v0.18.0**, pushed origin (Model-A CI + Docker Build green), promoted **prod + demo** to `sha-8430f7a`, rebuilt dev (Rule 39 FRESH). Full bar met; tree clean & pushed. Then owner: "save session; on the next session do the Cargorix redesign and the two open PENDING_DECISIONS."
 
-**✅ Done this session (LOCAL / HARD HOLD):**
-- **Cargorix Wave 2 — App-Shell Trio reskin.** Branch `feat/cargorix-wave-2-app-shell` `0a08369` (stacks on Wave 1 + active-tab). 3 files (`app-shell.tsx`/`header.tsx`/`sidebar.tsx`), tokens-only, RBAC `nav-items.ts` untouched. Floating-card layout (canvas gutter + detached header card + framed content card); **orange active-nav** = tenant-driven `--primary` left-rail (4×20px) over a warm `bg-accent` wash + `text-accent-foreground` (NOT orange-as-text → avoids Wave-1 AA trap). Verified live both themes: rail `rgb(249,116,21)`, active-nav AA **12.96**, inactive 4.83, white-label footer + nav groups intact, 0 console errors. Screenshots `screenshots/wave2-dashboard-{light,lightmode}.png`. tsc clean.
-- **Remember-me cookie bug FIXED.** Branch `fix/remember-me-session-cookie` `3a88589` (off main). New `apps/web/src/server/auth/remember-me.ts` (+`.test.ts`) + wrapped `handlers.POST` in `auth/index.ts`. Auth.js v5 has no per-login cookie-Max-Age hook (static `session.maxAge`=30d ceiling) → every cookie was persistent, masking the per-login JWT exp. Now unchecked = SESSION cookie (strip Max-Age/Expires; keep HttpOnly/Secure/SameSite/Path). **Live-proven** via CSRF+/callback on running dev (false→no Max-Age, true→+30d) + 11 unit + 413 web tests green.
+### ⏳ NEXT SESSION — owner-directed queue (2026-08-27)
+1. **🎨 Cargorix redesign — START Wave 0 spike.** ✅ FRMS-seat work, owner said "go". Plan = `docs/CARGORIX_ADOPTION_PLAN.md` (Path A design-language reskin, 6 waves; decisions locked in `docs/DECISIONS_LOG.md`). Wave 0 = build the oklch→HSL token converter + remap accent to tangerine in `apps/web/src/app/globals.css`, apply to ONE fisherfolk list + ONE detail page (exercises DefinitionGrid + Tabs + rail), prove the per-tenant `#tenant-theme-root` override still wins → before/after screenshots (light+dark) for owner review. Own branch, LOCAL. Non-negotiable KEEPs each wave: orange→tangerine accent + per-tenant override, RBAC nav, tRPC/Prisma/Auth seams, SidebarFooter white-label, DefinitionGrid idiom, gov WCAG 2.2 AA axe gate. NOTE Rule 39 trap: FRMS dev = prebuilt image, no bind-mount — REBUILD to see changes.
+2. **Two owner-authorized PENDING_DECISIONS (2026-08-27) — ⚠ CROSS-SEAT, NOT FRMS.** (a) AIEF `feat/v32.50-site-access-standard` merge → do from the **Powerbyte-AIEF seat**. (b) Phase-2 per-app site-access adoption (MG/Orqafy/FerryBook/CueLane) → do from **each app's OWN seat**. A FRMS session must SURFACE these as authorized-but-elsewhere and NOT attempt them (focus-lock stays FRMS). See `PENDING_DECISIONS.md`.
 
-**Dev / branches:** dev container REBUILT off throwaway `verify/wave2-plus-rememberme` (merge of both) → **dev runs BOTH now** for review at `http://localhost:44387/calapan-city`. Two clean feature branches kept for independent merge. 🔴 Rule-39: FRMS dev = prebuilt image, no HMR — rebuild to see source changes.
+### ✅ DONE THIS SESSION (2026-08-26, all executed + verified)
+- **Redirect-guard 308 fix (finished the deferred 🟡).** 12 RSC `redirect()` guards → async `tenantHref()` (`cba0295`). Non-masked hosts (dev, prod) byte-identical — invariant unit-tested; tsc + lint + 410 tests + `next build` all green.
+- **Merged to `main`** (`--no-ff` `c19e756`): fix id-404 (`2ed5cb9`) + host-aware links (`266449b`) + redirect guards (`cba0295`) + import merge (`a057545`) + docs.
+- **Released v0.18.0** (`8430f7a`): consolidated CHANGELOG (2 `feat` + 2 `fix` + docs) + version-sync 7 pkgs + landing-footer fallback + annotated tag; `git push --follow-tags` → **`origin/main == 8430f7a`**, tag published. Model-A CI + Docker Build & Publish both green (`sha-8430f7a`).
+- **Promoted PROD + DEMO to `sha-8430f7a` / v0.18.0.** Both DBs backed up first; **migrations no-op** (19 applied, 0 pending — code/docs only); reseed-never. Prod healthy: `/api/health` `/` `/login` 200, `/tm` 307. Demo healthy: canonical `/` + `/login` 200 (running revision `8430f7a`). (Demo migrate step hit a transient SSH-tunnel refusal — irrelevant here, 0 pending migrations.)
+- **Dev-freshness (Rule 39):** dev rebuilt off `main`; `dev-freshness-check.sh` → **all code containers FRESH**; `/api/health` 200 (:44387).
 
-**⏳ Next un-gated:** merge decision (owner-gated) for either/both branches · Cargorix Wave 3+ (`docs/CARGORIX_ADOPTION_PLAN.md` on `docs/cargorix-adoption-plan`) · 🐛 `/fisherfolk/new` 400 (agent-found, unrelated).
-**Open [WHAT] (non-executable from FRMS seat):** AIEF `feat/v32.50-site-access-standard` merge (AIEF seat) · Phase 2 per-app adoption (each app's own seat).
-
----
-
-
-Owner: "proceed to Wave 2 · hold it (no push) · highlight the active detail-tab menu · save session." Wave 1 executed + verified PASS via PM→Architect→Executor→QA orchestration; a targeted active-tab-highlight fix added on owner request (Image #1). Nothing pushed. Model authority memory: `project_cargorix_wave1_done_0823.md`.
-
-### ✅ DONE THIS SESSION (2026-08-23, executed + verified)
-- **Cargorix Wave 1 — cool-tinted neutral/surface token adoption.** Branch `feat/cargorix-wave-1-tokens` (off the Wave 0 spike branch), commit **`aae3379`**. Orchestration: Architect (general-purpose) read the donor `_tempfiles/cargorix-template/.../globals.css` + FRMS globals.css, ran the W0 oklch→HSL converter per token, produced the exact neutral diff + AA table → **spec-executor** applied **27 token lines** to `apps/web/src/app/globals.css` (`:root` + `.dark`) → **QA worker** (Playwright+axe) verified. Owner decisions locked pre-build: **adopt cool-tinted neutrals** (background/foreground/card/popover/muted/border/input + sidebar surfaces) + **keep the faithful pale accent** (W0 `--accent` unchanged).
-  - **Frozen (untouched):** `--primary`, `--secondary`, `--ring`, `--accent`, `--sidebar-primary`, `--sidebar-ring`, `--chart-1..5`, `--destructive*`, `--radius`. Per-tenant `#tenant-theme-root` override chain untouched; **zero** tRPC/Prisma/Auth/data-layer files (verified by diff).
-  - **Verify PASS:** dev rebuilt off branch (Rule 39, FRESH); 8 screenshots (light+dark) in `screenshots/cargorix-wave1/` (`w1-*`). axe WCAG 2.2 AA = only **pre-existing** color-contrast patterns (sidebar section labels at `muted-foreground/70`; frozen orange links/avatar), **NO new regressions** vs W0 baseline, 0 non-contrast issues, 0 app console errors. Cool neutrals landed, orange identity preserved, DefinitionGrid Profile-tab structure intact, dark mode clean (deep cool-dark). One AA nudge by architect: light `--muted-foreground` L44.5→42.3 → 4.51:1.
-- **Active-tab highlight fix** (owner request, Image #1). Branch `fix/fisherfolk-detail-active-tab` (off wave-1), commit **`e397bb0`** (+11/−8, one file `fisherfolk-detail-client.tsx`). Detail tab bar active state now = **orange (`--primary`) bottom-border + semibold high-contrast `foreground` text**; inactive = `muted-foreground`. Shared `detailTabTrigger` class const applied to all 8 triggers. AA-safe (active TEXT stays foreground; orange is the underline indicator, not the text — orange text would fail AA on the light card). Executor rebuilt dev + confirmed classes live in served chunk; visual screenshots captured by a follow-up QA worker (`screenshots/cargorix-wave1/tab-active-*.png`).
-
-### 🎨 CARGORIX — Wave 2 APPROVED as NEXT (owner "yes proceed to wave 2")
-Wave 2 = **App-Shell Trio** (`components/app-shell.tsx` / `sidebar.tsx` / `header.tsx`): floating rounded-card header (`bg-card rounded-xl border backdrop-blur`), grouped/collapsible sidebar w/ icon-rail collapse + 2-level sub styling, framed content box, and the **ORANGE active-nav** (finally consumes the W0-staged `--sidebar-primary`). **KEEP:** RBAC-filtered `NAV_GROUPS` (read-only `nav-items.tsx`), SidebarFooter white-label, header YearSelect/RegistrationTypeSelect Suspense, NotificationBell + ThemeToggle + user menu, mobile Sheet/drawer. **No ⌘K yet** (Wave 4). Watch items: RBAC nav parity per role + tenant-accent regression. Plan authority: `docs/CARGORIX_ADOPTION_PLAN.md` §5 Wave 2 (on branch `docs/cargorix-adoption-plan`). Per-wave discipline: branch, INHERIT-not-REPLACE, verify-all-pages + axe, HARD HOLD.
-
-### 🚧 OPEN / HELD
-- **HARD HOLD — no push** (owner "yes hold it"). All three reskin branches LOCAL/unpushed: `feat/cargorix-wave-0-spike` → `feat/cargorix-wave-1-tokens` → `fix/fisherfolk-detail-active-tab`. Adoption plan on `docs/cargorix-adoption-plan`. `main == origin/main @ 4e99d62` (v0.17.0) unchanged.
-- **agent-found bug (out of scope, NOT fixed):** `/fisherfolk/new` create route 400s — calls `fisherfolk.getById` with `id="new"`. Pre-existing routing bug, unrelated to the reskin. Needs its own ticket/fix (do NOT fold into a reskin wave).
-- Carried owner-gated (unchanged): AIEF framework merge (own seat), Site-Access Phase 2 per-app (own seats), M4 Report-Hub back-port, prior deploy backlog. See PENDING_DECISIONS.md.
-
-### Git / branch state
-- On `fix/fisherfolk-detail-active-tab` (chain: off `feat/cargorix-wave-1-tokens` off `feat/cargorix-wave-0-spike`). All LOCAL/unpushed. `main == origin/main @ 4e99d62`. Dev rebuilt off the tab-fix branch (FRESH, serves the reskin). Untracked scratch: `.qa-learnings/`, `_tempfiles/`, `screenshots/` (gitignored).
-
----
-
-## Current State (2026-08-21) — 🚀 Profile-tab horizontal layout SHIPPED to prod + demo as v0.17.0; Cargorix redesign queued NEXT
-
-[FOCUS: Fisherfolk-Registration-and-Management-System]
+### 📌 Previous (2026-08-21) — v0.17.0 Profile-tab layout SHIPPED (superseded by the block above)
 
 Owner authorized: push main → released **v0.17.0**, then promoted prod + demo once CI was green. Cargorix UX/UI redesign deferred to the **next-session handoff** (owner's directive). Model authority memory: `project_v0170_shipped_cargorix_next_0821.md`.
 
-### ✅ DONE THIS SESSION (2026-08-21, all executed + verified)
-- **Pushed main + released v0.17.0.** `gen-release-notes --apply --version 0.17.0`: consolidated CHANGELOG (1 `feat` = horizontal grouped Profile-tab layout + 6 docs), version-sync across 7 packages + landing footer, annotated tag; `git push --follow-tags` → **`origin/main == 4e99d62`**, tree clean. Model-A CI already green for `sha-4e99d62`.
-- **Promoted PROD + DEMO to `sha-4e99d62` / v0.17.0.** `push-to-prod.sh` + `push-to-demo.sh`: DB backed up each, **migrations no-op** (19 applied, 0 pending — UI+docs only), reseed-never. Both healthy: `/api/health` 200 (after ~15–25s boot; the transient 404 right after recreate is the known boot-delay pattern), `/` 200, `/login` 200, `/demo` 308 (trailing-slash redirect, cosmetic). **Real users now see the new Profile layout.**
-- **Dev-freshness (Rule 39):** dev already rebuilt off the Profile-tab branch (now on main); the only delta since is the version-sync commit (cosmetic footer string) — functionally fresh.
+- **Released v0.17.0** (`4e99d62`) + promoted PROD + DEMO (migrations no-op, reseed-never); dev rebuilt. Real users saw the new horizontal grouped Profile tab.
 
 ### 🎨 CARGORIX REDESIGN — planning DONE; paused before Wave 0 (HARD HOLD)
 Architect orchestration ran (PM → 2 scout architects → Plan synthesis). Plan: **`docs/CARGORIX_ADOPTION_PLAN.md`** — Path A (design-language reskin on FRMS's existing Radix primitives; Cargorix's `@base-ui` + Tailwind-v4/oklch are NOT adopted wholesale), 6 waves. **Decisions locked** (`docs/DECISIONS_LOG.md`): Tailwind **v3** · keep **Manrope** · **prioritized modules first** · Wave-4 extras = **all 3** (⌘K, theme customizer [tenant-admin-scoped], density toggle) · **defer** draft-first create flow. Non-negotiable KEEP each wave: orange accent + per-tenant `#tenant-theme-root` override, RBAC nav, tRPC/Prisma/Auth seams, SidebarFooter white-label, DefinitionGrid idiom; gov WCAG 2.2 AA axe gate.

@@ -64,7 +64,6 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
         <Header
           userName={userName}
           role={role}
-          tenantSlug={tenantSlug}
           onMenuClick={() => setMobileOpen(true)}
           onToggleSidebar={toggleSidebar}
         />

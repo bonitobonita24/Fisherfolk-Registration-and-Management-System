@@ -3,6 +3,7 @@ import { ShieldAlert } from "lucide-react";
 
 import { prisma } from "@frms/db";
 import { auth } from "@/server/auth";
+import { tenantHref } from "@/lib/tenant-href.server";
 
 import { RoleBuilderClient } from "./role-builder-client";
 
@@ -20,6 +21,7 @@ export default async function RoleBuilderPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant } = await params;
+  const settingsHref = await tenantHref(tenant, "/settings");
   const session = await auth();
   const role = session?.user?.role;
   const isAdmin = role === "tenant_manager" || role === "tenant_superadmin";
@@ -46,7 +48,7 @@ export default async function RoleBuilderPage({
               Only the tenant owner (Tenant Superadmin) can build and assign
               custom roles. Return to{" "}
               <Link
-                href={`/${tenant}/settings`}
+                href={settingsHref}
                 className="font-medium underline underline-offset-2"
               >
                 Settings

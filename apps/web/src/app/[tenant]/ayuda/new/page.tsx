@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
 import { PageHeader } from "@/components/shared";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { AyudaFormClient } from "./ayuda-form-client";
 
 interface NewAyudaProgramPageProps {
@@ -16,7 +17,7 @@ export default async function NewAyudaProgramPage({
 
   if (role !== "tenant_manager" && role !== "tenant_superadmin" && role !== "tenant_admin") {
     const { tenant } = await params;
-    redirect(`/${tenant}/ayuda`);
+    redirect(await tenantHref(tenant, "/ayuda"));
   }
 
   return (

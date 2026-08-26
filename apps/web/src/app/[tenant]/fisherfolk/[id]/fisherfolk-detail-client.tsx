@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   Activity,
   AlertTriangle,
@@ -24,6 +23,7 @@ import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
 import { renderQRDataUrl } from "@/lib/qr-code";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { FisherfolkActivityTimeline } from "./fisherfolk-activity-timeline";
 import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
 import { LinkedTodos } from "@/components/todo/linked-todos";
@@ -108,7 +108,7 @@ function ZoomableImage({
 }
 
 export function FisherfolkDetailClient({ id }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const utils = trpc.useUtils();
 
   const {
@@ -160,7 +160,7 @@ export function FisherfolkDetailClient({ id }: Props) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/fisherfolk`}>Back to list</Link>
+          <Link href={tenantHref("/fisherfolk")}>Back to list</Link>
         </Button>
         <Card className="gap-0 py-5">
           <CardContent className="px-6 py-10 text-center">
@@ -287,7 +287,7 @@ export function FisherfolkDetailClient({ id }: Props) {
         defaultTitle={`Follow up / missing data: ${record.fullName}`}
       />
       <Button asChild variant="outline" size="sm">
-        <Link href={`/${params.tenant}/fisherfolk/${id}/edit`}>
+        <Link href={tenantHref(`/fisherfolk/${id}/edit`)}>
           <Pencil className="mr-2 h-4 w-4" />
           Edit
         </Link>
@@ -301,7 +301,7 @@ export function FisherfolkDetailClient({ id }: Props) {
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
-        backHref={`/${params.tenant}/fisherfolk`}
+        backHref={tenantHref("/fisherfolk")}
         backLabel="Back to fisherfolk list"
         title={record.fullName}
         meta={record.idNumber}
@@ -489,7 +489,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                       value={
                         record.household ? (
                           <Link
-                            href={`/${params.tenant}/households/${record.household.id}`}
+                            href={tenantHref(`/households/${record.household.id}`)}
                             className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {record.household.householdNumber}
@@ -562,7 +562,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                         >
                           <div className="min-w-0">
                             <Link
-                              href={`/${params.tenant}/vessels/${v.id}`}
+                              href={tenantHref(`/vessels/${v.id}`)}
                               className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                               {v.vesselName}
@@ -601,7 +601,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                         >
                           <div className="min-w-0">
                             <Link
-                              href={`/${params.tenant}/violations/${v.id}`}
+                              href={tenantHref(`/violations/${v.id}`)}
                               className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                               {v.subject}
@@ -643,7 +643,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                         >
                           <div className="min-w-0">
                             <Link
-                              href={`/${params.tenant}/ayuda/${b.program.id}`}
+                              href={tenantHref(`/ayuda/${b.program.id}`)}
                               className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                               {b.program.title}
@@ -684,7 +684,7 @@ export function FisherfolkDetailClient({ id }: Props) {
                         >
                           <div className="min-w-0">
                             <Link
-                              href={`/${params.tenant}/fish-catches/${fc.id}`}
+                              href={tenantHref(`/fish-catches/${fc.id}`)}
                               className="text-sm font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                               {fc.referenceNo}

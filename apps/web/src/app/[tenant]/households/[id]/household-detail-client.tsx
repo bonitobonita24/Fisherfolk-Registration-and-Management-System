@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowLeft, Crown, Trash2, UserMinus, UserPlus } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { SearchInput } from "@/components/shared/search-input";
 import {
   RecordHeader,
@@ -354,7 +355,7 @@ function EditDetailsDialog({
 
 // ── Main component ─────────────────────────────────────────────────────
 export function HouseholdDetailClient({ id }: Props) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const router = useRouter();
   const utils = trpc.useUtils();
 
@@ -387,7 +388,7 @@ export function HouseholdDetailClient({ id }: Props) {
   const removeHousehold = trpc.household.remove.useMutation({
     onSuccess: () => {
       toast.success("Household deleted.");
-      router.push(`/${params.tenant}/households`);
+      router.push(tenantHref("/households"));
     },
     onError: (err) => {
       toast.error(err.message ?? "Failed to delete household.");
@@ -403,7 +404,7 @@ export function HouseholdDetailClient({ id }: Props) {
     return (
       <div className="space-y-4 pb-4">
         <Button asChild variant="ghost" size="sm">
-          <Link href={`/${params.tenant}/households`}>
+          <Link href={tenantHref("/households")}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to list
           </Link>
@@ -426,7 +427,7 @@ export function HouseholdDetailClient({ id }: Props) {
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
-        backHref={`/${params.tenant}/households`}
+        backHref={tenantHref("/households")}
         backLabel="Back to households"
         title={record.householdNumber}
         meta={`Head: ${record.head.fullName}`}
@@ -522,7 +523,7 @@ export function HouseholdDetailClient({ id }: Props) {
           <ul className="divide-y">
             <li className="flex items-center justify-between gap-3 py-2 first:pt-0">
               <Link
-                href={`/${params.tenant}/fisherfolk/${record.head.id}`}
+                href={tenantHref(`/fisherfolk/${record.head.id}`)}
                 className="min-w-0 flex-1 hover:underline"
               >
                 <p className="truncate text-sm font-medium text-foreground">
@@ -542,7 +543,7 @@ export function HouseholdDetailClient({ id }: Props) {
                   className="flex items-center justify-between gap-3 py-2 last:pb-0"
                 >
                   <Link
-                    href={`/${params.tenant}/fisherfolk/${member.id}`}
+                    href={tenantHref(`/fisherfolk/${member.id}`)}
                     className="min-w-0 flex-1 hover:underline"
                   >
                     <p className="truncate text-sm font-medium text-foreground">

@@ -2,9 +2,9 @@
 
 import type { ColumnDef, Row } from "@tanstack/react-table";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 export interface EditRequestListItem {
   id: string;
@@ -29,11 +29,11 @@ export interface EditRequestListItem {
 }
 
 function FisherfolkCell({ row }: { row: Row<EditRequestListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const { fisherfolk } = row.original;
   return (
     <Link
-      href={`/${params.tenant}/fisherfolk/${fisherfolk.id}`}
+      href={tenantHref(`/fisherfolk/${fisherfolk.id}`)}
       className="font-medium text-primary hover:underline"
     >
       <span className="block">{fisherfolk.fullName}</span>
@@ -59,10 +59,10 @@ function ChangedFieldsCell({ row }: { row: Row<EditRequestListItem> }) {
 }
 
 function ReviewLinkCell({ row }: { row: Row<EditRequestListItem> }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   return (
     <Link
-      href={`/${params.tenant}/edit-requests/${row.original.id}`}
+      href={tenantHref(`/edit-requests/${row.original.id}`)}
       className="font-medium text-primary hover:underline"
     >
       Review

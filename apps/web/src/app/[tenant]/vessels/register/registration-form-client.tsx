@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Loader2, X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -84,8 +85,7 @@ function trimOpt(v: string): string | undefined {
 
 export function VesselRegistrationFormClient() {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
 
   const [ownerSearch, setOwnerSearch] = useState("");
   const [selectedOwners, setSelectedOwners] = useState<SelectedOwner[]>([]);
@@ -123,7 +123,7 @@ export function VesselRegistrationFormClient() {
         : record.mfvrNumber;
       toast.success(`Vessel ${label} registered.`);
       void utils.vessel.list.invalidate();
-      router.push(`/${tenantSlug}/vessels/${record.id}`);
+      router.push(tenantHref(`/vessels/${record.id}`));
       router.refresh();
     },
     onError: (error) => {
@@ -654,7 +654,7 @@ export function VesselRegistrationFormClient() {
         {/* Actions */}
         <FormActions>
           <Button type="button" variant="outline" asChild>
-            <Link href={`/${tenantSlug}/vessels`}>Cancel</Link>
+            <Link href={tenantHref("/vessels")}>Cancel</Link>
           </Button>
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

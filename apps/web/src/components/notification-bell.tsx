@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { notificationHref } from "@/lib/notification-href";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { trpc } from "@/lib/trpc/client";
 
 const TYPE_DOT: Record<string, string> = {
@@ -36,8 +37,7 @@ function formatRelativeTime(date: Date): string {
 }
 
 export function NotificationBell() {
-  const params = useParams<{ tenant: string }>();
-  const tenant = params.tenant;
+  const tenantHref = useTenantHref();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -76,7 +76,8 @@ export function NotificationBell() {
     entityId: string | null;
   }) {
     markRead.mutate({ id: notif.id });
-    const href = notificationHref(tenant, notif.entityType, notif.entityId);
+    const rel = notificationHref(notif.entityType, notif.entityId);
+    const href = rel ? tenantHref(rel) : null;
     if (href) {
       setOpen(false);
       router.push(href);
@@ -162,7 +163,7 @@ export function NotificationBell() {
         )}
         <Separator />
         <Link
-          href={`/${tenant}/notifications`}
+          href={tenantHref("/notifications")}
           onClick={() => setOpen(false)}
           className="block px-4 py-2.5 text-center text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >

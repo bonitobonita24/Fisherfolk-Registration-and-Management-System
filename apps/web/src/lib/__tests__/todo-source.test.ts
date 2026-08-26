@@ -7,31 +7,33 @@ import {
 } from "../todo-source";
 
 describe("sourceEntityLink", () => {
+  // Returns TENANT-RELATIVE hrefs; the caller prepends the tenant prefix via
+  // useTenantHref()/tenantHref() so links are host-aware (see tenant-href.ts).
   it("builds a link for each known source entity type", () => {
-    expect(sourceEntityLink("fisherfolk", "abc", "calapan-city")).toEqual({
-      href: "/calapan-city/fisherfolk/abc",
+    expect(sourceEntityLink("fisherfolk", "abc")).toEqual({
+      href: "/fisherfolk/abc",
       label: "Fisherfolk",
     });
-    expect(sourceEntityLink("vessel", "abc", "calapan-city")).toEqual({
-      href: "/calapan-city/vessels/abc",
+    expect(sourceEntityLink("vessel", "abc")).toEqual({
+      href: "/vessels/abc",
       label: "Vessel",
     });
-    expect(sourceEntityLink("violation", "abc", "calapan-city")).toEqual({
-      href: "/calapan-city/violations/abc",
+    expect(sourceEntityLink("violation", "abc")).toEqual({
+      href: "/violations/abc",
       label: "Violation",
     });
-    expect(sourceEntityLink("ayudaProgram", "abc", "calapan-city")).toEqual({
-      href: "/calapan-city/ayuda/abc",
+    expect(sourceEntityLink("ayudaProgram", "abc")).toEqual({
+      href: "/ayuda/abc",
       label: "Ayuda",
     });
   });
 
   it("returns null when type or id is missing/unknown", () => {
-    expect(sourceEntityLink(null, "abc", "calapan-city")).toBeNull();
-    expect(sourceEntityLink(undefined, "abc", "calapan-city")).toBeNull();
-    expect(sourceEntityLink("fisherfolk", null, "calapan-city")).toBeNull();
-    expect(sourceEntityLink("fisherfolk", undefined, "calapan-city")).toBeNull();
-    expect(sourceEntityLink("household", "abc", "calapan-city")).toBeNull();
+    expect(sourceEntityLink(null, "abc")).toBeNull();
+    expect(sourceEntityLink(undefined, "abc")).toBeNull();
+    expect(sourceEntityLink("fisherfolk", null)).toBeNull();
+    expect(sourceEntityLink("fisherfolk", undefined)).toBeNull();
+    expect(sourceEntityLink("household", "abc")).toBeNull();
   });
 });
 

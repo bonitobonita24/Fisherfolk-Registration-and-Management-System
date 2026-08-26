@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { ImageOff, FileX2 } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { StatCard } from "@/components/shared";
 import { BarangayDensityMap } from "./barangay-density-map";
 import type { RegistrationType } from "./registration-type-select";
@@ -138,8 +139,7 @@ function DashboardSkeleton() {
 }
 
 function DashboardClientInner() {
-  const params = useParams();
-  const tenantSlug = params.tenant as string;
+  const tenantHref = useTenantHref();
   const searchParams = useSearchParams();
 
   const [bgyFilter, setBgyFilter] = useState<string>("all");
@@ -772,7 +772,7 @@ function DashboardClientInner() {
       <section aria-label="Data completeness">
         <h2 className="mb-3 text-sm font-semibold text-foreground">Data Completeness</h2>
         <div className="grid auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2">
-          <Link href={`/${tenantSlug}/fisherfolk?missing=photo`}>
+          <Link href={tenantHref("/fisherfolk?missing=photo")}>
             <StatCard
               icon={<ImageOff className="size-5" />}
               value={(stats?.missingPhoto ?? 0).toLocaleString()}
@@ -781,7 +781,7 @@ function DashboardClientInner() {
               className="cursor-pointer transition-colors hover:border-primary/50"
             />
           </Link>
-          <Link href={`/${tenantSlug}/fisherfolk?missing=signature`}>
+          <Link href={tenantHref("/fisherfolk?missing=signature")}>
             <StatCard
               icon={<FileX2 className="size-5" />}
               value={(stats?.missingSignature ?? 0).toLocaleString()}

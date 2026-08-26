@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/server/auth";
 import { PageHeader } from "@/components/shared";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { VesselRegistrationFormClient } from "./registration-form-client";
 
 interface VesselRegisterPageProps {
@@ -21,7 +22,7 @@ export default async function VesselRegisterPage({
     role !== "encoder"
   ) {
     const { tenant } = await params;
-    redirect(`/${tenant}/vessels`);
+    redirect(await tenantHref(tenant, "/vessels"));
   }
 
   return (

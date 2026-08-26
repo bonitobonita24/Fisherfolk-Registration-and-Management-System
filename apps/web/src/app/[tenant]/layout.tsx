@@ -6,6 +6,7 @@ import { auth } from "@/server/auth";
 import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { hexToHslTriplet, readableForeground } from "@/lib/theme/color";
+import { tenantHref } from "@/lib/tenant-href.server";
 
 interface TenantLayoutProps {
   children: React.ReactNode;
@@ -43,14 +44,14 @@ export default async function TenantLayout({
 
   if (!session?.user) {
     const { tenant: tenantForRedirect } = await params;
-    redirect(`/${tenantForRedirect}/login`);
+    redirect(await tenantHref(tenantForRedirect, "/login"));
   }
 
   const { tenant } = await params;
   const { name, role, tenantSlug } = session.user;
 
   if (tenantSlug !== tenant) {
-    redirect(`/${tenantSlug}/dashboard`);
+    redirect(await tenantHref(tenantSlug!, "/dashboard"));
   }
 
   const t = await prisma.tenant.findUnique({

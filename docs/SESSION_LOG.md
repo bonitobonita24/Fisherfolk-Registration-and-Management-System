@@ -2,56 +2,51 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
-## 2026-08-23 (evening) — Cargorix Wave 2 (App-Shell reskin) + remember-me bug fix
+## 2026-08-26 (cont.) — Full Auto: finish redirect 308 fix + ship v0.18.0 to prod + demo
 
-**In your words:** Start Wave 2 now → (mid-session) the "remember me" setting on login isn't working → save session.
-
-✅ **Done + verified (both LOCAL / HARD HOLD — nothing pushed)**
-- **Cargorix Wave 2 — App-Shell Trio floating-card reskin** (`feat/cargorix-wave-2-app-shell`, `0a08369`). 3 files, tokens-only, RBAC `nav-items.ts` untouched: canvas gutter + detached rounded **header card** above a **framed content card**; **orange active-nav finally lands** as a tenant-driven `--primary` left-rail bar over a warm accent wash — deliberately *not* orange-as-text (avoids the Wave-1 AA trap). Live-verified on rebuilt dev (light + dark, 0 console errors): rail = orange 4×20px; **active-nav contrast 12.96**, inactive 4.83; white-label footer + RBAC nav groups intact. Screenshots in `screenshots/`.
-- **Remember-me bug FIXED** (`fix/remember-me-session-cookie`, `3a88589`). Root cause: Auth.js v5 has no per-login hook for the cookie's Max-Age (static `session.maxAge`, pinned to 30d), so *every* login's cookie was written persistent — checking/unchecking looked identical. Fix wraps `handlers.POST`: an unchecked sign-in now downgrades the session-token cookie to a **session cookie** (clears on browser close); security attributes preserved. **Live-proven** on the real dev pipeline (unchecked → no Max-Age; checked → +30d) + 11 unit tests + 413 web tests green.
-
-💬 **Notes / decisions**
-- Dev was **rebuilt off a throwaway `verify/wave2-plus-rememberme` merge** so both changes run live now for review. Two clean feature branches kept for independent merge. **HARD HOLD stands** — merge/push is your call.
-- Logged the Auth.js-v5 remember-me footgun to the global lessons ledger.
-- 🐛 Still open (unrelated, agent-found): `/fisherfolk/new` create route 400s.
-- 2 open PENDING_DECISIONS `[WHAT]` remain but both are non-executable from the FRMS seat (AIEF merge · Phase 2 per-app adoption).
-
-## 2026-08-23 — Cargorix Wave 1 (tokens) + active-tab highlight
-
-**In your words:** Proceed to Wave 2 · hold it (don't push) · highlight where the active tab is on the Fisherfolk detail menu · save session.
+**In your words:** "yes do it all in full Auto mode" — do the whole lineup: finish the deferred redirect item, merge the bugfixes to main, push, and promote prod + demo.
 
 ✅ **Done + verified**
-- **Cargorix Wave 1 shipped** to branch `feat/cargorix-wave-1-tokens` (`aae3379`, LOCAL / HARD HOLD). Adopted Cargorix's **cool-tinted neutral/surface palette** (backgrounds, cards, sidebar, borders, muted) — converted donor oklch→HSL, applied to light + dark (27 token lines in `globals.css`). Your two locked calls: cool neutrals in, faithful pale accent kept.
-- **Orange identity fully preserved** — `--primary`/`--secondary`/`--ring`/`--accent`/`--sidebar-primary`/charts/radius frozen; per-tenant theme override untouched; **zero** data-layer files. Ran PM→Architect→Executor→QA agent orchestration.
-- **Verify PASS** — dev rebuilt (Rule 39, FRESH); axe WCAG 2.2 AA = only pre-existing contrast patterns, **no new regressions**, 0 console errors; DefinitionGrid Profile-tab intact; dark mode clean. 8 before/after screenshots delivered.
-- **Active-tab highlight fix** (`fix/fisherfolk-detail-active-tab`, `e397bb0`) — the Fisherfolk detail tab bar's active tab now shows a clear **orange underline + bold text** (inactive = muted); AA-safe (active text stays high-contrast, orange is the indicator).
-
-💬 **Notes / decisions**
-- **Wave 2 approved** as next (App-Shell Trio — floating card header, grouped sidebar, and the *orange active-nav* finally lands). **HARD HOLD stands** — nothing pushed (your "hold it").
-- 🐛 **Found an unrelated pre-existing bug** (not touched): `/fisherfolk/new` create route 400s (calls `getById` with `id="new"`). Logged for its own fix.
-
-⏳ **Next**
-- **Wave 2 — App-Shell Trio** per `docs/CARGORIX_ADOPTION_PLAN.md` §5. Branch-per-wave, verify + axe, HARD HOLD.
-
----
-
-## 2026-08-22 — Cargorix redesign: Wave 0 spike (token-remap PoC)
-
-**In your words:** Go, start Wave 0. Then — save session, stop the reboot loop.
-
-✅ **Done + verified**
-- **Wave 0 spike shipped** to branch `feat/cargorix-wave-0-spike` (`68a49cf`, LOCAL / HARD HOLD). Path A1 (stay Tailwind v3) confirmed.
-- **oklch→HSL converter** (`scripts/cargorix/oklch-to-hsl.mjs`) — translates the donor's v4 oklch tokens to FRMS's v3 HSL triplets; sanity-checked.
-- **Token remap** in `globals.css` — warmed the neutral `--accent` to an orange wash + **added the 3 Cargorix sidebar tokens FRMS was missing** (`--sidebar-primary/-foreground/-ring`), wired in `tailwind.config.ts`. All contrast pairs AA-pass (≥6.76). Finalized table → `docs/CARGORIX_WAVE0_TOKENS.md`.
-- **Tenant-override proven intact** — Register button flips orange→purple on `#tenant-theme-root` after the remap (`--primary`/`--ring`/`--secondary` untouched). **axe 20→20 (no new violations), 0 console errors, zero data-layer changes.**
-
-🔵 **Caught a real trap (Rule 39):** FRMS dev serves a *prebuilt image with no source bind-mount* — host edits don't hot-reload; the CSS only went live after a dev rebuild from source. First before/after were stale until then.
+- **Finished the deferred 🟡 redirect fix.** Converted the last 12 server `redirect()` guards to the async `tenantHref()` helper so the masked demo host stops the extra 308 inverse-mask hop. Prod is provably unchanged (the helper's invariant unit test asserts non-masked hosts stay slug-prefixed). Verified: typecheck + lint + **410 tests** + `next build` all green. Commit `cba0295`.
+- **Merged everything to `main`** (`--no-ff` `c19e756`): the id→404 fix, host-aware links, the redirect guards, and the earlier import merge.
+- **Released v0.18.0** — consolidated changelog (host-aware links + redirect guards = FEATURE; id-404 + import ledger = FIXED), version-synced across 7 packages + the landing-footer, annotated tag. Pushed to origin → **`main == origin/main`** (`8430f7a`); CI + the Docker image build both went green.
+- **Promoted PROD + DEMO to v0.18.0** (`sha-8430f7a`). Each DB backed up first; no migrations (code/docs only); no reseed. Both live and healthy — **frms.powerbyte.app**: `/api/health`, `/`, `/login` all 200; **frms-demo.powerbyte.app**: `/` + `/login` 200, running the exact release commit.
+- **Rebuilt dev** off `main` — the freshness check confirms dev is not behind (Rule 39), `/api/health` 200.
 
 💬 **Notes**
-- Wave 0 is intentionally subtle in static views (accent paints on hover/selected; sidebar-primary consumed only in Wave 2). Bold tangerine lands Waves 2–3. Offered a punchier-accent tweak (taste `[WHAT]`) — not taken.
+- The demo promotion's migrate step logged a transient SSH-tunnel refusal — harmless here (0 pending migrations); the app still deployed and verified healthy.
+- Task queue is now clear. Cargorix redesign remains the queued next big item (planning done, paused before Wave 0). The two still-open `PENDING_DECISIONS` items (AIEF standard merge, per-app Phase-2 adoption) are cross-seat work, not done from the FRMS seat.
 
-⏳ **Next (HARD HOLD, await owner "go")**
-- **Wave 1** — full token set + typography (Manrope) + app-wide dark-parity pass. Then Waves 2→5 per `docs/CARGORIX_ADOPTION_PLAN.md`.
+## 2026-08-26 — Merge import branch + fix two agent-found bugs (id-400, demo 308-on-click)
+
+**In your words:** Merge `feat/import-tool-dir-arg` to main, then do option 2 — the two low-prio agent-found items (`/fisherfolk/new` 400, and clean non-slug hrefs to kill the 308-on-click).
+
+✅ **Done + verified**
+- **Merged `feat/import-tool-dir-arg` → main** (`--no-ff`, `a057545`). Local only, unpushed (HARD HOLD). Diff = the `import-tempfiles.ts --dir`/ledger fix + import session docs, already exercised in prod last session.
+- **Bug 1 — `/fisherfolk/new` returned 400 → now 404.** Root cause: `/{tenant}/fisherfolk/new` matched the `[id]` route (id="new"); tRPC `getById`'s `.cuid()` input rejected it as BAD_REQUEST (400), and the client only special-cased NOT_FOUND. Guarded the detail + edit routes with a cuid check → clean `notFound()`. **Live-verified HTTP 404.** Branch `fix/fisherfolk-invalid-id-404` `2ed5cb9`.
+- **Bug 2 — host-aware links (kill demo custom-domain 308-on-click).** Finding: there were NO slugless hrefs; the real issue is the inverse — on the masked demo host every `/{slug}/...` link 308-inverse-masks to its clean path on each click. You chose "central helper + migrate". Built `src/lib/tenant-href*` (pure `computeTenantPrefix`/`joinTenantPath` + `useTenantHref()` client hook + async `tenantHref()` server helper) and migrated ~45 nav sites (3 parallel Sonnet workers for client files + 1 for server `<Link>`; builder cluster done inline). `notificationHref()`/`sourceEntityLink()` now return tenant-relative paths. Branch `feat/tenant-host-aware-links` `266449b` (stacked on the Bug-1 fix).
+  - **Verified:** tsc 0 · `next lint` clean · 410 tests pass (8 new for the helper; invariant "subdirectory === `/{slug}`" locked) · full grep confirms no stray slug-prefixed nav links · **live dev nav sweep after rebuild** — login→dashboard 0 errors, 22 nav links all `/calapan-city/...` (0 slugless), fisherfolk detail (8 migrated links) renders clean.
+
+💬 **Decisions / notes**
+- **Scoping call (HOW):** left the 12 server `redirect()` guard-bounces slug-prefixed — they fire rarely (not per-click), are auth-critical, and the middleware already routes primary custom-domain traffic with clean paths. Logged as a 🟡 deferred item in TASK_QUEUE.
+- **Cross-scope note:** `notificationHref()`/`sourceEntityLink()` contract changed (drop `tenant` param → tenant-relative return); all callers updated + the `todo-source` test updated. Future callers must prepend via the helper.
+- **All LOCAL / HARD HOLD** — three branches now stacked/unpushed (`a057545` main merge, `2ed5cb9` id-fix, `266449b` host-aware-links). Merge to main + any push remain owner calls.
+
+## 2026-08-25 — Post-hang verification of 08-14-26 masterlist import + branch push
+
+**In your words:** Laptop hung overnight and the session got interrupted — check the last session's approved tasks against ground truth to see what actually finished. Then: push the held branch.
+
+✅ **Done + verified (live ground-truth counts, not doc claims)**
+- **All approved import work confirmed complete despite the hang** — the interruption struck *after* everything committed:
+  - FRMS **dev** `calapan-city = 3181` ✅ (+ `calapan-demo = 500`, separate tenant → 3681 total, expected)
+  - FRMS **prod** `calapan-city = 3181` ✅
+  - Live **FMO** old app SQLite `fisherfolk = 3181` ✅ (6423 upload files) — reconciliation holds, FRMS == FMO, 0 real people missing.
+  - Media-ledger fix + import commits all present on the branch.
+- **Pushed `feat/import-tool-dir-arg` → origin** (owner-authorized). New tracking branch, **0/0 synced**; all 5 commits up (import-tool `--dir` + telegram `media_objects` ledger fix `29a6cbd` + 4 docs/session commits). **`main` untouched — no auto-deploy triggered.** HARD HOLD cleared.
+
+💬 **Notes**
+- FMO `with_img_and_sig = 3153` (28 without both) = pre-existing legacy data quality in the older 3108, **not** the backfill (73/73 verified last session).
+- Feature branch pushed, not merged — merge to `main` (→ Model-A CI + staging) stays a separate explicit call.
 
 ---
 

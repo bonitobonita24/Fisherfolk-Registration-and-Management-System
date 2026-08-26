@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import type { Actor, PermissionMatrix } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
 
@@ -39,6 +40,7 @@ export function Sidebar({
   onToggle,
 }: SidebarProps) {
   const pathname = usePathname();
+  const tenantHref = useTenantHref();
   const actor: Actor = matrix ? { role, matrix } : { role };
 
   return (
@@ -54,7 +56,7 @@ export function Sidebar({
           {isCollapsed ? (
             /* Collapsed: icon only, centered — toggle button is in the footer slot below */
             <Link
-              href={`/${tenantSlug}/dashboard`}
+              href={tenantHref("/dashboard")}
               onClick={() => onNavigate?.()}
               aria-label="FRMS Dashboard"
             >
@@ -66,7 +68,7 @@ export function Sidebar({
             /* Expanded: icon + text on left, collapse button on right */
             <>
               <Link
-                href={`/${tenantSlug}/dashboard`}
+                href={tenantHref("/dashboard")}
                 className="flex items-center gap-2"
                 onClick={() => onNavigate?.()}
               >
@@ -115,7 +117,7 @@ export function Sidebar({
                   )}
                   <ul className="space-y-0.5">
                     {items.map((item) => {
-                      const fullHref = `/${tenantSlug}${item.href}`;
+                      const fullHref = tenantHref(item.href);
                       const isActive = pathname.startsWith(fullHref);
                       const Icon = item.icon;
                       const linkCn = cn(

@@ -3,6 +3,7 @@ import { ArrowRight, CreditCard, ShieldCheck } from "lucide-react";
 import { prisma } from "@frms/db";
 
 import { auth } from "@/server/auth";
+import { tenantHref } from "@/lib/tenant-href.server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ThemeSettings } from "./theme-settings";
 import { BarangayAliases } from "./barangay-aliases";
@@ -14,6 +15,8 @@ export default async function SettingsPage({
   params: Promise<{ tenant: string }>;
 }) {
   const { tenant } = await params;
+  const idTemplateHref = await tenantHref(tenant, "/settings/id-template");
+  const rolesHref = await tenantHref(tenant, "/settings/roles");
   const session = await auth();
   const role = session?.user?.role;
   const isAdmin = role === "tenant_manager" || role === "tenant_superadmin";
@@ -50,7 +53,7 @@ export default async function SettingsPage({
             The active template is loaded automatically when encoders print IDs.
           </p>
           <Link
-            href={`/${tenant}/settings/id-template`}
+            href={idTemplateHref}
             className="inline-flex items-center gap-1.5 text-sm font-medium underline underline-offset-2"
           >
             Open template designer
@@ -74,7 +77,7 @@ export default async function SettingsPage({
               assign them to Encoder, Viewer, and Bantay Dagat users.
             </p>
             <Link
-              href={`/${tenant}/settings/roles`}
+              href={rolesHref}
               className="inline-flex items-center gap-1.5 text-sm font-medium underline underline-offset-2"
             >
               Open Role Builder

@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { cn } from "@/lib/utils";
 import { SearchInput } from "@/components/shared/search-input";
 import { Badge } from "@/components/ui/badge";
@@ -116,7 +117,7 @@ function FisherfolkResultRow({
 // ── Main component ───────────────────────────────────────────────────────────
 export function HouseholdWizard() {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
 
   const [step, setStep] = useState<WizardStep>("head");
 
@@ -196,7 +197,7 @@ export function HouseholdWizard() {
         notes: notes || undefined,
       });
       toast.success("Household created.");
-      router.push(`/${params.tenant}/households/${result.id}`);
+      router.push(tenantHref(`/households/${result.id}`));
     } catch (err) {
       toast.error(
         err instanceof Error

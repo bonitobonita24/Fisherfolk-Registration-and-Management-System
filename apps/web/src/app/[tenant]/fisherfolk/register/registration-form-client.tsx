@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type UseFormReturn } from "react-hook-form";
@@ -13,6 +13,7 @@ import { Gender, CivilStatus } from "@frms/shared/types";
 import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -100,8 +101,7 @@ export function RegistrationFormClient({
   initialValues,
 }: RegistrationFormClientProps = {}) {
   const router = useRouter();
-  const params = useParams<{ tenant: string }>();
-  const tenantSlug = params.tenant;
+  const tenantHref = useTenantHref();
   const [step, setStep] = useState<StepNumber>(1);
 
   const form = useForm<FormValues>({
@@ -149,7 +149,7 @@ export function RegistrationFormClient({
     onSuccess: (record) => {
       toast.success(`Registered ${record.fullName} (${record.idNumber}).`);
       void utils.fisherfolk.list.invalidate();
-      router.push(`/${tenantSlug}/fisherfolk`);
+      router.push(tenantHref("/fisherfolk"));
       router.refresh();
     },
     onError: (error) => {
@@ -263,7 +263,7 @@ export function RegistrationFormClient({
             </div>
             <div className="flex items-center gap-2">
               <Button type="button" variant="outline" asChild>
-                <Link href={`/${tenantSlug}/fisherfolk`}>Cancel</Link>
+                <Link href={tenantHref("/fisherfolk")}>Cancel</Link>
               </Button>
               {step < TOTAL_STEPS ? (
                 <Button

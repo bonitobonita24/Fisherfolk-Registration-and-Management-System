@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
@@ -29,6 +28,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ID_CARD_GEOMETRY } from "@frms/shared/schemas";
 import { trpc } from "@/lib/trpc/client";
+import { useTenantHref } from "@/lib/use-tenant-href";
 
 // ─── Exported types (consumed by PvcSheet — Step 2) ──────────────────────────
 
@@ -82,7 +82,7 @@ function FisherfolkSelectStep({
 }: {
   onProceedToLayout: (selection: PrintSelection) => void;
 }) {
-  const params = useParams<{ tenant: string }>();
+  const tenantHref = useTenantHref();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Map<string, SelectedSubject>>(
     new Map(),
@@ -171,7 +171,7 @@ function FisherfolkSelectStep({
         <p className="mt-1 text-muted-foreground">
           An administrator must design and activate a fisherfolk ID template in{" "}
           <Link
-            href={`/${params.tenant}/settings/id-template`}
+            href={tenantHref("/settings/id-template")}
             className="font-medium underline underline-offset-2"
           >
             Settings → ID Card Template
