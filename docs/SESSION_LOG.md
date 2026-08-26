@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-26 — Merge import branch + fix two agent-found bugs (id-400, demo 308-on-click)
+
+**In your words:** Merge `feat/import-tool-dir-arg` to main, then do option 2 — the two low-prio agent-found items (`/fisherfolk/new` 400, and clean non-slug hrefs to kill the 308-on-click).
+
+✅ **Done + verified**
+- **Merged `feat/import-tool-dir-arg` → main** (`--no-ff`, `a057545`). Local only, unpushed (HARD HOLD). Diff = the `import-tempfiles.ts --dir`/ledger fix + import session docs, already exercised in prod last session.
+- **Bug 1 — `/fisherfolk/new` returned 400 → now 404.** Root cause: `/{tenant}/fisherfolk/new` matched the `[id]` route (id="new"); tRPC `getById`'s `.cuid()` input rejected it as BAD_REQUEST (400), and the client only special-cased NOT_FOUND. Guarded the detail + edit routes with a cuid check → clean `notFound()`. **Live-verified HTTP 404.** Branch `fix/fisherfolk-invalid-id-404` `2ed5cb9`.
+- **Bug 2 — host-aware links (kill demo custom-domain 308-on-click).** Finding: there were NO slugless hrefs; the real issue is the inverse — on the masked demo host every `/{slug}/...` link 308-inverse-masks to its clean path on each click. You chose "central helper + migrate". Built `src/lib/tenant-href*` (pure `computeTenantPrefix`/`joinTenantPath` + `useTenantHref()` client hook + async `tenantHref()` server helper) and migrated ~45 nav sites (3 parallel Sonnet workers for client files + 1 for server `<Link>`; builder cluster done inline). `notificationHref()`/`sourceEntityLink()` now return tenant-relative paths. Branch `feat/tenant-host-aware-links` `266449b` (stacked on the Bug-1 fix).
+  - **Verified:** tsc 0 · `next lint` clean · 410 tests pass (8 new for the helper; invariant "subdirectory === `/{slug}`" locked) · full grep confirms no stray slug-prefixed nav links · **live dev nav sweep after rebuild** — login→dashboard 0 errors, 22 nav links all `/calapan-city/...` (0 slugless), fisherfolk detail (8 migrated links) renders clean.
+
+💬 **Decisions / notes**
+- **Scoping call (HOW):** left the 12 server `redirect()` guard-bounces slug-prefixed — they fire rarely (not per-click), are auth-critical, and the middleware already routes primary custom-domain traffic with clean paths. Logged as a 🟡 deferred item in TASK_QUEUE.
+- **Cross-scope note:** `notificationHref()`/`sourceEntityLink()` contract changed (drop `tenant` param → tenant-relative return); all callers updated + the `todo-source` test updated. Future callers must prepend via the helper.
+- **All LOCAL / HARD HOLD** — three branches now stacked/unpushed (`a057545` main merge, `2ed5cb9` id-fix, `266449b` host-aware-links). Merge to main + any push remain owner calls.
+
 ## 2026-08-25 — Post-hang verification of 08-14-26 masterlist import + branch push
 
 **In your words:** Laptop hung overnight and the session got interrupted — check the last session's approved tasks against ground truth to see what actually finished. Then: push the held branch.

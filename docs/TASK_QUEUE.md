@@ -6,9 +6,26 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-_(none)_
+- 🟡 **Server `redirect()` 308 on demo custom-domain (low prio, deferred).** The 12 RSC `redirect()` guard-bounces
+  (`layout.tsx`, `[tenant]/page.tsx`, register/new pages, admin/kanban) still emit slug-prefixed targets, so on the
+  masked demo host they take one extra 308-inverse-mask hop. Left as-is with the host-aware-links work: they fire
+  rarely (not per-click), are auth-critical, and the middleware already routes primary custom-domain traffic with
+  clean paths. Fix later with the async `tenantHref()` helper if desired. `agent-found 2026-08-26`
 
 ## ✅ Done recently
+
+- ✅ **Host-aware in-app links — kill demo custom-domain 308-on-click.** New `src/lib/tenant-href*` helpers
+  (`useTenantHref()` client hook + `tenantHref()` server helper + pure `computeTenantPrefix`/`joinTenantPath`);
+  migrated ~45 nav sites (client `<Link>`/`router.push` + server `<Link>`) so links are clean on a masked
+  custom-domain host and slug-prefixed `/{slug}/...` on subdirectory hosts (prod unchanged, invariant unit-tested).
+  `notificationHref()`/`sourceEntityLink()` now return tenant-relative paths. Verified: tsc 0, lint clean, 410 tests
+  (8 new), live dev nav sweep (22 links slug-prefixed, 0 slugless, 0 console errors). Branch
+  `feat/tenant-host-aware-links` `266449b`, LOCAL/HARD HOLD. (owner-approved "central helper + migrate", 2026-08-26)
+- ✅ **`/fisherfolk/new` returned 400 → now 404 (agent-found bug).** `/{tenant}/fisherfolk/new` matched the `[id]`
+  route with id="new"; the tRPC `getById` `.cuid()` input rejected it as BAD_REQUEST (400). Guarded the detail + edit
+  server routes with a cuid check → clean `notFound()` (404). Verified live (HTTP 404). Branch
+  `fix/fisherfolk-invalid-id-404` `2ed5cb9`, LOCAL/HARD HOLD. (2026-08-26)
+- ✅ **Merged `feat/import-tool-dir-arg` → main** (`--no-ff`, `a057545`); LOCAL, unpushed (HARD HOLD). (2026-08-26)
 
 - ✅ **Backfilled the 73 FRMS-only fisherfolk into the live FMO app** (records added directly in FRMS after the
   original migration). FMO SQLite 3108→**3181** (73 INSERT OR IGNORE; 1 skipped = VILLANUEVA already present under
