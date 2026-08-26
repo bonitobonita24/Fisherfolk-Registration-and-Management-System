@@ -1,15 +1,23 @@
 # FRMS — Project State
 
-## Current State (2026-08-21, latest) — 🚀 Profile-tab horizontal layout SHIPPED to prod + demo as v0.17.0; Cargorix redesign queued NEXT
+## Current State (2026-08-26, latest) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
+Owner: "yes do it all in full Auto mode." Executed end-to-end: finished the deferred server-`redirect()` 308 fix, merged the two bugfix branches + host-aware links to `main`, released **v0.18.0**, pushed origin (Model-A CI + Docker Build green), promoted **prod + demo** to `sha-8430f7a`, rebuilt dev (Rule 39 FRESH). Full bar met; tree clean & pushed. Cargorix redesign remains the queued NEXT big item (planning done, paused before Wave 0 — unchanged).
+
+### ✅ DONE THIS SESSION (2026-08-26, all executed + verified)
+- **Redirect-guard 308 fix (finished the deferred 🟡).** 12 RSC `redirect()` guards → async `tenantHref()` (`cba0295`). Non-masked hosts (dev, prod) byte-identical — invariant unit-tested; tsc + lint + 410 tests + `next build` all green.
+- **Merged to `main`** (`--no-ff` `c19e756`): fix id-404 (`2ed5cb9`) + host-aware links (`266449b`) + redirect guards (`cba0295`) + import merge (`a057545`) + docs.
+- **Released v0.18.0** (`8430f7a`): consolidated CHANGELOG (2 `feat` + 2 `fix` + docs) + version-sync 7 pkgs + landing-footer fallback + annotated tag; `git push --follow-tags` → **`origin/main == 8430f7a`**, tag published. Model-A CI + Docker Build & Publish both green (`sha-8430f7a`).
+- **Promoted PROD + DEMO to `sha-8430f7a` / v0.18.0.** Both DBs backed up first; **migrations no-op** (19 applied, 0 pending — code/docs only); reseed-never. Prod healthy: `/api/health` `/` `/login` 200, `/tm` 307. Demo healthy: canonical `/` + `/login` 200 (running revision `8430f7a`). (Demo migrate step hit a transient SSH-tunnel refusal — irrelevant here, 0 pending migrations.)
+- **Dev-freshness (Rule 39):** dev rebuilt off `main`; `dev-freshness-check.sh` → **all code containers FRESH**; `/api/health` 200 (:44387).
+
+### 📌 Previous (2026-08-21) — v0.17.0 Profile-tab layout SHIPPED (superseded by the block above)
+
 Owner authorized: push main → released **v0.17.0**, then promoted prod + demo once CI was green. Cargorix UX/UI redesign deferred to the **next-session handoff** (owner's directive). Model authority memory: `project_v0170_shipped_cargorix_next_0821.md`.
 
-### ✅ DONE THIS SESSION (2026-08-21, all executed + verified)
-- **Pushed main + released v0.17.0.** `gen-release-notes --apply --version 0.17.0`: consolidated CHANGELOG (1 `feat` = horizontal grouped Profile-tab layout + 6 docs), version-sync across 7 packages + landing footer, annotated tag; `git push --follow-tags` → **`origin/main == 4e99d62`**, tree clean. Model-A CI already green for `sha-4e99d62`.
-- **Promoted PROD + DEMO to `sha-4e99d62` / v0.17.0.** `push-to-prod.sh` + `push-to-demo.sh`: DB backed up each, **migrations no-op** (19 applied, 0 pending — UI+docs only), reseed-never. Both healthy: `/api/health` 200 (after ~15–25s boot; the transient 404 right after recreate is the known boot-delay pattern), `/` 200, `/login` 200, `/demo` 308 (trailing-slash redirect, cosmetic). **Real users now see the new Profile layout.**
-- **Dev-freshness (Rule 39):** dev already rebuilt off the Profile-tab branch (now on main); the only delta since is the version-sync commit (cosmetic footer string) — functionally fresh.
+- **Released v0.17.0** (`4e99d62`) + promoted PROD + DEMO (migrations no-op, reseed-never); dev rebuilt. Real users saw the new horizontal grouped Profile tab.
 
 ### 🎨 CARGORIX REDESIGN — planning DONE; paused before Wave 0 (HARD HOLD)
 Architect orchestration ran (PM → 2 scout architects → Plan synthesis). Plan: **`docs/CARGORIX_ADOPTION_PLAN.md`** — Path A (design-language reskin on FRMS's existing Radix primitives; Cargorix's `@base-ui` + Tailwind-v4/oklch are NOT adopted wholesale), 6 waves. **Decisions locked** (`docs/DECISIONS_LOG.md`): Tailwind **v3** · keep **Manrope** · **prioritized modules first** · Wave-4 extras = **all 3** (⌘K, theme customizer [tenant-admin-scoped], density toggle) · **defer** draft-first create flow. Non-negotiable KEEP each wave: orange accent + per-tenant `#tenant-theme-root` override, RBAC nav, tRPC/Prisma/Auth seams, SidebarFooter white-label, DefinitionGrid idiom; gov WCAG 2.2 AA axe gate.

@@ -6,14 +6,15 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-- 🟡 **Server `redirect()` 308 on demo custom-domain (low prio, deferred).** The 12 RSC `redirect()` guard-bounces
-  (`layout.tsx`, `[tenant]/page.tsx`, register/new pages, admin/kanban) still emit slug-prefixed targets, so on the
-  masked demo host they take one extra 308-inverse-mask hop. Left as-is with the host-aware-links work: they fire
-  rarely (not per-click), are auth-critical, and the middleware already routes primary custom-domain traffic with
-  clean paths. Fix later with the async `tenantHref()` helper if desired. `agent-found 2026-08-26`
+_(none — queue clear as of 2026-08-26 v0.18.0 ship)_
 
 ## ✅ Done recently
 
+- ✅ **Server `redirect()` 308 on demo custom-domain — SHIPPED (v0.18.0).** The 12 RSC `redirect()` guard sites
+  (`[tenant]/{layout,page}`, register/new pages, admin/kanban, `tm/layout`) now call the async `tenantHref()`
+  helper → tenant-relative `/...` on a masked host, slug-prefixed `/{slug}/...` elsewhere. Non-masked hosts
+  (dev, prod) byte-identical (invariant unit-tested). Verified tsc/lint/410-tests/build; commit `cba0295`,
+  released **v0.18.0**, promoted prod + demo. (was the deferred 🟡 — now closed, 2026-08-26)
 - ✅ **Host-aware in-app links — kill demo custom-domain 308-on-click.** New `src/lib/tenant-href*` helpers
   (`useTenantHref()` client hook + `tenantHref()` server helper + pure `computeTenantPrefix`/`joinTenantPath`);
   migrated ~45 nav sites (client `<Link>`/`router.push` + server `<Link>`) so links are clean on a masked

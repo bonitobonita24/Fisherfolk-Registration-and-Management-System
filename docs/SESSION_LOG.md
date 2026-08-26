@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-26 (cont.) — Full Auto: finish redirect 308 fix + ship v0.18.0 to prod + demo
+
+**In your words:** "yes do it all in full Auto mode" — do the whole lineup: finish the deferred redirect item, merge the bugfixes to main, push, and promote prod + demo.
+
+✅ **Done + verified**
+- **Finished the deferred 🟡 redirect fix.** Converted the last 12 server `redirect()` guards to the async `tenantHref()` helper so the masked demo host stops the extra 308 inverse-mask hop. Prod is provably unchanged (the helper's invariant unit test asserts non-masked hosts stay slug-prefixed). Verified: typecheck + lint + **410 tests** + `next build` all green. Commit `cba0295`.
+- **Merged everything to `main`** (`--no-ff` `c19e756`): the id→404 fix, host-aware links, the redirect guards, and the earlier import merge.
+- **Released v0.18.0** — consolidated changelog (host-aware links + redirect guards = FEATURE; id-404 + import ledger = FIXED), version-synced across 7 packages + the landing-footer, annotated tag. Pushed to origin → **`main == origin/main`** (`8430f7a`); CI + the Docker image build both went green.
+- **Promoted PROD + DEMO to v0.18.0** (`sha-8430f7a`). Each DB backed up first; no migrations (code/docs only); no reseed. Both live and healthy — **frms.powerbyte.app**: `/api/health`, `/`, `/login` all 200; **frms-demo.powerbyte.app**: `/` + `/login` 200, running the exact release commit.
+- **Rebuilt dev** off `main` — the freshness check confirms dev is not behind (Rule 39), `/api/health` 200.
+
+💬 **Notes**
+- The demo promotion's migrate step logged a transient SSH-tunnel refusal — harmless here (0 pending migrations); the app still deployed and verified healthy.
+- Task queue is now clear. Cargorix redesign remains the queued next big item (planning done, paused before Wave 0). The two still-open `PENDING_DECISIONS` items (AIEF standard merge, per-app Phase-2 adoption) are cross-seat work, not done from the FRMS seat.
+
 ## 2026-08-26 — Merge import branch + fix two agent-found bugs (id-400, demo 308-on-click)
 
 **In your words:** Merge `feat/import-tool-dir-arg` to main, then do option 2 — the two low-prio agent-found items (`/fisherfolk/new` 400, and clean non-slug hrefs to kill the 308-on-click).
