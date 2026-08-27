@@ -182,7 +182,7 @@ function HouseholdMultiSelectPopover({
           {selected.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {selected.map((hh) => (
-                <Badge key={hh.id} variant="secondary" className="text-xs">
+                <Badge key={hh.id} variant="secondary" className="rounded-lg text-xs">
                   {hh.householdNumber}
                 </Badge>
               ))}
@@ -488,7 +488,7 @@ export function BulkFilterDialog({
             </p>
           )}
 
-          <div className="max-h-80 overflow-y-auto rounded-md border border-border">
+          <div className="max-h-80 overflow-y-auto rounded-lg border">
             <Table>
               <TableHeader>
                 <TableRow>

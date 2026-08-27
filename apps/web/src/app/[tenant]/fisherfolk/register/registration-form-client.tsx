@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BarangayPicker, CategoryPicker, FormSection } from "@/components/shared";
+import { Stepper } from "@/components/shared/stepper";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
 import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
@@ -222,7 +223,7 @@ export function RegistrationFormClient({
   return (
     <Card>
       <CardContent className="space-y-6 px-6 py-5">
-      <StepIndicator current={step} />
+      <Stepper steps={["Personal", "Address", "Documents", "Review"]} current={step - 1} />
 
       <Form {...form}>
         <form
@@ -293,44 +294,6 @@ export function RegistrationFormClient({
       </Form>
       </CardContent>
     </Card>
-  );
-}
-
-function StepIndicator({ current }: { current: StepNumber }) {
-  const labels = ["Personal", "Address", "Documents", "Review"];
-  return (
-    <ol className="flex items-center gap-3 text-sm">
-      {labels.map((label, idx) => {
-        const stepNumber = (idx + 1) as StepNumber;
-        const isActive = stepNumber === current;
-        const isComplete = stepNumber < current;
-        return (
-          <li key={label} className="flex items-center gap-2">
-            <span
-              className={`flex size-7 items-center justify-center rounded-full text-xs font-medium ${
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : isComplete
-                    ? "bg-primary/20 text-primary"
-                    : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {stepNumber}
-            </span>
-            <span
-              className={
-                isActive ? "font-medium text-foreground" : "text-muted-foreground"
-              }
-            >
-              {label}
-            </span>
-            {idx < labels.length - 1 && (
-              <span className="ml-1 h-px w-8 bg-border" aria-hidden />
-            )}
-          </li>
-        );
-      })}
-    </ol>
   );
 }
 
@@ -670,7 +633,7 @@ function ReviewStep({ values, registrationYear }: ReviewStepProps) {
   return (
     <FormSection title="Review">
       <div className="space-y-6">
-      <section className="rounded-md border border-border bg-muted/30 p-4">
+      <section className="rounded-lg border border-border bg-muted/30 p-4">
         <p className="text-sm font-medium text-muted-foreground">
           Fisherfolk ID
         </p>

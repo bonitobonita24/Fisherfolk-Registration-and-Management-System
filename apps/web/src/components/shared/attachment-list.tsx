@@ -56,7 +56,7 @@ function AttachmentThumb({
           className="block"
           aria-label={`Open ${item.originalFilename} in new tab`}
         >
-          <div className="relative aspect-square h-32 overflow-hidden rounded-md border border-border bg-muted">
+          <div className="relative aspect-square h-32 overflow-hidden rounded-md border border-border bg-muted/30">
             <Image
               src={url}
               alt={item.originalFilename}
@@ -83,8 +83,10 @@ function AttachmentThumb({
 
   // PDF / non-image: bordered row with link
   return (
-    <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
-      <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+    <div className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted/50">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <FileIcon className="h-4 w-4" aria-hidden="true" />
+      </span>
       <a
         href={url}
         target="_blank"
@@ -101,7 +103,7 @@ function AttachmentThumb({
         <button
           type="button"
           onClick={() => onRemove(item)}
-          className="ml-1 rounded p-0.5 hover:bg-muted"
+          className="ml-1 rounded-md p-0.5 hover:bg-accent hover:text-accent-foreground"
           aria-label={`Remove ${item.originalFilename}`}
         >
           <X className="h-3 w-3" aria-hidden="true" />

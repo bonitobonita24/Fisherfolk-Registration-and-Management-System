@@ -14,7 +14,7 @@ export function Stepper({ steps, current, className }: StepperProps) {
           {/* Circle */}
           <div
             className={cn(
-              "flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-medium",
+              "flex size-7 shrink-0 items-center justify-center rounded-lg text-xs font-medium",
               i < current
                 ? "bg-primary text-primary-foreground"
                 : i === current

@@ -127,7 +127,7 @@ function AddMemberDialog({
             {filtered.map((person) => (
               <div
                 key={person.id}
-                className="flex items-center justify-between gap-3 rounded-md border p-3"
+                className="flex items-center justify-between gap-3 rounded-lg border p-3"
               >
                 <div className="min-w-0">
                   <p className="truncate font-medium text-foreground">
@@ -211,7 +211,7 @@ function ChangeHeadDialog({
           {candidates.map((person) => (
             <div
               key={person.id}
-              className="flex items-center justify-between gap-3 rounded-md border p-3"
+              className="flex items-center justify-between gap-3 rounded-lg border p-3"
             >
               <div className="min-w-0">
                 <p className="truncate font-medium text-foreground">

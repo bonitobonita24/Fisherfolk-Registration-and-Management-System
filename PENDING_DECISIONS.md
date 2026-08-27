@@ -6,6 +6,18 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-08-27 — 🎨 Cargorix Wave 3 go/no-go (HARD HOLD — owner review gate)
+
+- [x] ✅ **RESOLVED (2026-08-27, owner "that is all approved and good to go") — Cargorix Wave 3 DONE + verified.**
+  Reskinned the 14 `components/shared/` wrappers to the Cargorix token idiom (floating-card/chip/radius),
+  commit `354131a` on `feat/cargorix-stack-integrated`. **DefinitionGrid left byte-identical (FROZEN)** per the
+  owner-signed "absolutely perfect" guardrail — `detail-field.tsx` untouched; `index.ts` barrel byte-stable;
+  no prop/export/signature drift; no literal colors (tokens only). Verified: tsc 7/7 · lint · 410 tests · build ·
+  **axe WCAG 2.2 AA = 0 violations across 10 routes (incl. dark)** · live detail render confirms DefinitionGrid +
+  record-header + status-badge intact. Screenshots sent. LOCAL / HARD HOLD (nothing merged/pushed/deployed).
+  **Roadmap now at Wave 4** (additive: ⌘K, theme customizer, density — all pre-approved) → Wave 5 (per-module
+  polish + full-app axe + Rule-31 re-baseline). Both remain owner-gated go/no-go.
+
 ### 2026-08-14 — 🚀 Push / merge authorization (HARD HOLD)
 
 - [x] ✅ **RESOLVED [WHAT] (2026-08-14, owner authorized both) — PUSHED + RELEASED `v0.11.0`.**

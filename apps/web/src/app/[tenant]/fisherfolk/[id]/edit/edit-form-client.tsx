@@ -276,7 +276,7 @@ function EditForm({ id, record }: EditFormProps) {
         className="space-y-6"
       >
         {/* Notice banner */}
-        <div className="flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
+        <div className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3 text-sm text-muted-foreground">
           <Info className="mt-0.5 h-4 w-4 shrink-0" />
           <p>
             Filling in blank fields saves immediately. Changing a field that

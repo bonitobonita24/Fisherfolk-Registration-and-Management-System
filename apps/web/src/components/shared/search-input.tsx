@@ -55,7 +55,7 @@ export function SearchInput({
         <Button
           variant="ghost"
           size="sm"
-          className="absolute right-0 top-0 h-full px-2 hover:bg-transparent"
+          className="absolute right-0 top-0 h-full rounded-md px-2 hover:bg-accent hover:text-accent-foreground"
           onClick={handleClear}
         >
           <X className="h-4 w-4 text-muted-foreground" />

@@ -54,7 +54,7 @@ function EvidenceImage({ imageKey }: { imageKey: string }) {
   );
   if (!data?.url) {
     return (
-      <div className="flex aspect-square w-full items-center justify-center rounded-md border bg-muted">
+      <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
         <p className="text-xs text-muted-foreground">Loading…</p>
       </div>
     );
@@ -63,7 +63,7 @@ function EvidenceImage({ imageKey }: { imageKey: string }) {
     <img
       src={data.url}
       alt="Evidence"
-      className="aspect-square w-full rounded-md border bg-muted object-cover"
+      className="aspect-square w-full rounded-lg border bg-muted object-cover"
     />
   );
 }
@@ -236,7 +236,7 @@ export function ViolationDetailClient({ id, canManage }: Props) {
                         <img
                           src={fisherfolkPhotoResp.url}
                           alt={`Portrait of ${targetFisherfolk.fullName}`}
-                          className="max-h-[80vh] w-full rounded-md object-contain"
+                          className="max-h-[80vh] w-full rounded-lg object-contain"
                         />
                       </DialogContent>
                     </Dialog>

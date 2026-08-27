@@ -95,9 +95,9 @@ export function DataTable<TData, TValue>({
           />
         </div>
       )}
-      <div className="overflow-hidden rounded-lg border">
+      <div className="overflow-hidden rounded-xl border border-border bg-card">
         <Table>
-          <TableHeader className="sticky top-0 z-20 bg-card">
+          <TableHeader className="sticky top-0 z-20 bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
@@ -122,7 +122,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() ? "selected" : undefined}
-                  className="hover:bg-accent data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_20%,transparent)] data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_30%,transparent)] dark:data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_8%,transparent)] dark:data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_14%,transparent)]"
+                  className="hover:bg-muted/50 data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_20%,transparent)] data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_30%,transparent)] dark:data-[state=selected]:bg-[color-mix(in_oklab,hsl(var(--foreground))_8%,transparent)] dark:data-[state=selected]:hover:bg-[color-mix(in_oklab,hsl(var(--foreground))_14%,transparent)]"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

@@ -61,7 +61,7 @@ export function BarangayPicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[--radix-popover-trigger-width] p-0"
+        className="w-[--radix-popover-trigger-width] rounded-xl border-border p-0"
         align="start"
       >
         <Command>
@@ -73,6 +73,7 @@ export function BarangayPicker({
                 <CommandItem
                   key={barangay}
                   value={barangay}
+                  className="rounded-md"
                   onSelect={(currentValue) => {
                     onValueChange(currentValue === value ? "" : currentValue);
                     setOpen(false);

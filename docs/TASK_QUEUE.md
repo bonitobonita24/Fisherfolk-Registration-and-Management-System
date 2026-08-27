@@ -6,9 +6,38 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-_(none — queue clear as of 2026-08-26 v0.18.0 ship)_
+- 🟡 **Cargorix Wave 3 — components/shared/ wrapper layer.** Gated on owner sign-off (DefinitionGrid idiom).
+  Build on branch `feat/cargorix-stack-integrated`. See `PENDING_DECISIONS.md` 2026-08-27. `owner`
+- 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
+  files, drop/merge stale entries. `agent-found 2026-08-27`
+- 🟡 **Cargorix Wave 5 — DEFERRED remainder** (per plan §8 D6 "prioritized first, rest deferred").
+  Prioritized done+verified (dashboard + fisherfolk + all 6 record modules). Still to polish when
+  owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
+  `id-generator`, `audit-log`, `notifications`, `analytics`, `map`, `settings`, `user-management`,
+  `role-builder`) + the platform `/tm` site. `owner-gated 2026-08-27`
+- 🔴 **Cargorix Wave-5 deferred structural items** (audit-found, held to avoid scope creep/regression):
+  (a) list-client toolbar+pagination floating-card wrap — UNIFORM across all 5 record list clients
+  (a layout redesign, not a token nudge); (b) `fisherfolk/[id]/edit/edit-form-client.tsx` raw
+  `Card`→shared `FormSection` + `RecordHeader` for parity with the register form; (c) extract the
+  fisherfolk-detail bespoke underline tabs into a shared Tabs treatment. All JSX-only, token-clean
+  today. `agent-found 2026-08-27`
+- 🔴 **a11y: app-wide `aria-hidden-focus` on any open Radix menu/dialog** — when a Radix
+  DropdownMenu/Dialog opens, the app-shell root `<div class="flex h-full w-full overflow-hidden">`
+  gets `aria-hidden="true"` (via `hideOthers`) while still containing focusable content NOT made
+  `inert` → axe WCAG 2.2 AA serious. **Pre-existing + app-wide** (reproduces on the untouched user-menu
+  dropdown; NOT a Cargorix-Wave-4 regression). Proper fix = Radix upgrade or an app-shell `inert`/
+  aria-hidden shim on open — its own a11y branch + cross-dialog verify, not a UI-reskin change.
+  Where: `components/app-shell.tsx` root + shared Radix overlays. `agent-found 2026-08-27`
 
 ## ✅ Done recently
+
+- ✅ **Cargorix Waves 0–2 integrated onto current main + verified.** New branch
+  `feat/cargorix-stack-integrated` (`3b2c9d8`): merged v0.18.0 `main` into the stacked waves (4 shell files
+  auto-merged w/ the tenantHref refactor, both changesets coexist), + `fix(a11y)` sidebar group-label
+  contrast 4.16→AA. Gate green (tsc/lint/410 tests/build); live render clean 0 console errors; axe WCAG 2.2
+  AA 0 violations/5 routes. LOCAL/HARD HOLD. (2026-08-27)
+
+## ✅ Older
 
 - ✅ **Server `redirect()` 308 on demo custom-domain — SHIPPED (v0.18.0).** The 12 RSC `redirect()` guard sites
   (`[tenant]/{layout,page}`, register/new pages, admin/kanban, `tm/layout`) now call the async `tenantHref()`

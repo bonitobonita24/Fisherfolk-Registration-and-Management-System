@@ -1,6 +1,77 @@
 # FRMS — Project State
 
-## Current State (2026-08-26, latest) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
+## Current State (2026-08-27, latest) — 🎨 Cargorix Wave 3 DONE + verified (owner-approved); roadmap → Wave 4
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **🛑 LOOP STOPPED BY OWNER (2026-08-27).** Owner directed the auto-loop to stop rebooting (an earlier
+> stop directive had rebooted anyway). This session did NO code work — it re-verified state and re-issued
+> the handoff. Session ends via `close-session --stop --force`. Next start is a MANUAL owner action; all
+> state below is current and unchanged since Wave 3 completion (`b9d2550`). Nothing is blocking.
+
+Owner reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" → Wave 3
+built + verified this session. Waves 0–3 now all integrated on `feat/cargorix-stack-integrated`, LOCAL/HARD HOLD.
+
+### ✅ DONE THIS SESSION (2026-08-27 Wave 3 — executed + verified — LOCAL / HARD HOLD)
+- **Cargorix Wave 3 — `components/shared/` wrapper reskin** (commit `354131a`). 14 wrappers restyled to the
+  Cargorix token idiom (floating-card `rounded-xl border bg-card`, `rounded-lg bg-primary/10 text-primary`
+  chips, `rounded-md` interactive rows, softened hovers) via 5 parallel Sonnet executors.
+  - **DefinitionGrid FROZEN** per owner guardrail — `detail-field.tsx` untouched; `shared/index.ts` barrel
+    byte-stable; ZERO prop/export/signature drift; no literal colors (tokens only, identity via primary/accent).
+  - `status-badge` + `stepper` indicators pill→`rounded-lg` (chip scale); `data-table` floating-card frame
+    (TanStack+tRPC untouched); form-section/record-header/confirm-dialog/pickers/file+attachment token polish.
+  - **Verified (full Rule-32 bar):** tsc 7/7 · lint · **410 tests** · build 54s · dev rebuilt FRESH (:44387) ·
+    **axe WCAG 2.2 AA = 0 violations across 10 routes incl. dark** · live detail render confirms DefinitionGrid +
+    record-header + status-chip intact + orange active-tab. Evidence `screenshots/wave3-*.png` (sent to owner).
+
+### 🗺️ Wave roadmap — 0✅ 1✅ 2✅ **3✅** · 4⬜ (additive: ⌘K, theme customizer, density — pre-approved) · 5⬜ (per-module polish + full-app axe + Rule-31 re-baseline). Waves 4/5 remain owner-gated go/no-go.
+
+---
+
+### Prior session (2026-08-27 earlier) — Waves 0-2 integrated + verified
+Full-auto session. Resume already-done cross-check CAUGHT that the prior handoff's "START Wave 0 spike"
+was **stale** — Waves 0, 1, AND 2 were already built as local unmerged branches (cleanly stacked
+wave-0 ⊆ wave-1 ⊆ wave-2). Integrated + verified onto current main; one a11y contrast fix.
+
+### ✅ DONE THIS SESSION (2026-08-27, all executed + verified — LOCAL / HARD HOLD)
+- **New branch `feat/cargorix-stack-integrated`** off current `main` (`650757d`, v0.18.0).
+  - `c156411` — merged current `main` INTO the Cargorix stack (was 14 commits behind). The 4 overlapping
+    shell/nav files (`app-shell.tsx`, `header.tsx`, `sidebar.tsx`, `fisherfolk-detail-client.tsx`) — which
+    v0.18.0's `useTenantHref` refactor AND Wave 2's reskin both touched — **git 3-way auto-merged cleanly**;
+    only docs (SESSION_LOG/STATE) conflicted (took main). Confirmed BOTH changesets coexist.
+  - `3b2c9d8` — `fix(a11y)`: sidebar group labels (Overview/Records/Operations/Administration) were
+    `text-muted-foreground/70` @11px = 4.16:1 dark, **below 4.5:1 WCAG 2.2 AA** (SC 1.4.3). Dropped `/70`
+    → full muted-foreground (~7:1 dark / ~5.6:1 light). One line, `sidebar.tsx:114`.
+- **Verified (full Rule-32 bar):** tsc 7/7 · lint 0 · **410 tests** · `build` all green. Dev rebuilt off the
+  branch (FRESH, :44387). Live render — dashboard (light+dark), fisherfolk list, fisherfolk **detail** (the
+  highest merge-risk file: Photo/Sig/QR + orange active-tab + DefinitionGrid all intact, real photo loads),
+  full RBAC nav incl. Administration, tenant orange identity preserved, **0 console errors**. **axe-core
+  4.11.4 WCAG 2.2 AA** across 5 routes: 3 nodes/route → after fix = **0 violations.** Evidence:
+  `screenshots/cargorix-verify-0[1-5]-*.png` (sent to owner).
+- Originals preserved: `feat/cargorix-wave-{0,1,2}-*`, `docs/cargorix-adoption-plan` (holds the plan doc — not on main).
+
+### ⏳ NEXT SESSION — pending tasks + open decisions (nothing blocking; owner-gated go/no-go)
+1. **🎨 Cargorix Wave 4 — GATED on owner go.** Additive, all pre-approved in `docs/CARGORIX_ADOPTION_PLAN.md`:
+   ⌘K command palette · theme customizer · density toggle. Build on `feat/cargorix-stack-integrated`, LOCAL.
+2. **🎨 Cargorix Wave 5 — GATED (after W4).** Per-module polish across ~38 pages + full-app axe WCAG 2.2 AA
+   gate + Rule-31 design-fidelity re-baseline. Final wave of the reskin.
+3. **📋 Merge/deploy the Cargorix stack — GATED [WHAT].** Waves 0–3 sit LOCAL on `feat/cargorix-stack-integrated`;
+   merging to `main` (+ release + prod/demo promote) is a deliberate owner decision. Nothing pushed yet.
+4. **🧹 Un-gated housekeeping (do anytime):** reconcile the 5 stale pre-existing `PENDING_DECISIONS.md` items
+   (2026-08-08→08-14; several look already-shipped per memory — verify vs git/deploy state, close or keep).
+5. **⚠ CROSS-SEAT, NOT FRMS (surface only, never execute here):** (a) AIEF `feat/v32.50-site-access-standard`
+   merge → **Powerbyte-AIEF seat**. (b) Phase-2 per-app site-access adoption (MG/Orqafy/FerryBook/CueLane) →
+   **each app's OWN seat**. Both owner-authorized 2026-08-27; a FRMS session surfaces them as belonging elsewhere.
+6. **🔧 Maintenance:** launch-folder `MEMORY.md` is ~23KB (near the 24.4KB read limit) — compact to one line/entry
+   in a dedicated pass (flagged by the memory hook).
+
+### Git
+On `feat/cargorix-stack-integrated` @ `b9d2550` (`354131a` = Wave 3 code · `b9d2550` = docs). Tree clean.
+`main == origin/main == 650757d` (v0.18.0, untouched). Nothing merged/pushed/deployed — **HARD HOLD holds**.
+
+---
+
+## Current State (2026-08-26) — 🚀 v0.18.0 host-aware links + redirect guards + id-404 SHIPPED to prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
