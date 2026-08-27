@@ -2,6 +2,31 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-28 — Cargorix Waves 4 & 5 built + full stack SHIPPED as v0.19.0 (prod + demo)
+
+**In your words:** "go Wave 4" → "go Wave 5" → "merge/ship the whole Cargorix stack (release + prod/demo promotion)".
+
+✅ Done
+- **Wave 4 — additive capabilities** (branch, then merged): ⌘K command palette (RBAC-filtered off NAV_GROUPS,
+  cmdk), per-user density toggle (`[data-density]` rem-scale on v3, localStorage), tenant-admin theme
+  customizer (preset swatches → existing settings.theme mutation, never fights per-tenant override). All
+  additive, live-verified (⌘K navigates, density 16→15px, customizer applies preset). Fixed the command
+  palette's WCAG 2.2 target-size (hid redundant dialog close). tsc/lint/410 tests/build green; axe 0 new.
+- **Wave 5 — prioritized per-module polish** (dashboard + fisherfolk + 6 record modules): bespoke steppers →
+  shared Stepper, edit-form blue banner → tokens, vessel-detail status → StatusBadge, rounded-lg parity
+  across 13 files. JSX-only, zero data-layer. Full-app axe WCAG 2.2 AA = 0 new violations (light+dark);
+  verify-all-pages clean. Rule-31 re-baseline screenshots captured.
+- **SHIPPED v0.19.0 to prod + demo.** Merged Waves 0–5 → main (`f04a03e`), released v0.19.0 (`8a7bc41`, tag
+  pushed, main==origin), CI green → `sha-8a7bc41`, promoted prod + demo (DB backup each, 0 pending
+  migrations, reseed-never — both healthy, footer renders v0.19.0). Dev rebuilt off main = FRESH (Rule 39).
+
+💬 Notes
+- Whole Cargorix stack is UI-only — zero tRPC/Prisma/Auth/RBAC changes; DefinitionGrid frozen throughout.
+- Demo migrate step hit a transient SSH-tunnel refusal — harmless (0 pending migrations); must be re-run for
+  any future schema-changing release.
+- Deferred (logged in TASK_QUEUE): Wave-5 remainder (non-record modules + `/tm`), 3 structural items, and the
+  pre-existing app-wide `aria-hidden-focus` a11y fix.
+
 ## 2026-08-27 — Cargorix Wave 3: reskin the shared wrapper layer (owner-approved)
 
 **In your words:** you reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" — build Wave 3.

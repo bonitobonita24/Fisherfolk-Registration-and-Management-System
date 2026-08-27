@@ -1,30 +1,32 @@
 # FRMS — Project State
 
-## Current State (2026-08-27, latest) — 🎨 Cargorix Wave 3 DONE + verified (owner-approved); roadmap → Wave 4
+## Current State (2026-08-28, latest) — 🚀 Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-> **🛑 LOOP STOPPED BY OWNER (2026-08-27).** Owner directed the auto-loop to stop rebooting (an earlier
-> stop directive had rebooted anyway). This session did NO code work — it re-verified state and re-issued
-> the handoff. Session ends via `close-session --stop --force`. Next start is a MANUAL owner action; all
-> state below is current and unchanged since Wave 3 completion (`b9d2550`). Nothing is blocking.
+Cold-start authority: `project_cargorix_shipped_v0190_0828.md`. Dense loop handoff: `.sessions/slot-22/next-session`.
 
-Owner reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" → Wave 3
-built + verified this session. Waves 0–3 now all integrated on `feat/cargorix-stack-integrated`, LOCAL/HARD HOLD.
+> **✅ MILESTONE COMPLETE — full Cargorix UI adoption + ⌘K/density/theme-customizer LIVE on prod + demo.**
+> Session saved via the save-session routine. `origin/main @8a7bc41` = released **v0.19.0** (tag pushed).
+> One held docs commit (`1ee14c4`, main 1-ahead) — HARD HOLD, push only on owner word.
 
-### ✅ DONE THIS SESSION (2026-08-27 Wave 3 — executed + verified — LOCAL / HARD HOLD)
-- **Cargorix Wave 3 — `components/shared/` wrapper reskin** (commit `354131a`). 14 wrappers restyled to the
-  Cargorix token idiom (floating-card `rounded-xl border bg-card`, `rounded-lg bg-primary/10 text-primary`
-  chips, `rounded-md` interactive rows, softened hovers) via 5 parallel Sonnet executors.
-  - **DefinitionGrid FROZEN** per owner guardrail — `detail-field.tsx` untouched; `shared/index.ts` barrel
-    byte-stable; ZERO prop/export/signature drift; no literal colors (tokens only, identity via primary/accent).
-  - `status-badge` + `stepper` indicators pill→`rounded-lg` (chip scale); `data-table` floating-card frame
-    (TanStack+tRPC untouched); form-section/record-header/confirm-dialog/pickers/file+attachment token polish.
-  - **Verified (full Rule-32 bar):** tsc 7/7 · lint · **410 tests** · build 54s · dev rebuilt FRESH (:44387) ·
-    **axe WCAG 2.2 AA = 0 violations across 10 routes incl. dark** · live detail render confirms DefinitionGrid +
-    record-header + status-chip intact + orange active-tab. Evidence `screenshots/wave3-*.png` (sent to owner).
+### 🗺️ Wave roadmap — 0✅ 1✅ 2✅ 3✅ **4✅ 5✅** · ALL SHIPPED (v0.19.0). Deferred (owner-gated, optional): Wave-5 remainder (non-record modules + `/tm`) + 3 structural items + pre-existing aria-hidden-focus a11y fix.
 
-### 🗺️ Wave roadmap — 0✅ 1✅ 2✅ **3✅** · 4⬜ (additive: ⌘K, theme customizer, density — pre-approved) · 5⬜ (per-module polish + full-app axe + Rule-31 re-baseline). Waves 4/5 remain owner-gated go/no-go.
+### ✅ DONE THIS SESSION (2026-08-28 — built + verified + SHIPPED)
+- **Wave 4** — ⌘K command palette (RBAC-filtered off NAV_GROUPS, cmdk), per-user density toggle
+  (`[data-density]` rem-scale v3, localStorage), tenant-admin theme customizer (preset swatches → existing
+  settings.theme mutation, respects per-tenant override). Live-verified. Fixed command-palette WCAG target-size.
+- **Wave 5** — prioritized per-module polish (dashboard + fisherfolk + 6 record modules): bespoke steppers →
+  shared Stepper, edit-form blue banner → tokens, vessel-detail status → StatusBadge, `rounded-lg` parity
+  (13 files, JSX-only, zero data-layer). Full-app axe WCAG 2.2 AA = **0 new violations** (light+dark); Rule-31
+  re-baseline screenshots in `screenshots/cargorix-wave5-baseline/`.
+- **SHIPPED v0.19.0** — merged Waves 0–5 → main (`f04a03e`), released `8a7bc41` (version-sync ×7 + footer +
+  consolidated CHANGELOG + tag, pushed), CI green → `sha-8a7bc41`, promoted **prod + demo** (DB backup each,
+  **0 pending migrations**, reseed-never — both healthy, footer renders v0.19.0), dev rebuilt FRESH (Rule 39).
+  ⚠ demo migrate hit a transient SSH-tunnel refusal — harmless (0 pending migrations); re-run for future schema releases.
+
+### ⚖️ OPEN [WHAT] (cross-seat, owner-authorized 2026-08-27 — NOT FRMS-seat work; surface, don't attempt here)
+- AIEF `feat/v32.50-site-access-standard` merge → AIEF seat. · Phase 2 per-app site-access adoption → each app's own seat.
 
 ---
 
