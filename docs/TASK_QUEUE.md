@@ -10,6 +10,17 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   Build on branch `feat/cargorix-stack-integrated`. See `PENDING_DECISIONS.md` 2026-08-27. `owner`
 - 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
   files, drop/merge stale entries. `agent-found 2026-08-27`
+- 🟡 **Cargorix Wave 5 — DEFERRED remainder** (per plan §8 D6 "prioritized first, rest deferred").
+  Prioritized done+verified (dashboard + fisherfolk + all 6 record modules). Still to polish when
+  owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
+  `id-generator`, `audit-log`, `notifications`, `analytics`, `map`, `settings`, `user-management`,
+  `role-builder`) + the platform `/tm` site. `owner-gated 2026-08-27`
+- 🔴 **Cargorix Wave-5 deferred structural items** (audit-found, held to avoid scope creep/regression):
+  (a) list-client toolbar+pagination floating-card wrap — UNIFORM across all 5 record list clients
+  (a layout redesign, not a token nudge); (b) `fisherfolk/[id]/edit/edit-form-client.tsx` raw
+  `Card`→shared `FormSection` + `RecordHeader` for parity with the register form; (c) extract the
+  fisherfolk-detail bespoke underline tabs into a shared Tabs treatment. All JSX-only, token-clean
+  today. `agent-found 2026-08-27`
 - 🔴 **a11y: app-wide `aria-hidden-focus` on any open Radix menu/dialog** — when a Radix
   DropdownMenu/Dialog opens, the app-shell root `<div class="flex h-full w-full overflow-hidden">`
   gets `aria-hidden="true"` (via `hideOthers`) while still containing focusable content NOT made
