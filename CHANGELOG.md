@@ -4,6 +4,34 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.19.0 — 2026-08-28
+
+### [FEATURE]
+- Cargorix Wave 5 — prioritized per-module screen polish (token/idiom, JSX-only) (`c8069d7`)
+- Cargorix Wave 4 — additive capabilities (⌘K palette, density, theme customizer) (`d4d198d`)
+- Cargorix Wave 3 — reskin shared wrapper layer (token-only) (`354131a`)
+- Wave 2 — App-Shell Trio floating-card reskin + orange active-nav (`0a08369`)
+- Wave 1 — adopt cool-tinted neutral/surface tokens (light+dark), AA-verified (`aae3379`)
+- Wave 0 spike — token-remap PoC + oklch→HSL converter (`68a49cf`)
+
+### [FIXED]
+- command palette WCAG 2.2 target-size + log pre-existing aria-hidden-focus (`9a09f6a`)
+- sidebar group labels meet WCAG 2.2 AA contrast (drop /70 alpha) (`3b2c9d8`)
+- clear active-tab highlight (orange underline + semibold) on detail tab bar (`e397bb0`)
+
+### [DOCS]
+- log Cargorix Wave-5 deferred remainder + structural items (`8d3b5d1`)
+- mark auto-loop stopped by owner directive; state unchanged since Wave 3 (`daa5c5c`)
+- finalize save-session handoff — Wave 3 done; W4/W5/merge gated queue (`fbeb072`)
+- Cargorix Wave 3 done + verified (owner-approved); roadmap -> Wave 4 (`b9d2550`)
+- Cargorix Waves 0-2 integrated onto v0.18.0 + verified; Wave 3 gated (`9c4b1c8`)
+- next-session queue — Cargorix Wave 0 + 2 owner-authorized cross-seat decisions (`650757d`)
+- v0.18.0 shipped to prod + demo (full-auto run) (`94ed6b7`)
+- Cargorix Wave 2 (App-Shell reskin) + remember-me cookie fix — both live-verified (LOCAL/HARD HOLD) (`d553499`)
+- Cargorix Wave 1 (cool-tinted neutrals) done + active-tab highlight; Wave 2 approved next (LOCAL/HARD HOLD) (`4fc1e00`)
+- Cargorix Wave 0 spike done — token remap + converter (LOCAL/HARD HOLD) (`a103b5d`)
+
+
 ## v0.18.0 — 2026-08-26
 
 ### [FEATURE]
