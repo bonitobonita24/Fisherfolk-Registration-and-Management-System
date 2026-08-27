@@ -576,7 +576,7 @@ export function VesselRegistrationFormClient() {
             </div>
 
             {ownerSearch.trim().length >= 2 && (
-              <div className="rounded-md border border-border bg-card">
+              <div className="rounded-lg border bg-card">
                 {ownerListQuery.isLoading && (
                   <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />

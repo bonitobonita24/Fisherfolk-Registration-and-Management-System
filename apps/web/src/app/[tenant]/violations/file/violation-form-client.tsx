@@ -231,7 +231,7 @@ export function ViolationFormClient() {
                 />
               ) : selectedFisherfolk ? (
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="gap-1 pr-1">
+                  <Badge variant="secondary" className="gap-1 rounded-lg pr-1">
                     <span>{selectedFisherfolk.fullName}</span>
                     <span className="font-mono text-xs opacity-70">
                       {selectedFisherfolk.idNumber}
@@ -257,7 +257,7 @@ export function ViolationFormClient() {
                     Type at least 2 characters to search.
                   </p>
                   {fisherfolkSearch.trim().length >= 2 && (
-                    <div className="rounded-md border border-border bg-card">
+                    <div className="rounded-lg border border-border bg-card">
                       {fisherfolkListQuery.isLoading && (
                         <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -305,7 +305,7 @@ export function ViolationFormClient() {
               <p className="text-sm font-medium text-foreground">Vessel *</p>
               {selectedVessel ? (
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="gap-1 pr-1">
+                  <Badge variant="secondary" className="gap-1 rounded-lg pr-1">
                     <span>
                       {selectedVessel.vesselName ?? selectedVessel.mfvrNumber}
                     </span>
@@ -333,7 +333,7 @@ export function ViolationFormClient() {
                     Type at least 2 characters to search.
                   </p>
                   {vesselSearch.trim().length >= 2 && (
-                    <div className="rounded-md border border-border bg-card">
+                    <div className="rounded-lg border border-border bg-card">
                       {vesselListQuery.isLoading && (
                         <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                           <Loader2 className="h-4 w-4 animate-spin" />

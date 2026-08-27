@@ -297,7 +297,7 @@ export function FishCatchFormClient() {
                 <FormItem>
                   <FormLabel>Fisherfolk *</FormLabel>
                   {selectedFisherfolk ? (
-                    <div className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                       <div>
                         <p className="font-medium text-foreground">
                           {selectedFisherfolk.fullName}
@@ -330,7 +330,7 @@ export function FishCatchFormClient() {
                         Type at least 2 characters to search.
                       </FormDescription>
                       {fisherfolkSearch.trim().length >= 2 && (
-                        <div className="rounded-md border border-border bg-card">
+                        <div className="rounded-lg border border-border bg-card">
                           {fisherfolkQuery.isLoading && (
                             <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -381,7 +381,7 @@ export function FishCatchFormClient() {
                 <FormItem>
                   <FormLabel>Vessel (optional)</FormLabel>
                   {selectedVessel ? (
-                    <div className="flex items-center justify-between rounded-md border border-border bg-card px-3 py-2">
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                       <p className="font-medium text-foreground">
                         {selectedVessel.label}
                       </p>
@@ -407,7 +407,7 @@ export function FishCatchFormClient() {
                       </FormControl>
                       {(vesselSearch.trim().length >= 2 ||
                         !!selectedFisherfolk) && (
-                        <div className="rounded-md border border-border bg-card">
+                        <div className="rounded-lg border border-border bg-card">
                           {vesselQuery.isLoading && (
                             <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -624,7 +624,7 @@ export function FishCatchFormClient() {
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="grid gap-3 rounded-md border border-border p-3 md:grid-cols-6"
+                className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-6"
               >
                 <FormField
                   control={form.control}

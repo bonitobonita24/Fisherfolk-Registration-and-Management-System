@@ -318,7 +318,7 @@ export function VesselDetailClient({ id }: Props) {
                         {formatDate(v.createdAt)}
                       </p>
                     </div>
-                    <Badge variant="outline">{v.status}</Badge>
+                    <StatusBadge status={v.status} />
                   </li>
                 ))}
               </ul>

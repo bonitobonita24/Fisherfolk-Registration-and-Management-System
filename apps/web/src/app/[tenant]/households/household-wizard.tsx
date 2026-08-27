@@ -7,8 +7,8 @@ import { X } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
-import { cn } from "@/lib/utils";
 import { SearchInput } from "@/components/shared/search-input";
+import { Stepper } from "@/components/shared/stepper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,52 +33,6 @@ const STEPS: { key: WizardStep; label: string }[] = [
   { key: "review", label: "Review" },
 ];
 
-// ── Local stepper header (aria-current on active step) ──────────────────────
-function WizardStepper({ current }: { current: WizardStep }) {
-  const currentIndex = STEPS.findIndex((s) => s.key === current);
-  return (
-    <ol className="flex items-center" aria-label="Household creation steps">
-      {STEPS.map((s, i) => {
-        const isCurrent = s.key === current;
-        const isDone = i < currentIndex;
-        return (
-          <li key={s.key} className="flex items-center">
-            <div
-              aria-current={isCurrent ? "step" : undefined}
-              className={cn(
-                "flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-medium",
-                isDone
-                  ? "bg-primary text-primary-foreground"
-                  : isCurrent
-                    ? "bg-primary text-primary-foreground ring-2 ring-ring ring-offset-2 ring-offset-background"
-                    : "bg-muted text-muted-foreground",
-              )}
-            >
-              {i + 1}
-            </div>
-            <span
-              className={cn(
-                "ml-2 text-sm",
-                i <= currentIndex ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {s.label}
-            </span>
-            {i < STEPS.length - 1 && (
-              <div
-                className={cn(
-                  "mx-3 h-px w-10",
-                  isDone ? "bg-primary" : "bg-border",
-                )}
-              />
-            )}
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
-
 // ── Selectable fisherfolk result row ────────────────────────────────────────
 function FisherfolkResultRow({
   person,
@@ -92,7 +46,7 @@ function FisherfolkResultRow({
   disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+    <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
       <div className="min-w-0">
         <p className="truncate font-medium text-foreground">
           {person.fullName}
@@ -209,7 +163,10 @@ export function HouseholdWizard() {
 
   return (
     <div className="space-y-6">
-      <WizardStepper current={step} />
+      <Stepper
+        steps={STEPS.map((s) => s.label)}
+        current={STEPS.findIndex((s) => s.key === step)}
+      />
 
       {/* ── Step 1: Head ────────────────────────────────────────────────── */}
       {step === "head" && (
@@ -229,7 +186,7 @@ export function HouseholdWizard() {
             </div>
 
             {head && (
-              <div className="rounded-md border border-primary bg-primary/5 p-3">
+              <div className="rounded-lg border border-primary bg-primary/5 p-3">
                 <p className="text-xs font-medium text-primary">
                   Selected head
                 </p>

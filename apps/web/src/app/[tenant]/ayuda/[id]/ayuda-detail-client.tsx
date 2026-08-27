@@ -176,7 +176,7 @@ function AddBeneficiaryDialog({
           {isHouseholdMode ? (
             selectedHousehold ? (
               <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="gap-1 pr-1">
+                <Badge variant="secondary" className="gap-1 rounded-lg pr-1">
                   <span>{selectedHousehold.householdNumber}</span>
                   <span className="opacity-70">
                     {selectedHousehold.headName}
@@ -206,7 +206,7 @@ function AddBeneficiaryDialog({
                   Type at least 2 characters to search.
                 </p>
                 {search.trim().length >= 2 && (
-                  <div className="rounded-md border border-border bg-card">
+                  <div className="rounded-lg border border-border bg-card">
                     {householdListQuery.isLoading && (
                       <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -248,7 +248,7 @@ function AddBeneficiaryDialog({
             )
           ) : selectedFisherfolk ? (
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary" className="gap-1 pr-1">
+              <Badge variant="secondary" className="gap-1 rounded-lg pr-1">
                 <span>{selectedFisherfolk.fullName}</span>
                 <span className="font-mono text-xs opacity-70">
                   {selectedFisherfolk.idNumber}
@@ -275,7 +275,7 @@ function AddBeneficiaryDialog({
                 Type at least 2 characters to search.
               </p>
               {search.trim().length >= 2 && (
-                <div className="rounded-md border border-border bg-card">
+                <div className="rounded-lg border border-border bg-card">
                   {fisherfolkListQuery.isLoading && (
                     <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -453,7 +453,7 @@ function BeneficiariesTable({
           </AlertDialog>
         </div>
       )}
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>

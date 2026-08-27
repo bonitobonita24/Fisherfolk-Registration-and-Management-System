@@ -48,7 +48,7 @@ function DeltaBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
+        "inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-medium tabular-nums",
         deltaPercent > 0
           ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"
           : deltaPercent < 0
