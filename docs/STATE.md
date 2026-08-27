@@ -45,20 +45,24 @@ wave-0 ⊆ wave-1 ⊆ wave-2). Integrated + verified onto current main; one a11y
   `screenshots/cargorix-verify-0[1-5]-*.png` (sent to owner).
 - Originals preserved: `feat/cargorix-wave-{0,1,2}-*`, `docs/cargorix-adoption-plan` (holds the plan doc — not on main).
 
-### ⏳ NEXT SESSION — Wave 3 is GATED on owner (open [WHAT] in PENDING_DECISIONS.md)
-- **🎨 Cargorix Wave 3 — components/shared/ wrapper layer (highest leverage).** Rebuilds the shared wrapper
-  layer **including DefinitionGrid** — the plan's own guardrail requires **explicit owner sign-off on
-  DefinitionGrid** (the "absolutely perfect" idiom). Owner asked to verify first. So: owner reviews the
-  screenshots + green-lights Wave 3 before it starts. Build on `feat/cargorix-stack-integrated`. LOCAL.
-- **Un-gated alternative if owner prefers:** reconcile the 5 stale pre-existing `PENDING_DECISIONS.md` items
-  (2026-08-08 → 08-14; several look already-shipped per memory — verify vs git/deploy state, close or keep).
-- **Two owner-authorized PENDING items stay CROSS-SEAT / NOT FRMS** (AIEF site-access merge from AIEF seat;
-  Phase-2 per-app adoption from each app's own seat) — a FRMS session surfaces, never executes them.
-- **Maintenance:** launch-folder `MEMORY.md` is ~22KB (near read limit) — compact it (one line/entry) in a dedicated pass.
+### ⏳ NEXT SESSION — pending tasks + open decisions (nothing blocking; owner-gated go/no-go)
+1. **🎨 Cargorix Wave 4 — GATED on owner go.** Additive, all pre-approved in `docs/CARGORIX_ADOPTION_PLAN.md`:
+   ⌘K command palette · theme customizer · density toggle. Build on `feat/cargorix-stack-integrated`, LOCAL.
+2. **🎨 Cargorix Wave 5 — GATED (after W4).** Per-module polish across ~38 pages + full-app axe WCAG 2.2 AA
+   gate + Rule-31 design-fidelity re-baseline. Final wave of the reskin.
+3. **📋 Merge/deploy the Cargorix stack — GATED [WHAT].** Waves 0–3 sit LOCAL on `feat/cargorix-stack-integrated`;
+   merging to `main` (+ release + prod/demo promote) is a deliberate owner decision. Nothing pushed yet.
+4. **🧹 Un-gated housekeeping (do anytime):** reconcile the 5 stale pre-existing `PENDING_DECISIONS.md` items
+   (2026-08-08→08-14; several look already-shipped per memory — verify vs git/deploy state, close or keep).
+5. **⚠ CROSS-SEAT, NOT FRMS (surface only, never execute here):** (a) AIEF `feat/v32.50-site-access-standard`
+   merge → **Powerbyte-AIEF seat**. (b) Phase-2 per-app site-access adoption (MG/Orqafy/FerryBook/CueLane) →
+   **each app's OWN seat**. Both owner-authorized 2026-08-27; a FRMS session surfaces them as belonging elsewhere.
+6. **🔧 Maintenance:** launch-folder `MEMORY.md` is ~23KB (near the 24.4KB read limit) — compact to one line/entry
+   in a dedicated pass (flagged by the memory hook).
 
 ### Git
-On `feat/cargorix-stack-integrated` @ `3b2c9d8`. `main == origin/main == 650757d` (untouched). Tree clean.
-Nothing merged to main, nothing pushed/deployed — **HARD HOLD holds** (full-auto never ships).
+On `feat/cargorix-stack-integrated` @ `b9d2550` (`354131a` = Wave 3 code · `b9d2550` = docs). Tree clean.
+`main == origin/main == 650757d` (v0.18.0, untouched). Nothing merged/pushed/deployed — **HARD HOLD holds**.
 
 ---
 
