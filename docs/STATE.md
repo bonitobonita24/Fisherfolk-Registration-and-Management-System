@@ -4,6 +4,11 @@
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
+> **🛑 LOOP STOPPED BY OWNER (2026-08-27).** Owner directed the auto-loop to stop rebooting (an earlier
+> stop directive had rebooted anyway). This session did NO code work — it re-verified state and re-issued
+> the handoff. Session ends via `close-session --stop --force`. Next start is a MANUAL owner action; all
+> state below is current and unchanged since Wave 3 completion (`b9d2550`). Nothing is blocking.
+
 Owner reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" → Wave 3
 built + verified this session. Waves 0–3 now all integrated on `feat/cargorix-stack-integrated`, LOCAL/HARD HOLD.
 
