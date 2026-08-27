@@ -10,6 +10,13 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   Build on branch `feat/cargorix-stack-integrated`. See `PENDING_DECISIONS.md` 2026-08-27. `owner`
 - 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
   files, drop/merge stale entries. `agent-found 2026-08-27`
+- 🔴 **a11y: app-wide `aria-hidden-focus` on any open Radix menu/dialog** — when a Radix
+  DropdownMenu/Dialog opens, the app-shell root `<div class="flex h-full w-full overflow-hidden">`
+  gets `aria-hidden="true"` (via `hideOthers`) while still containing focusable content NOT made
+  `inert` → axe WCAG 2.2 AA serious. **Pre-existing + app-wide** (reproduces on the untouched user-menu
+  dropdown; NOT a Cargorix-Wave-4 regression). Proper fix = Radix upgrade or an app-shell `inert`/
+  aria-hidden shim on open — its own a11y branch + cross-dialog verify, not a UI-reskin change.
+  Where: `components/app-shell.tsx` root + shared Radix overlays. `agent-found 2026-08-27`
 
 ## ✅ Done recently
 

@@ -26,7 +26,12 @@ Command.displayName = CommandPrimitive.displayName
 const CommandDialog = ({ children, ...props }: DialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="overflow-hidden p-0">
+      {/* Hide the base dialog's 16px corner close button — a command palette
+          dismisses via Esc / overlay-click (conventional), and the 16px target
+          fails WCAG 2.2 target-size (2.5.8). `[&>button.absolute]` matches only
+          the DialogContent close (a direct-child <button> with `absolute`), not
+          the nested cmdk controls. CommandDialog is used solely by command-menu.tsx. */}
+      <DialogContent className="overflow-hidden p-0 [&>button.absolute]:hidden">
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
         </Command>
