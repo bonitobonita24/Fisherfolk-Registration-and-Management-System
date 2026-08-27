@@ -7,7 +7,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Menu, LogOut, Settings, PanelLeft } from "lucide-react";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CommandMenu } from "@/components/command-menu";
+import { DensityToggle } from "@/components/density";
+import { ThemeCustomizer } from "@/components/theme-customizer";
 import { useTenantHref } from "@/lib/use-tenant-href";
+import type { UserRole } from "@frms/shared/types";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,7 +31,7 @@ import {
 
 interface HeaderProps {
   userName: string;
-  role: string;
+  role: UserRole;
   onMenuClick?: () => void;
   onToggleSidebar?: () => void;
 }
@@ -127,8 +131,13 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar }: HeaderP
 
       {/* Right actions */}
       <div className="ml-auto flex items-center gap-1">
+        {/* Wave-4 additive: ⌘K palette (RBAC-filtered), per-user density,
+            tenant-admin theme customizer. All opt-in; none load-bearing. */}
+        <CommandMenu role={role} />
         <NotificationBell />
         <ThemeToggle />
+        <DensityToggle />
+        <ThemeCustomizer role={role} />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

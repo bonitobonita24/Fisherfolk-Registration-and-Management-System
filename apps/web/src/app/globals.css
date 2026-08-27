@@ -93,3 +93,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Wave-4 density (Cargorix): root rem-scale, per-user via [data-density]. Default = comfortable (16px). */
+html[data-density="compact"] { font-size: 15px; }
+html[data-density="spacious"] { font-size: 17px; }

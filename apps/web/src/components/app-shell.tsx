@@ -4,6 +4,7 @@ import { useState } from "react";
 import type React from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { DensityInit } from "@/components/density";
 import {
   Sheet,
   SheetContent,
@@ -26,6 +27,8 @@ export function AppShell({ tenantSlug, role, userName, children }: AppShellProps
 
   return (
     <div className="flex h-full w-full overflow-hidden">
+      {/* Wave-4: apply the per-user saved density attribute on mount (renders null). */}
+      <DensityInit />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-2 focus:left-2 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:shadow focus:ring-2 focus:ring-ring"
