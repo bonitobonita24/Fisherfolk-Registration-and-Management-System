@@ -3,6 +3,23 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-08-27 — Cargorix Wave 3: shared wrapper reskin (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + 5 parallel Sonnet spec-executors). Owner approved the Waves 0–2 reskin
+("that is all approved and good to go") → build Wave 3.
+
+**Change** (commit `354131a`, branch `feat/cargorix-stack-integrated`, LOCAL / HARD HOLD):
+- Token-only reskin of the 14 `apps/web/src/components/shared/*` wrappers to the Cargorix idiom (floating-card
+  `rounded-xl border bg-card`, `rounded-lg bg-primary/10 text-primary` chips, `rounded-md` rows, softened hovers).
+- **DefinitionGrid FROZEN** (`detail-field.tsx` untouched) per the owner-signed "absolutely perfect" guardrail;
+  `shared/index.ts` barrel byte-stable; no prop/export/signature drift; no literal colors (semantic tokens only).
+- `status-badge` + `stepper` indicators pill→`rounded-lg`; `data-table` floating-card frame (TanStack+tRPC intact);
+  form-section/record-header/confirm-dialog/search-input/empty-state/pickers/file+attachment token polish.
+
+**Verified**: tsc 7/7 · lint · 410 tests · build 54s · dev rebuilt FRESH (Rule 39) · axe WCAG 2.2 AA 0 violations
+across 10 routes incl. dark · live detail render confirms DefinitionGrid + record-header + status-chip intact.
+No merge/push/deploy — HARD HOLD.
+
 ## 2026-08-09 — Auth.js beta.32 SHIPPED TO PRODUCTION + CI build fix (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM). Owner authorized "yes do #1" → ship the merged Auth.js beta.32 security fix

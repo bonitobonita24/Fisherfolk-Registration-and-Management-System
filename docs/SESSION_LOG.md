@@ -2,6 +2,26 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-27 — Cargorix Wave 3: reskin the shared wrapper layer (owner-approved)
+
+**In your words:** you reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" — build Wave 3.
+
+✅ **Done + verified**
+- **Reskinned all 14 shared UI wrappers** to the Cargorix look — the layer nearly every screen inherits from,
+  so this delivers most of the visual polish. Floating cards, subtle chips, consistent rounded corners, softer hovers.
+- **Kept your "absolutely perfect" DefinitionGrid untouched** (frozen structure) — only the surrounding
+  components were restyled. Status badges and stepper dots are now soft-rounded chips instead of full pills.
+- **Nothing under the hood changed** — no component props, no exports, no data/table logic; purely visual tokens.
+- **Verified end-to-end:** typecheck · lint · 410 tests · production build all green; live pages render clean;
+  accessibility (WCAG 2.2 AA) 0 issues across 10 screens including dark mode. Screenshots sent.
+
+💬 **Notes**
+- All LOCAL / HARD HOLD — committed to the branch, nothing merged, pushed, or deployed. Awaiting your word.
+- Cargorix roadmap: Waves 0–3 done. Wave 4 (⌘K command palette, theme customizer, density toggle — all
+  pre-approved) and Wave 5 (per-module polish) are the remaining optional stages, each your go/no-go.
+
+---
+
 ## 2026-08-27 — Full Auto: integrate Cargorix Waves 0-2 onto current main + verify
 
 **In your words:** verify Waves 0–2 first, then "do what should be next full auto mode, i need to sleep."

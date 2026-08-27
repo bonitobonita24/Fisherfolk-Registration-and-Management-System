@@ -1,13 +1,32 @@
 # FRMS — Project State
 
-## Current State (2026-08-27, latest) — 🎨 Cargorix Waves 0-2 INTEGRATED onto v0.18.0 main + verified; Wave 3 gated on owner
+## Current State (2026-08-27, latest) — 🎨 Cargorix Wave 3 DONE + verified (owner-approved); roadmap → Wave 4
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-Full-auto session, owner asleep ("do what should be next full auto mode, i need to sleep"). Owner had
-picked "verify Waves 0-2 first". The resume already-done cross-check CAUGHT that the prior handoff's
-"START Wave 0 spike" was **stale** — Waves 0, 1, AND 2 were already built as local unmerged branches
-(cleanly stacked wave-0 ⊆ wave-1 ⊆ wave-2). Real next step was integration + verification onto current main.
+Owner reviewed the Waves 0–2 reskin screenshots and said "that is all approved and good to go" → Wave 3
+built + verified this session. Waves 0–3 now all integrated on `feat/cargorix-stack-integrated`, LOCAL/HARD HOLD.
+
+### ✅ DONE THIS SESSION (2026-08-27 Wave 3 — executed + verified — LOCAL / HARD HOLD)
+- **Cargorix Wave 3 — `components/shared/` wrapper reskin** (commit `354131a`). 14 wrappers restyled to the
+  Cargorix token idiom (floating-card `rounded-xl border bg-card`, `rounded-lg bg-primary/10 text-primary`
+  chips, `rounded-md` interactive rows, softened hovers) via 5 parallel Sonnet executors.
+  - **DefinitionGrid FROZEN** per owner guardrail — `detail-field.tsx` untouched; `shared/index.ts` barrel
+    byte-stable; ZERO prop/export/signature drift; no literal colors (tokens only, identity via primary/accent).
+  - `status-badge` + `stepper` indicators pill→`rounded-lg` (chip scale); `data-table` floating-card frame
+    (TanStack+tRPC untouched); form-section/record-header/confirm-dialog/pickers/file+attachment token polish.
+  - **Verified (full Rule-32 bar):** tsc 7/7 · lint · **410 tests** · build 54s · dev rebuilt FRESH (:44387) ·
+    **axe WCAG 2.2 AA = 0 violations across 10 routes incl. dark** · live detail render confirms DefinitionGrid +
+    record-header + status-chip intact + orange active-tab. Evidence `screenshots/wave3-*.png` (sent to owner).
+
+### 🗺️ Wave roadmap — 0✅ 1✅ 2✅ **3✅** · 4⬜ (additive: ⌘K, theme customizer, density — pre-approved) · 5⬜ (per-module polish + full-app axe + Rule-31 re-baseline). Waves 4/5 remain owner-gated go/no-go.
+
+---
+
+### Prior session (2026-08-27 earlier) — Waves 0-2 integrated + verified
+Full-auto session. Resume already-done cross-check CAUGHT that the prior handoff's "START Wave 0 spike"
+was **stale** — Waves 0, 1, AND 2 were already built as local unmerged branches (cleanly stacked
+wave-0 ⊆ wave-1 ⊆ wave-2). Integrated + verified onto current main; one a11y contrast fix.
 
 ### ✅ DONE THIS SESSION (2026-08-27, all executed + verified — LOCAL / HARD HOLD)
 - **New branch `feat/cargorix-stack-integrated`** off current `main` (`650757d`, v0.18.0).
