@@ -147,15 +147,17 @@ export function AttachmentUpload({
         disabled={isDisabled}
         onClick={() => inputRef.current?.click()}
         className={cn(
-          "flex w-full flex-col items-center justify-center rounded-md border border-dashed px-6 py-8 text-center transition-colors",
+          "flex w-full flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 px-6 py-8 text-center transition-colors",
           isDisabled
-            ? "cursor-not-allowed opacity-50 border-muted-foreground/25"
-            : "cursor-pointer border-muted-foreground/25 hover:border-muted-foreground/50",
+            ? "cursor-not-allowed opacity-50"
+            : "cursor-pointer hover:border-primary/50 hover:bg-muted/50",
         )}
       >
         {isUploading ? (
           <>
-            <Loader2 className="mb-2 h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
+            </span>
             <p className="text-xs text-muted-foreground">
               Uploading {uploadingCount} file
               {uploadingCount !== 1 ? "s" : ""}…
@@ -163,7 +165,9 @@ export function AttachmentUpload({
           </>
         ) : (
           <>
-            <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+            <span className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Upload className="h-6 w-6" aria-hidden="true" />
+            </span>
             <p className="text-xs text-muted-foreground">
               Click to upload attachments
             </p>
@@ -193,13 +197,15 @@ export function AttachmentUpload({
             return (
               <li
                 key={attachment.filePath}
-                className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                className="flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm transition-colors hover:bg-muted/50"
               >
-                {isPdf ? (
-                  <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  {isPdf ? (
+                    <FileIcon className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <ImageIcon className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </span>
                 <span className="min-w-0 flex-1 truncate">
                   {attachment.originalFilename}
                 </span>

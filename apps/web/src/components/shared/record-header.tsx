@@ -44,7 +44,7 @@ export function RecordHeader({
         asChild
         variant="ghost"
         size="icon"
-        className="-ml-1 size-8 shrink-0 text-muted-foreground hover:text-foreground"
+        className="-ml-1 size-8 shrink-0 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       >
         <Link href={backHref} aria-label={backLabel}>
           <ArrowLeft className="size-4" />

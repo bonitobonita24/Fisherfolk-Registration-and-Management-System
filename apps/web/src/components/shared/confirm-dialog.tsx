@@ -55,6 +55,7 @@ export function ConfirmDialog({
         <DialogFooter>
           <Button
             variant="outline"
+            className="hover:bg-accent hover:text-accent-foreground"
             onClick={() => setOpen(false)}
             disabled={loading}
           >

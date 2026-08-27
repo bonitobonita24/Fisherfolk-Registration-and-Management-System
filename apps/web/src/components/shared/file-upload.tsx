@@ -83,10 +83,10 @@ export function FileUpload({
           if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center rounded-md border border-dashed px-6 py-8 transition-colors",
+          "flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 px-6 py-8 transition-colors",
           dragOver
             ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25 hover:border-muted-foreground/50",
+            : "hover:border-primary/50 hover:bg-muted/50",
         )}
       >
         <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
@@ -113,7 +113,7 @@ export function FileUpload({
           {files.map((file, i) => (
             <li
               key={`${file.name}-${i}`}
-              className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
             >
               <FileIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="min-w-0 flex-1 truncate">{file.name}</span>

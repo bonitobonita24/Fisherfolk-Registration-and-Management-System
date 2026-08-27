@@ -111,7 +111,7 @@ export function CategoryPicker({
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[--radix-popover-trigger-width] p-0"
+          className="w-[--radix-popover-trigger-width] rounded-xl border-border p-0"
           align="start"
         >
           {query.isLoading ? (
@@ -130,7 +130,7 @@ export function CategoryPicker({
             </p>
           ) : (
             <ScrollArea className="max-h-72">
-              <ul className="py-1">
+              <ul className="space-y-0.5 p-1">
                 {categories.map((category) => {
                   const checked = value.includes(category.id);
                   return (
@@ -141,7 +141,7 @@ export function CategoryPicker({
                         onClick={() => {
                           toggle(category.id);
                         }}
-                        className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground"
                       >
                         <span
                           aria-hidden
@@ -172,7 +172,7 @@ export function CategoryPicker({
             <Badge
               key={category.id}
               variant="secondary"
-              className="flex items-center gap-1.5 pr-1"
+              className="flex items-center gap-1.5 rounded-lg pr-1"
               style={
                 category.displayColor != null && category.displayColor !== ""
                   ? {
@@ -190,7 +190,7 @@ export function CategoryPicker({
                   remove(category.id);
                 }}
                 aria-label={`Remove ${category.name}`}
-                className="rounded-sm p-0.5 hover:bg-foreground/10"
+                className="rounded-md p-0.5 hover:bg-foreground/10"
               >
                 <X className="h-3 w-3" />
               </button>
