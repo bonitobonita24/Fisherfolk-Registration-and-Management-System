@@ -10,8 +10,6 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted
   prod+demo (healthy, footer v0.19.0), dev FRESH. UI-only; axe WCAG 2.2 AA 0 new violations. (Was: "Wave 3
   gated on owner sign-off" — resolved through ship.)
-- 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
-  files, drop/merge stale entries. `agent-found 2026-08-27`
 - 🟡 **Cargorix Wave 5 — DEFERRED remainder** (per plan §8 D6 "prioritized first, rest deferred").
   Prioritized done+verified (dashboard + fisherfolk + all 6 record modules). Still to polish when
   owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
@@ -25,6 +23,9 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   today. `agent-found 2026-08-27`
 ## ✅ Done recently
 
+- ✅ **Compacted launch-folder `MEMORY.md`** — 25.2KB→9.9KB (61% smaller), trimmed verbose per-line hooks
+  to true one-liners; all 94 memory-file pointers preserved, 0 dangling links (detail stays in each linked
+  topic file). Improves cold-start read cost every session. (FIS-2, 2026-08-28)
 - ✅ **a11y: app-wide `aria-hidden-focus` on open Radix menu/dialog — FIXED (WCAG 2.2 AA).** Root cause:
   Radix v1 menu/dialog/popover use `aria-hidden`'s `hideOthers()` → sets `aria-hidden="true"` but NOT
   `inert`, so the hidden background subtree kept tabbable content (axe serious, SC 4.1.2). Fix = a

@@ -2,6 +2,31 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-28 — Squirlnote task sync + FIS-5 a11y fix + FIS-2 memory compaction (Full Auto)
+
+**In your words:** "encode these tasks to Squirlnote first + learn the MCP" → "go with FIS-5, then do the tasks in full auto mode."
+
+✅ Done
+- **Squirlnote synced.** Learned the `mcp__squirlnote__*` MCP; mapped `docs/TASK_QUEUE.md` onto the FIS board
+  (Pending/On-Going/For Review; never Done). Advanced the existing Cargorix task → For Review (shipped
+  v0.19.0), created FIS-2..FIS-5 for the open items, de-duped against `list_tasks` first.
+- **FIS-5 — app-wide `aria-hidden-focus` a11y fix (WCAG 2.2 AA, serious).** Root cause: Radix v1
+  menu/dialog/popover use `aria-hidden`'s `hideOthers()` → sets `aria-hidden` but not `inert`, leaving the
+  hidden background subtree tabbable. Fix = a once-mounted MutationObserver shim in the root layout that
+  mirrors `inert` onto exactly the Radix-marked nodes and cleans it up on close (pure logic + 6 unit tests;
+  never disturbs a pre-existing app `inert`). Verified on rebuilt dev: dropdown + ⌘K dialog open → axe 0
+  (was aria-hidden-focus×1), close → inert removed, axe 0, menu interactive, 0 console errors.
+  tsc/lint/**416** tests/build green. Branch `fix/a11y-aria-hidden-inert` (`265b215`).
+- **FIS-2 — compacted launch-folder `MEMORY.md`** 25.2KB→9.9KB (61%), all 94 memory-file pointers kept,
+  0 dangling; verbose hooks trimmed (detail stays in each linked file).
+
+💬 Decisions/notes
+- **HARD HOLD** — all work LOCAL on `fix/a11y-aria-hidden-inert`; nothing pushed/deployed. FIS-5 + FIS-2 sit
+  in Squirlnote **For Review** for your approval (never auto-Done).
+- **Handed back for your eyes (not done autonomously):** FIS-4 (app-wide list-toolbar/pagination floating-card
+  redesign + edit-form/tabs restructure) and FIS-3 (Wave 5 remainder — non-record modules + `/tm`). Both are
+  *appearance* changes the Cargorix waves have consistently gated on your review — say the word to proceed.
+
 ## 2026-08-28 — Cargorix Waves 4 & 5 built + full stack SHIPPED as v0.19.0 (prod + demo)
 
 **In your words:** "go Wave 4" → "go Wave 5" → "merge/ship the whole Cargorix stack (release + prod/demo promotion)".
