@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
+import { AriaHiddenInertShim } from "@/components/a11y/aria-hidden-inert-shim";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import "./globals.css";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <AriaHiddenInertShim />
           <TRPCProvider>{children}</TRPCProvider>
         </ThemeProvider>
       </body>

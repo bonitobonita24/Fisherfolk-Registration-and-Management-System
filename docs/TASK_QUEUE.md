@@ -10,8 +10,6 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted
   prod+demo (healthy, footer v0.19.0), dev FRESH. UI-only; axe WCAG 2.2 AA 0 new violations. (Was: "Wave 3
   gated on owner sign-off" — resolved through ship.)
-- 🔴 **Compact launch-folder MEMORY.md** (~22KB, near read limit) — one line/entry, move detail to topic
-  files, drop/merge stale entries. `agent-found 2026-08-27`
 - 🟡 **Cargorix Wave 5 — DEFERRED remainder** (per plan §8 D6 "prioritized first, rest deferred").
   Prioritized done+verified (dashboard + fisherfolk + all 6 record modules). Still to polish when
   owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
@@ -23,15 +21,20 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   `Card`→shared `FormSection` + `RecordHeader` for parity with the register form; (c) extract the
   fisherfolk-detail bespoke underline tabs into a shared Tabs treatment. All JSX-only, token-clean
   today. `agent-found 2026-08-27`
-- 🔴 **a11y: app-wide `aria-hidden-focus` on any open Radix menu/dialog** — when a Radix
-  DropdownMenu/Dialog opens, the app-shell root `<div class="flex h-full w-full overflow-hidden">`
-  gets `aria-hidden="true"` (via `hideOthers`) while still containing focusable content NOT made
-  `inert` → axe WCAG 2.2 AA serious. **Pre-existing + app-wide** (reproduces on the untouched user-menu
-  dropdown; NOT a Cargorix-Wave-4 regression). Proper fix = Radix upgrade or an app-shell `inert`/
-  aria-hidden shim on open — its own a11y branch + cross-dialog verify, not a UI-reskin change.
-  Where: `components/app-shell.tsx` root + shared Radix overlays. `agent-found 2026-08-27`
-
 ## ✅ Done recently
+
+- ✅ **Compacted launch-folder `MEMORY.md`** — 25.2KB→9.9KB (61% smaller), trimmed verbose per-line hooks
+  to true one-liners; all 94 memory-file pointers preserved, 0 dangling links (detail stays in each linked
+  topic file). Improves cold-start read cost every session. (FIS-2, 2026-08-28)
+- ✅ **a11y: app-wide `aria-hidden-focus` on open Radix menu/dialog — FIXED (WCAG 2.2 AA).** Root cause:
+  Radix v1 menu/dialog/popover use `aria-hidden`'s `hideOthers()` → sets `aria-hidden="true"` but NOT
+  `inert`, so the hidden background subtree kept tabbable content (axe serious, SC 4.1.2). Fix = a
+  once-mounted MutationObserver shim in the root layout (`components/a11y/aria-hidden-inert-shim.tsx` +
+  pure `lib/a11y/aria-hidden-inert.ts`, 6 unit tests) that mirrors `inert` onto exactly the Radix-marked
+  nodes and removes it on close; never touches a pre-existing app `inert`. Verified on rebuilt dev:
+  dropdown + ⌘K dialog open → axe 0 (was aria-hidden-focus×1), close → inert cleaned, axe 0, menu
+  interactive, 0 console errors. tsc/lint/416 tests/build green. Branch `fix/a11y-aria-hidden-inert`
+  `265b215`, LOCAL/HARD HOLD. (FIS-5, 2026-08-28)
 
 - ✅ **Cargorix Waves 0–2 integrated onto current main + verified.** New branch
   `feat/cargorix-stack-integrated` (`3b2c9d8`): merged v0.18.0 `main` into the stacked waves (4 shell files
