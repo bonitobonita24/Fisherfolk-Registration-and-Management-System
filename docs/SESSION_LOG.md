@@ -2,6 +2,18 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-29 — Post-full-auto verification + save (no reboot)
+
+**In your words:** "check if the last session's tasks all finished, nothing unfinished or corrupted" → then "save it, put pending in Squirlnote, shutting down to rest, no reboot loop."
+
+✅ Done
+- Verified last session (FIS-5 + FIS-2) against ground truth: tree clean, `main` 5 ahead of origin (HELD), FIS-5 files present + shim mounted in `app/layout.tsx`, `tsc` exit 0, **416 tests pass / 170 skipped (DB-gated) / 0 fail** — identical to recorded baseline. No corruption, nothing half-written.
+- Confirmed Squirlnote board in sync (no dupes): FIS-4 → Pending, FIS-3 → On-Going, FIS-5/FIS-2/FIS-1 → For Review. Added `design`+`ui` tags to the two open tasks (FIS-4, FIS-3) per tagging convention.
+
+💬 Notes
+- The prior full-auto loop was halted by owner directive at end of last session — clean stop, not a crash. Only "open" items are the deliberately-deferred FIS-4 then FIS-3.
+- ⏳ Owner-gated: push the 5 held commits to origin (separate ship decision, not yet given). Prod/demo remain v0.19.0.
+
 ## 2026-08-28 — Squirlnote task sync + FIS-5 a11y fix + FIS-2 memory compaction (Full Auto)
 
 **In your words:** "encode these tasks to Squirlnote first + learn the MCP" → "go with FIS-5, then do the tasks in full auto mode."
