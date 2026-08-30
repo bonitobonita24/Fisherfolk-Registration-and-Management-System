@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, MoreHorizontal, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -23,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc/client";
+import { ListToolbar, SearchInput } from "@/components/shared";
 
 import { CreateUserDialog } from "./create-user-dialog";
 import { ResetPasswordDialog } from "./reset-password-dialog";
@@ -44,17 +44,8 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export function UsersClient({ tenantId }: UsersClientProps) {
-  const [inputValue, setInputValue] = useState("");
-  const [search, setSearch] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useState("");
   const [resetTarget, setResetTarget] = useState<ResetTarget | null>(null);
-
-  // Debounce: update `search` 300 ms after the user stops typing
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setSearch(inputValue.trim() || undefined);
-    }, 300);
-    return () => clearTimeout(id);
-  }, [inputValue]);
 
   const utils = trpc.useUtils();
 
@@ -62,7 +53,7 @@ export function UsersClient({ tenantId }: UsersClientProps) {
     tenantId,
     page: 1,
     limit: 20,
-    search,
+    search: search || undefined,
   });
 
   const setStatus = trpc.tenantUser.setStatus.useMutation({
@@ -110,22 +101,27 @@ export function UsersClient({ tenantId }: UsersClientProps) {
         )}
       </div>
 
-      {/* ── Toolbar ───────────────────────────────────────────────────────── */}
-      <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-1 py-1.5">
-        <Input
-          placeholder="Search users…"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className="h-8 w-full max-w-sm sm:w-56"
-          aria-label="Search users"
-        />
-        <div className="ml-auto">
+      <ListToolbar>
+        <div className="flex items-center gap-2">
+          <Users className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">All Users</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {data ? data.total : "-"}
+          </span>
+        </div>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search users…"
+            className="w-full sm:w-56"
+          />
           <CreateUserDialog
             tenantId={tenantId}
             onCreated={() => void utils.tenantUser.list.invalidate()}
           />
         </div>
-      </div>
+      </ListToolbar>
 
       {/* ── Table ─────────────────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-md border bg-card">

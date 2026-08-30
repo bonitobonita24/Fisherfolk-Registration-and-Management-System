@@ -25,7 +25,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import {
+  ListToolbar,
+  UnderlineTabsList,
+  UnderlineTabsTrigger,
+} from "@/components/shared";
 import { ID_CARD_GEOMETRY } from "@frms/shared/schemas";
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
@@ -303,20 +308,22 @@ function FisherfolkSelectStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 px-6 py-5">
-          <div className="relative">
-            <Search
-              className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              id="fisherfolk-search"
-              placeholder="Search by name or ID number…"
-              className="h-9 pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search all fisherfolk by name or registration ID"
-            />
-          </div>
+          <ListToolbar>
+            <div className="relative w-full sm:w-72">
+              <Search
+                className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="fisherfolk-search"
+                placeholder="Search by name or ID number…"
+                className="h-9 pl-8"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search all fisherfolk by name or registration ID"
+              />
+            </div>
+          </ListToolbar>
 
           {trimmedSearch.length === 0 ? (
             <p className="text-xs text-muted-foreground">
@@ -532,18 +539,18 @@ export function SelectAndPrint({ onProceedToLayout }: SelectAndPrintProps) {
       value={activeTab}
       onValueChange={(v) => setActiveTab(v as "FISHERFOLK" | "VESSEL")}
     >
-      <TabsList>
-        <TabsTrigger value="FISHERFOLK">
+      <UnderlineTabsList>
+        <UnderlineTabsTrigger value="FISHERFOLK">
           <Users className="mr-2 h-4 w-4" aria-hidden="true" />
           Fisherfolk IDs
-        </TabsTrigger>
-        <TabsTrigger value="VESSEL" aria-label="Vessel IDs — coming soon">
+        </UnderlineTabsTrigger>
+        <UnderlineTabsTrigger value="VESSEL" aria-label="Vessel IDs — coming soon">
           Vessel IDs
           <Badge variant="secondary" className="ml-2 px-1 py-0 text-xs">
             Coming soon
           </Badge>
-        </TabsTrigger>
-      </TabsList>
+        </UnderlineTabsTrigger>
+      </UnderlineTabsList>
 
       <TabsContent value="FISHERFOLK" className="mt-4">
         <FisherfolkSelectStep onProceedToLayout={onProceedToLayout} />

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormSection } from "@/components/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -75,15 +75,11 @@ export function BarangayAliases() {
     !fromLabel.trim() || !toLabel || createAlias.isPending;
 
   return (
-    <Card>
-      <CardHeader className="border-b px-6 py-5">
-        <CardTitle className="text-sm font-medium">Barangay Aliases</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Maps common misspellings or variants of a barangay name to the
-          canonical name, applied automatically during data import.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6 px-6 py-5">
+    <FormSection
+      title="Barangay Aliases"
+      description="Maps common misspellings or variants of a barangay name to the canonical name, applied automatically during data import."
+    >
+      <div className="space-y-6">
         {/* ── Add form row ─────────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex-1 min-w-[180px] space-y-1.5">
@@ -170,7 +166,7 @@ export function BarangayAliases() {
             </Table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </FormSection>
   );
 }

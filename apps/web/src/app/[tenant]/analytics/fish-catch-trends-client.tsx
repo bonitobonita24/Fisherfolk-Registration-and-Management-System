@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormSection } from "@/components/shared/form-section";
 import {
   ChartContainer,
   ChartLegend,
@@ -77,143 +77,131 @@ export function FishCatchTrendsClient() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* ── Total Catch (kg) over time ────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Total Catch (kg) over time</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Monthly total landed catch weight
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {trendsLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : data.length === 0 ? (
-            <EmptyState message="No fish catch data yet." />
-          ) : (
-            <ChartContainer
-              config={totalKgConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Total Catch (kg) over time"
+        description="Monthly total landed catch weight"
+        className="overflow-hidden py-0"
+      >
+        {trendsLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : data.length === 0 ? (
+          <EmptyState message="No fish catch data yet." />
+        ) : (
+          <ChartContainer
+            config={totalKgConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <AreaChart
+              data={data}
+              margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
             >
-              <AreaChart
-                data={data}
-                margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis dataKey="month" {...tickProps} />
-                <YAxis
-                  {...tickProps}
-                  width={56}
-                  tickFormatter={formatCompactNumber}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="totalKg"
-                  stroke="var(--color-totalKg)"
-                  fill="var(--color-totalKg)"
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis dataKey="month" {...tickProps} />
+              <YAxis
+                {...tickProps}
+                width={56}
+                tickFormatter={formatCompactNumber}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Area
+                type="monotone"
+                dataKey="totalKg"
+                stroke="var(--color-totalKg)"
+                fill="var(--color-totalKg)"
+                fillOpacity={0.2}
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── Catch Value (₱) over time ─────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Catch Value (₱) over time</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Monthly estimated catch value
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {trendsLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : data.length === 0 ? (
-            <EmptyState message="No fish catch value data yet." />
-          ) : (
-            <ChartContainer
-              config={valuePhpConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Catch Value (₱) over time"
+        description="Monthly estimated catch value"
+        className="overflow-hidden py-0"
+      >
+        {trendsLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : data.length === 0 ? (
+          <EmptyState message="No fish catch value data yet." />
+        ) : (
+          <ChartContainer
+            config={valuePhpConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <AreaChart
+              data={data}
+              margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
             >
-              <AreaChart
-                data={data}
-                margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis dataKey="month" {...tickProps} />
-                <YAxis
-                  {...tickProps}
-                  width={56}
-                  tickFormatter={formatCompactNumber}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="valuePhp"
-                  stroke="var(--color-valuePhp)"
-                  fill="var(--color-valuePhp)"
-                  fillOpacity={0.2}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis dataKey="month" {...tickProps} />
+              <YAxis
+                {...tickProps}
+                width={56}
+                tickFormatter={formatCompactNumber}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Area
+                type="monotone"
+                dataKey="valuePhp"
+                stroke="var(--color-valuePhp)"
+                fill="var(--color-valuePhp)"
+                fillOpacity={0.2}
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── CPUE Trend ───────────────────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0 lg:col-span-2">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">CPUE Trend</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Catch per unit effort — kg per fishing hour and kg per trip
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {trendsLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : data.length === 0 ? (
-            <EmptyState message="No CPUE data yet." />
-          ) : (
-            <ChartContainer
-              config={cpueConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="CPUE Trend"
+        description="Catch per unit effort — kg per fishing hour and kg per trip"
+        className="overflow-hidden py-0 lg:col-span-2"
+      >
+        {trendsLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : data.length === 0 ? (
+          <EmptyState message="No CPUE data yet." />
+        ) : (
+          <ChartContainer
+            config={cpueConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <LineChart
+              data={data}
+              margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
             >
-              <LineChart
-                data={data}
-                margin={{ left: -10, right: 10, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis dataKey="month" {...tickProps} />
-                <YAxis
-                  {...tickProps}
-                  width={56}
-                  tickFormatter={formatCompactNumber}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <ChartLegend content={<ChartLegendContent />} />
-                <Line
-                  type="monotone"
-                  dataKey="cpueHr"
-                  stroke="var(--color-cpueHr)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="cpueTrip"
-                  stroke="var(--color-cpueTrip)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis dataKey="month" {...tickProps} />
+              <YAxis
+                {...tickProps}
+                width={56}
+                tickFormatter={formatCompactNumber}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Line
+                type="monotone"
+                dataKey="cpueHr"
+                stroke="var(--color-cpueHr)"
+                strokeWidth={2}
+                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="cpueTrip"
+                stroke="var(--color-cpueTrip)"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ChartContainer>
+        )}
+      </FormSection>
     </div>
   );
 }

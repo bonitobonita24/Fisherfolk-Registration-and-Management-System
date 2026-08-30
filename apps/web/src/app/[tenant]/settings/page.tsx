@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, CreditCard, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { prisma } from "@frms/db";
 
 import { auth } from "@/server/auth";
 import { tenantHref } from "@/lib/tenant-href.server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormSection, PageHeader } from "@/components/shared";
 import { ThemeSettings } from "./theme-settings";
 import { BarangayAliases } from "./barangay-aliases";
 import { AnnualResetCard } from "./annual-reset-card";
@@ -30,24 +30,14 @@ export default async function SettingsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex shrink-0 items-center gap-3 pt-4 pb-4">
-        <div>
-          <h1 className="truncate text-base font-semibold tracking-tight">Settings</h1>
-          <p className="text-xs text-muted-foreground">
-            Manage tenant settings including categories, violation types, and email configuration.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage tenant settings including categories, violation types, and email configuration."
+      />
 
       {/* ID Card Template — admin design surface (one-time task) */}
-      <Card>
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="flex items-center gap-2 text-sm font-medium">
-            <CreditCard className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-            ID Card Template
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
+      <FormSection title="ID Card Template">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             Design and activate the ID card template used by the ID Generator.
             The active template is loaded automatically when encoders print IDs.
@@ -59,19 +49,13 @@ export default async function SettingsPage({
             Open template designer
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-        </CardContent>
-      </Card>
+        </div>
+      </FormSection>
 
       {/* Role Builder — data-driven custom-role permission matrix, owner-only */}
       {isAdmin ? (
-        <Card>
-          <CardHeader className="border-b px-6 py-5">
-            <CardTitle className="flex items-center gap-2 text-sm font-medium">
-              <ShieldCheck className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              Role Builder
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
+        <FormSection title="Role Builder">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
               Create custom roles with a per-feature permission matrix and
               assign them to Encoder, Viewer, and Bantay Dagat users.
@@ -83,8 +67,8 @@ export default async function SettingsPage({
               Open Role Builder
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-          </CardContent>
-        </Card>
+          </div>
+        </FormSection>
       ) : null}
 
       <ThemeSettings />

@@ -1,6 +1,11 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  UnderlineTabsList,
+  UnderlineTabsTrigger,
+} from "@/components/shared/underline-tabs";
 import { AnalyticsClient } from "./analytics-client";
 import { FishCatchCompositionClient } from "./fish-catch-composition-client";
 import { FishCatchTrendsClient } from "./fish-catch-trends-client";
@@ -8,14 +13,14 @@ import { FishCatchTrendsClient } from "./fish-catch-trends-client";
 export function AnalyticsTabs() {
   return (
     <Tabs defaultValue="fisherfolk" className="mt-4">
-      <TabsList className="h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b px-2 pb-1">
-        <TabsTrigger value="fisherfolk" className="shrink-0">
+      <UnderlineTabsList>
+        <UnderlineTabsTrigger value="fisherfolk">
           Fisherfolk
-        </TabsTrigger>
-        <TabsTrigger value="fish-catch" className="shrink-0">
+        </UnderlineTabsTrigger>
+        <UnderlineTabsTrigger value="fish-catch">
           Fish Catch
-        </TabsTrigger>
-      </TabsList>
+        </UnderlineTabsTrigger>
+      </UnderlineTabsList>
       <TabsContent value="fisherfolk" className="min-w-0 pt-4 pb-4">
         <AnalyticsClient />
       </TabsContent>

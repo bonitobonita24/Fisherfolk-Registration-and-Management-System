@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc/client";
 import type { ValidationReport } from "@/lib/import/validate";
-import { Stepper } from "@/components/shared";
+import { FormSection, Stepper } from "@/components/shared";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type WizardStep = "upload" | "preview" | "done";
@@ -173,11 +172,7 @@ export function ImportWizard() {
 
       {/* ── Upload step ───────────────────────────────────────────────────── */}
       {step === "upload" && (
-        <Card>
-          <CardHeader className="border-b px-6 py-5">
-            <CardTitle className="text-sm font-medium">Upload Spreadsheet</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 px-6 py-5">
+        <FormSection title="Upload Spreadsheet">
             {/* ── Mode selector ─────────────────────────────────────────── */}
             <div className="space-y-2">
               <Label>Import mode</Label>
@@ -231,21 +226,14 @@ export function ImportWizard() {
                   : "Validating records…"}
               </p>
             )}
-          </CardContent>
-        </Card>
+        </FormSection>
       )}
 
       {/* ── Preview step ──────────────────────────────────────────────────── */}
       {step === "preview" && report !== null && (
         <div className="space-y-4">
           {/* Summary card */}
-          <Card>
-            <CardHeader className="border-b px-6 py-5">
-              <CardTitle className="text-sm font-medium">
-                Validation Preview — {fileName}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 px-6 py-5">
+          <FormSection title={`Validation Preview — ${fileName}`}>
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCell
@@ -333,21 +321,14 @@ export function ImportWizard() {
                   );
                 })()}
               </div>
-            </CardContent>
-          </Card>
+          </FormSection>
 
           {/* Row preview table — first 100 rows */}
-          <Card>
-            <CardHeader className="border-b px-6 py-5">
-              <CardTitle className="text-sm font-medium">
-                Row Preview{" "}
-                <span className="text-muted-foreground font-normal text-xs">
-                  (first {Math.min(report.rows.length, 100)} of{" "}
-                  {report.rows.length})
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto p-0">
+          <FormSection
+            title="Row Preview"
+            description={`(first ${Math.min(report.rows.length, 100)} of ${report.rows.length})`}
+            className="[&>div:last-child]:p-0 [&>div:last-child]:overflow-x-auto"
+          >
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -393,18 +374,13 @@ export function ImportWizard() {
                   })}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
+          </FormSection>
         </div>
       )}
 
       {/* ── Done step ─────────────────────────────────────────────────────── */}
       {step === "done" && commitResult !== null && (
-        <Card>
-          <CardHeader className="border-b px-6 py-5">
-            <CardTitle className="text-sm font-medium">Import Complete</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 px-6 py-5">
+        <FormSection title="Import Complete">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <StatCell
                 label="Imported"
@@ -427,16 +403,14 @@ export function ImportWizard() {
             <Button variant="outline" size="sm" onClick={handleReset}>
               Import another file
             </Button>
-          </CardContent>
-        </Card>
+        </FormSection>
       )}
 
       {/* ── Recent imports (always visible) ───────────────────────────────── */}
-      <Card>
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Recent Imports</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto p-0">
+      <FormSection
+        title="Recent Imports"
+        className="[&>div:last-child]:p-0 [&>div:last-child]:overflow-x-auto"
+      >
           {!batches || batches.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               No imports yet.
@@ -485,8 +459,7 @@ export function ImportWizard() {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+      </FormSection>
     </div>
   );
 }

@@ -2,6 +2,30 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
+
+**In your words:** "1. keep FIS-4 on For Review · 2. do FIS-3 · 3. merge/push."
+
+✅ Done
+- **Released v0.20.0** — merged FIS-4 → main, consolidated changelog + version-sync (7 pkgs + footer) + tag `v0.20.0`, `git push --follow-tags` → `origin/main == 8a3f173`. Ships the long-held FIS-5 WCAG a11y fix + FIS-2 + FIS-4. CI builds image `sha-8a3f173`. (Prod/demo promotion left as a separate manual step — pending your word.)
+- **FIS-3 complete + verified** — applied the shared-wrapper/floating-card idiom across the 12 non-record modules + `/tm` (10 parallel workers, 2 waves; chrome/JSX only, byte-faithful):
+  - List chrome (`ListToolbar`/`ListPagination`): edit-requests, `/tm` tenants+users (were zero-shared), id-generator.
+  - `Card`→`FormSection`/`RecordHeader`: edit-requests review, reports hub, import wizard, analytics (16 cards), settings, role-builder.
+  - `UnderlineTabs`: reports, analytics, todo, id-generator. `PageHeader`/`EmptyState`: import, notifications, map, audit-log, user-management, todo, settings.
+  - Preserved intentional non-token hex (pvc-sheet print fills, theme brand swatches).
+  - Verified: tsc/lint green · 416 tests · build green · dev rebuilt (Rule 39) · **live axe 0 violations across 12 tenant routes, 0 console errors** (WCAG 2.2 AA). Screenshots `screenshots/fis3/`.
+  - Committed `d51afe1` on `feat/fis3-nonrecord-module-consistency`, **LOCAL / HARD HOLD**.
+- FIS-4 Squirlnote card kept in **For Review** (per your item 1).
+
+⏳ Next / Held
+- **FIS-3 handed back for your visual review** (`screenshots/fis3/`) — merge/push of FIS-3 awaiting your word (not auto-pushed; it's a large visual batch you'll want to eyeball).
+- **Prod/demo promotion of v0.20.0** — your call.
+- audit-log + user-management remain feature STUBS (header adopted; tables not built).
+
+💬 Notes
+- git-guard false-positived on "clean" in the FIS-3 commit body (known footgun) — reworded to "green".
+- `/tm` axe not swept (webmaster lacks platform access); its chrome reuses axe-proven shared components.
+
 ## 2026-08-30 — FIS-4 list chrome + edit-form/detail-tabs shared wrappers
 
 **In your words:** resume → "yes proceed" (proceed with the owner-directed FIS-4 visual restyle).

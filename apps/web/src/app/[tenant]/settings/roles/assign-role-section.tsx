@@ -4,13 +4,6 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -26,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FormSection } from "@/components/shared";
 import { trpc } from "@/lib/trpc/client";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -86,16 +80,11 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="border-b px-6 py-5">
-        <CardTitle className="text-sm font-medium">Assign Custom Roles</CardTitle>
-        <CardDescription className="text-xs">
-          Attach a custom role to an Encoder, Viewer, or Bantay Dagat user.
-          Tenant Admin and Tenant Superadmin accounts always keep their full
-          fixed-tier access and cannot carry a custom role.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-6 py-5">
+    <FormSection
+      title="Assign Custom Roles"
+      description="Attach a custom role to an Encoder, Viewer, or Bantay Dagat user. Tenant Admin and Tenant Superadmin accounts always keep their full fixed-tier access and cannot carry a custom role."
+    >
+      <div>
         {usersLoading ? (
           <p className="text-sm text-muted-foreground animate-pulse">Loading users…</p>
         ) : users.length === 0 ? (
@@ -162,7 +151,7 @@ export function AssignRoleSection({ tenantId }: AssignRoleSectionProps) {
             </Table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </FormSection>
   );
 }

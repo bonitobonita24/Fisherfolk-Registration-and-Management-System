@@ -48,7 +48,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared";
 import { TodoCalendar } from "./todo-calendar";
 
 export type KanbanStatus = "TODO" | "IN_PROGRESS" | "DONE";
@@ -671,10 +672,14 @@ export function TodoBoardClient({ canManage }: { canManage: boolean }) {
       <Tabs value={view} onValueChange={(v) => setView(v as "kanban" | "calendar")}>
         <div className="sticky top-0 z-30 -mx-4 bg-background">
           <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
-            <TabsList aria-label="ToDo view" className="h-8">
-              <TabsTrigger value="kanban">Kanban</TabsTrigger>
-              <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            </TabsList>
+            <UnderlineTabsList aria-label="ToDo view" className="h-8 w-auto shrink-0 border-b-0 p-0">
+              <UnderlineTabsTrigger value="kanban" className="h-8 px-3 text-xs">
+                Kanban
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="calendar" className="h-8 px-3 text-xs">
+                Calendar
+              </UnderlineTabsTrigger>
+            </UnderlineTabsList>
 
             <div
               role="group"

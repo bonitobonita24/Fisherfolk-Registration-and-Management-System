@@ -21,7 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { FormSection } from "@/components/shared/form-section";
+import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared/underline-tabs";
 import { trpc } from "@/lib/trpc/client";
 import { ReportHub } from "./report-hub";
 
@@ -149,10 +151,10 @@ export function ReportsClient() {
 
   return (
     <Tabs defaultValue="standard" className="space-y-6">
-      <TabsList className="print:hidden">
-        <TabsTrigger value="standard">Standard Reports</TabsTrigger>
-        <TabsTrigger value="hub">Report Hub</TabsTrigger>
-      </TabsList>
+      <UnderlineTabsList className="print:hidden">
+        <UnderlineTabsTrigger value="standard">Standard Reports</UnderlineTabsTrigger>
+        <UnderlineTabsTrigger value="hub">Report Hub</UnderlineTabsTrigger>
+      </UnderlineTabsList>
 
       <TabsContent value="standard" className="space-y-6">
       {/* ── Print-only government header ──────────────────────────────────── */}
@@ -168,11 +170,7 @@ export function ReportsClient() {
       </div>
 
       {/* ── Filters card (hidden on print) ────────────────────────────────── */}
-      <Card className="print:hidden">
-        <CardHeader>
-          <CardTitle className="text-base">Report Options</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <FormSection title="Report Options" className="print:hidden">
           {/* Report type */}
           <div className="space-y-1.5">
             <Label htmlFor="report-type">Report Type</Label>
@@ -256,8 +254,7 @@ export function ReportsClient() {
               </>
             )}
           </div>
-        </CardContent>
-      </Card>
+      </FormSection>
 
       {/* ── Results card ───────────────────────────────────────────────────── */}
       {applied !== null && (

@@ -5,8 +5,8 @@ import type { ReportDomain } from "@frms/shared/schemas";
 
 import type { AppRouter } from "@/server/trpc/root";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FormSection } from "@/components/shared/form-section";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -164,11 +164,7 @@ export function ReportFilters({
   } = visibility;
 
   return (
-    <Card className="overflow-hidden py-0 print:hidden">
-      <CardHeader className="border-b px-6 py-5">
-        <CardTitle className="text-sm font-medium">Report Hub — Faceted Query</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 px-6 py-5">
+    <FormSection title="Report Hub — Faceted Query" className="print:hidden">
         <div className="space-y-1.5">
           <Label htmlFor="hub-domain">Domain</Label>
           <Select
@@ -358,7 +354,6 @@ export function ReportFilters({
             </>
           )}
         </div>
-      </CardContent>
-    </Card>
+    </FormSection>
   );
 }
