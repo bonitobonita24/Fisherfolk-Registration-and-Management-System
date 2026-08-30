@@ -2,6 +2,26 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-30 — FIS-4 list chrome + edit-form/detail-tabs shared wrappers
+
+**In your words:** resume → "yes proceed" (proceed with the owner-directed FIS-4 visual restyle).
+
+✅ Done
+- **FIS-4 complete + verified** — the 3 Cargorix Wave-5 deferred structural items, chrome/JSX only, byte-faithful behavior:
+  - New shared floating-card `ListToolbar` + `ListPagination`, applied UNIFORM across all 5 record list clients (fisherfolk, vessels, violations, ayuda, fish-catches) — replaces per-client hand-rolled bare toolbar + duplicated pagination.
+  - Fisherfolk edit form: raw `Card` → shared `FormSection` + `RecordHeader` (register-form parity; all 14 fields/validation/RHF wiring unchanged).
+  - Fisherfolk-detail inline underline tabs → shared `UnderlineTabsList`/`UnderlineTabsTrigger` (class-for-class identical render).
+- **Verified:** tsc clean · lint clean · 416 tests pass · build green · dev rebuilt off branch (Rule 39) · **live axe 0 violations across 7 routes, 0 console errors** (WCAG 2.2 AA gate, Rule 33). Before/after evidence in `screenshots/fis4/`.
+- Committed `2ae8d52` on `feat/fis4-list-toolbar-edit-form-tabs`, **LOCAL / HARD HOLD** (not merged/pushed).
+
+⏳ Next / Held
+- **FIS-4 handed back for your visual review** (screenshots/fis4/) before FIS-3.
+- **FIS-3** (🟡 owner-gated) — Cargorix Wave 5 remainder: non-record modules + `/tm`.
+- 7 held commits now on `main` + this FIS-4 branch unmerged — push/merge still your call (HARD HOLD).
+
+💬 Notes
+- Ran the live axe sweep via a headless playwright-core harness injecting axe inline (dev CSP allows `'unsafe-inline'` but blocks CDN `script-src` — CDN load failed, inline injection works).
+
 ## 2026-08-29 — Post-full-auto verification + save (no reboot)
 
 **In your words:** "check if the last session's tasks all finished, nothing unfinished or corrupted" → then "save it, put pending in Squirlnote, shutting down to rest, no reboot loop."
