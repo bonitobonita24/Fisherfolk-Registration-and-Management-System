@@ -4,6 +4,15 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.21.0 — 2026-08-30
+
+### [FEATURE]
+- FIS-3 Cargorix Wave-5 remainder — non-record modules + /tm consistency (`d51afe1`)
+
+### [DOCS]
+- task-queue + session log — FIS-3 done + verified (416 tests, axe 0/12); v0.20.0 released (`9d51fa1`)
+
+
 ## v0.20.0 — 2026-08-30
 
 ### [FEATURE]
