@@ -19,13 +19,13 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ### FMO meeting 2026-07-09 — registration policy + ID changes (captured 2026-08-31; all builds HARD HOLD pending owner [WHAT])
 
-- 🔴 **FIS-8 — Per-family registration terminology (remove "head of the family").** Meeting: head-of-family
-  concept dropped; registration counted per family unit (one primary registered fisherfolk; non-fisher spouses
-  not counted). Code today: real `Household` model with a unique `headId` FK (`Household.head`) + "Head of
-  Household" report columns (`report/domain-columns.ts:106`, `report.ts:466`). ⚠ **[WHAT] — notes contradict:**
-  one section says remove the head concept, another still describes "select head, add members, generate household
-  ID." Confirm: (a) fully remove head designation + relabel to per-family unit, or (b) keep household grouping,
-  only relabel "head" → "primary registrant"? `source: owner meeting 2026-07-09` `planning` `design`
+- 🔴 **FIS-8 — Multi-family households (support multiple heads per household).** ✅ **[WHAT] RESOLVED (owner
+  2026-08-31):** KEEP the household grouping AND the head-of-family concept — but one household may contain
+  MULTIPLE families (2–3 families living together), each with its OWN head. Current schema blocks this:
+  `Household.headId` is `@unique` (exactly one head per household). Work: introduce a family sub-grouping under
+  `Household` (each Family = one head + its members) OR relax the single-head constraint to allow multiple family
+  units per household; update household create/edit UI + "Head of Household" reporting to list per-family heads.
+  Design the multi-family-per-household model. `source: owner meeting 2026-07-09` `feature` `db` `design`
 
 - 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
   dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
@@ -45,30 +45,32 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
   the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
 
-- 🔴 **FIS-12 — Remove active/inactive status; keep only NEW + RENEWED.** Enum today
-  `FisherfolkStatus { NEW, ACTIVE, RENEWED, INACTIVE, ARCHIVED }`. Drop ACTIVE + INACTIVE. Enum-rename discipline
-  (ALTER TYPE, never DROP/CREATE) + data backfill for existing ACTIVE/INACTIVE rows. ⚠ **[WHAT]:** remap rule for
-  existing rows (ACTIVE→NEW or →RENEWED by renewal history?); keep ARCHIVED as a system state?
-  `source: owner meeting 2026-07-09` `feature` `db`
+- 🔴 **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command.**
+  ✅ **[WHAT] RESOLVED (owner 2026-08-31).** Status meanings: **NEW** = brand-new registrant, never before in the
+  DB; **RENEWED** = re-registered, only possible AFTER a Mayor's-election renewal cycle; **EXPIRED** = flagged for
+  renewal. Flow: after each mayoral election an admin runs a SINGLE-SHOT command (Administrative Settings) that
+  bulk-sets all current active IDs → EXPIRED; then each fisherfolk is renewed one-by-one (EXPIRED → RENEWED) as
+  they complete the post-election renewal process. Build: retire ACTIVE/INACTIVE from active use (ALTER TYPE
+  discipline; add EXPIRED); add the admin bulk-expire tool (permission-gated, confirm-guarded, audit-logged).
+  ⚠ **DEFERRED activation** — this is year 1; the bulk-expire is NOT run until the next mayoral election. Build the
+  tool now, do not execute it. `source: owner meeting 2026-07-09` `feature` `db`
 
 - 🔴 **FIS-13 — QR scan & verification flow.** QR is ALREADY generated + printed on the ID card
   (`Fisherfolk.qrCode`, `id-card-renderer.tsx` qr element). NEW = an in-app scan/verify surface: scan a fisherfolk
   ID QR → resolve → show verification (valid/record summary). [WHAT]: public vs authed verify; camera-scan page
   vs deep-link resolver. `source: owner meeting 2026-07-09` `feature`
 
-- 🔴 **FIS-14 — Confirm RSBSA number on the default ID card template.** ⚠ Notes say "RSVS" but no RSVS exists in
-  code; card supports RSBSA (`{{rsbsa_number}}` from `Fisherfolk.rsbsaNumber`). Confirm the default ID template
-  includes the RSBSA token. **[WHAT]: is "RSVS" a mishearing of RSBSA, or a genuinely separate ID we must add?**
-  `source: owner meeting 2026-07-09` `feature` `ui`
+- ✅ **FIS-14 — RSBSA on ID card — RESOLVED, no build (owner 2026-08-31).** "RSVS" was misheard; owner confirms it
+  means **RSBSA**, which the ID card already supports (`{{rsbsa_number}}`). No work needed. Squirlnote → For Review
+  (owner to mark Done). `source: owner meeting 2026-07-09`
 
 - 🔴 **FIS-15 — 3-year renewal cycle (mayoral-term aligned).** `RegistrationRenewal` + `registrationYear` exist;
   renewal is manual, no cadence enforcement. Add a 3-year renewal cadence: due-date/renewal-due computation +
   indicator. [WHAT]: reminder-only vs status enforcement; anchor year. `source: owner meeting 2026-07-09` `feature`
 
-- 🔴 **FIS-16 — Confirm mayor read-only (dashboard) access.** Existing `viewer` role is view-only across all mapped
-  segments (`route-feature-map.ts`); no dedicated "mayor" role. Likely `viewer` already satisfies "read-only
-  dashboard view." [WHAT]: is `viewer` acceptable, or build a narrower dashboard-only custom role? (low priority)
-  `source: owner meeting 2026-07-09` `planning`
+- ✅ **FIS-16 — Mayor read-only access — RESOLVED, no build (owner 2026-08-31 "yes").** The existing `viewer` role
+  (view-only across all mapped segments) is acceptable for the mayor's read-only dashboard; no new role needed.
+  Squirlnote → For Review (owner to mark Done). `source: owner meeting 2026-07-09`
 
 > **Already covered (no task):** Senior-citizens report EXISTS (`report.ts` `senior_citizens` "60+" + analytics
 > "Senior Citizens by Barangay"). Kanban/task module EXISTS (todo). QR generation EXISTS.
