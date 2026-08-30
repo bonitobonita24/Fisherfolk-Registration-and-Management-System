@@ -10,12 +10,19 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted
   prod+demo (healthy, footer v0.19.0), dev FRESH. UI-only; axe WCAG 2.2 AA 0 new violations. (Was: "Wave 3
   gated on owner sign-off" — resolved through ship.)
-- 🟡 **Cargorix Wave 5 — DEFERRED remainder** (per plan §8 D6 "prioritized first, rest deferred").
-  Prioritized done+verified (dashboard + fisherfolk + all 6 record modules). Still to polish when
-  owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
-  `id-generator`, `audit-log`, `notifications`, `analytics`, `map`, `settings`, `user-management`,
-  `role-builder`) + the platform `/tm` site. `owner-gated 2026-08-27`
 ## ✅ Done recently
+
+- ✅ **FIS-3 — Cargorix Wave 5 remainder DONE + verified (2026-08-30).** Applied the shared-wrapper/
+  floating-card idiom app-wide across the non-record modules (JSX/chrome only, token-only, byte-faithful):
+  list chrome (`ListToolbar`/`ListPagination`) on edit-requests + `/tm` tenants/users (were zero-shared) +
+  id-generator; `Card`→`FormSection`/`RecordHeader` on edit-requests review, reports hub, import wizard,
+  analytics (16 cards), settings, role-builder; `UnderlineTabs` on reports/analytics/todo/id-generator;
+  `PageHeader`/`EmptyState` on import/notifications/map/audit-log/user-management/todo/settings. Preserved
+  intentional non-token hex (pvc-sheet print fills, theme brand swatches). Verified: tsc/lint green · 416
+  tests · build green · **live axe 0 violations across 12 tenant routes, 0 console errors** (WCAG 2.2 AA).
+  `/tm` not axe-swept (needs platform login) but reuses axe-proven shared chrome. Screenshots
+  `screenshots/fis3/`. Branch `feat/fis3-nonrecord-module-consistency` `d51afe1`, LOCAL/HARD HOLD. (FIS-3)
+  Note: audit-log + user-management are still feature STUBS (header adopted; tables not yet built).
 
 - ✅ **FIS-4 — Cargorix Wave-5 deferred structural restyle DONE + verified (2026-08-30).** All three
   audit-found items landed (JSX/chrome only, token-clean, byte-faithful behavior): (a) new shared
