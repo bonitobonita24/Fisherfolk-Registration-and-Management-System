@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { MoreHorizontal } from "lucide-react";
+import { Building2, MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -23,27 +22,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc/client";
+import { ListToolbar, SearchInput } from "@/components/shared";
 
 import { CreateTenantDialog } from "./create-tenant-dialog";
 
 export function TenantsClient() {
-  const [inputValue, setInputValue] = useState("");
-  const [search, setSearch] = useState<string | undefined>(undefined);
-
-  // Debounce: update `search` 300 ms after the user stops typing
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setSearch(inputValue.trim() || undefined);
-    }, 300);
-    return () => clearTimeout(id);
-  }, [inputValue]);
+  const [search, setSearch] = useState("");
 
   const utils = trpc.useUtils();
 
   const { data, isLoading } = trpc.tenant.list.useQuery({
     page: 1,
     limit: 20,
-    search,
+    search: search || undefined,
   });
 
   const setStatus = trpc.tenant.setStatus.useMutation({
@@ -72,21 +63,26 @@ export function TenantsClient() {
 
   return (
     <div className="space-y-4">
-      {/* ── Toolbar ───────────────────────────────────────────────────────── */}
-      <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-1 py-1.5">
-        <Input
-          placeholder="Search tenants…"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className="h-8 w-full max-w-sm sm:w-56"
-          aria-label="Search tenants"
-        />
-        <div className="ml-auto">
+      <ListToolbar>
+        <div className="flex items-center gap-2">
+          <Building2 className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-medium">All Tenants</span>
+          <span className="text-sm tabular-nums text-muted-foreground">
+            {data ? data.total : "-"}
+          </span>
+        </div>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          <SearchInput
+            value={search}
+            onChange={setSearch}
+            placeholder="Search tenants…"
+            className="w-full sm:w-56"
+          />
           <CreateTenantDialog
             onCreated={() => void utils.tenant.list.invalidate()}
           />
         </div>
-      </div>
+      </ListToolbar>
 
       {/* ── Table ─────────────────────────────────────────────────────────── */}
       <div className="overflow-x-auto rounded-md border">

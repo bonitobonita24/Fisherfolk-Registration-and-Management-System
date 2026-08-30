@@ -6,13 +6,6 @@ import { MoreHorizontal, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FormSection } from "@/components/shared";
 import { trpc } from "@/lib/trpc/client";
 
 import { AssignRoleSection } from "./assign-role-section";
@@ -81,22 +75,17 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 border-b px-6 py-5">
-          <div>
-            <CardTitle className="text-sm font-medium">Custom Roles</CardTitle>
-            <CardDescription className="text-xs">
-              Build roles below Tenant Admin with a per-feature permission
-              matrix. Custom roles can never grant Billing or User
-              Management.
-            </CardDescription>
-          </div>
+      <FormSection
+        title="Custom Roles"
+        description="Build roles below Tenant Admin with a per-feature permission matrix. Custom roles can never grant Billing or User Management."
+      >
+        <div className="flex justify-end">
           <Button onClick={openCreate} size="sm">
             <Plus className="mr-1.5 h-4 w-4" aria-hidden="true" />
             New Role
           </Button>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
+        </div>
+        <div>
           {isLoading ? (
             <p className="text-sm text-muted-foreground animate-pulse">
               Loading custom roles…
@@ -167,8 +156,8 @@ export function RoleBuilderClient({ tenantId }: RoleBuilderClientProps) {
               </Table>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </FormSection>
 
       <AssignRoleSection tenantId={tenantId} />
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormSection } from "@/components/shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc/client";
@@ -79,33 +79,23 @@ export function ThemeSettings() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Accent Colors</CardTitle>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          <div className="space-y-3 animate-pulse">
-            <div className="h-4 w-1/3 rounded bg-muted" />
-            <div className="h-9 w-full rounded bg-muted" />
-            <div className="h-4 w-1/3 rounded bg-muted" />
-            <div className="h-9 w-full rounded bg-muted" />
-          </div>
-        </CardContent>
-      </Card>
+      <FormSection title="Accent Colors">
+        <div className="space-y-3 animate-pulse">
+          <div className="h-4 w-1/3 rounded bg-muted" />
+          <div className="h-9 w-full rounded bg-muted" />
+          <div className="h-4 w-1/3 rounded bg-muted" />
+          <div className="h-9 w-full rounded bg-muted" />
+        </div>
+      </FormSection>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="border-b px-6 py-5">
-        <CardTitle className="text-sm font-medium">Accent Colors</CardTitle>
-        <p className="text-xs text-muted-foreground">
-          Set the primary (orange) and secondary (navy) accent colors for
-          your organization. Changes apply to everyone in this tenant. The
-          dark background is unaffected.
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-6 px-6 py-5">
+    <FormSection
+      title="Accent Colors"
+      description="Set the primary (orange) and secondary (navy) accent colors for your organization. Changes apply to everyone in this tenant. The dark background is unaffected."
+    >
+      <div className="space-y-6">
         {/* ── Primary color row ──────────────────────────────────────────────── */}
         <div className="space-y-1.5">
           <Label htmlFor="primary-hex">Primary color (orange)</Label>
@@ -191,7 +181,7 @@ export function ThemeSettings() {
             Reset to default
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </FormSection>
   );
 }

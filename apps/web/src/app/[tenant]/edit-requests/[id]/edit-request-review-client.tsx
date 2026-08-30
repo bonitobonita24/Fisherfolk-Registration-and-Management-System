@@ -9,12 +9,7 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { RecordHeader } from "@/components/shared";
+import { RecordHeader, FormSection } from "@/components/shared";
 import { StatusBadge } from "@/components/shared/status-badge";
 
 interface Props {
@@ -230,28 +225,20 @@ export function EditRequestReviewClient({ id }: Props) {
         badge={<StatusBadge status={request.status} />}
       />
 
-      {/* Fisherfolk info card */}
-      <Card>
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Fisherfolk</CardTitle>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          <Link
-            href={tenantHref(`/fisherfolk/${fisherfolk.id}`)}
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {fisherfolk.fullName}
-          </Link>
-          <p className="text-xs text-muted-foreground">{fisherfolk.idNumber}</p>
-        </CardContent>
-      </Card>
+      {/* Fisherfolk info */}
+      <FormSection title="Fisherfolk">
+        <Link
+          href={tenantHref(`/fisherfolk/${fisherfolk.id}`)}
+          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {fisherfolk.fullName}
+        </Link>
+        <p className="text-xs text-muted-foreground">{fisherfolk.idNumber}</p>
+      </FormSection>
 
       {/* Diff table */}
-      <Card>
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Proposed Changes</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto px-6 py-5">
+      <FormSection title="Proposed Changes">
+        <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b">
@@ -282,8 +269,8 @@ export function EditRequestReviewClient({ id }: Props) {
               No field changes recorded.
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </FormSection>
 
       {/* Action buttons (PENDING only) */}
       {isPending && (
@@ -310,11 +297,8 @@ export function EditRequestReviewClient({ id }: Props) {
 
       {/* Verdict (non-PENDING) */}
       {!isPending && (
-        <Card>
-          <CardHeader className="border-b px-6 py-5">
-            <CardTitle className="text-sm font-medium">Decision</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 px-6 py-5 text-sm">
+        <FormSection title="Decision">
+          <div className="space-y-2 text-sm">
             <p>
               <span className="font-medium">Reviewed by:</span>{" "}
               {request.reviewedBy?.name ?? "—"}
@@ -329,21 +313,16 @@ export function EditRequestReviewClient({ id }: Props) {
                 {request.rejectionReason}
               </p>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </FormSection>
       )}
 
       {/* Rejection history (PD-004) */}
       {priorRejections.length > 0 && (
         <>
           <Separator />
-          <Card>
-            <CardHeader className="border-b px-6 py-5">
-              <CardTitle className="text-sm font-medium">
-                Prior Rejection History
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 px-6 py-5">
+          <FormSection title="Prior Rejection History">
+            <div className="space-y-3">
               {priorRejections.map((h) => (
                 <div
                   key={h.id}
@@ -362,8 +341,8 @@ export function EditRequestReviewClient({ id }: Props) {
                   )}
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </FormSection>
         </>
       )}
 

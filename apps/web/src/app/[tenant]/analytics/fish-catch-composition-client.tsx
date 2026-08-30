@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { GEAR_TYPE_LABELS } from "@frms/shared/constants";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FormSection } from "@/components/shared/form-section";
 import {
   ChartContainer,
   ChartTooltip,
@@ -86,266 +86,238 @@ export function FishCatchCompositionClient() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* ── Catch by Species ──────────────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Catch by Species (Top 10)</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Total landed weight by common name
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {bySpeciesLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : (bySpecies?.length ?? 0) === 0 ? (
-            <EmptyState message="No fish catch species data yet." />
-          ) : (
-            <ChartContainer
-              config={speciesConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Catch by Species (Top 10)"
+        description="Total landed weight by common name"
+        className="overflow-hidden py-0"
+      >
+        {bySpeciesLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : (bySpecies?.length ?? 0) === 0 ? (
+          <EmptyState message="No fish catch species data yet." />
+        ) : (
+          <ChartContainer
+            config={speciesConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={bySpecies ?? []}
+              margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
             >
-              <BarChart
-                data={bySpecies ?? []}
-                margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis
-                  dataKey="commonName"
-                  angle={-30}
-                  textAnchor="end"
-                  interval={0}
-                  {...tickProps}
-                />
-                <YAxis {...tickProps} width={56} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="totalKg"
-                  fill="var(--color-totalKg)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis
+                dataKey="commonName"
+                angle={-30}
+                textAnchor="end"
+                interval={0}
+                {...tickProps}
+              />
+              <YAxis {...tickProps} width={56} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="totalKg"
+                fill="var(--color-totalKg)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── Catch by Gear Type ────────────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Catch by Gear Type</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Total landed weight by fishing gear
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {byGearTypeLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : gearTypeData.length === 0 ? (
-            <EmptyState message="No gear type data yet." />
-          ) : (
-            <ChartContainer
-              config={gearTypeConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Catch by Gear Type"
+        description="Total landed weight by fishing gear"
+        className="overflow-hidden py-0"
+      >
+        {byGearTypeLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : gearTypeData.length === 0 ? (
+          <EmptyState message="No gear type data yet." />
+        ) : (
+          <ChartContainer
+            config={gearTypeConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={gearTypeData}
+              margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
             >
-              <BarChart
-                data={gearTypeData}
-                margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis
-                  dataKey="gearTypeLabel"
-                  angle={-30}
-                  textAnchor="end"
-                  interval={0}
-                  {...tickProps}
-                />
-                <YAxis {...tickProps} width={56} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="totalKg"
-                  fill="var(--color-totalKg)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis
+                dataKey="gearTypeLabel"
+                angle={-30}
+                textAnchor="end"
+                interval={0}
+                {...tickProps}
+              />
+              <YAxis {...tickProps} width={56} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="totalKg"
+                fill="var(--color-totalKg)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── CPUE by Gear Type ─────────────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">
-            Catch per Unit Effort by Gear (kg/hr)
-          </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Landed weight per fishing hour, by gear
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {byGearTypeLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : gearTypeData.length === 0 ? (
-            <EmptyState message="No gear type data yet." />
-          ) : (
-            <ChartContainer
-              config={cpueConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Catch per Unit Effort by Gear (kg/hr)"
+        description="Landed weight per fishing hour, by gear"
+        className="overflow-hidden py-0"
+      >
+        {byGearTypeLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : gearTypeData.length === 0 ? (
+          <EmptyState message="No gear type data yet." />
+        ) : (
+          <ChartContainer
+            config={cpueConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={gearTypeData}
+              margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
             >
-              <BarChart
-                data={gearTypeData}
-                margin={{ left: -10, right: 10, top: 5, bottom: 48 }}
-              >
-                <CartesianGrid {...gridProps} vertical={false} />
-                <XAxis
-                  dataKey="gearTypeLabel"
-                  angle={-30}
-                  textAnchor="end"
-                  interval={0}
-                  {...tickProps}
-                />
-                <YAxis {...tickProps} width={56} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="cpueHr"
-                  fill="var(--color-cpueHr)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid {...gridProps} vertical={false} />
+              <XAxis
+                dataKey="gearTypeLabel"
+                angle={-30}
+                textAnchor="end"
+                interval={0}
+                {...tickProps}
+              />
+              <YAxis {...tickProps} width={56} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="cpueHr"
+                fill="var(--color-cpueHr)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── Catch by Fishing-Ground Barangay ──────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">
-            Catch by Fishing-Ground Barangay
-          </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Top 15 barangays by landed weight
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {byBarangayLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : (byBarangay?.length ?? 0) === 0 ? (
-            <EmptyState message="No fishing-ground barangay data yet." />
-          ) : (
-            <ChartContainer
-              config={barangayConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Catch by Fishing-Ground Barangay"
+        description="Top 15 barangays by landed weight"
+        className="overflow-hidden py-0"
+      >
+        {byBarangayLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : (byBarangay?.length ?? 0) === 0 ? (
+          <EmptyState message="No fishing-ground barangay data yet." />
+        ) : (
+          <ChartContainer
+            config={barangayConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={byBarangay ?? []}
+              layout="vertical"
+              margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
             >
-              <BarChart
-                data={byBarangay ?? []}
-                layout="vertical"
-                margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" {...tickProps} />
-                <YAxis
-                  type="category"
-                  dataKey="barangay"
-                  width={130}
-                  {...tickProps}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="totalKg"
-                  fill="var(--color-totalKg)"
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+              <XAxis type="number" {...tickProps} />
+              <YAxis
+                type="category"
+                dataKey="barangay"
+                width={130}
+                {...tickProps}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="totalKg"
+                fill="var(--color-totalKg)"
+                radius={[0, 4, 4, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── Top Fisherfolk by Catch ───────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Top Fisherfolk by Catch</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Top 10 fisherfolk by total landed weight
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {topFishersLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : (topFishers?.length ?? 0) === 0 ? (
-            <EmptyState message="No fish catch records yet." />
-          ) : (
-            <ChartContainer
-              config={topFishersConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Top Fisherfolk by Catch"
+        description="Top 10 fisherfolk by total landed weight"
+        className="overflow-hidden py-0"
+      >
+        {topFishersLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : (topFishers?.length ?? 0) === 0 ? (
+          <EmptyState message="No fish catch records yet." />
+        ) : (
+          <ChartContainer
+            config={topFishersConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={topFishers ?? []}
+              layout="vertical"
+              margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
             >
-              <BarChart
-                data={topFishers ?? []}
-                layout="vertical"
-                margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" {...tickProps} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={130}
-                  {...tickProps}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="totalKg"
-                  fill="var(--color-totalKg)"
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+              <XAxis type="number" {...tickProps} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={130}
+                {...tickProps}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="totalKg"
+                fill="var(--color-totalKg)"
+                radius={[0, 4, 4, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
 
       {/* ── Top Vessels by Catch ──────────────────────────────────────────── */}
-      <Card className="overflow-hidden py-0">
-        <CardHeader className="border-b px-6 py-5">
-          <CardTitle className="text-sm font-medium">Top Vessels by Catch</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Top 10 vessels by total landed weight
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-6 py-5">
-          {topVesselsLoading ? (
-            <Shimmer className="h-[300px] w-full" />
-          ) : (topVessels?.length ?? 0) === 0 ? (
-            <EmptyState message="No fish catch records yet." />
-          ) : (
-            <ChartContainer
-              config={topVesselsConfig}
-              className="aspect-auto h-[300px] w-full"
+      <FormSection
+        title="Top Vessels by Catch"
+        description="Top 10 vessels by total landed weight"
+        className="overflow-hidden py-0"
+      >
+        {topVesselsLoading ? (
+          <Shimmer className="h-[300px] w-full" />
+        ) : (topVessels?.length ?? 0) === 0 ? (
+          <EmptyState message="No fish catch records yet." />
+        ) : (
+          <ChartContainer
+            config={topVesselsConfig}
+            className="aspect-auto h-[300px] w-full"
+          >
+            <BarChart
+              data={topVessels ?? []}
+              layout="vertical"
+              margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
             >
-              <BarChart
-                data={topVessels ?? []}
-                layout="vertical"
-                margin={{ left: 0, right: 24, top: 5, bottom: 5 }}
-              >
-                <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
-                <XAxis type="number" {...tickProps} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={130}
-                  {...tickProps}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="totalKg"
-                  fill="var(--color-totalKg)"
-                  radius={[0, 4, 4, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
-          )}
-        </CardContent>
-      </Card>
+              <CartesianGrid stroke="hsl(var(--border))" horizontal={false} />
+              <XAxis type="number" {...tickProps} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={130}
+                {...tickProps}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar
+                dataKey="totalKg"
+                fill="var(--color-totalKg)"
+                radius={[0, 4, 4, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+      </FormSection>
     </div>
   );
 }

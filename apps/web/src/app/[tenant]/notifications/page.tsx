@@ -13,8 +13,8 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader, EmptyState } from "@/components/shared";
 import { notificationHref } from "@/lib/notification-href";
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
@@ -110,42 +110,32 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">
-            Notifications
-          </h1>
-          <p className="text-muted-foreground">
-            View system notifications and alerts for your account.
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => markAllRead.mutate()}
-            disabled={markAllRead.isPending}
-          >
-            <CheckCheck className="mr-2 h-4 w-4" />
-            Mark all read
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Notifications"
+        description="View system notifications and alerts for your account."
+        action={
+          unreadCount > 0 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => markAllRead.mutate()}
+              disabled={markAllRead.isPending}
+            >
+              <CheckCheck className="mr-2 h-4 w-4" />
+              Mark all read
+            </Button>
+          ) : undefined
+        }
+      />
 
       {isLoading ? (
         <NotificationsSkeleton />
       ) : notifications.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-            <Bell className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm font-medium text-foreground">
-              You&apos;re all caught up
-            </p>
-            <p className="text-sm text-muted-foreground">
-              No notifications yet — new alerts will show up here.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Bell}
+          title="You're all caught up"
+          description="No notifications yet — new alerts will show up here."
+        />
       ) : (
         <ul
           className="divide-y divide-border rounded-lg border border-border bg-card"
