@@ -15,13 +15,19 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   owner wants: the non-record modules (`edit-requests`, `todo`/kanban, `reports`, `import`,
   `id-generator`, `audit-log`, `notifications`, `analytics`, `map`, `settings`, `user-management`,
   `role-builder`) + the platform `/tm` site. `owner-gated 2026-08-27`
-- 🔴 **Cargorix Wave-5 deferred structural items** (audit-found, held to avoid scope creep/regression):
-  (a) list-client toolbar+pagination floating-card wrap — UNIFORM across all 5 record list clients
-  (a layout redesign, not a token nudge); (b) `fisherfolk/[id]/edit/edit-form-client.tsx` raw
-  `Card`→shared `FormSection` + `RecordHeader` for parity with the register form; (c) extract the
-  fisherfolk-detail bespoke underline tabs into a shared Tabs treatment. All JSX-only, token-clean
-  today. `agent-found 2026-08-27`
 ## ✅ Done recently
+
+- ✅ **FIS-4 — Cargorix Wave-5 deferred structural restyle DONE + verified (2026-08-30).** All three
+  audit-found items landed (JSX/chrome only, token-clean, byte-faithful behavior): (a) new shared
+  floating-card `ListToolbar` + `ListPagination` (`components/shared/list-{toolbar,pagination}.tsx`)
+  applied UNIFORM across all 5 record list clients (fisherfolk, vessels, violations, ayuda, fish-catches) —
+  replaces per-client hand-rolled bare toolbar + duplicated pagination; (b) fisherfolk edit form raw
+  `Card`→shared `FormSection`+`RecordHeader` (all 14 fields/validation/RHF unchanged, register-form parity);
+  (c) fisherfolk-detail inline underline tabs extracted to shared `UnderlineTabsList`/`UnderlineTabsTrigger`
+  (`components/shared/underline-tabs.tsx`, class-for-class identical). Verified: tsc clean · lint clean ·
+  **416 tests** · build green · **live axe 0 violations across 7 routes, 0 console errors** (WCAG 2.2 AA,
+  Rule 33). Screenshots in `screenshots/fis4/`. Branch `feat/fis4-list-toolbar-edit-form-tabs` `2ae8d52`,
+  LOCAL/HARD HOLD. (FIS-4)
 
 - ✅ **Compacted launch-folder `MEMORY.md`** — 25.2KB→9.9KB (61% smaller), trimmed verbose per-line hooks
   to true one-liners; all 94 memory-file pointers preserved, 0 dangling links (detail stays in each linked

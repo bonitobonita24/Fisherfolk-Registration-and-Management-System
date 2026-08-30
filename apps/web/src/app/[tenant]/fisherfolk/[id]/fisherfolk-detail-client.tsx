@@ -36,7 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Tooltip,
@@ -47,6 +47,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
+import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared/underline-tabs";
 import {
   DefinitionGrid,
   DetailField,
@@ -295,9 +296,6 @@ export function FisherfolkDetailClient({ id }: Props) {
     </>
   );
 
-  const detailTabTrigger =
-    "shrink-0 gap-1.5 rounded-none border-b-2 border-transparent -mb-px text-muted-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none data-[state=active]:font-semibold";
-
   return (
     <div className="space-y-4 pb-4">
       <RecordHeader
@@ -377,55 +375,55 @@ export function FisherfolkDetailClient({ id }: Props) {
         {/* RIGHT — tabbed related-record sections */}
         <div className="min-w-0">
           <Tabs defaultValue="profile">
-            <TabsList className="h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0">
-              <TabsTrigger value="profile" className={detailTabTrigger}>
+            <UnderlineTabsList>
+              <UnderlineTabsTrigger value="profile">
                 <UserRound className="size-3.5" aria-hidden="true" />
                 Profile
-              </TabsTrigger>
-              <TabsTrigger value="vessels" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="vessels">
                 <Ship className="size-3.5" aria-hidden="true" />
                 Vessels
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.vessels.length}
                 </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="violations" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="violations">
                 <AlertTriangle className="size-3.5" aria-hidden="true" />
                 Violations
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.violations.length}
                 </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="ayuda" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="ayuda">
                 <HeartHandshake className="size-3.5" aria-hidden="true" />
                 Ayuda
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.ayudaBeneficiaries.length}
                 </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="fish-catches" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="fish-catches">
                 <Fish className="size-3.5" aria-hidden="true" />
                 Fish Catches
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.fishCatches.length}
                 </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="renewals" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="renewals">
                 <History className="size-3.5" aria-hidden="true" />
                 Renewals
                 <Badge variant="outline" className="text-[11px] tabular-nums">
                   {record.renewals.length}
                 </Badge>
-              </TabsTrigger>
-              <TabsTrigger value="activity" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="activity">
                 <Activity className="size-3.5" aria-hidden="true" />
                 Activity
-              </TabsTrigger>
-              <TabsTrigger value="todos" className={detailTabTrigger}>
+              </UnderlineTabsTrigger>
+              <UnderlineTabsTrigger value="todos">
                 <ListChecks className="size-3.5" aria-hidden="true" />
                 ToDos
-              </TabsTrigger>
-            </TabsList>
+              </UnderlineTabsTrigger>
+            </UnderlineTabsList>
 
             <TabsContent value="profile" className="min-w-0 pt-4">
               <Card className="gap-0 py-5">
