@@ -1,29 +1,32 @@
 # FRMS — Project State
 
-## Current State (2026-08-28, latest) — 🚀 Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo
+## Current State (2026-08-30, latest) — 🚀 FIS-4 + FIS-3 Cargorix consistency SHIPPED; v0.21.0 LIVE on prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
-Cold-start authority: `project_cargorix_shipped_v0190_0828.md`. Dense loop handoff: `.sessions/slot-22/next-session`.
+Cold-start authority: `project_fis4_fis3_shipped_0830.md`.
 
-> **✅ MILESTONE COMPLETE — full Cargorix UI adoption + ⌘K/density/theme-customizer LIVE on prod + demo.**
-> Session saved via the save-session routine. `origin/main @8a7bc41` = released **v0.19.0** (tag pushed).
-> One held docs commit (`1ee14c4`, main 1-ahead) — HARD HOLD, push only on owner word.
+> **✅ MILESTONE COMPLETE — app-wide Cargorix consistency (FIS-4 record chrome + FIS-3 non-record modules + `/tm`) LIVE.**
+> Session saved via the save-session routine. `origin/main @e426dbe` = released **v0.21.0** (tag pushed); v0.20.0 also tagged.
+> **Prod + demo both promoted to v0.21.0** (`sha-e426dbe`), healthy. One trailing docs commit (main 1-ahead of origin) — HARD HOLD.
 
-### 🗺️ Wave roadmap — 0✅ 1✅ 2✅ 3✅ **4✅ 5✅** · ALL SHIPPED (v0.19.0). Deferred (owner-gated, optional): Wave-5 remainder (non-record modules + `/tm`) + 3 structural items + pre-existing aria-hidden-focus a11y fix.
+### ✅ DONE THIS SESSION (2026-08-30 — built + verified + SHIPPED)
+- **FIS-4** — new shared floating-card `ListToolbar`+`ListPagination` applied uniform across all 5 record list
+  clients; fisherfolk edit-form raw `Card`→`FormSection`/`RecordHeader`; fisherfolk-detail underline tabs →
+  shared `UnderlineTabsList`/`UnderlineTabsTrigger`. Released **v0.20.0** (`8a3f173`, w/ held FIS-5 a11y + FIS-2).
+- **FIS-3** — shared idiom applied across 12 non-record modules + `/tm` (10 workers, 2 waves): list chrome
+  (edit-requests, `/tm` tenants/users, id-generator), `Card`→`FormSection` (edit-requests review, reports,
+  import, analytics ×16, settings, role-builder), `UnderlineTabs` (reports/analytics/todo/id-generator),
+  `PageHeader`/`EmptyState` (import/notifications/map/audit-log/user-management/todo/settings). Released **v0.21.0** (`e426dbe`).
+- **Verify:** tsc/lint green · 416 tests · build green · **live axe 0 violations across 19 tenant routes, 0 console errors** (WCAG 2.2 AA). Screenshots `screenshots/fis4/` + `screenshots/fis3/` (gitignored, PII).
+- **SHIPPED** — both releases pushed origin + **promoted to prod + demo** (`push-to-{prod,demo}.sh sha-e426dbe`;
+  DB backup each, **0 pending migrations** UI-only, reseed-never). Prod `frms.powerbyte.app` + demo
+  `frms-demo.powerbyte.app` healthy on v0.21.0. Dev rebuilt FRESH on main (Rule 39).
+  ⚠ demo migrate SSH-tunnel refusal (localhost:5436) = harmless no-op (0 pending); app DB link fine.
 
-### ✅ DONE THIS SESSION (2026-08-28 — built + verified + SHIPPED)
-- **Wave 4** — ⌘K command palette (RBAC-filtered off NAV_GROUPS, cmdk), per-user density toggle
-  (`[data-density]` rem-scale v3, localStorage), tenant-admin theme customizer (preset swatches → existing
-  settings.theme mutation, respects per-tenant override). Live-verified. Fixed command-palette WCAG target-size.
-- **Wave 5** — prioritized per-module polish (dashboard + fisherfolk + 6 record modules): bespoke steppers →
-  shared Stepper, edit-form blue banner → tokens, vessel-detail status → StatusBadge, `rounded-lg` parity
-  (13 files, JSX-only, zero data-layer). Full-app axe WCAG 2.2 AA = **0 new violations** (light+dark); Rule-31
-  re-baseline screenshots in `screenshots/cargorix-wave5-baseline/`.
-- **SHIPPED v0.19.0** — merged Waves 0–5 → main (`f04a03e`), released `8a7bc41` (version-sync ×7 + footer +
-  consolidated CHANGELOG + tag, pushed), CI green → `sha-8a7bc41`, promoted **prod + demo** (DB backup each,
-  **0 pending migrations**, reseed-never — both healthy, footer renders v0.19.0), dev rebuilt FRESH (Rule 39).
-  ⚠ demo migrate hit a transient SSH-tunnel refusal — harmless (0 pending migrations); re-run for future schema releases.
+### ⏳ PENDING (queued this session — owner "queue for a dedicated session"; each needs a backend scout + scope [WHAT])
+- **FIS-6** — build `audit-log` feature (14-line stub → audit-trail table via shared DataTable/ListToolbar). Squirlnote Pending.
+- **FIS-7** — build `user-management` feature (stub → tenant user admin: users table + role assign/invite, reuse RBAC + `/tm` users-client). Squirlnote Pending.
 
 ### ⚖️ OPEN [WHAT] (cross-seat, owner-authorized 2026-08-27 — NOT FRMS-seat work; surface, don't attempt here)
 - AIEF `feat/v32.50-site-access-standard` merge → AIEF seat. · Phase 2 per-app site-access adoption → each app's own seat.
