@@ -17,14 +17,18 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
   - Committed `d51afe1` on `feat/fis3-nonrecord-module-consistency`, **LOCAL / HARD HOLD**.
 - FIS-4 Squirlnote card kept in **For Review** (per your item 1).
 
+- **Shipped BOTH releases live (owner authorized merge/push + promote).** v0.20.0 promoted to prod+demo (FIS-4 + held FIS-5 a11y); then v0.21.0 (FIS-3) merged + pushed and **also promoted to prod+demo** (owner "do the two later-notes"). Prod `frms.powerbyte.app` + demo `frms-demo.powerbyte.app` both live + healthy on **v0.21.0** (`sha-e426dbe`); migrations no-op (UI-only), reseed-never, DB backed up each. Dev rebuilt FRESH on main (Rule 39).
+- **Queued the two stub features** (owner chose "queue for a dedicated session"): FIS-6 build audit-log table, FIS-7 build user-management table — added to TASK_QUEUE + Squirlnote (Pending, tagged feature/ui/audit|auth). Both need a backend scout + a scope `[WHAT]` before building.
+
 ⏳ Next / Held
-- **FIS-3 handed back for your visual review** (`screenshots/fis3/`) — merge/push of FIS-3 awaiting your word (not auto-pushed; it's a large visual batch you'll want to eyeball).
-- **Prod/demo promotion of v0.20.0** — your call.
-- audit-log + user-management remain feature STUBS (header adopted; tables not built).
+- **FIS-6** — build audit-log feature (stub → real audit-trail table). Scout AuditLog model/router first.
+- **FIS-7** — build user-management feature (stub → tenant user admin). Scout user/RBAC router first.
+- Cross-seat PENDINGs (AIEF merge · Phase 2 per-app) still belong to other seats.
 
 💬 Notes
 - git-guard false-positived on "clean" in the FIS-3 commit body (known footgun) — reworded to "green".
 - `/tm` axe not swept (webmaster lacks platform access); its chrome reuses axe-proven shared components.
+- demo `push-to-demo.sh` migrate step throws a harmless P1001 SSH-tunnel refusal (localhost:5436) — no-op since zero pending migrations; app DB link (internal docker net) is fine, demo verified healthy.
 
 ## 2026-08-30 — FIS-4 list chrome + edit-form/detail-tabs shared wrappers
 

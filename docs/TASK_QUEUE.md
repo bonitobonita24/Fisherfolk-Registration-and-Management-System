@@ -6,6 +6,17 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+- 🔴 **Build `audit-log` feature (currently a 14-line stub).** `app/[tenant]/audit-log/page.tsx` has only a
+  PageHeader; no table/data. Build the audit-trail view: paginated table of audit entries (adopt shared
+  `DataTable` + `ListToolbar`/`ListPagination`), scoped to tenant, Viewer+ gate. Scout the existing AuditLog
+  Prisma model + tRPC router first (L5 AuditLog exists per security). SCOPE `[WHAT]` to confirm: which
+  columns/events, filters (actor/entity/date), retention. `agent-found 2026-08-30` `feature`
+- 🔴 **Build `user-management` feature (currently a 14-line stub).** `app/[tenant]/user-management/page.tsx`
+  is placeholder-only. Build the tenant user admin: table of this tenant's users + role assign/invite
+  (reuse RBAC infra + `/tm` users-client pattern + role-builder). Scout the existing user/RBAC router first.
+  SCOPE `[WHAT]` to confirm: which actions (invite/deactivate/role-change), permission gate (tenant_admin+),
+  columns. Respect Rule 34 (never expose Billing/User-Mgmt below tenant_admin). `agent-found 2026-08-30` `feature`
+
 - ✅ **Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo (2026-08-28).** Full UI adoption +
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted
   prod+demo (healthy, footer v0.19.0), dev FRESH. UI-only; axe WCAG 2.2 AA 0 new violations. (Was: "Wave 3
