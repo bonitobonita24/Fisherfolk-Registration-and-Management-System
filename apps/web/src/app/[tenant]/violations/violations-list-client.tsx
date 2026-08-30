@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { keepPreviousData } from "@tanstack/react-query";
-import { AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { DataTable } from "@/components/shared/data-table";
-import { EmptyState, SearchInput } from "@/components/shared";
-import { Button } from "@/components/ui/button";
+import { EmptyState, ListToolbar, ListPagination, SearchInput } from "@/components/shared";
 import {
   Select,
   SelectContent,
@@ -50,43 +49,38 @@ export function ViolationsListClient() {
     setPage(1);
   };
 
-  const handlePageSizeChange = (value: string) => {
-    setLimit(Number(value));
-    setPage(1);
-  };
-
   return (
     <div className="space-y-4">
-      <div className="sticky top-0 z-30 -mx-4 bg-background">
-        <div className="flex min-h-11 flex-wrap items-center gap-2 border-b px-4 py-1.5">
+      <ListToolbar>
+        <div className="flex items-center gap-2">
           <AlertTriangle className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span className="text-sm font-medium">All Violations</span>
           <span className="text-sm tabular-nums text-muted-foreground">
             {data ? data.total : "-"}
           </span>
-          <div className="ml-auto flex w-full flex-wrap items-center gap-2 sm:w-auto">
-            <SearchInput
-              value={search}
-              onChange={handleSearchChange}
-              placeholder="Search violations..."
-              className="w-full sm:w-56"
-            />
-            <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
-              <SelectTrigger className="h-8 w-full sm:w-[150px]" aria-label="Filter by status">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="w-52">
-                <SelectItem value="ALL">All Status</SelectItem>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s.replace(/_/g, " ")}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
-      </div>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          <SearchInput
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search violations..."
+            className="w-full sm:w-56"
+          />
+          <Select value={status ?? "ALL"} onValueChange={handleStatusChange}>
+            <SelectTrigger className="h-8 w-full sm:w-[150px]" aria-label="Filter by status">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent className="w-52">
+              <SelectItem value="ALL">All Status</SelectItem>
+              {STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s.replace(/_/g, " ")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </ListToolbar>
 
       <DataTable
         columns={columns}
@@ -102,74 +96,22 @@ export function ViolationsListClient() {
         }
       />
 
-      <div className="flex items-center justify-between px-2">
-        <p className="text-sm text-muted-foreground">
-          {data
+      <ListPagination
+        page={page}
+        pageSize={limit}
+        pageSizeOptions={PAGE_SIZES}
+        pageCount={totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setLimit(size);
+          setPage(1);
+        }}
+        summary={
+          data
             ? `${data.total} record${data.total !== 1 ? "s" : ""} found`
-            : "Loading..."}
-        </p>
-        <div className="flex items-center space-x-6 lg:space-x-8">
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
-            <Select
-              value={String(limit)}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger className="h-8 w-[70px]" aria-label="Rows per page">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {PAGE_SIZES.map((size) => (
-                  <SelectItem key={size} value={String(size)}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {page} of {totalPages > 0 ? totalPages : 1}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => setPage(1)}
-              disabled={page <= 1}
-            >
-              <span className="sr-only">Go to first page</span>
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page <= 1}
-            >
-              <span className="sr-only">Go to previous page</span>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page >= totalPages}
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden h-8 w-8 p-0 lg:flex"
-              onClick={() => setPage(totalPages)}
-              disabled={page >= totalPages}
-            >
-              <span className="sr-only">Go to last page</span>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+            : "Loading..."
+        }
+      />
     </div>
   );
 }

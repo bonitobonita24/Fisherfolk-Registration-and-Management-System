@@ -14,7 +14,7 @@ import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Form,
@@ -32,7 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarangayPicker, CategoryPicker, FormActions } from "@/components/shared";
+import {
+  BarangayPicker,
+  CategoryPicker,
+  FormActions,
+  FormSection,
+  RecordHeader,
+} from "@/components/shared";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
 import { SignaturePad } from "@/components/fisherfolk/signature-pad";
 
@@ -286,11 +292,8 @@ function EditForm({ id, record }: EditFormProps) {
         </div>
 
         {/* Personal details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
+        <FormSection title="Personal Information">
+          <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
               name="firstName"
@@ -435,15 +438,12 @@ function EditForm({ id, record }: EditFormProps) {
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </FormSection>
 
         {/* Address & categories */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Address &amp; Categories</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <FormSection title="Address & Categories">
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="address"
@@ -493,15 +493,12 @@ function EditForm({ id, record }: EditFormProps) {
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </FormSection>
 
         {/* Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Documents</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <FormSection title="Documents">
+          <div className="space-y-6">
             <FormField
               control={form.control}
               name="photo"
@@ -541,8 +538,8 @@ function EditForm({ id, record }: EditFormProps) {
                 </FormItem>
               )}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </FormSection>
 
         {/* Actions */}
         <FormActions>
@@ -602,21 +599,12 @@ export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) 
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={tenantHref(`/fisherfolk/${id}`)}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            Edit — {record.fullName}
-          </h1>
-          <p className="text-sm text-muted-foreground">{record.idNumber}</p>
-        </div>
-      </div>
+      <RecordHeader
+        backHref={tenantHref(`/fisherfolk/${id}`)}
+        backLabel="Back to record"
+        title={`Edit — ${record.fullName}`}
+        meta={record.idNumber}
+      />
 
       <EditForm
         id={id}
