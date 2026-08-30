@@ -17,6 +17,66 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   SCOPE `[WHAT]` to confirm: which actions (invite/deactivate/role-change), permission gate (tenant_admin+),
   columns. Respect Rule 34 (never expose Billing/User-Mgmt below tenant_admin). `agent-found 2026-08-30` `feature`
 
+### FMO meeting 2026-07-09 — registration policy + ID changes (captured 2026-08-31; all builds HARD HOLD pending owner [WHAT])
+
+- 🔴 **FIS-8 — Per-family registration terminology (remove "head of the family").** Meeting: head-of-family
+  concept dropped; registration counted per family unit (one primary registered fisherfolk; non-fisher spouses
+  not counted). Code today: real `Household` model with a unique `headId` FK (`Household.head`) + "Head of
+  Household" report columns (`report/domain-columns.ts:106`, `report.ts:466`). ⚠ **[WHAT] — notes contradict:**
+  one section says remove the head concept, another still describes "select head, add members, generate household
+  ID." Confirm: (a) fully remove head designation + relabel to per-family unit, or (b) keep household grouping,
+  only relabel "head" → "primary registrant"? `source: owner meeting 2026-07-09` `planning` `design`
+
+- 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
+  dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
+  Violations" dashboard tile (`violations-group-tile.tsx`) + `activeViolationCount` renewal guard
+  (`fisherfolk.ts:505`). ⚠ **[WHAT]:** show a raw count instead of a badge? Keep the renewal-block semantics
+  (active violation blocks renewal) unchanged? `source: owner meeting 2026-07-09` `feature` `ui`
+
+- 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already exists as one of
+  the 6 `CANONICAL_CATEGORIES` (`lib/normalize/types.ts:13`). NEW work = subcategory taxonomy + aquaculture-only
+  fields: brackish (fishpond/fishpen/fishcage/fishcorral) + freshwater (backyard fishpond/fishpen/fishcage/
+  fishcorral); capture land area, lease-or-owned, commodity type, culture method (poly/monoculture). Operators
+  register (not non-operator landowners). ⚠ **Ordinance-gated — full implementation pending amendments (Jan);**
+  build the structure now, activate later. [WHAT]: new Prisma model vs JSON extension; which fields required.
+  `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-11 — Add full-time / part-time + primary source of income fields.** Not present today (no occupation/
+  livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
+  the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
+
+- 🔴 **FIS-12 — Remove active/inactive status; keep only NEW + RENEWED.** Enum today
+  `FisherfolkStatus { NEW, ACTIVE, RENEWED, INACTIVE, ARCHIVED }`. Drop ACTIVE + INACTIVE. Enum-rename discipline
+  (ALTER TYPE, never DROP/CREATE) + data backfill for existing ACTIVE/INACTIVE rows. ⚠ **[WHAT]:** remap rule for
+  existing rows (ACTIVE→NEW or →RENEWED by renewal history?); keep ARCHIVED as a system state?
+  `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-13 — QR scan & verification flow.** QR is ALREADY generated + printed on the ID card
+  (`Fisherfolk.qrCode`, `id-card-renderer.tsx` qr element). NEW = an in-app scan/verify surface: scan a fisherfolk
+  ID QR → resolve → show verification (valid/record summary). [WHAT]: public vs authed verify; camera-scan page
+  vs deep-link resolver. `source: owner meeting 2026-07-09` `feature`
+
+- 🔴 **FIS-14 — Confirm RSBSA number on the default ID card template.** ⚠ Notes say "RSVS" but no RSVS exists in
+  code; card supports RSBSA (`{{rsbsa_number}}` from `Fisherfolk.rsbsaNumber`). Confirm the default ID template
+  includes the RSBSA token. **[WHAT]: is "RSVS" a mishearing of RSBSA, or a genuinely separate ID we must add?**
+  `source: owner meeting 2026-07-09` `feature` `ui`
+
+- 🔴 **FIS-15 — 3-year renewal cycle (mayoral-term aligned).** `RegistrationRenewal` + `registrationYear` exist;
+  renewal is manual, no cadence enforcement. Add a 3-year renewal cadence: due-date/renewal-due computation +
+  indicator. [WHAT]: reminder-only vs status enforcement; anchor year. `source: owner meeting 2026-07-09` `feature`
+
+- 🔴 **FIS-16 — Confirm mayor read-only (dashboard) access.** Existing `viewer` role is view-only across all mapped
+  segments (`route-feature-map.ts`); no dedicated "mayor" role. Likely `viewer` already satisfies "read-only
+  dashboard view." [WHAT]: is `viewer` acceptable, or build a narrower dashboard-only custom role? (low priority)
+  `source: owner meeting 2026-07-09` `planning`
+
+> **Already covered (no task):** Senior-citizens report EXISTS (`report.ts` `senior_citizens` "60+" + analytics
+> "Senior Citizens by Barangay"). Kanban/task module EXISTS (todo). QR generation EXISTS.
+> **Not FRMS-code tasks (business/proposal — tracked elsewhere):** benchmark maintenance pricing vs HR system ·
+> pitch slides (lead with dashboard demo) · cloud-cost justification in proposal · pricing/contract · formal
+> re-registration letter to fisherfolk · "Sheila to study fish catch/dashboard" (person-assigned).
+> **Parking lot (future, discussed as "potential"):** staff whereabouts/activity tracking.
+
 - ✅ **Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo (2026-08-28).** Full UI adoption +
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted
   prod+demo (healthy, footer v0.19.0), dev FRESH. UI-only; axe WCAG 2.2 AA 0 new violations. (Was: "Wave 3
