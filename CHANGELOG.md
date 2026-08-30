@@ -4,6 +4,22 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.20.0 — 2026-08-30
+
+### [FEATURE]
+- FIS-4 uniform list chrome + edit-form/detail-tabs shared wrappers (`2ae8d52`)
+
+### [FIXED]
+- mirror inert onto Radix aria-hidden background (FIS-5, WCAG 2.2 AA) (`265b215`)
+
+### [DOCS]
+- task-queue + session log — FIS-4 done + verified (416 tests, axe 0/7 routes) (`0ae391b`)
+- 2026-08-29 post-full-auto verification — FIS-5+FIS-2 verified clean (416 tests), Squirlnote synced (`c2531a0`)
+- FIS-2 memory compaction done + session log (FIS-5 a11y + FIS-2) (`26b4a56`)
+- FIS-5 a11y aria-hidden-focus fix → Done recently (`a0acd9b`)
+- Cargorix Waves 4-5 + v0.19.0 shipped to prod+demo (full-auto ship) (`92e52aa`)
+
+
 ## v0.19.0 — 2026-08-28
 
 ### [FEATURE]
