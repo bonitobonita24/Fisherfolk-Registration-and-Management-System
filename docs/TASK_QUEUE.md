@@ -6,6 +6,17 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+### 2026-09-01 presentation batch (owner-dumped, HARD HOLD — build→demo). Map decision: barangay-level (no GPS in schema).
+
+- 🔴 **FIS-17 — Detail fields ~30% larger + tighter density (ALL detail pages).** Shared `components/shared/detail-field.tsx`: bump `DetailField` label (`text-xs`) + value (`text-sm`) ~30%; tighten `DefinitionGrid` (`gap-x-6 gap-y-4`) + `FieldRail` (`space-y-4`). Propagates to all 6 detail pages (fisherfolk/households/vessels/violations/ayuda/fish-catches). Done: bigger + closer-spaced, axe AA 0 new, all 6 pages visually QA'd. `owner 2026-09-01` `design` `ui`
+- 🔴 **FIS-18 — Fisherfolk sidebar: replace "Status" with Category/categories.** `fisherfolk-detail-client.tsx:372` — swap `DetailField label="Status"` for resolved `categoryIds`→`Category` name+color chip(s). `owner 2026-09-01` `design` `ui`
+- 🔴 **FIS-19 — Rename "Registration Year"→"Renewal Date" + history icon + RENEWED header badge.** Profile tab: relabel field, show latest `renewals[].renewedAt` (— if none), history icon opens all past renewal dates (`RegistrationRenewal` table). Add "RENEWED" badge beside ACTIVE in `RecordHeader` when `status===RENEWED`. Confirm "Date Joined"=`dateJoined` (first record) — no change. `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-20 — Household member rows: photo thumbnail (click-to-enlarge) + category label.** `household-detail-client.tsx` member rows: add photo left of name (add `photo` to `fisherfolkLiteSelect` in `household.ts`, resolve download URL, lift `ZoomableImage` to shared); category label on right (fetch `category.list`, map ids→names). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-21 — Add-member barangay-mismatch warning + row warning icon.** At add-time, if candidate `barangay`≠head `barangay`: popup warning (still allow add); warning icon on that member's row. Barangay-string level (no coords needed). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-22 — "Already in another household" message points to WHERE.** `household.ts` update mutation already rejects; extend to look up + return the other household's number/link in the message. One-household-per-member already structurally enforced (single FK + `headId @unique`). `owner 2026-09-01` `feature` `api`
+- 🔴 **FIS-23 — Household detail ~50/50 split with barangay-level member map (right).** Wrap Details+Members in a grid; new `household-member-map.tsx` (MapLibre, reuse `CALAPAN_BARANGAY_CENTROIDS`) plots members at barangay centroids (jittered so overlaps show); king icon on Head. NO GPS — barangay-level only (owner-approved 2026-09-01). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-24 — Household submenu: municipal interconnection map.** New nav item under Records/Household + new route; municipal outline (derive via turf union of `calapan-barangays.geojson` polygons); plot all households, king icon on Heads, Head→member connection lines (barangay-centroid level), highlight members whose barangay≠Head's ("jumped"). Nav model is flat — add sibling `NavItem`. `owner 2026-09-01` `feature` `ui`
+
 - 🔴 **Build `audit-log` feature (currently a 14-line stub).** `app/[tenant]/audit-log/page.tsx` has only a
   PageHeader; no table/data. Build the audit-trail view: paginated table of audit entries (adopt shared
   `DataTable` + `ListToolbar`/`ListPagination`), scoped to tenant, Viewer+ gate. Scout the existing AuditLog
