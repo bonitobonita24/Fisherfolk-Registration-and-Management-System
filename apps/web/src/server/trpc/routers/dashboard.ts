@@ -85,7 +85,7 @@ export const dashboardRouter = createTRPCRouter({
       ] = await Promise.all([
         ctx.db.fisherfolk.count({ where: { tenantId: ctx.tenantId } }),
         ctx.db.fisherfolk.count({
-          where: { tenantId: ctx.tenantId, status: "ACTIVE" },
+          where: { tenantId: ctx.tenantId, status: { in: ["NEW", "RENEWED"] } },
         }),
         ctx.db.vessel.count({ where: { tenantId: ctx.tenantId } }),
         ctx.db.violation.count({
@@ -168,7 +168,7 @@ export const dashboardRouter = createTRPCRouter({
 
     const groups = await ctx.db.fisherfolk.groupBy({
       by: ["barangay"],
-      where: { tenantId: ctx.tenantId, status: "ACTIVE" },
+      where: { tenantId: ctx.tenantId, status: { in: ["NEW", "RENEWED"] } },
       _count: { _all: true },
       orderBy: { _count: { barangay: "desc" } },
     });
@@ -322,7 +322,7 @@ export const dashboardRouter = createTRPCRouter({
     }),
 
   // Per-barangay density + subgroup breakdown, for the dashboard's barangay
-  // density map. Supports four datasets — fisherfolk (ACTIVE, by activity
+  // density map. Supports four datasets — fisherfolk (NEW/RENEWED, by activity
   // category), and vessels / ayuda / violations whose geolocation is derived
   // through the fisherfolk relation (owner / beneficiary / violator barangay).
   // Returns a uniform { subgroups, barangays } shape the map renders directly.
@@ -388,7 +388,7 @@ export const dashboardRouter = createTRPCRouter({
         );
 
         const rows = await ctx.db.fisherfolk.findMany({
-          where: { tenantId, status: "ACTIVE" },
+          where: { tenantId, status: { in: ["NEW", "RENEWED"] } },
           select: { barangay: true, categoryIds: true },
         });
         for (const r of rows) {
@@ -486,20 +486,18 @@ export const dashboardRouter = createTRPCRouter({
       return { subgroups, barangays };
     }),
 
-  // Admin-only mutation: bulk-reset ACTIVE/RENEWED fisherfolk from prior years
-  // to INACTIVE. Idempotent. Called manually by admin; helper path is reusable
-  // by a future cron.
+  // Admin-only mutation: post-election bulk-expire — marks ALL currently-valid
+  // (NEW/RENEWED) fisherfolk EXPIRED, flagging them for renewal. Idempotent.
+  // Called manually by admin; helper path is reusable by a future cron.
   resetAnnualRegistrations: adminProcedure.mutation(async ({ ctx }) => {
     if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-    const tenant = await ctx.db.tenant.findFirst({
-      where: { id: ctx.tenantId },
-      select: { currentRegistrationYear: true },
-    });
-    if (!tenant) throw new TRPCError({ code: "NOT_FOUND" });
+    if (!ctx.userId) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Missing actor" });
+    }
     const result = await resetAnnualRegistrations(
       ctx.db,
       ctx.tenantId,
-      tenant.currentRegistrationYear,
+      ctx.userId,
     );
     return result;
   }),
@@ -508,7 +506,7 @@ export const dashboardRouter = createTRPCRouter({
   // Fisherfolk.registrationYear — near-copy of analytics.getRegistrationTrends)
   // + renewals (groupBy RegistrationRenewal.renewalYear) + delta percent vs the
   // prior year. Status filter mirrors getFisherfolkCategoryBreakdown's "ALL"
-  // convention (NEW/RENEWED/ACTIVE — excludes INACTIVE/archived records).
+  // convention (NEW/RENEWED — excludes EXPIRED/archived records).
   getYoYComparison: protectedProcedure.query(async ({ ctx }) => {
     if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
     const tenantId: string = ctx.tenantId;
@@ -518,7 +516,7 @@ export const dashboardRouter = createTRPCRouter({
         by: ["registrationYear"],
         where: {
           tenantId,
-          status: { in: ["NEW", "RENEWED", "ACTIVE"] as FisherfolkStatus[] },
+          status: { in: ["NEW", "RENEWED"] as FisherfolkStatus[] },
         },
         _count: { _all: true },
         orderBy: { registrationYear: "asc" },
@@ -555,7 +553,7 @@ export const dashboardRouter = createTRPCRouter({
 
       const statusFilter =
         input.registrationType === "ALL"
-          ? { status: { in: ["NEW", "RENEWED", "ACTIVE"] as FisherfolkStatus[] } }
+          ? { status: { in: ["NEW", "RENEWED"] as FisherfolkStatus[] } }
           : { status: input.registrationType };
 
       const cats = await ctx.db.category.findMany({

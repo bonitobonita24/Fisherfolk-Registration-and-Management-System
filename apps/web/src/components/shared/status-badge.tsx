@@ -27,6 +27,7 @@ const statusColorMap: Record<string, BadgeColor> = {
   ACTIVE: "green",
   RENEWED: "green",
   INACTIVE: "yellow",
+  EXPIRED: "yellow",
   ARCHIVED: "gray",
 
   // VesselStatus

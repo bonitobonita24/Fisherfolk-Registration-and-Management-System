@@ -15,6 +15,7 @@ enum FisherfolkStatus {
   RENEWED
   INACTIVE
   ARCHIVED
+  EXPIRED
 }
 
 enum VesselStatus {
@@ -49,6 +50,7 @@ enum AuditAction {
   LOGIN
   EXPORT
   MEDIA_DOWNLOAD
+  EXPIRE
 }
 
 enum UserRole {

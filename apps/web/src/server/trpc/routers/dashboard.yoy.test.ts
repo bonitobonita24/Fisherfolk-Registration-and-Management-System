@@ -140,7 +140,7 @@ describe("dashboard.getYoYComparison (procedure)", () => {
     expect(captured.renewal?.where.tenantId).toBe("tenant-yoy");
     // Status convention mirrors the tile's "ALL" filter.
     expect(captured.fisherfolk?.where.status).toEqual({
-      in: ["NEW", "RENEWED", "ACTIVE"],
+      in: ["NEW", "RENEWED"],
     });
     expect(captured.fisherfolk?.by).toEqual(["registrationYear"]);
     expect(captured.renewal?.by).toEqual(["renewalYear"]);

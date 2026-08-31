@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { columns, type FisherfolkListItem } from "./columns";
 
-const STATUSES = ["NEW", "ACTIVE", "RENEWED", "INACTIVE", "ARCHIVED"] as const;
+const STATUSES = ["NEW", "RENEWED", "EXPIRED", "ARCHIVED"] as const;
 const PAGE_SIZES = [10, 20, 50] as const;
 
 export function FisherfolkListClient() {
