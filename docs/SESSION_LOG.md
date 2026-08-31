@@ -2,6 +2,23 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-01 — Presentation batches (FIS-17..30) built + shipped to demo (full auto)
+
+**In your words:** three rounds of demo/presentation tasks — detail-page typography & density, category/renewal/household/map features, then a location-capture feature with draggable pins + mobile GPS; then bug-fixes + polish; "run it all in full auto, I need to sleep."
+
+✅ Done (all verified tsc/lint/416 tests/build, deployed to demo `frms-demo.powerbyte.app`, healthy):
+- Detail fonts ~30% larger + tighter density (all 6 detail pages, one shared component).
+- Fisherfolk sidebar Category chips (was Status); **distinct color per category**.
+- "Renewal Date" + past-renewals history popover + RENEWED badge (deduped); renewal data backfilled so renewed records show real dates.
+- Household: member photos (zoomable) + category chips + barangay-mismatch warnings; "already in HH-XXXX" message; 50/50 split with member map.
+- Municipal Network map (crown heads, connection lines, **jumped=pink**, **heatmap toggle**).
+- **Location capture**: draggable-pin LocationPicker (auto-centers on barangay) + mobile GPS; lat/lng added to 5 models; wired into Fisherfolk, Vessel, FishCatch, Violation, Ayuda.
+- **Fixed**: blank household map (WebGL 0×0 buffer in grid cell); photo/signature/QR enlarge now large + zoomable.
+
+💬 Notes: branch `feat/presentation-batch-0901` is LOCAL/unpushed (HARD HOLD); demo deployed (authorized), **prod untouched** (owner-gated). Maps render on a real browser (headless shows blank; verified 0 console errors live). These features also target Production — separate owner-gated release (merge→main + version + "push to production"); prod uses real renewal data, ayuda/vessels/violations stay dormant.
+
+⏳ Next: **FIS-31 — landing-page overhaul** (brainstorm + updated screenshots + better copy + humanize) — queued as the post-reboot handoff task. Then the production release on your word.
+
 ## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
 
 **In your words:** "1. keep FIS-4 on For Review · 2. do FIS-3 · 3. merge/push."
