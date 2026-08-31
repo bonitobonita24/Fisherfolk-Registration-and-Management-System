@@ -4,15 +4,24 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Crown, Trash2, UserMinus, UserPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  Crown,
+  Trash2,
+  TriangleAlert,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
+import { normalizeBarangay } from "@/lib/normalize/barangay";
 import { SearchInput } from "@/components/shared/search-input";
 import {
   RecordHeader,
   DetailField,
   DefinitionGrid,
+  ZoomableImage,
 } from "@/components/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +52,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import HouseholdMemberMap from "./household-member-map";
 
 // ── Types ────────────────────────────────────────────────────────────────
 interface FisherfolkLite {
@@ -51,22 +67,110 @@ interface FisherfolkLite {
   fullName: string;
   barangay: string;
   categoryIds: string[];
+  photo: string | null;
 }
 
 interface Props {
   id: string;
 }
 
+/** True when two barangay names refer to a different place, normalized. */
+function isDifferentBarangay(a: string, b: string): boolean {
+  const na = normalizeBarangay(a).value ?? a;
+  const nb = normalizeBarangay(b).value ?? b;
+  return na !== nb;
+}
+
+function initials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  const first = parts[0]![0] ?? "";
+  const last = parts.length > 1 ? (parts[parts.length - 1]![0] ?? "") : "";
+  return (first + last).toUpperCase();
+}
+
+/** 36px round photo thumbnail (enlargeable) with an initials fallback. */
+function MemberAvatar({
+  photoKey,
+  fullName,
+}: {
+  photoKey: string | null;
+  fullName: string;
+}) {
+  const { data: photoUrlResp } = trpc.upload.getDownloadUrl.useQuery(
+    { key: photoKey ?? "" },
+    { enabled: !!photoKey },
+  );
+
+  if (photoKey && photoUrlResp?.url) {
+    return (
+      <ZoomableImage
+        src={photoUrlResp.url}
+        alt={`${fullName}'s photo`}
+        ariaLabel={`Enlarge ${fullName}'s photo`}
+        thumbnailClassName="size-9 shrink-0 rounded-full border object-cover"
+      />
+    );
+  }
+
+  return (
+    <span className="flex size-9 shrink-0 items-center justify-center rounded-full border bg-muted text-xs font-medium text-muted-foreground">
+      {initials(fullName)}
+    </span>
+  );
+}
+
+/** Comma-joined category name badges for a member row (FIS-20b). */
+function MemberCategories({
+  categoryIds,
+  categoriesMap,
+}: {
+  categoryIds: string[];
+  categoriesMap: Map<string, { name: string; color: string | null }>;
+}) {
+  const names = categoryIds
+    .map((cid) => categoriesMap.get(cid))
+    .filter((c): c is { name: string; color: string | null } => c != null);
+
+  if (names.length === 0) {
+    return <span className="text-xs text-muted-foreground">—</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-1">
+      {names.map((c) => {
+        const hex =
+          c.color && /^#[0-9A-Fa-f]{6}$/.test(c.color) ? c.color : "#6b7280";
+        return (
+          <span
+            key={c.name}
+            className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-medium"
+            style={{
+              backgroundColor: `${hex}1a`,
+              color: hex,
+              borderColor: `${hex}40`,
+            }}
+          >
+            {c.name}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Add Member dialog ───────────────────────────────────────────────────
 function AddMemberDialog({
   householdId,
   currentMemberIds,
+  headBarangay,
   open,
   onOpenChange,
   onAdded,
 }: {
   householdId: string;
   currentMemberIds: string[];
+  headBarangay: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdded: () => void;
@@ -124,35 +228,49 @@ function AddMemberDialog({
                 No available fisherfolk found.
               </p>
             )}
-            {filtered.map((person) => (
-              <div
-                key={person.id}
-                className="flex items-center justify-between gap-3 rounded-lg border p-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">
-                    {person.fullName}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {person.idNumber} · {person.barangay}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={addMember.isPending}
-                  onClick={() =>
-                    addMember.mutate({
-                      id: householdId,
-                      addMemberIds: [person.id],
-                    })
-                  }
+            {filtered.map((person) => {
+              const mismatch = isDifferentBarangay(
+                person.barangay,
+                headBarangay,
+              );
+              return (
+                <div
+                  key={person.id}
+                  className="space-y-2 rounded-lg border p-3"
                 >
-                  Add
-                </Button>
-              </div>
-            ))}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-foreground">
+                        {person.fullName}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {person.idNumber} · {person.barangay}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={addMember.isPending}
+                      onClick={() =>
+                        addMember.mutate({
+                          id: householdId,
+                          addMemberIds: [person.id],
+                        })
+                      }
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {mismatch && (
+                    <p className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                      <TriangleAlert className="size-3.5 shrink-0" />
+                      Not in the same barangay as the head — add anyway?
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -366,6 +484,15 @@ export function HouseholdDetailClient({ id }: Props) {
     error,
   } = trpc.household.getById.useQuery({ id });
 
+  const { data: categories } = trpc.category.list.useQuery({});
+  const categoriesMap = useMemo(() => {
+    const map = new Map<string, { name: string; color: string | null }>();
+    for (const c of categories ?? []) {
+      map.set(c.id, { name: c.name, color: c.displayColor ?? null });
+    }
+    return map;
+  }, [categories]);
+
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [changeHeadOpen, setChangeHeadOpen] = useState(false);
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);
@@ -465,124 +592,193 @@ export function HouseholdDetailClient({ id }: Props) {
         }
       />
 
-      {/* Details */}
-      <Card className="gap-0 py-5">
-        <CardHeader className="flex flex-row items-center justify-between px-6 pb-4 pt-0">
-          <CardTitle className="text-sm font-medium">Household Details</CardTitle>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setEditDetailsOpen(true)}
-          >
-            Edit Details
-          </Button>
-        </CardHeader>
-        <CardContent className="px-6 py-0">
-          <DefinitionGrid columns={3}>
-            <DetailField label="Household Number" value={record.householdNumber} />
-            <DetailField label="Barangay" value={record.barangay} />
-            <DetailField label="Address" value={record.address} />
-          </DefinitionGrid>
-          {record.notes && (
-            <div className="mt-4 space-y-1">
-              <p className="text-xs text-muted-foreground">Notes</p>
-              <p className="whitespace-pre-wrap text-sm text-foreground">
-                {record.notes}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Members */}
-      <Card className="gap-0 py-5">
-        <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 pb-4 pt-0">
-          <CardTitle className="text-sm font-medium">Members</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => setChangeHeadOpen(true)}
-            >
-              <Crown className="mr-2 h-4 w-4" />
-              Change Head
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setAddMemberOpen(true)}
-            >
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Member
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="px-6 py-0">
-          <ul className="divide-y">
-            <li className="flex items-center justify-between gap-3 py-2 first:pt-0">
-              <Link
-                href={tenantHref(`/fisherfolk/${record.head.id}`)}
-                className="min-w-0 flex-1 hover:underline"
+      {/* FIS-23 — details/members left, member-location map right (50/50, stacks on small screens) */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="space-y-4">
+          {/* Details */}
+          <Card className="gap-0 py-5">
+            <CardHeader className="flex flex-row items-center justify-between px-6 pb-4 pt-0">
+              <CardTitle className="text-sm font-medium">Household Details</CardTitle>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setEditDetailsOpen(true)}
               >
-                <p className="truncate text-sm font-medium text-foreground">
-                  {record.head.fullName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {record.head.idNumber} · {record.head.barangay}
-                </p>
-              </Link>
-              <Badge variant="secondary">Head</Badge>
-            </li>
-            {record.members
-              .filter((m) => m.id !== record.head.id)
-              .map((member) => (
-                <li
-                  key={member.id}
-                  className="flex items-center justify-between gap-3 py-2 last:pb-0"
+                Edit Details
+              </Button>
+            </CardHeader>
+            <CardContent className="px-6 py-0">
+              <DefinitionGrid columns={3}>
+                <DetailField label="Household Number" value={record.householdNumber} />
+                <DetailField label="Barangay" value={record.barangay} />
+                <DetailField label="Address" value={record.address} />
+              </DefinitionGrid>
+              {record.notes && (
+                <div className="mt-4 space-y-1">
+                  <p className="text-xs text-muted-foreground">Notes</p>
+                  <p className="whitespace-pre-wrap text-sm text-foreground">
+                    {record.notes}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Members */}
+          <Card className="gap-0 py-5">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 pb-4 pt-0">
+              <CardTitle className="text-sm font-medium">Members</CardTitle>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setChangeHeadOpen(true)}
                 >
-                  <Link
-                    href={tenantHref(`/fisherfolk/${member.id}`)}
-                    className="min-w-0 flex-1 hover:underline"
-                  >
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {member.fullName}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {member.idNumber} · {member.barangay}
-                    </p>
-                  </Link>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    disabled={removeMember.isPending}
-                    onClick={() =>
-                      removeMember.mutate({
-                        id: record.id,
-                        removeMemberIds: [member.id],
-                      })
-                    }
-                    aria-label={`Remove ${member.fullName} from household`}
-                  >
-                    <UserMinus className="h-4 w-4" />
-                  </Button>
-                </li>
-              ))}
-            {record.members.filter((m) => m.id !== record.head.id).length ===
-              0 && (
-              <li className="py-2 text-sm text-muted-foreground first:pt-0 last:pb-0">
-                No additional members.
-              </li>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
+                  <Crown className="mr-2 h-4 w-4" />
+                  Change Head
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setAddMemberOpen(true)}
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Member
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="px-6 py-0">
+              <TooltipProvider>
+                <ul className="divide-y">
+                  <li className="flex items-center gap-3 py-2 first:pt-0">
+                    <MemberAvatar
+                      photoKey={record.head.photo}
+                      fullName={record.head.fullName}
+                    />
+                    <Link
+                      href={tenantHref(`/fisherfolk/${record.head.id}`)}
+                      className="min-w-0 flex-1 hover:underline"
+                    >
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {record.head.fullName}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {record.head.idNumber} · {record.head.barangay}
+                      </p>
+                    </Link>
+                    <div className="w-28 shrink-0">
+                      <MemberCategories
+                        categoryIds={record.head.categoryIds}
+                        categoriesMap={categoriesMap}
+                      />
+                    </div>
+                    <Badge variant="secondary">Head</Badge>
+                  </li>
+                  {record.members
+                    .filter((m) => m.id !== record.head.id)
+                    .map((member) => {
+                      const mismatch = isDifferentBarangay(
+                        member.barangay,
+                        record.head.barangay,
+                      );
+                      return (
+                        <li
+                          key={member.id}
+                          className="flex items-center gap-3 py-2 last:pb-0"
+                        >
+                          <MemberAvatar
+                            photoKey={member.photo}
+                            fullName={member.fullName}
+                          />
+                          <Link
+                            href={tenantHref(`/fisherfolk/${member.id}`)}
+                            className="min-w-0 flex-1 hover:underline"
+                          >
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {member.fullName}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {member.idNumber} · {member.barangay}
+                            </p>
+                          </Link>
+                          <div className="w-28 shrink-0">
+                            <MemberCategories
+                              categoryIds={member.categoryIds}
+                              categoriesMap={categoriesMap}
+                            />
+                          </div>
+                          {mismatch && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <TriangleAlert
+                                  className="size-4 shrink-0 text-amber-600 dark:text-amber-500"
+                                  aria-label={`${member.fullName} is in a different barangay from the head of family`}
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Different barangay from head of family
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            disabled={removeMember.isPending}
+                            onClick={() =>
+                              removeMember.mutate({
+                                id: record.id,
+                                removeMemberIds: [member.id],
+                              })
+                            }
+                            aria-label={`Remove ${member.fullName} from household`}
+                          >
+                            <UserMinus className="h-4 w-4" />
+                          </Button>
+                        </li>
+                      );
+                    })}
+                  {record.members.filter((m) => m.id !== record.head.id)
+                    .length === 0 && (
+                    <li className="py-2 text-sm text-muted-foreground first:pt-0 last:pb-0">
+                      No additional members.
+                    </li>
+                  )}
+                </ul>
+              </TooltipProvider>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="lg:sticky lg:top-4 lg:self-start">
+          <HouseholdMemberMap
+            members={[
+              {
+                id: record.head.id,
+                fullName: record.head.fullName,
+                barangay: record.head.barangay,
+                isHead: true,
+              },
+              ...record.members
+                .filter((m) => m.id !== record.head.id)
+                .map((m) => ({
+                  id: m.id,
+                  fullName: m.fullName,
+                  barangay: m.barangay,
+                  isHead: false,
+                })),
+            ]}
+            headBarangay={record.head.barangay}
+          />
+        </div>
+      </div>
 
       <AddMemberDialog
         householdId={record.id}
         currentMemberIds={currentMemberIds}
+        headBarangay={record.head.barangay}
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         onAdded={refresh}

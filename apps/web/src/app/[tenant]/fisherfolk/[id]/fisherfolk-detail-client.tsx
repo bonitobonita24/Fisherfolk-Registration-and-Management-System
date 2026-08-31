@@ -44,6 +44,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
@@ -67,6 +72,29 @@ function formatDate(value: Date | string | null | undefined): string {
     month: "long",
     day: "numeric",
   });
+}
+
+/** Colored category chip — tinted from the category's own displayColor hex. */
+function CategoryChip({
+  name,
+  color,
+}: {
+  name: string;
+  color: string | null | undefined;
+}) {
+  const hex = color && /^#[0-9A-Fa-f]{6}$/.test(color) ? color : "#6b7280";
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium"
+      style={{
+        backgroundColor: `${hex}1a`,
+        color: hex,
+        borderColor: `${hex}40`,
+      }}
+    >
+      {name}
+    </span>
+  );
 }
 
 /** Thumbnail that opens an enlarged view in a Dialog when clicked. */
@@ -120,6 +148,8 @@ export function FisherfolkDetailClient({ id }: Props) {
   } = trpc.fisherfolk.getById.useQuery({ id });
 
   const { data: me } = trpc.user.me.useQuery();
+
+  const { data: categories } = trpc.category.list.useQuery({});
 
   const { data: photoUrlResp } = trpc.upload.getDownloadUrl.useQuery(
     { key: record?.photo ?? "" },
@@ -303,7 +333,20 @@ export function FisherfolkDetailClient({ id }: Props) {
         backLabel="Back to fisherfolk list"
         title={record.fullName}
         meta={record.idNumber}
-        badge={<StatusBadge status={record.status} />}
+        badge={
+          record.status === "RENEWED" ? (
+            <span className="inline-flex items-center gap-1.5">
+              <StatusBadge status={record.status} />
+              <StatusBadge
+                status="RENEWED"
+                color="orange"
+                icon={RefreshCw}
+              />
+            </span>
+          ) : (
+            <StatusBadge status={record.status} />
+          )
+        }
         actions={headerActions}
       />
 
@@ -369,7 +412,25 @@ export function FisherfolkDetailClient({ id }: Props) {
 
           <DetailField label="ID Number" value={record.idNumber} />
           <DetailField label="RSBSA Number" value={record.rsbsaNumber} />
-          <DetailField label="Status" value={record.status} />
+          <DetailField
+            label="Category"
+            value={
+              record.categoryIds.length > 0 ? (
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {record.categoryIds.map((catId) => {
+                    const category = categories?.find((c) => c.id === catId);
+                    return (
+                      <CategoryChip
+                        key={catId}
+                        name={category?.name ?? "Unknown"}
+                        color={category?.displayColor}
+                      />
+                    );
+                  })}
+                </span>
+              ) : null
+            }
+          />
         </FieldRail>
 
         {/* RIGHT — tabbed related-record sections */}
@@ -462,8 +523,43 @@ export function FisherfolkDetailClient({ id }: Props) {
                       value={formatDate(record.dateJoined)}
                     />
                     <DetailField
-                      label="Registration Year"
-                      value={record.registrationYear}
+                      label="Renewal Date"
+                      value={
+                        <span className="inline-flex items-center gap-1.5">
+                          {formatDate(latestRenewal?.renewedAt)}
+                          {record.renewals.length > 0 && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-5 shrink-0 text-muted-foreground hover:text-foreground"
+                                  aria-label="View renewal history"
+                                >
+                                  <History className="size-3.5" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-72" align="start">
+                                <p className="mb-2 text-xs font-medium text-foreground">
+                                  Renewal History
+                                </p>
+                                <ul className="max-h-64 space-y-2 overflow-y-auto">
+                                  {record.renewals.map((r) => (
+                                    <li key={r.id} className="text-xs">
+                                      <p className="font-medium text-foreground">
+                                        {r.renewalYear}
+                                      </p>
+                                      <p className="text-muted-foreground">
+                                        {formatDate(r.renewedAt)}
+                                      </p>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </span>
+                      }
                     />
                     <DetailField
                       label="Renewal Status"

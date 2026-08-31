@@ -1,0 +1,479 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { Crown } from "lucide-react";
+import type { FeatureCollection, LineString, Point } from "geojson";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { trpc } from "@/lib/trpc/client";
+import {
+  CALAPAN_BARANGAY_CENTROIDS,
+  CALAPAN_BOUNDS,
+} from "@/data/calapan-barangay-centroids";
+import { normalizeBarangay } from "@/lib/normalize/barangay";
+
+// Served as a static asset (public/data/...) — see BarangayDensityMap for why
+// this is fetched client-side rather than bundled as a JS import.
+const BOUNDARIES_URL = "/data/calapan-barangays.geojson";
+
+const DARK_STYLE =
+  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const LIGHT_STYLE =
+  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+
+const OUTLINE_SOURCE_ID = "municipal-barangay-outline-source";
+const OUTLINE_LAYER_ID = "municipal-barangay-outline-lines";
+const LINE_SOURCE_ID = "household-connection-source";
+const LINE_LAYER_ID = "household-connection-lines";
+const MEMBER_SOURCE_ID = "household-member-points-source";
+const MEMBER_LAYER_ID = "household-member-points-circles";
+
+// Small deterministic jitter radius (degrees) so households/members sharing a
+// barangay centroid fan out instead of fully overlapping. Barangay-level
+// only — exact GPS residence isn't collected (owner-approved, matches
+// BarangayDensityMap / HouseholdMemberMap's centroid-based approximation).
+const JITTER_RADIUS_DEG = 0.0022;
+
+const HEAD_COLOR = "#eab308"; // gold
+const CONNECTED_COLOR = "#38bdf8"; // sky blue
+const JUMPED_COLOR = "#f59e0b"; // amber warning
+
+interface NetworkMember {
+  id: string;
+  fullName: string;
+  barangay: string;
+}
+
+interface NetworkHousehold {
+  id: string;
+  householdNumber: string;
+  head: NetworkMember;
+  members: NetworkMember[];
+}
+
+interface LineProps {
+  jumped: boolean;
+}
+
+interface MemberPointProps {
+  jumped: boolean;
+  fullName: string;
+  barangay: string;
+}
+
+/** Deterministic [0,1) hash of a string (djb2 variant) — stable across renders/SSR. */
+function hashString(input: string): number {
+  let hash = 5381;
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 33) ^ input.charCodeAt(i);
+  }
+  return (hash >>> 0) / 4294967296;
+}
+
+/** Deterministic small lat/lon offset derived from an id, so repeated calls fan out. */
+function jitterFor(id: string): { dLat: number; dLon: number } {
+  const angle = hashString(id) * 2 * Math.PI;
+  const magnitude = hashString(`${id}:r`) * JITTER_RADIUS_DEG;
+  return {
+    dLat: Math.sin(angle) * magnitude,
+    dLon: Math.cos(angle) * magnitude,
+  };
+}
+
+// Known raw-barangay spelling/abbreviation variants that don't normalize to a
+// canonical centroid key. Mirrors BarangayDensityMap's alias table.
+const BARANGAY_ALIASES: Record<string, string> = {
+  wawa: "Sabang",
+  "nag-iba i": "Nag-iba I",
+  "nag-iba ii": "Nag-iba II",
+  "mahal na pangalan": "Mahal na Pangalan",
+  calero: "Calero",
+  "sto niño": "Santo Niño",
+  communal: "Comunal",
+  lumangbayan: "Lumang Bayan",
+  "sta rita": "Santa Rita",
+  "sta isabel": "Santa Isabel",
+  "san rafael": "Salong",
+  svs: "San Vicente South",
+};
+
+function simplifyBarangay(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\./g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function resolveCentroidKey(raw: string): string {
+  const norm = normalizeBarangay(raw).value ?? raw;
+  if (CALAPAN_BARANGAY_CENTROIDS[norm] != null) return norm;
+  return BARANGAY_ALIASES[simplifyBarangay(raw)] ?? norm;
+}
+
+/** Inline SVG matching lucide-react's Crown icon, for injection into a MapLibre HTML marker. */
+function renderCrownSvg(): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"/></svg>`;
+}
+
+/**
+ * Municipal household interconnection map (FIS-24). Plots every household's
+ * head (with a lucide Crown marker) at its barangay centroid, draws a
+ * connection line to each member's barangay centroid, and flags members who
+ * "jumped" to a different barangay than their head in a warning color.
+ * Barangay-level only — no GPS is collected. Mirrors BarangayDensityMap's
+ * MapLibre init/theme/resize patterns.
+ */
+export function MunicipalNetworkMap() {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const headMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const [mounted, setMounted] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  const { data: households, isLoading } = trpc.householdNetwork.list.useQuery();
+
+  useEffect(() => setMounted(true), []);
+
+  // ── Map init (once) ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mounted) return;
+    if (containerRef.current == null) return;
+    if (mapRef.current != null) return;
+
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: resolvedTheme === "light" ? LIGHT_STYLE : DARK_STYLE,
+      bounds: CALAPAN_BOUNDS,
+      fitBoundsOptions: { padding: 24 },
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(
+      new maplibregl.AttributionControl({ compact: true }),
+      "bottom-right",
+    );
+
+    map.on("load", () => setMapReady(true));
+
+    mapRef.current = map;
+
+    return () => {
+      for (const marker of headMarkersRef.current) marker.remove();
+      headMarkersRef.current = [];
+      map.remove();
+      mapRef.current = null;
+      setMapReady(false);
+    };
+    // Intentionally init once; theme swaps are handled via setStyle below.
+  }, [mounted]);
+
+  // Keep the map sized to its (flex-filled) container.
+  useEffect(() => {
+    if (!mapReady) return;
+    const el = containerRef.current;
+    const map = mapRef.current;
+    if (el == null || map == null) return;
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mapReady]);
+
+  // ── Theme swap ───────────────────────────────────────────────────────────
+  const prevThemeRef = useRef(resolvedTheme);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady) return;
+    if (prevThemeRef.current === resolvedTheme) return;
+    prevThemeRef.current = resolvedTheme;
+    map.setStyle(resolvedTheme === "light" ? LIGHT_STYLE : DARK_STYLE);
+    // A style swap discards all sources/layers — force the layer-setup
+    // effects below to re-run once the new style has loaded.
+    setMapReady(false);
+    void map.once("styledata", () => setMapReady(true));
+  }, [resolvedTheme, mapReady]);
+
+  // ── Municipal outline (all barangay polygons, unified line layer) ──────
+  const [boundaries, setBoundaries] = useState<FeatureCollection | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(BOUNDARIES_URL)
+      .then((res) => res.json())
+      .then((data: FeatureCollection) => {
+        if (!cancelled) setBoundaries(data);
+      })
+      .catch(() => {
+        // The outline is a visual nicety, not a hard dependency.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady || boundaries == null) return;
+
+    if (map.getSource(OUTLINE_SOURCE_ID) == null) {
+      map.addSource(OUTLINE_SOURCE_ID, { type: "geojson", data: boundaries });
+    }
+    if (map.getLayer(OUTLINE_LAYER_ID) == null) {
+      map.addLayer({
+        id: OUTLINE_LAYER_ID,
+        type: "line",
+        source: OUTLINE_SOURCE_ID,
+        paint: {
+          "line-color": "#9ca3af",
+          "line-width": 1,
+          "line-opacity": 0.5,
+        },
+      });
+    }
+  }, [mapReady, boundaries]);
+
+  // ── Derived: heads / members / connection lines ─────────────────────────
+  const { heads, memberFeatures, lineFeatures } = useMemo(() => {
+    const headsOut: Array<{
+      household: NetworkHousehold;
+      lat: number;
+      lon: number;
+    }> = [];
+    const memberFeaturesOut: Array<
+      GeoJSON.Feature<Point, MemberPointProps>
+    > = [];
+    const lineFeaturesOut: Array<GeoJSON.Feature<LineString, LineProps>> = [];
+
+    for (const household of households ?? []) {
+      const headKey = resolveCentroidKey(household.head.barangay);
+      const headCentroid = CALAPAN_BARANGAY_CENTROIDS[headKey];
+      if (headCentroid == null) continue;
+
+      const headJitter = jitterFor(household.id);
+      const headLat = headCentroid.lat + headJitter.dLat;
+      const headLon = headCentroid.lon + headJitter.dLon;
+      headsOut.push({ household, lat: headLat, lon: headLon });
+
+      const normalizedHeadBarangay =
+        normalizeBarangay(household.head.barangay).value ??
+        household.head.barangay;
+
+      for (const member of household.members) {
+        if (member.id === household.head.id) continue;
+
+        const memberKey = resolveCentroidKey(member.barangay);
+        const memberCentroid = CALAPAN_BARANGAY_CENTROIDS[memberKey];
+        if (memberCentroid == null) continue;
+
+        const memberJitter = jitterFor(member.id);
+        const memberLat = memberCentroid.lat + memberJitter.dLat;
+        const memberLon = memberCentroid.lon + memberJitter.dLon;
+
+        const jumped =
+          (normalizeBarangay(member.barangay).value ?? member.barangay) !==
+          normalizedHeadBarangay;
+
+        memberFeaturesOut.push({
+          type: "Feature",
+          properties: { jumped, fullName: member.fullName, barangay: member.barangay },
+          geometry: { type: "Point", coordinates: [memberLon, memberLat] },
+        });
+
+        lineFeaturesOut.push({
+          type: "Feature",
+          properties: { jumped },
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [headLon, headLat],
+              [memberLon, memberLat],
+            ],
+          },
+        });
+      }
+    }
+
+    return {
+      heads: headsOut,
+      memberFeatures: memberFeaturesOut,
+      lineFeatures: lineFeaturesOut,
+    };
+  }, [households]);
+
+  // ── Connection lines ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady) return;
+
+    const geojson: FeatureCollection<LineString, LineProps> = {
+      type: "FeatureCollection",
+      features: lineFeatures,
+    };
+
+    const source = map.getSource<maplibregl.GeoJSONSource>(LINE_SOURCE_ID);
+    if (source == null) {
+      map.addSource(LINE_SOURCE_ID, { type: "geojson", data: geojson });
+    } else {
+      source.setData(geojson);
+    }
+
+    if (map.getLayer(LINE_LAYER_ID) == null) {
+      map.addLayer({
+        id: LINE_LAYER_ID,
+        type: "line",
+        source: LINE_SOURCE_ID,
+        paint: {
+          "line-color": [
+            "case",
+            ["get", "jumped"],
+            JUMPED_COLOR,
+            CONNECTED_COLOR,
+          ],
+          "line-width": 1.25,
+          "line-opacity": 0.55,
+        },
+      });
+    }
+  }, [mapReady, lineFeatures]);
+
+  // ── Member points (GeoJSON layer — efficient at municipal scale) ────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady) return;
+
+    const geojson: FeatureCollection<Point, MemberPointProps> = {
+      type: "FeatureCollection",
+      features: memberFeatures,
+    };
+
+    const source = map.getSource<maplibregl.GeoJSONSource>(MEMBER_SOURCE_ID);
+    if (source == null) {
+      map.addSource(MEMBER_SOURCE_ID, { type: "geojson", data: geojson });
+    } else {
+      source.setData(geojson);
+    }
+
+    if (map.getLayer(MEMBER_LAYER_ID) == null) {
+      map.addLayer({
+        id: MEMBER_LAYER_ID,
+        type: "circle",
+        source: MEMBER_SOURCE_ID,
+        paint: {
+          "circle-radius": ["case", ["get", "jumped"], 5, 3.5],
+          "circle-color": [
+            "case",
+            ["get", "jumped"],
+            JUMPED_COLOR,
+            CONNECTED_COLOR,
+          ],
+          "circle-opacity": 0.85,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-opacity": 0.6,
+        },
+      });
+    }
+  }, [mapReady, memberFeatures]);
+
+  // ── Head markers (DOM markers — Crown icon, one per household) ─────────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady) return;
+
+    for (const marker of headMarkersRef.current) marker.remove();
+    headMarkersRef.current = [];
+
+    for (const { household, lat, lon } of heads) {
+      const el = document.createElement("div");
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.width = "22px";
+      el.style.height = "22px";
+      el.style.borderRadius = "9999px";
+      el.style.backgroundColor = HEAD_COLOR;
+      el.style.border = "2px solid #ffffff";
+      el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.4)";
+      el.title = `${household.head.fullName} — ${household.householdNumber} (${household.head.barangay})`;
+      el.innerHTML = renderCrownSvg();
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([lon, lat])
+        .addTo(map);
+      headMarkersRef.current.push(marker);
+    }
+  }, [mapReady, heads]);
+
+  return (
+    <Card className="flex h-full flex-col gap-0 overflow-hidden py-0">
+      <CardHeader className="space-y-1 border-b px-6 py-5">
+        <CardTitle className="text-sm font-medium">
+          Municipal Household Network
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Every household head connected to its members, approximated at
+          barangay centers — exact residence coordinates aren&apos;t
+          collected.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col px-6 py-5 lg:min-h-0">
+        <div className="relative h-full min-h-[28rem] w-full overflow-hidden rounded-md border">
+          <div ref={containerRef} className="h-full w-full" />
+
+          <div className="absolute bottom-3 left-3 z-10 rounded-lg border bg-card/95 p-2.5 shadow-lg backdrop-blur">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span
+                  className="flex size-4 shrink-0 items-center justify-center rounded-full border border-white"
+                  style={{ backgroundColor: HEAD_COLOR }}
+                >
+                  <Crown className="size-2.5 text-white" />
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Household head
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="size-3 shrink-0 rounded-full border border-white"
+                  style={{ backgroundColor: CONNECTED_COLOR }}
+                />
+                <span className="text-xs text-muted-foreground">
+                  Connected member
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="size-3 shrink-0 rounded-full border border-white"
+                  style={{ backgroundColor: JUMPED_COLOR }}
+                />
+                <span className="text-xs text-muted-foreground">
+                  Jumped barangay
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {isLoading && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/40">
+              <p className="text-sm text-muted-foreground">
+                Loading network…
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
