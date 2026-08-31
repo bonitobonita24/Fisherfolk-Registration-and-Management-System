@@ -6,6 +6,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+- 🔴 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** On a specific fisherfolk detail page, the
+  tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw
+  native horizontal scrollbar. Restyle it to match the app's current CSS/scrollbar styling (thin/themed
+  overflow, not the default OS scrollbar) — likely the `UnderlineTabs`/tabs overflow container in
+  `fisherfolk-detail-client.tsx`. `source: owner 2026-08-31` `bug` `ui` `design`
+
 - 🔴 **Build `audit-log` feature (currently a 14-line stub).** `app/[tenant]/audit-log/page.tsx` has only a
   PageHeader; no table/data. Build the audit-trail view: paginated table of audit entries (adopt shared
   `DataTable` + `ListToolbar`/`ListPagination`), scoped to tenant, Viewer+ gate. Scout the existing AuditLog
