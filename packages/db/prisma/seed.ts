@@ -254,6 +254,21 @@ async function main() {
 
   console.log(`  ✅ Tenant admin (role=tenant_admin) ready: ${lguAdmin.username}`);
 
+  // Distinct, accessible palette — mirrors packages/db/scripts/distinct-category-colors.sql
+  // so freshly-seeded categories start varied instead of all needing the SQL backfill.
+  const CATEGORY_COLOR_PALETTE = [
+    "#4F8EF7", // blue
+    "#22C55E", // green
+    "#F97316", // orange
+    "#A855F7", // purple
+    "#EC4899", // pink
+    "#14B8A6", // teal
+    "#EAB308", // amber
+    "#EF4444", // red
+    "#6366F1", // indigo
+    "#06B6D4", // cyan
+  ];
+
   const defaultCategories = [
     { name: "Boat Owner/Operator", slug: "boat-owner-operator", description: "Owner or operator of a registered fishing vessel", displayOrder: 1 },
     { name: "Capture Fishing", slug: "capture-fishing", description: "Engaged in municipal capture fishing", displayOrder: 2 },
@@ -263,7 +278,7 @@ async function main() {
     { name: "Aquaculture", slug: "aquaculture", description: "Engaged in aquaculture/fish farming", displayOrder: 6 },
   ];
 
-  for (const cat of defaultCategories) {
+  for (const [i, cat] of defaultCategories.entries()) {
     await prisma.category.upsert({
       where: {
         tenantId_slug: {
@@ -277,7 +292,7 @@ async function main() {
         name: cat.name,
         slug: cat.slug,
         description: cat.description,
-        displayColor: "#4F8EF7",
+        displayColor: CATEGORY_COLOR_PALETTE[i % CATEGORY_COLOR_PALETTE.length]!,
         iconType: "EMOJI",
         iconEmoji: "🐟",
         displayOrder: cat.displayOrder,

@@ -13,6 +13,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc/client";
 import {
   CALAPAN_BARANGAY_CENTROIDS,
@@ -35,6 +37,8 @@ const LINE_SOURCE_ID = "household-connection-source";
 const LINE_LAYER_ID = "household-connection-lines";
 const MEMBER_SOURCE_ID = "household-member-points-source";
 const MEMBER_LAYER_ID = "household-member-points-circles";
+const HEAT_SOURCE_ID = "household-count-heat-source";
+const HEAT_LAYER_ID = "household-count-heat-layer";
 
 // Small deterministic jitter radius (degrees) so households/members sharing a
 // barangay centroid fan out instead of fully overlapping. Barangay-level
@@ -44,7 +48,7 @@ const JITTER_RADIUS_DEG = 0.0022;
 
 const HEAD_COLOR = "#eab308"; // gold
 const CONNECTED_COLOR = "#38bdf8"; // sky blue
-const JUMPED_COLOR = "#f59e0b"; // amber warning
+const JUMPED_COLOR = "#EC4899"; // pink — distinct from the amber "warning" palette
 
 interface NetworkMember {
   id: string;
@@ -84,6 +88,13 @@ interface MemberPointProps {
   fullName: string;
   barangay: string;
 }
+
+interface HeatPointProps {
+  barangay: string;
+  weight: number;
+}
+
+type DisplayMode = "network" | "heatmap";
 
 /** Deterministic [0,1) hash of a string (djb2 variant) — stable across renders/SSR. */
 function hashString(input: string): number {
@@ -155,6 +166,7 @@ export function MunicipalNetworkMap() {
   const headMarkersRef = useRef<maplibregl.Marker[]>([]);
   const [mounted, setMounted] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("network");
   const { resolvedTheme } = useTheme();
 
   const { data: households, isLoading } = trpc.householdNetwork.list.useQuery();
@@ -319,6 +331,30 @@ export function MunicipalNetworkMap() {
     };
   }, [households]);
 
+  // ── Derived: household count per barangay (heatmap weight) ─────────────
+  // Weighted by HOUSEHOLD count — one count per household, keyed off the
+  // head's barangay (a household "lives" wherever its head is registered).
+  const heatFeatures = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const household of households ?? []) {
+      const key = resolveCentroidKey(household.head.barangay);
+      if (CALAPAN_BARANGAY_CENTROIDS[key] == null) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+
+    const features: Array<GeoJSON.Feature<Point, HeatPointProps>> = [];
+    for (const [barangay, weight] of counts) {
+      const centroid = CALAPAN_BARANGAY_CENTROIDS[barangay];
+      if (centroid == null) continue;
+      features.push({
+        type: "Feature",
+        properties: { barangay, weight },
+        geometry: { type: "Point", coordinates: [centroid.lon, centroid.lat] },
+      });
+    }
+    return features;
+  }, [households]);
+
   // ── Connection lines ─────────────────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current;
@@ -353,7 +389,12 @@ export function MunicipalNetworkMap() {
         },
       });
     }
-  }, [mapReady, lineFeatures]);
+    map.setLayoutProperty(
+      LINE_LAYER_ID,
+      "visibility",
+      displayMode === "network" ? "visible" : "none",
+    );
+  }, [mapReady, lineFeatures, displayMode]);
 
   // ── Member points (GeoJSON layer — efficient at municipal scale) ────────
   useEffect(() => {
@@ -392,7 +433,94 @@ export function MunicipalNetworkMap() {
         },
       });
     }
-  }, [mapReady, memberFeatures]);
+    map.setLayoutProperty(
+      MEMBER_LAYER_ID,
+      "visibility",
+      displayMode === "network" ? "visible" : "none",
+    );
+  }, [mapReady, memberFeatures, displayMode]);
+
+  // ── Household-count heatmap (barangays weighted by household count) ────
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map == null || !mapReady) return;
+
+    const geojson: FeatureCollection<Point, HeatPointProps> = {
+      type: "FeatureCollection",
+      features: heatFeatures,
+    };
+
+    const source = map.getSource<maplibregl.GeoJSONSource>(HEAT_SOURCE_ID);
+    if (source == null) {
+      map.addSource(HEAT_SOURCE_ID, { type: "geojson", data: geojson });
+    } else {
+      source.setData(geojson);
+    }
+
+    if (map.getLayer(HEAT_LAYER_ID) == null) {
+      map.addLayer({
+        id: HEAT_LAYER_ID,
+        type: "heatmap",
+        source: HEAT_SOURCE_ID,
+        paint: {
+          "heatmap-weight": [
+            "interpolate",
+            ["linear"],
+            ["get", "weight"],
+            0,
+            0,
+            1,
+            0.3,
+            5,
+            0.6,
+            50,
+            1,
+          ],
+          "heatmap-intensity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            9,
+            1.2,
+            14,
+            3,
+          ],
+          "heatmap-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            9,
+            18,
+            14,
+            42,
+          ],
+          "heatmap-opacity": 0.8,
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0,
+            "rgba(0,0,0,0)",
+            0.1,
+            "rgba(56,189,248,0.35)",
+            0.3,
+            "rgba(56,189,248,0.65)",
+            0.5,
+            "rgba(250,204,21,0.75)",
+            0.75,
+            "rgba(251,146,60,0.85)",
+            1,
+            "rgba(239,68,68,0.95)",
+          ],
+        },
+      });
+    }
+    map.setLayoutProperty(
+      HEAT_LAYER_ID,
+      "visibility",
+      displayMode === "heatmap" ? "visible" : "none",
+    );
+  }, [mapReady, heatFeatures, displayMode]);
 
   // ── Head markers (DOM markers — Crown icon, one per household) ─────────
   useEffect(() => {
@@ -423,6 +551,15 @@ export function MunicipalNetworkMap() {
     }
   }, [mapReady, heads]);
 
+  // Head markers are DOM elements (not a MapLibre layer), so the heatmap
+  // toggle hides/shows them directly rather than via setLayoutProperty.
+  useEffect(() => {
+    const visible = displayMode === "network";
+    for (const marker of headMarkersRef.current) {
+      marker.getElement().style.display = visible ? "flex" : "none";
+    }
+  }, [displayMode, heads]);
+
   return (
     <Card className="flex h-full flex-col gap-0 overflow-hidden py-0">
       <CardHeader className="space-y-1 border-b px-6 py-5">
@@ -439,39 +576,64 @@ export function MunicipalNetworkMap() {
         <div className="relative h-full min-h-[28rem] w-full overflow-hidden rounded-md border">
           <div ref={containerRef} className="h-full w-full" />
 
-          <div className="absolute bottom-3 left-3 z-10 rounded-lg border bg-card/95 p-2.5 shadow-lg backdrop-blur">
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span
-                  className="flex size-4 shrink-0 items-center justify-center rounded-full border border-white"
-                  style={{ backgroundColor: HEAD_COLOR }}
-                >
-                  <Crown className="size-2.5 text-white" />
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Household head
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="size-3 shrink-0 rounded-full border border-white"
-                  style={{ backgroundColor: CONNECTED_COLOR }}
-                />
-                <span className="text-xs text-muted-foreground">
-                  Connected member
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="size-3 shrink-0 rounded-full border border-white"
-                  style={{ backgroundColor: JUMPED_COLOR }}
-                />
-                <span className="text-xs text-muted-foreground">
-                  Jumped barangay
-                </span>
-              </div>
+          <div className="absolute left-3 top-3 z-10 rounded-lg border bg-card/95 p-2.5 shadow-lg backdrop-blur">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="network-heatmap-toggle" className="text-xs">
+                {displayMode === "heatmap" ? "Heatmap" : "Network"} view
+              </Label>
+              <Switch
+                id="network-heatmap-toggle"
+                checked={displayMode === "heatmap"}
+                onCheckedChange={(checked) =>
+                  setDisplayMode(checked ? "heatmap" : "network")
+                }
+                aria-label={`Toggle ${displayMode === "network" ? "Heatmap" : "Network"} view`}
+              />
             </div>
           </div>
+
+          {displayMode === "network" ? (
+            <div className="absolute bottom-3 left-3 z-10 rounded-lg border bg-card/95 p-2.5 shadow-lg backdrop-blur">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="flex size-4 shrink-0 items-center justify-center rounded-full border border-white"
+                    style={{ backgroundColor: HEAD_COLOR }}
+                  >
+                    <Crown className="size-2.5 text-white" />
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Household head
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="size-3 shrink-0 rounded-full border border-white"
+                    style={{ backgroundColor: CONNECTED_COLOR }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Connected member
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="size-3 shrink-0 rounded-full border border-white"
+                    style={{ backgroundColor: JUMPED_COLOR }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Jumped barangay
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="absolute bottom-3 left-3 z-10 rounded-lg border bg-card/95 p-2.5 shadow-lg backdrop-blur">
+              <p className="text-xs text-muted-foreground">
+                Barangays weighted by household count — hotter areas have more
+                registered households.
+              </p>
+            </div>
+          )}
 
           {isLoading && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-background/40">

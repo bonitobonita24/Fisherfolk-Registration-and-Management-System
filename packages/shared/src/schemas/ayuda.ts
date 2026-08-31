@@ -32,6 +32,8 @@ export const ayudaBeneficiaryCreateSchema = z.object({
   verificationStatus: ayudaBeneficiaryStatusSchema.optional(),
   verifiedById: z.string().cuid().optional(),
   verifiedAt: z.coerce.date().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 export const ayudaBeneficiaryUpdateSchema = z.object({
@@ -39,6 +41,8 @@ export const ayudaBeneficiaryUpdateSchema = z.object({
   verificationStatus: ayudaBeneficiaryStatusSchema.optional(),
   verifiedById: z.string().cuid().nullable().optional(),
   verifiedAt: z.coerce.date().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 export const ayudaUploadCreateSchema = z.object({

@@ -106,6 +106,8 @@ export const vesselRouter = createTRPCRouter({
           homeport: z.string().optional(),
           fishingGearClassification: z.array(z.string()).default([]),
           vesselPhoto: z.string().optional(),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
           ownerIds: z.array(z.string().cuid()).default([]),
         })
         .strict(),
@@ -182,6 +184,8 @@ export const vesselRouter = createTRPCRouter({
           homeport: z.string().optional(),
           fishingGearClassification: z.array(z.string()).optional(),
           status: vesselStatusEnum.optional(),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
         })
         .strict(),
     )

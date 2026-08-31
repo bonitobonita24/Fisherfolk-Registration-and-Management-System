@@ -96,33 +96,70 @@ export default function HouseholdMemberMap({
   useEffect(() => setMounted(true), []);
 
   // ── Map init (once) ─────────────────────────────────────────────────────
+  // Unlike BarangayDensityMap (a full-height route page), this card sits in a
+  // `lg:self-start` grid cell — its ancestor chain doesn't stretch to a
+  // definite height the way a full-height flex/grid page does, so on first
+  // paint the container can still measure 0px tall (grid/flex layout not yet
+  // settled). MapLibre bakes its WebGL render-buffer size in at construction
+  // time; creating the map against a 0-height container leaves it stuck
+  // rendering into a 0x0 buffer even after the container's CSS min-height
+  // kicks in — the ResizeObserver below only reacts to a *change*, and going
+  // from "never measured" to "settled" isn't always reported as one. Guard
+  // creation until the container has real pixels, retrying across a few
+  // animation frames, so init never races the layout.
   useEffect(() => {
     if (!mounted) return;
-    if (containerRef.current == null) return;
     if (mapRef.current != null) return;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: resolvedTheme === "light" ? LIGHT_STYLE : DARK_STYLE,
-      bounds: CALAPAN_BOUNDS,
-      fitBoundsOptions: { padding: 24 },
-      attributionControl: false,
-    });
+    let cancelled = false;
+    let rafId: number | null = null;
 
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.addControl(
-      new maplibregl.AttributionControl({ compact: true }),
-      "bottom-right",
-    );
+    function tryInit(attemptsLeft: number) {
+      if (cancelled) return;
+      const el = containerRef.current;
+      if (el == null) return;
 
-    map.on("load", () => setMapReady(true));
+      if (el.clientHeight === 0 && attemptsLeft > 0) {
+        rafId = requestAnimationFrame(() => tryInit(attemptsLeft - 1));
+        return;
+      }
 
-    mapRef.current = map;
+      const map = new maplibregl.Map({
+        container: el,
+        style: resolvedTheme === "light" ? LIGHT_STYLE : DARK_STYLE,
+        bounds: CALAPAN_BOUNDS,
+        fitBoundsOptions: { padding: 24 },
+        attributionControl: false,
+      });
+
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+      map.addControl(
+        new maplibregl.AttributionControl({ compact: true }),
+        "bottom-right",
+      );
+
+      // Belt-and-suspenders resize: even with the size-guard above, force a
+      // resize once tiles have loaded and once more a beat later, in case
+      // the grid cell's height still settles a frame or two after init
+      // (e.g. sibling content in the left column reflowing).
+      map.on("load", () => {
+        map.resize();
+        requestAnimationFrame(() => map.resize());
+        setTimeout(() => map.resize(), 150);
+        setMapReady(true);
+      });
+
+      mapRef.current = map;
+    }
+
+    tryInit(20);
 
     return () => {
+      cancelled = true;
+      if (rafId != null) cancelAnimationFrame(rafId);
       for (const marker of markersRef.current) marker.remove();
       markersRef.current = [];
-      map.remove();
+      mapRef.current?.remove();
       mapRef.current = null;
       setMapReady(false);
     };

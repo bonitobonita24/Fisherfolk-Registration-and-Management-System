@@ -78,6 +78,8 @@ export const fishCatchCreateSchema = z
     disposition: catchDispositionSchema.optional(),
     remarks: z.string().optional(),
     source: fishCatchSourceSchema.default(FishCatchSource.FMO_ENUMERATOR),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
     species: z.array(fishCatchSpeciesInputSchema).min(1),
   })
   .superRefine((data, ctx) => {
@@ -115,6 +117,8 @@ const fishCatchUpdateDataSchema = z.object({
   disposition: catchDispositionSchema.nullable().optional(),
   remarks: z.string().nullable().optional(),
   source: fishCatchSourceSchema.optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
   species: z.array(fishCatchSpeciesInputSchema).min(1).optional(),
 });
 

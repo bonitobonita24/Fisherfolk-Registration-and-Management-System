@@ -12,7 +12,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
+import {
+  RecordHeader,
+  DetailField,
+  DefinitionGrid,
+  LocationPicker,
+} from "@/components/shared";
 
 interface Props {
   id: string;
@@ -197,6 +202,24 @@ export function FishCatchDetailClient({ id }: Props) {
               value={kgPerTrip ? `${kgPerTrip} kg/trip` : "—"}
             />
           </DefinitionGrid>
+        </CardContent>
+      </Card>
+
+      {/* Location */}
+      <Card className="gap-0 py-5">
+        <CardHeader className="px-6 pb-4 pt-0">
+          <CardTitle className="text-sm font-medium">Location</CardTitle>
+        </CardHeader>
+        <CardContent className="px-6 py-0">
+          {record.latitude != null && record.longitude != null ? (
+            <LocationPicker
+              disabled
+              value={{ lat: record.latitude, lng: record.longitude }}
+              onChange={() => {}}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">No location set</p>
+          )}
         </CardContent>
       </Card>
 

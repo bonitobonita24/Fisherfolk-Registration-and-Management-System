@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
-import { FormSection, FormActions } from "@/components/shared";
+import { FormSection, FormActions, LocationPicker } from "@/components/shared";
 
 // All numeric inputs are kept as strings in the form; parsing happens in handleSubmit.
 const formSchema = z.object({
@@ -53,6 +53,8 @@ const formSchema = z.object({
   homeport: z.string(),
   fishingGearClassification: z.array(z.string()),
   vesselPhoto: z.string().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -111,6 +113,8 @@ export function VesselRegistrationFormClient() {
       homeport: "",
       fishingGearClassification: [],
       vesselPhoto: undefined,
+      latitude: null,
+      longitude: null,
     },
   });
 
@@ -156,6 +160,8 @@ export function VesselRegistrationFormClient() {
       homeport: trimOpt(values.homeport),
       fishingGearClassification: values.fishingGearClassification,
       ...(values.vesselPhoto && { vesselPhoto: values.vesselPhoto }),
+      latitude: values.latitude ?? undefined,
+      longitude: values.longitude ?? undefined,
       ownerIds: selectedOwners.map((o) => o.id),
     });
   }
@@ -649,6 +655,44 @@ export function VesselRegistrationFormClient() {
               </div>
             )}
           </div>
+        </FormSection>
+
+        {/* Location */}
+        <FormSection title="Location">
+          <FormField
+            control={form.control}
+            name="latitude"
+            render={() => (
+              <FormItem>
+                <FormLabel>Homeport Location</FormLabel>
+                <FormControl>
+                  <LocationPicker
+                    value={
+                      form.watch("latitude") != null &&
+                      form.watch("longitude") != null
+                        ? {
+                            lat: form.watch("latitude")!,
+                            lng: form.watch("longitude")!,
+                          }
+                        : null
+                    }
+                    onChange={(next) => {
+                      form.setValue("latitude", next.lat, {
+                        shouldValidate: true,
+                      });
+                      form.setValue("longitude", next.lng, {
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Drag the pin, click the map, or use your current location.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </FormSection>
 
         {/* Actions */}

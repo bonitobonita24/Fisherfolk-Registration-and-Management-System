@@ -30,7 +30,12 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AttachmentList } from "@/components/shared/attachment-list";
-import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
+import {
+  RecordHeader,
+  DetailField,
+  DefinitionGrid,
+  LocationPicker,
+} from "@/components/shared";
 
 interface Props {
   id: string;
@@ -334,6 +339,23 @@ export function ViolationDetailClient({ id, canManage }: Props) {
             {/* Narrative fields — full width, never squeezed into the grid */}
             <DetailField label="Details" value={record.details} />
             <DetailField label="Notes" value={record.notes} />
+            <Separator />
+            <div className="space-y-1.5">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Location
+              </p>
+              {record.latitude != null && record.longitude != null ? (
+                <LocationPicker
+                  disabled
+                  value={{ lat: record.latitude, lng: record.longitude }}
+                  onChange={() => {}}
+                />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No location set
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

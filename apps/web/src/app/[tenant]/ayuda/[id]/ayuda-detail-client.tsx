@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { trpc } from "@/lib/trpc/client";
@@ -47,6 +47,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
   Table,
   TableBody,
   TableCell,
@@ -60,7 +65,12 @@ import {
   AttachmentUpload,
   type UploadedAttachment,
 } from "@/components/shared/attachment-upload";
-import { RecordHeader, DetailField, DefinitionGrid } from "@/components/shared";
+import {
+  RecordHeader,
+  DetailField,
+  DefinitionGrid,
+  LocationPicker,
+} from "@/components/shared";
 
 interface Props {
   id: string;
@@ -328,6 +338,100 @@ function AddBeneficiaryDialog({
   );
 }
 
+/** Verify dropdown + "Mark Received" location-capture dialog for one beneficiary row. */
+function BeneficiaryActions({
+  beneficiaryId,
+  onVerify,
+  isPending,
+}: {
+  beneficiaryId: string;
+  onVerify: (input: {
+    id: string;
+    verificationStatus: "RECEIVED" | "CANCELLED";
+    latitude?: number | null;
+    longitude?: number | null;
+  }) => void;
+  isPending: boolean;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+
+  return (
+    <>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8"
+            disabled={isPending}
+          >
+            Verify
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => {
+              setMenuOpen(false);
+              setDialogOpen(true);
+            }}
+          >
+            Mark Received
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              onVerify({ id: beneficiaryId, verificationStatus: "CANCELLED" })
+            }
+          >
+            Cancel
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(next) => {
+          setDialogOpen(next);
+          if (!next) setCoords(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark as Received</DialogTitle>
+            <DialogDescription>
+              Optional — record where the aid was distributed to this
+              beneficiary.
+            </DialogDescription>
+          </DialogHeader>
+          <LocationPicker value={coords} onChange={setCoords} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={isPending}
+              onClick={() => {
+                onVerify({
+                  id: beneficiaryId,
+                  verificationStatus: "RECEIVED",
+                  latitude: coords?.lat ?? null,
+                  longitude: coords?.lng ?? null,
+                });
+                setDialogOpen(false);
+              }}
+            >
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 function BeneficiariesTable({
   programId,
   canManage,
@@ -487,6 +591,9 @@ function BeneficiariesTable({
               <TableHead className="text-xs font-medium text-muted-foreground">
                 Verified At
               </TableHead>
+              <TableHead className="text-xs font-medium text-muted-foreground">
+                Location
+              </TableHead>
               {canManage && (
                 <TableHead className="text-right text-xs font-medium text-muted-foreground">
                   Actions
@@ -539,43 +646,39 @@ function BeneficiariesTable({
                   <TableCell className="py-2 text-sm">
                     {formatDate(b.verifiedAt)}
                   </TableCell>
+                  <TableCell className="py-2 text-sm">
+                    {b.latitude != null && b.longitude != null ? (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 gap-1 px-2 text-xs"
+                          >
+                            <MapPin className="h-3.5 w-3.5" />
+                            View
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80" align="start">
+                          <LocationPicker
+                            disabled
+                            value={{ lat: b.latitude, lng: b.longitude }}
+                            onChange={() => {}}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   {canManage && (
                     <TableCell className="py-2 text-right text-sm">
                       {b.verificationStatus === "PENDING" ? (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8"
-                              disabled={verify.isPending}
-                            >
-                              Verify
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                verify.mutate({
-                                  id: b.id,
-                                  verificationStatus: "RECEIVED",
-                                })
-                              }
-                            >
-                              Mark Received
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                verify.mutate({
-                                  id: b.id,
-                                  verificationStatus: "CANCELLED",
-                                })
-                              }
-                            >
-                              Cancel
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <BeneficiaryActions
+                          beneficiaryId={b.id}
+                          onVerify={verify.mutate}
+                          isPending={verify.isPending}
+                        />
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}

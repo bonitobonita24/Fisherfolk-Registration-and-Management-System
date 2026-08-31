@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -52,6 +51,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
+import { ZoomableImage } from "@/components/shared/zoomable-image";
 import { LocationPicker } from "@/components/shared/location-picker";
 import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared/underline-tabs";
 import {
@@ -95,45 +95,6 @@ function CategoryChip({
     >
       {name}
     </span>
-  );
-}
-
-/** Thumbnail that opens an enlarged view in a Dialog when clicked. */
-function ZoomableImage({
-  src,
-  alt,
-  thumbnailClassName,
-  enlargedClassName,
-  ariaLabel,
-}: {
-  src: string;
-  alt: string;
-  thumbnailClassName: string;
-  enlargedClassName?: string;
-  ariaLabel: string;
-}) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          className="block w-full cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <img src={src} alt={alt} className={thumbnailClassName} />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="flex max-h-[85vh] w-fit max-w-[90vw] items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-[90vw]">
-        <img
-          src={src}
-          alt={alt}
-          className={
-            enlargedClassName ??
-            "max-h-[85vh] max-w-full rounded-lg object-contain"
-          }
-        />
-      </DialogContent>
-    </Dialog>
   );
 }
 

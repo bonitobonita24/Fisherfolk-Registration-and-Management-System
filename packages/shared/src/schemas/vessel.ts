@@ -21,6 +21,8 @@ export const vesselCreateSchema = z.object({
   vesselPhoto: z.string().optional(),
   qrCode: z.string().optional(),
   status: vesselStatusSchema.optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
   createdById: z.string().optional(),
   updatedById: z.string().optional(),
 });
@@ -45,6 +47,8 @@ const vesselUpdateDataSchema = z.object({
   vesselPhoto: z.string().nullable().optional(),
   qrCode: z.string().nullable().optional(),
   status: vesselStatusSchema.optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
   createdById: z.string().nullable().optional(),
   updatedById: z.string().nullable().optional(),
 });
