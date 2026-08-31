@@ -19,7 +19,9 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 
 ✅ **FIS-31 — landing page overhaul**: all copy rewritten (hero/features/stats/process/CTA/footer/SEO) in grounded civic language + humanize + ai-check clean; deployed + verified live on demo. New H1 "Every fisherfolk, vessel, and catch in Calapan City, tracked in one system."
 
-⏳ Next: refresh the landing `showcase/*.png` screenshots in a **real browser** (headless can't render the MapLibre maps to feature them). Then the **production release** on your explicit word (merge→main + version + changelog; reconcile FIS-12 migration drift first).
+✅ Ran a **full audit check** (4 adversarial read-only auditors + completeness critic): all features PASS, tsc/416 tests green, 263 deletions all deliberate, no secrets, scripts idempotent. Trivial fixes committed (`9887835`).
+
+⏳ Next session (your directive — "do the finding + gaps next session"), in order: **1)** reconcile the FIS-12 migration drift (release-blocker, in PENDING_DECISIONS); **2)** real-browser verification pass (maps actually render + the 4 new location forms + mobile GPS end-to-end); **3)** a11y pass on the new map/picker/zoom components; **4)** refresh landing showcase screenshots (real browser) + redeploy demo; **5)** then the owner-gated production release.
 
 ## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
 
