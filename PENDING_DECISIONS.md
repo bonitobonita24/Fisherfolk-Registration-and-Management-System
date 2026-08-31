@@ -6,6 +6,19 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-09-01 — ⚠ FIS-12 migration drift — RELEASE-BLOCKER before any prod migrate (surfaced by full audit)
+
+- [ ] **Reconcile FIS-12 status-model migrations before the production release.** The two migrations
+  `20260831120000_fisherfolk_status_add_expired` + `20260831120100_fisherfolk_status_backfill` and the
+  `EXPIRED` value on the `FisherfolkStatus` enum live ONLY on the unmerged branch
+  `feat/fis12-registration-status-model` (`6892e64`, NOT an ancestor of `feat/presentation-batch-0901`).
+  They are applied in the **dev DB** but absent from this branch's `packages/db/prisma/migrations/` +
+  `schema.prisma`. Demo is unaffected (its `migrate deploy` only ran `add_location_coordinates`). **Before
+  merging this branch to main + `push to production`:** decide the order — (a) merge/rebase FIS-12 first, or
+  (b) cherry-pick the 2 migrations + the `EXPIRED` enum into the release, so prod `migrate deploy` and the
+  schema/migration history stay consistent. `[WHAT]`/coordination — owner call. (Also noted in the
+  2026-09-01 handoff + SESSION_LOG.)
+
 ### 2026-08-27 — 🎨 Cargorix Wave 3 go/no-go (HARD HOLD — owner review gate)
 
 - [x] ✅ **RESOLVED (2026-08-27, owner "that is all approved and good to go") — Cargorix Wave 3 DONE + verified.**
