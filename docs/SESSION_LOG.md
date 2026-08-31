@@ -17,7 +17,9 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 
 💬 Notes: branch `feat/presentation-batch-0901` is LOCAL/unpushed (HARD HOLD); demo deployed (authorized), **prod untouched** (owner-gated). Maps render on a real browser (headless shows blank; verified 0 console errors live). These features also target Production — separate owner-gated release (merge→main + version + "push to production"); prod uses real renewal data, ayuda/vessels/violations stay dormant.
 
-⏳ Next: **FIS-31 — landing-page overhaul** (brainstorm + updated screenshots + better copy + humanize) — queued as the post-reboot handoff task. Then the production release on your word.
+✅ **FIS-31 — landing page overhaul**: all copy rewritten (hero/features/stats/process/CTA/footer/SEO) in grounded civic language + humanize + ai-check clean; deployed + verified live on demo. New H1 "Every fisherfolk, vessel, and catch in Calapan City, tracked in one system."
+
+⏳ Next: refresh the landing `showcase/*.png` screenshots in a **real browser** (headless can't render the MapLibre maps to feature them). Then the **production release** on your explicit word (merge→main + version + changelog; reconcile FIS-12 migration drift first).
 
 ## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
 
