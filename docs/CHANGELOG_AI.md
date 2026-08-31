@@ -3,6 +3,20 @@
 # Format: ## YYYY-MM-DD — [Phase or Feature Name]
 # Attribution: CLINE | CLAUDE_CODE | COPILOT | HUMAN | UNKNOWN
 
+## 2026-08-31 — FIS-12: registration status model NEW/RENEWED/EXPIRED + deferred bulk-expire (CLAUDE_CODE)
+
+**Agent**: CLAUDE_CODE (Opus PM + 6 Sonnet spec-executor dispatches). Owner picked FIS-12 to build this session.
+
+**Change** (commit `6892e64`, branch `feat/fis12-registration-status-model`, LOCAL / HARD HOLD):
+- `FisherfolkStatus` +`EXPIRED`, `AuditAction` +`EXPIRE`; migrations `20260831120000_..._add_expired` +
+  `20260831120100_..._backfill` (backfill ACTIVE→NEW, INACTIVE→EXPIRED). Applied to dev DB (3486 rows).
+- Backend: renew precondition INACTIVE→EXPIRED; dashboard valid-set ACTIVE→{NEW,RENEWED};
+  `resetAnnualRegistrations` → post-election bulk-expire (NEW/RENEWED→EXPIRED, tenant-scoped, EXPIRE audit row).
+- UI: status badge +EXPIRED, fisherfolk filter list, admin bulk-expire card copy/confirm; seeds seed NEW.
+- Tests aligned to new contract (lifecycle rewrite, renew-from-EXPIRED, yoy valid-set).
+- Verified: typecheck 7/7 · 586/586 tests · prod build green. Bulk-expire DEFERRED (run only post-election);
+  backfill mapping needs owner sign-off before the prod migration.
+
 ## 2026-08-27 — Cargorix Wave 3: shared wrapper reskin (CLAUDE_CODE)
 
 **Agent**: CLAUDE_CODE (Opus PM + 5 parallel Sonnet spec-executors). Owner approved the Waves 0–2 reskin

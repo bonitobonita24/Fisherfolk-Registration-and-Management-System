@@ -2,6 +2,19 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-08-31 — Built FIS-12: registration status model NEW/RENEWED/EXPIRED + deferred bulk-expire
+
+**In your words:** "resume session" → "yes lets proceed" → picked **FIS-12** → "after that last on-going task, save session and stop reboot loop."
+
+✅ Done
+- **Built FIS-12** — the registration status model becomes **NEW / RENEWED / EXPIRED** (ACTIVE/INACTIVE retired). Schema enum + 2 migrations, backend (renew now requires EXPIRED; dashboards count NEW+RENEWED as valid), UI (badge, filter, admin card), seeds, and a **post-election bulk-expire** admin tool (confirm-guarded, audit-logged) — **built but deferred**, not to run until the next mayoral election. All via PM→worker dispatches, LOCAL on `feat/fis12-registration-status-model` (`6892e64`). **HARD HOLD — nothing pushed.**
+- **Verified:** typecheck 7/7, **586/586 tests** (lifecycle tests run against the real dev DB — EXPIRED transition, EXPIRE audit row, tenant isolation all pass), production build green. Dev DB backfilled: **3486 rows ACTIVE→NEW**.
+
+💬 Decisions/notes
+- **[HOW] I took a backfill default flagged for your sign-off before prod:** existing `ACTIVE→NEW`, `INACTIVE→EXPIRED` (otherwise retiring ACTIVE would hide every current fisherfolk from valid lists/counts). Local-only for now.
+- Scout mislabeled a few `ACTIVE` line refs that were actually Vessel/Violation/Category statuses — the worker verified each against the schema and left those untouched (converting them would've been wrong).
+- Not done yet (next session, un-gated): rebuild the dev app off the branch + a live visual QA of the badge/filter/admin card. FIS-9/13/15 still await your [WHAT] answers.
+
 ## 2026-08-31 — Captured FMO July-9 meeting → FIS-8..16; drafted city-govt pitch deck
 
 **In your words:** "check the July-9 Notion meeting notes, make Todos from what could be a task" → then answered the [WHAT]s → "draft the pitch deck" → "save session, stop reboot loop."

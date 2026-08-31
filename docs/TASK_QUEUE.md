@@ -45,7 +45,10 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
   the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
 
-- 🔴 **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command.**
+- ✅ **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command — BUILT 2026-08-31.**
+  Built + verified (typecheck 7/7 · 586 tests · build green) on `feat/fis12-registration-status-model` (`6892e64`), LOCAL/HARD HOLD.
+  Bulk-expire admin tool built but DEFERRED (do not run until next mayoral election). ⚠ Backfill mapping ACTIVE→NEW / INACTIVE→EXPIRED
+  needs owner sign-off before the prod migration. `feature` `db`
   ✅ **[WHAT] RESOLVED (owner 2026-08-31).** Status meanings: **NEW** = brand-new registrant, never before in the
   DB; **RENEWED** = re-registered, only possible AFTER a Mayor's-election renewal cycle; **EXPIRED** = flagged for
   renewal. Flow: after each mayoral election an admin runs a SINGLE-SHOT command (Administrative Settings) that
