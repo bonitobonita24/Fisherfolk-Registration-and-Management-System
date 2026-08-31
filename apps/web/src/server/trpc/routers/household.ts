@@ -12,6 +12,8 @@ const fisherfolkLiteSelect = {
   barangay: true,
   categoryIds: true,
   photo: true,
+  latitude: true,
+  longitude: true,
 };
 
 // P2002 = Prisma unique-constraint violation. Duck-typed to avoid a hard

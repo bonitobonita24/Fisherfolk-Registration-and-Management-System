@@ -17,3 +17,4 @@ export { ListToolbar } from "./list-toolbar";
 export { ListPagination } from "./list-pagination";
 export { UnderlineTabsList, UnderlineTabsTrigger } from "./underline-tabs";
 export { ZoomableImage } from "./zoomable-image";
+export { LocationPicker } from "./location-picker";

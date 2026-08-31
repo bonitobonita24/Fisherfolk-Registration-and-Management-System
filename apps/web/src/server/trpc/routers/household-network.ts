@@ -19,10 +19,22 @@ export const householdNetworkRouter = createTRPCRouter({
         id: true,
         householdNumber: true,
         head: {
-          select: { id: true, fullName: true, barangay: true },
+          select: {
+            id: true,
+            fullName: true,
+            barangay: true,
+            latitude: true,
+            longitude: true,
+          },
         },
         members: {
-          select: { id: true, fullName: true, barangay: true },
+          select: {
+            id: true,
+            fullName: true,
+            barangay: true,
+            latitude: true,
+            longitude: true,
+          },
         },
       },
     });

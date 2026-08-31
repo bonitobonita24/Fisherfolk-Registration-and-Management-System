@@ -52,6 +52,7 @@ import {
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
+import { LocationPicker } from "@/components/shared/location-picker";
 import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared/underline-tabs";
 import {
   DefinitionGrid,
@@ -631,6 +632,25 @@ export function FisherfolkDetailClient({ id }: Props) {
                       className="sm:col-span-2 lg:col-span-3"
                     />
                   </DefinitionGrid>
+
+                  <Separator />
+
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Location
+                    </p>
+                    {record.latitude != null && record.longitude != null ? (
+                      <LocationPicker
+                        disabled
+                        value={{ lat: record.latitude, lng: record.longitude }}
+                        onChange={() => {}}
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No location set
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

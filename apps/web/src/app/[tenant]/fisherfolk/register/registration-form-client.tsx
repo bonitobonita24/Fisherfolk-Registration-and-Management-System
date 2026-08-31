@@ -33,7 +33,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarangayPicker, CategoryPicker, FormSection } from "@/components/shared";
+import {
+  BarangayPicker,
+  CategoryPicker,
+  FormSection,
+  LocationPicker,
+} from "@/components/shared";
 import { Stepper } from "@/components/shared/stepper";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
 import { SignaturePad } from "@/components/fisherfolk/signature-pad";
@@ -87,6 +92,8 @@ const formSchema = z.object({
     .min(1, "Select at least one category"),
   photo: z.string().optional(),
   signature: z.string().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -123,6 +130,8 @@ export function RegistrationFormClient({
       categoryIds: [],
       photo: undefined,
       signature: undefined,
+      latitude: null,
+      longitude: null,
       ...initialValues,
     },
   });
@@ -214,6 +223,8 @@ export function RegistrationFormClient({
       categoryIds: values.categoryIds,
       ...(values.photo && { photo: values.photo }),
       ...(values.signature && { signature: values.signature }),
+      latitude: values.latitude ?? undefined,
+      longitude: values.longitude ?? undefined,
       registrationYear,
     });
   }
@@ -495,6 +506,7 @@ function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
 }
 
 function AddressStep({ form }: StepProps) {
+  const barangay = form.watch("barangay");
   return (
     <FormSection title="Address & Categories">
       <div className="space-y-4">
@@ -547,6 +559,34 @@ function AddressStep({ form }: StepProps) {
             <FormDescription>
               Select one or more fisherfolk categories. Admins manage the list
               in Settings → Categories.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="latitude"
+        render={() => (
+          <FormItem>
+            <FormLabel>Location</FormLabel>
+            <FormControl>
+              <LocationPicker
+                value={
+                  form.watch("latitude") != null && form.watch("longitude") != null
+                    ? { lat: form.watch("latitude")!, lng: form.watch("longitude")! }
+                    : null
+                }
+                onChange={(next) => {
+                  form.setValue("latitude", next.lat, { shouldValidate: true });
+                  form.setValue("longitude", next.lng, { shouldValidate: true });
+                }}
+                barangay={barangay}
+              />
+            </FormControl>
+            <FormDescription>
+              Drag the pin, click the map, or use your current location. The
+              pin auto-centers on the selected barangay until moved.
             </FormDescription>
             <FormMessage />
           </FormItem>

@@ -68,6 +68,8 @@ interface FisherfolkLite {
   barangay: string;
   categoryIds: string[];
   photo: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface Props {
@@ -760,6 +762,8 @@ export function HouseholdDetailClient({ id }: Props) {
                 fullName: record.head.fullName,
                 barangay: record.head.barangay,
                 isHead: true,
+                latitude: record.head.latitude,
+                longitude: record.head.longitude,
               },
               ...record.members
                 .filter((m) => m.id !== record.head.id)
@@ -768,6 +772,8 @@ export function HouseholdDetailClient({ id }: Props) {
                   fullName: m.fullName,
                   barangay: m.barangay,
                   isHead: false,
+                  latitude: m.latitude,
+                  longitude: m.longitude,
                 })),
             ]}
             headBarangay={record.head.barangay}

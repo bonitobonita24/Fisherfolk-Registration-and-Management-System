@@ -368,6 +368,8 @@ model Fisherfolk {
   civilStatus      CivilStatus?     @map("civil_status")
   address          String
   barangay         String
+  latitude         Float?           @map("latitude")
+  longitude        Float?           @map("longitude")
   contactNumber    String?          @map("contact_number")
   rsbsaNumber      String?          @map("rsbsa_number")
   categoryIds      String[]         @map("category_ids")
@@ -428,6 +430,8 @@ model Vessel {
   engineSerialNumber        String?      @map("engine_serial_number")
   horsepower                Float?
   homeport                  String?
+  latitude                  Float?       @map("latitude")
+  longitude                 Float?       @map("longitude")
   fishingGearClassification String[]     @map("fishing_gear_classification")
   vesselPhoto               String?      @map("vessel_photo")
   qrCode                    String?      @map("qr_code")
@@ -461,6 +465,8 @@ model Violation {
   evidenceImages  String[]            @map("evidence_images")
   notes           String?
   violatorName    String?             @map("violator_name")
+  latitude        Float?              @map("latitude")
+  longitude       Float?              @map("longitude")
   status          ViolationStatus     @default(ACTIVE)
   filedById       String              @map("filed_by_id")
   liftedById      String?             @map("lifted_by_id")
@@ -656,6 +662,8 @@ model AyudaBeneficiary {
   verificationStatus AyudaBeneficiaryStatus @default(PENDING)
   verifiedById       String?                @map("verified_by_id")
   verifiedAt         DateTime?              @map("verified_at")
+  latitude           Float?                 @map("latitude")
+  longitude          Float?                 @map("longitude")
   createdAt          DateTime               @default(now()) @map("created_at")
   householdId        String?                @map("household_id")
 
@@ -883,6 +891,8 @@ model FishCatch {
   returnAt              DateTime?         @map("return_at")
   fishingGroundBarangay String?           @map("fishing_ground_barangay")
   fishingGroundLabel    String?           @map("fishing_ground_label")
+  latitude              Float?            @map("latitude")
+  longitude             Float?            @map("longitude")
   fmaCode               String?           @map("fma_code")
   gearType              GearType          @map("gear_type")
   gearDetail            String?           @map("gear_detail")

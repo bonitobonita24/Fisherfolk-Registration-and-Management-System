@@ -50,6 +50,22 @@ interface NetworkMember {
   id: string;
   fullName: string;
   barangay: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+/** Real captured GPS coords when present, else centroid + deterministic jitter. */
+function resolveLocation(
+  member: NetworkMember,
+): { lat: number; lon: number } | null {
+  if (member.latitude != null && member.longitude != null) {
+    return { lat: member.latitude, lon: member.longitude };
+  }
+  const key = resolveCentroidKey(member.barangay);
+  const centroid = CALAPAN_BARANGAY_CENTROIDS[key];
+  if (centroid == null) return null;
+  const { dLat, dLon } = jitterFor(member.id);
+  return { lat: centroid.lat + dLat, lon: centroid.lon + dLon };
 }
 
 interface NetworkHousehold {
@@ -256,13 +272,9 @@ export function MunicipalNetworkMap() {
     const lineFeaturesOut: Array<GeoJSON.Feature<LineString, LineProps>> = [];
 
     for (const household of households ?? []) {
-      const headKey = resolveCentroidKey(household.head.barangay);
-      const headCentroid = CALAPAN_BARANGAY_CENTROIDS[headKey];
-      if (headCentroid == null) continue;
-
-      const headJitter = jitterFor(household.id);
-      const headLat = headCentroid.lat + headJitter.dLat;
-      const headLon = headCentroid.lon + headJitter.dLon;
+      const headLocation = resolveLocation(household.head);
+      if (headLocation == null) continue;
+      const { lat: headLat, lon: headLon } = headLocation;
       headsOut.push({ household, lat: headLat, lon: headLon });
 
       const normalizedHeadBarangay =
@@ -272,13 +284,9 @@ export function MunicipalNetworkMap() {
       for (const member of household.members) {
         if (member.id === household.head.id) continue;
 
-        const memberKey = resolveCentroidKey(member.barangay);
-        const memberCentroid = CALAPAN_BARANGAY_CENTROIDS[memberKey];
-        if (memberCentroid == null) continue;
-
-        const memberJitter = jitterFor(member.id);
-        const memberLat = memberCentroid.lat + memberJitter.dLat;
-        const memberLon = memberCentroid.lon + memberJitter.dLon;
+        const memberLocation = resolveLocation(member);
+        if (memberLocation == null) continue;
+        const { lat: memberLat, lon: memberLon } = memberLocation;
 
         const jumped =
           (normalizeBarangay(member.barangay).value ?? member.barangay) !==

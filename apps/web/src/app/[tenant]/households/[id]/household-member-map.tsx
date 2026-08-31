@@ -34,6 +34,9 @@ export interface HouseholdMemberMapMember {
   fullName: string;
   barangay: string;
   isHead: boolean;
+  /** Real captured GPS coordinates, when present — preferred over the barangay-centroid fallback. */
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface HouseholdMemberMapProps {
@@ -161,13 +164,24 @@ export default function HouseholdMemberMap({
       normalizeBarangay(headBarangay).value ?? headBarangay;
 
     for (const member of members) {
-      const centroidKey = resolveCentroidKey(member.barangay);
-      const centroid = CALAPAN_BARANGAY_CENTROIDS[centroidKey];
-      if (centroid == null) continue;
+      const hasRealCoords =
+        member.latitude != null && member.longitude != null;
 
-      const { dLat, dLon } = jitterFor(member.id);
-      const lat = centroid.lat + dLat;
-      const lon = centroid.lon + dLon;
+      let lat: number;
+      let lon: number;
+
+      if (hasRealCoords) {
+        lat = member.latitude as number;
+        lon = member.longitude as number;
+      } else {
+        const centroidKey = resolveCentroidKey(member.barangay);
+        const centroid = CALAPAN_BARANGAY_CENTROIDS[centroidKey];
+        if (centroid == null) continue;
+
+        const { dLat, dLon } = jitterFor(member.id);
+        lat = centroid.lat + dLat;
+        lon = centroid.lon + dLon;
+      }
 
       const sameBarangay =
         (normalizeBarangay(member.barangay).value ?? member.barangay) ===
