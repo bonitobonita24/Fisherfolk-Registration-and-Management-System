@@ -37,11 +37,11 @@ export function LandingHero() {
             transition={{ duration: 0.6, delay: 0.05 }}
             className="text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           >
-            Every fisherfolk, vessel, and catch —{" "}
+            Every fisherfolk, vessel, and catch in Calapan City,{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              registered and managed
-            </span>{" "}
-            in one place.
+              tracked in one system
+            </span>
+            .
           </motion.h1>
 
           <motion.p
@@ -50,10 +50,10 @@ export function LandingHero() {
             transition={{ duration: 0.6, delay: 0.12 }}
             className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground"
           >
-            The Fisherfolk Registration &amp; Management System digitizes
-            registration, vessels, subsidies, catch monitoring, and compliance
-            for the coastal communities of Calapan City — accurate records,
-            faster service, better decisions.
+            FRMS is the system the City Fisheries Management Office runs day
+            to day: registration, vessel and catch records, the ayuda
+            program, and a live map of every household along the coast. It&apos;s
+            already active across all 62 barangays.
           </motion.p>
 
           <motion.div

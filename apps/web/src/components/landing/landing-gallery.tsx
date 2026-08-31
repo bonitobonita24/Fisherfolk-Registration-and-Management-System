@@ -67,11 +67,11 @@ export function LandingGallery() {
               See it in action
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              A polished, purpose-built interface
+              The screens FMO staff use every day
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Clear screens designed for LGU staff — from daily registration to
-              city-wide analytics.
+              Built around how the office already works, from morning
+              registration to the reports it sends up the chain.
             </p>
           </div>
         </Reveal>

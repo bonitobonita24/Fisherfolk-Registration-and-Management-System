@@ -22,44 +22,44 @@ const FEATURES: {
   {
     icon: Users,
     title: "Fisherfolk Registration",
-    body: "A complete municipal registry — profiles, photos, gear, and livelihood details, verified and searchable.",
+    body: "Full profiles with photo, signature, QR-coded ID, and an approximate map pin, sorted into categories, with a status that updates itself as records go from new to renewed to expired.",
     span: true,
   },
   {
     icon: Home,
     title: "Household Management",
-    body: "Group fisherfolk by household for accurate demographics and fair subsidy targeting.",
+    body: "Group fisherfolk by household, see who's living with whom in each barangay, and view how every household in the city connects on one map.",
   },
   {
     icon: Ship,
     title: "Vessel Registration",
-    body: "Track boats and gear with owner links, specifications, and documents.",
+    body: "Boats tied to their owners, with specs, gear, and documents on file, plus a pin for roughly where each one operates.",
   },
   {
     icon: HandHeart,
     title: "Ayuda & Subsidies",
-    body: "Plan, target, and record assistance distribution with a transparent audit trail.",
+    body: "Plan a distribution, list who's eligible, pin where beneficiaries are, and keep a record of who actually received assistance and when.",
   },
   {
     icon: Fish,
     title: "Fish Catch Monitoring",
-    body: "Log catch volumes and species to power fisheries analytics and policy.",
+    body: "Log catch volume, species, and value per trip, pinned to roughly where it was caught, for a real read on the local fishery.",
   },
   {
     icon: ShieldAlert,
     title: "Violations & Compliance",
-    body: "Record infractions and enforcement actions to keep coastal waters sustainable.",
+    body: "Record infractions with a location pin and follow enforcement from the initial report through to resolution.",
   },
   {
     icon: BarChart3,
     title: "Reports & Analytics",
-    body: "Dashboards, density maps, and one-click reports for evidence-based decisions.",
+    body: "A barangay density map, demographic and category breakdowns, and reports the office can generate and print without waiting on IT.",
     span: true,
   },
   {
     icon: IdCard,
     title: "Fisherfolk ID Generation",
-    body: "Issue official, printable fisherfolk IDs straight from verified records.",
+    body: "Print an official, QR-coded fisherfolk ID straight from a verified record.",
   },
 ];
 
@@ -76,8 +76,9 @@ export function LandingFeatures() {
               Built for the full fisheries lifecycle
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Eight integrated modules replace scattered spreadsheets and paper
-              forms with one connected system of record.
+              Eight modules cover the office's day-to-day work, from first
+              registration to the annual report, in place of spreadsheets
+              scattered across different desks.
             </p>
           </div>
         </Reveal>

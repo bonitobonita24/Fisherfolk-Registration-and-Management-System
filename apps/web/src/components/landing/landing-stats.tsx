@@ -8,8 +8,8 @@ const STATS: {
 }[] = [
   { value: 3000, suffix: "+", label: "Fisherfolk registered" },
   { value: 62, label: "Barangays covered" },
-  { value: 8, label: "Integrated modules" },
-  { value: 100, suffix: "%", label: "Digital records" },
+  { value: 8, label: "Modules in daily use" },
+  { value: 100, suffix: "%", label: "Fully digital" },
 ];
 
 export function LandingStats() {
