@@ -334,20 +334,7 @@ export function FisherfolkDetailClient({ id }: Props) {
         backLabel="Back to fisherfolk list"
         title={record.fullName}
         meta={record.idNumber}
-        badge={
-          record.status === "RENEWED" ? (
-            <span className="inline-flex items-center gap-1.5">
-              <StatusBadge status={record.status} />
-              <StatusBadge
-                status="RENEWED"
-                color="orange"
-                icon={RefreshCw}
-              />
-            </span>
-          ) : (
-            <StatusBadge status={record.status} />
-          )
-        }
+        badge={<StatusBadge status={record.status} />}
         actions={headerActions}
       />
 
