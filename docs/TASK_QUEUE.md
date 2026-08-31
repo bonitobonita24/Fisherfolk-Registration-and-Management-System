@@ -6,7 +6,11 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
-### 2026-09-01 presentation batch (owner-dumped, HARD HOLD — build→demo). Map decision: barangay-level (no GPS in schema).
+### 2026-09-01 presentation batch (owner-dumped). Map decision: barangay-level + draggable capture. ALSO targets Production (separate owner-gated release; ayuda/vessels/violations dormant in prod for now).
+
+> STATUS 2026-09-01: FIS-17..24 ✅ built+verified+committed (`faa591b`); FIS-25 🟡 flagship (Fisherfolk)
+> built+committed (`0394a97`), other 4 entity forms pending. Badge dedupe `d843dc4`. Renewal backfill
+> `<this commit>`. Branch `feat/presentation-batch-0901`; deploying to demo. tsc/lint/416 tests/build green.
 
 - 🔴 **FIS-17 — Detail fields ~30% larger + tighter density (ALL detail pages).** Shared `components/shared/detail-field.tsx`: bump `DetailField` label (`text-xs`) + value (`text-sm`) ~30%; tighten `DefinitionGrid` (`gap-x-6 gap-y-4`) + `FieldRail` (`space-y-4`). Propagates to all 6 detail pages (fisherfolk/households/vessels/violations/ayuda/fish-catches). Done: bigger + closer-spaced, axe AA 0 new, all 6 pages visually QA'd. `owner 2026-09-01` `design` `ui`
 - 🔴 **FIS-18 — Fisherfolk sidebar: replace "Status" with Category/categories.** `fisherfolk-detail-client.tsx:372` — swap `DetailField label="Status"` for resolved `categoryIds`→`Category` name+color chip(s). `owner 2026-09-01` `design` `ui`
