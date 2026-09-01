@@ -97,3 +97,26 @@
 /* Wave-4 density (Cargorix): root rem-scale, per-user via [data-density]. Default = comfortable (16px). */
 html[data-density="compact"] { font-size: 15px; }
 html[data-density="spacious"] { font-size: 17px; }
+
+/* FIS-17: themed thin scrollbar for horizontally-overflowing tab strips
+   (replaces the raw native OS scrollbar on UnderlineTabsList). Token-driven
+   so it adapts to light/dark; subtle by default, a touch stronger on hover. */
+@layer utilities {
+  .tabs-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  .tabs-scrollbar::-webkit-scrollbar {
+    height: 6px;
+  }
+  .tabs-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tabs-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 9999px;
+  }
+  .tabs-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+}
