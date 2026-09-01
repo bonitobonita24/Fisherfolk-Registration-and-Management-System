@@ -38,7 +38,8 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 - 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the maps/location capture headless couldn't capture; overwrite `public/showcase/*.png`. `owner 2026-09-01` `design`
 
 - 🔴 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task).** After round-3 ships: brainstorm + rebuild the public landing page with the latest features, updated screenshots, better statements/context (appropriate skills: brainstorming, frontend-design/web-motion, copywriting), then run **humanize** on all captions/statements + ai-check. `owner 2026-09-01` `design` `docs`
-- 🔴 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** On a specific fisherfolk detail page, the
+- 🟡 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** ✅ CODE DONE (`ccbe876`, 2026-09-01): new `.tabs-scrollbar` themed thin-scrollbar utility on shared `UnderlineTabsList` (uniform across fisherfolk-detail/id-generator/analytics/reports/todo); lint-gated build green. Visual render confirmation folded into FIS-32 real-browser pass. Original ask below:
+  ~~🔴~~ On a specific fisherfolk detail page, the
   tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw
   native horizontal scrollbar. Restyle it to match the app's current CSS/scrollbar styling (thin/themed
   overflow, not the default OS scrollbar) — likely the `UnderlineTabs`/tabs overflow container in
