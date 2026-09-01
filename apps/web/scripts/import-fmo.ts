@@ -311,7 +311,7 @@ async function main(): Promise<void> {
             .map((c) => catMap.get(c.toLowerCase()))
             .filter((id): id is string => id !== undefined),
           remarks: n.remarks ?? undefined,
-          status: "ACTIVE" as const,
+          status: "NEW" as const,
           registrationYear: currentRegistrationYear,
           createdById: adminId ?? undefined,
           updatedById: adminId ?? undefined,

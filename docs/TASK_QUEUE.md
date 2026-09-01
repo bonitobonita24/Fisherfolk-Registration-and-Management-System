@@ -38,6 +38,11 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 - 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the maps/location capture headless couldn't capture; overwrite `public/showcase/*.png`. `owner 2026-09-01` `design`
 
 - 🔴 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task).** After round-3 ships: brainstorm + rebuild the public landing page with the latest features, updated screenshots, better statements/context (appropriate skills: brainstorming, frontend-design/web-motion, copywriting), then run **humanize** on all captions/statements + ai-check. `owner 2026-09-01` `design` `docs`
+- 🔴 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** On a specific fisherfolk detail page, the
+  tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw
+  native horizontal scrollbar. Restyle it to match the app's current CSS/scrollbar styling (thin/themed
+  overflow, not the default OS scrollbar) — likely the `UnderlineTabs`/tabs overflow container in
+  `fisherfolk-detail-client.tsx`. `source: owner 2026-08-31` `bug` `ui` `design`
 
 - 🔴 **Build `audit-log` feature (currently a 14-line stub).** `app/[tenant]/audit-log/page.tsx` has only a
   PageHeader; no table/data. Build the audit-trail view: paginated table of audit entries (adopt shared
@@ -49,6 +54,71 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   (reuse RBAC infra + `/tm` users-client pattern + role-builder). Scout the existing user/RBAC router first.
   SCOPE `[WHAT]` to confirm: which actions (invite/deactivate/role-change), permission gate (tenant_admin+),
   columns. Respect Rule 34 (never expose Billing/User-Mgmt below tenant_admin). `agent-found 2026-08-30` `feature`
+
+### FMO meeting 2026-07-09 — registration policy + ID changes (captured 2026-08-31; all builds HARD HOLD pending owner [WHAT])
+
+- 🔴 **FIS-8 — Multi-family households (support multiple heads per household).** ✅ **[WHAT] RESOLVED (owner
+  2026-08-31):** KEEP the household grouping AND the head-of-family concept — but one household may contain
+  MULTIPLE families (2–3 families living together), each with its OWN head. Current schema blocks this:
+  `Household.headId` is `@unique` (exactly one head per household). Work: introduce a family sub-grouping under
+  `Household` (each Family = one head + its members) OR relax the single-head constraint to allow multiple family
+  units per household; update household create/edit UI + "Head of Household" reporting to list per-family heads.
+  Design the multi-family-per-household model. `source: owner meeting 2026-07-09` `feature` `db` `design`
+
+- 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
+  dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
+  Violations" dashboard tile (`violations-group-tile.tsx`) + `activeViolationCount` renewal guard
+  (`fisherfolk.ts:505`). ⚠ **[WHAT]:** show a raw count instead of a badge? Keep the renewal-block semantics
+  (active violation blocks renewal) unchanged? `source: owner meeting 2026-07-09` `feature` `ui`
+
+- 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already exists as one of
+  the 6 `CANONICAL_CATEGORIES` (`lib/normalize/types.ts:13`). NEW work = subcategory taxonomy + aquaculture-only
+  fields: brackish (fishpond/fishpen/fishcage/fishcorral) + freshwater (backyard fishpond/fishpen/fishcage/
+  fishcorral); capture land area, lease-or-owned, commodity type, culture method (poly/monoculture). Operators
+  register (not non-operator landowners). ⚠ **Ordinance-gated — full implementation pending amendments (Jan);**
+  build the structure now, activate later. [WHAT]: new Prisma model vs JSON extension; which fields required.
+  `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-11 — Add full-time / part-time + primary source of income fields.** Not present today (no occupation/
+  livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
+  the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
+
+- ✅ **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command — BUILT 2026-08-31.**
+  Built + verified (typecheck 7/7 · 586 tests · build green) on `feat/fis12-registration-status-model` (`6892e64`), LOCAL/HARD HOLD.
+  Bulk-expire admin tool built but DEFERRED (do not run until next mayoral election). ⚠ Backfill mapping ACTIVE→NEW / INACTIVE→EXPIRED
+  needs owner sign-off before the prod migration. `feature` `db`
+  ✅ **[WHAT] RESOLVED (owner 2026-08-31).** Status meanings: **NEW** = brand-new registrant, never before in the
+  DB; **RENEWED** = re-registered, only possible AFTER a Mayor's-election renewal cycle; **EXPIRED** = flagged for
+  renewal. Flow: after each mayoral election an admin runs a SINGLE-SHOT command (Administrative Settings) that
+  bulk-sets all current active IDs → EXPIRED; then each fisherfolk is renewed one-by-one (EXPIRED → RENEWED) as
+  they complete the post-election renewal process. Build: retire ACTIVE/INACTIVE from active use (ALTER TYPE
+  discipline; add EXPIRED); add the admin bulk-expire tool (permission-gated, confirm-guarded, audit-logged).
+  ⚠ **DEFERRED activation** — this is year 1; the bulk-expire is NOT run until the next mayoral election. Build the
+  tool now, do not execute it. `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-13 — QR scan & verification flow.** QR is ALREADY generated + printed on the ID card
+  (`Fisherfolk.qrCode`, `id-card-renderer.tsx` qr element). NEW = an in-app scan/verify surface: scan a fisherfolk
+  ID QR → resolve → show verification (valid/record summary). [WHAT]: public vs authed verify; camera-scan page
+  vs deep-link resolver. `source: owner meeting 2026-07-09` `feature`
+
+- ✅ **FIS-14 — RSBSA on ID card — RESOLVED, no build (owner 2026-08-31).** "RSVS" was misheard; owner confirms it
+  means **RSBSA**, which the ID card already supports (`{{rsbsa_number}}`). No work needed. Squirlnote → For Review
+  (owner to mark Done). `source: owner meeting 2026-07-09`
+
+- 🔴 **FIS-15 — 3-year renewal cycle (mayoral-term aligned).** `RegistrationRenewal` + `registrationYear` exist;
+  renewal is manual, no cadence enforcement. Add a 3-year renewal cadence: due-date/renewal-due computation +
+  indicator. [WHAT]: reminder-only vs status enforcement; anchor year. `source: owner meeting 2026-07-09` `feature`
+
+- ✅ **FIS-16 — Mayor read-only access — RESOLVED, no build (owner 2026-08-31 "yes").** The existing `viewer` role
+  (view-only across all mapped segments) is acceptable for the mayor's read-only dashboard; no new role needed.
+  Squirlnote → For Review (owner to mark Done). `source: owner meeting 2026-07-09`
+
+> **Already covered (no task):** Senior-citizens report EXISTS (`report.ts` `senior_citizens` "60+" + analytics
+> "Senior Citizens by Barangay"). Kanban/task module EXISTS (todo). QR generation EXISTS.
+> **Not FRMS-code tasks (business/proposal — tracked elsewhere):** benchmark maintenance pricing vs HR system ·
+> pitch slides (lead with dashboard demo) · cloud-cost justification in proposal · pricing/contract · formal
+> re-registration letter to fisherfolk · "Sheila to study fish catch/dashboard" (person-assigned).
+> **Parking lot (future, discussed as "potential"):** staff whereabouts/activity tracking.
 
 - ✅ **Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo (2026-08-28).** Full UI adoption +
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted

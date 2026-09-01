@@ -8,26 +8,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { trpc } from "@/lib/trpc/client";
 
-interface AnnualResetCardProps {
-  currentYear: number;
-}
-
 // ── AnnualResetCard component ─────────────────────────────────────────────────
 // Admin-only control for the existing `dashboard.resetAnnualRegistrations`
-// mutation. Marks ACTIVE/RENEWED fisherfolk from prior registration years as
-// INACTIVE, closing out the current registration cycle. Idempotent — safe to
-// run more than once.
-export function AnnualResetCard({ currentYear }: AnnualResetCardProps) {
+// mutation. Bulk-sets every currently-registered fisherfolk (NEW/RENEWED) to
+// EXPIRED, flagging them for individual renewal. Deferred, once-per-election
+// action — intended to run once after a mayoral election, not on a fixed
+// annual cadence. Idempotent — safe to run more than once.
+export function AnnualResetCard() {
   const utils = trpc.useUtils();
 
   const resetMutation = trpc.dashboard.resetAnnualRegistrations.useMutation({
     onSuccess: (result) => {
       void utils.dashboard.invalidate();
       if (result.count === 0) {
-        toast.success("No prior-year registrations needed resetting.");
+        toast.success("No registrations needed to be flagged for renewal.");
       } else {
         toast.success(
-          `Annual reset complete — ${result.count} fisherfolk marked inactive.`,
+          `Reset complete — ${result.count} fisherfolk flagged as expired, pending individual renewal.`,
         );
       }
     },
@@ -45,17 +42,24 @@ export function AnnualResetCard({ currentYear }: AnnualResetCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap items-center justify-between gap-3 px-6 py-5">
-        <p className="text-xs text-muted-foreground max-w-prose">
-          Marks every fisherfolk still registered under a previous year as
-          Inactive, closing out the {currentYear} registration cycle.
-          Fisherfolk registered for the current year are unaffected. This can
-          be run again safely.
-        </p>
+        <div className="max-w-prose space-y-1.5">
+          <p className="text-xs text-muted-foreground">
+            Bulk-sets every currently-registered fisherfolk (New/Renewed) to
+            Expired, flagging each one for individual renewal. Already-expired
+            or archived fisherfolk are unaffected. This can be run again
+            safely.
+          </p>
+          <p className="text-xs text-muted-foreground/70">
+            Deferred action — run once after a mayoral election, not on a
+            fixed schedule. Each fisherfolk is renewed individually
+            afterward.
+          </p>
+        </div>
         <ConfirmDialog
           variant="destructive"
           trigger={<Button variant="destructive" size="sm">Run Annual Reset</Button>}
           title="Run annual registration reset?"
-          description={`This marks every fisherfolk still registered under a year before ${currentYear} as Inactive, closing out the ${currentYear} registration cycle. Fisherfolk already registered for ${currentYear} are unaffected. This action can be run again safely.`}
+          description={`This bulk-sets every currently-registered fisherfolk (New/Renewed) to Expired, flagging each one for individual renewal. Already-expired or archived fisherfolk are unaffected. This can be run again safely. Intended to run once after a mayoral election.`}
           confirmLabel="Yes, reset registrations"
           cancelLabel="Cancel"
           onConfirm={async () => {

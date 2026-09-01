@@ -38,6 +38,41 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 ✅ Ran a **full audit check** (4 adversarial read-only auditors + completeness critic): all features PASS, tsc/416 tests green, 263 deletions all deliberate, no secrets, scripts idempotent. Trivial fixes committed (`9887835`).
 
 ⏳ Next session (your directive — "do the finding + gaps next session"), in order: **1)** reconcile the FIS-12 migration drift (release-blocker, in PENDING_DECISIONS); **2)** real-browser verification pass (maps actually render + the 4 new location forms + mobile GPS end-to-end); **3)** a11y pass on the new map/picker/zoom components; **4)** refresh landing showcase screenshots (real browser) + redeploy demo; **5)** then the owner-gated production release.
+## 2026-08-31 — Built FIS-12: registration status model NEW/RENEWED/EXPIRED + deferred bulk-expire
+
+**In your words:** "resume session" → "yes lets proceed" → picked **FIS-12** → "after that last on-going task, save session and stop reboot loop."
+
+✅ Done
+- **Built FIS-12** — the registration status model becomes **NEW / RENEWED / EXPIRED** (ACTIVE/INACTIVE retired). Schema enum + 2 migrations, backend (renew now requires EXPIRED; dashboards count NEW+RENEWED as valid), UI (badge, filter, admin card), seeds, and a **post-election bulk-expire** admin tool (confirm-guarded, audit-logged) — **built but deferred**, not to run until the next mayoral election. All via PM→worker dispatches, LOCAL on `feat/fis12-registration-status-model` (`6892e64`). **HARD HOLD — nothing pushed.**
+- **Verified:** typecheck 7/7, **586/586 tests** (lifecycle tests run against the real dev DB — EXPIRED transition, EXPIRE audit row, tenant isolation all pass), production build green. Dev DB backfilled: **3486 rows ACTIVE→NEW**.
+
+💬 Decisions/notes
+- **[HOW] I took a backfill default flagged for your sign-off before prod:** existing `ACTIVE→NEW`, `INACTIVE→EXPIRED` (otherwise retiring ACTIVE would hide every current fisherfolk from valid lists/counts). Local-only for now.
+- Scout mislabeled a few `ACTIVE` line refs that were actually Vessel/Violation/Category statuses — the worker verified each against the schema and left those untouched (converting them would've been wrong).
+- Not done yet (next session, un-gated): rebuild the dev app off the branch + a live visual QA of the badge/filter/admin card. FIS-9/13/15 still await your [WHAT] answers.
+
+## 2026-08-31 — Captured FMO July-9 meeting → FIS-8..16; drafted city-govt pitch deck
+
+**In your words:** "check the July-9 Notion meeting notes, make Todos from what could be a task" → then answered the [WHAT]s → "draft the pitch deck" → "save session, stop reboot loop."
+
+✅ Done
+- **Analyzed the July-9 FMO meeting notes + scouted the code** to ground each item, then distilled **9 tasks (FIS-8..16)** into `docs/TASK_QUEUE.md` + mirrored to Squirlnote (Pending, tagged). All builds HARD HOLD. Commits `4e67c29` + `c712240` on branch `docs/fis8-16-meeting-tasks-0709` (LOCAL).
+- **Owner-resolved the [WHAT]s this session:**
+  - FIS-8 → keep household grouping + head concept, but support MULTIPLE families/heads per household (schema `Household.headId` is `@unique` today → needs family sub-grouping).
+  - FIS-12 → status model NEW / RENEWED / EXPIRED + a deferred post-election single-shot "bulk-expire" admin command (build now, don't run until next mayoral election).
+  - FIS-14 → "RSVS" misheard = RSBSA (already on card) → no build → **For Review**.
+  - FIS-16 → existing `viewer` role is fine for the Mayor's read-only view → no build → **For Review**.
+- **Drafted the city-government pitch deck** — 14-slide speaker-led HTML deck (FRMS navy/teal/gold brand, Fraunces+Archivo+Plex Mono), leads with the dashboard, pricing in a "reveal-if-asked" appendix, framed around the AIP. Published as private Artifact: https://claude.ai/code/artifact/139eae6b-a1a0-4839-a8ef-1e0afdcd80c7 (source in scratchpad; not yet committed to repo).
+
+💬 Decisions/notes
+- Scout surprises baked into the tasks: aquaculture already a category (subcats/fields are the new work); QR already generated (scan/verify is new); senior-citizens report + kanban already exist (no task).
+- Deck placeholders to confirm before presenting: real per-barangay/household/aid numbers (only 3,200+ is real), ID-card sample data, no real app screenshots yet.
+
+⏳ Not yet / Next
+- **FIS-9 / FIS-13 / FIS-15 explained, awaiting owner answers** (FIS-9 label vs count + keep renewal-block?; FIS-13 public vs authed verify + how much PII; FIS-15 fold into FIS-12 or add a "valid-until" display).
+- FIS-8/10/11/12 ready to scope+build once prioritized (all HARD HOLD).
+- Pre-existing queue: FIS-6 audit-log, FIS-7 user-management (stubs).
+- Pitch deck: fill real numbers / add screenshots / export PDF / commit to repo — on request.
 
 ## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
 

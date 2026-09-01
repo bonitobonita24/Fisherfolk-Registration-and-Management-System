@@ -411,7 +411,7 @@ async function main(): Promise<void> {
           rsbsaNumber: n.rsbsaNumber ?? undefined,
           categoryIds,
           remarks: n.remarks ?? undefined,
-          status: "ACTIVE" as const,
+          status: "NEW" as const,
           registrationYear: tenant.currentRegistrationYear,
           createdById,
           updatedById: createdById,

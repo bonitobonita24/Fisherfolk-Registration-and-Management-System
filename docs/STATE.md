@@ -1,6 +1,52 @@
 # FRMS — Project State
 
-## Current State (2026-08-30, latest) — 🚀 FIS-4 + FIS-3 Cargorix consistency SHIPPED; v0.21.0 LIVE on prod + demo
+## Current State (2026-08-31, latest) — ✅ FIS-12 registration status model (NEW/RENEWED/EXPIRED) BUILT + verified, LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: `project_fis12_status_model_built_0831.md`. Resume session → owner picked **FIS-12** to build,
+then "after this task, save session and stop reboot loop." Built via PM→spec-executor workers (7 dispatches),
+verified full Rule-32 bar, committed LOCAL. **Nothing pushed/deployed — HARD HOLD.**
+
+### ✅ DONE THIS SESSION (2026-08-31 — built + verified, HARD HOLD)
+- **FIS-12 — registration status model NEW / RENEWED / EXPIRED** on branch `feat/fis12-registration-status-model`
+  (`6892e64`, off the `docs/fis8-16-meeting-tasks-0709` docs work). Retire ACTIVE/INACTIVE from active use.
+  - **Schema/DB:** `FisherfolkStatus` +`EXPIRED`, `AuditAction` +`EXPIRE`. Two migrations: `20260831120000_..._add_expired`
+    (ADD VALUE, non-txn) + `20260831120100_..._backfill` (data). Applied to **dev** DB directly (dev history was
+    `db push`-built, not baselined — applied via container psql + `migrate resolve --applied`; client regenerated).
+    Backfill verified: **3486 rows ACTIVE→NEW** (now NEW=3614, RENEWED=67, 0 INACTIVE existed).
+  - **Backend:** renew precondition INACTIVE→**EXPIRED**; dashboard "valid" set ACTIVE→**{NEW,RENEWED}** (yoy/breakdown
+    drop ACTIVE). `resetAnnualRegistrations` helper is now the **post-election bulk-expire** (NEW/RENEWED→EXPIRED,
+    tenant-scoped, no year filter, writes an EXPIRE audit-log row); adminProcedure-gated, actor null-guarded.
+  - **UI:** status badge +EXPIRED (yellow), fisherfolk filter list, admin bulk-expire card copy + confirm-guard
+    reworded (deferred once-per-election action); unused `currentYear` prop dropped.
+  - **Seeds/imports:** new fisherfolk seed as NEW (not ACTIVE).
+  - **Tests aligned** to the new contract (lifecycle rewrite: EXPIRED→RENEWED + EXPIRE audit + tenant isolation;
+    fisherfolk renew-from-EXPIRED; yoy valid-set).
+- **Verify (full bar):** typecheck 7/7 · **586/586 tests** (incl. lifecycle run against real dev DB) · prod `build` green.
+
+### ⚠ OWNER SIGN-OFF NEEDED BEFORE PROD (flagged in commit + here)
+- **Backfill mapping is a [HOW] default I took:** existing `ACTIVE→NEW`, `INACTIVE→EXPIRED` (retiring ACTIVE would
+  otherwise hide all current fisherfolk from valid lists/counts). Local-only now; confirm before the prod migration.
+- **DEFERRED activation:** the bulk-expire admin tool is BUILT but must NOT be run until the next mayoral election
+  (per FIS-12 decision). It is confirm-guarded + audit-logged; no auto-run.
+
+### ⏳ NEXT (un-gated queue — FIS meeting batch + stubs)
+- **FIS-8** — multi-family households (approved, ready to build) · **FIS-10** aquaculture sub-registration ·
+  **FIS-11** full/part-time + income fields · **FIS-6** audit-log table · **FIS-7** user-management table.
+- **Still awaiting owner [WHAT]:** FIS-9 (label vs count), FIS-13 (public vs authed QR verify), FIS-15
+  (reminder vs enforcement; integrates with FIS-12 status model).
+- **⚠ CROSS-SEAT (surface only, never here):** AIEF `feat/v32.50-site-access-standard` merge · Phase-2 per-app site-access.
+
+### Git
+On `feat/fis12-registration-status-model` @ `6892e64` (feature). Prior branch `docs/fis8-16-meeting-tasks-0709`
+holds the meeting-capture docs (unpushed). `main == origin/main` untouched. **HARD HOLD — nothing pushed/deployed.**
+Prod + demo still on v0.21.0, healthy. Dev DB carries the FIS-12 enum + backfill (dev app NOT yet rebuilt off the
+branch — a live visual QA + `dev-freshness` rebuild is the next un-gated step if resumed).
+
+---
+
+## Current State (2026-08-30) — 🚀 FIS-4 + FIS-3 Cargorix consistency SHIPPED; v0.21.0 LIVE on prod + demo
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
