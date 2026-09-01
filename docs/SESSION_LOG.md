@@ -2,6 +2,22 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-01 (AM) — Real-browser demo smoke before presentation (FIS-32 partial) + stop loop
+
+**In your words:** "do the next cheapest thing I might need for the presentation to be presented, then save session, stop the reboot loop."
+
+✅ Done — live real-browser smoke of the demo (`frms-demo.powerbyte.app`), no code changes, no deploy:
+- Landing page (FIS-31) renders clean, **0 console errors**, correct title/H1.
+- Login works via org-first flow: org `calapan-city` → `admin@demo.com` → dashboard.
+- Dashboard + `/map` page structure render fully (controls, dataset selector, boundaries/heatmap toggles, category legend, zoom), **0 console errors**; WebGL context active.
+- Barangay boundary data layer (`/data/calapan-barangays.geojson`) loads **200** (same-origin, healthy).
+
+💬 Key presentation finding — **basemap tiles depend on an EXTERNAL CDN** (`basemaps.cartocdn.com`, dark-matter style). In the test browser the map canvas showed blank because that external request never completed (test-browser sandbox blocks external egress; the app's own data is fine). ⚠ **Action for you:** open the map in your actual presentation browser on the venue's network — if the venue blocks external CDNs, the basemap will render blank live too (barangay points/boundaries would still work; only the map backdrop is CDN-dependent). Could not be settled from a real ISP browser this session; chrome-devtools real Chrome or your own glance is the definitive check.
+
+💬 FIS-32 is therefore **partially** done: structure/data/console verified; the pure WebGL tile compositing still needs a genuine real-browser confirmation (the documented headless-MapLibre limitation held). FIS-33 (a11y) and FIS-34 (screenshot refresh) untouched.
+
+⛔ Unchanged blocker: **FIS-12 migration drift** remains the open release-blocker `[WHAT]` in PENDING_DECISIONS.md — gates any production release. Branch `feat/presentation-batch-0901` still LOCAL/HARD HOLD.
+
 ## 2026-09-01 — Presentation batches (FIS-17..30) built + shipped to demo (full auto)
 
 **In your words:** three rounds of demo/presentation tasks — detail-page typography & density, category/renewal/household/map features, then a location-capture feature with draggable pins + mobile GPS; then bug-fixes + polish; "run it all in full auto, I need to sleep."
