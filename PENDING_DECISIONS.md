@@ -8,16 +8,21 @@ conductor's to decide and never lands here.
 
 ### 2026-09-01 — ⚠ FIS-12 migration drift — RELEASE-BLOCKER before any prod migrate (surfaced by full audit)
 
-- [ ] **Reconcile FIS-12 status-model migrations before the production release.** The two migrations
-  `20260831120000_fisherfolk_status_add_expired` + `20260831120100_fisherfolk_status_backfill` and the
-  `EXPIRED` value on the `FisherfolkStatus` enum live ONLY on the unmerged branch
-  `feat/fis12-registration-status-model` (`6892e64`, NOT an ancestor of `feat/presentation-batch-0901`).
-  They are applied in the **dev DB** but absent from this branch's `packages/db/prisma/migrations/` +
-  `schema.prisma`. Demo is unaffected (its `migrate deploy` only ran `add_location_coordinates`). **Before
-  merging this branch to main + `push to production`:** decide the order — (a) merge/rebase FIS-12 first, or
-  (b) cherry-pick the 2 migrations + the `EXPIRED` enum into the release, so prod `migrate deploy` and the
-  schema/migration history stay consistent. `[WHAT]`/coordination — owner call. (Also noted in the
-  2026-09-01 handoff + SESSION_LOG.)
+- [x] ✅ **RESOLVED (2026-09-01, owner chose "merge/rebase FIS-12 first") — MERGED into the release branch.**
+  `git merge --no-ff feat/fis12-registration-status-model` → `feat/presentation-batch-0901` (`4aa229a`).
+  `schema.prisma` auto-merged cleanly (`EXPIRED` enum value + location coords coexist); all 3 migrations now
+  present in correct chronological order (`add_expired` → `backfill` → `add_location_coordinates`); the 2 docs
+  conflicts (SESSION_LOG/TASK_QUEUE) resolved as a union (both histories kept). Verified: prisma validate ✓ ·
+  tsc --noEmit ✓ (after `prisma generate`) · 416 unit tests ✓ (170 DB-gated skipped, 586 total — reconciles) ·
+  lint-gated `next build` ✓. LOCAL / HARD HOLD (nothing pushed). Schema/migration history is now consistent for
+  a future prod `migrate deploy`.
+  - ⚠ **STILL-OPEN pre-prod `[WHAT]` — backfill mapping sign-off.** The `backfill` migration remaps existing
+    rows `ACTIVE→NEW` and `INACTIVE→EXPIRED`. Memory flagged this needs owner sign-off before running against
+    **prod** data (prod is real registrant data). The migration is idempotent/guarded but the semantic mapping
+    is an owner call — confirm before the production `migrate deploy`.
+  - 🔧 **Dev-workflow caveat (not a prod blocker):** `ALTER TYPE ... ADD VALUE` can trip Prisma `migrate dev`'s
+    shadow-DB (enum-value-in-transaction). Prod uses `migrate deploy` (no shadow DB) so it is unaffected; only
+    a fresh local `migrate dev` reset would hit it.
 
 ### 2026-08-27 — 🎨 Cargorix Wave 3 go/no-go (HARD HOLD — owner review gate)
 
