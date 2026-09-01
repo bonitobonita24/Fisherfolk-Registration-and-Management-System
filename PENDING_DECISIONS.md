@@ -16,10 +16,11 @@ conductor's to decide and never lands here.
   tsc --noEmit ✓ (after `prisma generate`) · 416 unit tests ✓ (170 DB-gated skipped, 586 total — reconciles) ·
   lint-gated `next build` ✓. LOCAL / HARD HOLD (nothing pushed). Schema/migration history is now consistent for
   a future prod `migrate deploy`.
-  - ⚠ **STILL-OPEN pre-prod `[WHAT]` — backfill mapping sign-off.** The `backfill` migration remaps existing
-    rows `ACTIVE→NEW` and `INACTIVE→EXPIRED`. Memory flagged this needs owner sign-off before running against
-    **prod** data (prod is real registrant data). The migration is idempotent/guarded but the semantic mapping
-    is an owner call — confirm before the production `migrate deploy`.
+  - [x] ✅ **RESOLVED (2026-09-02, owner "yes all the way" after reviewing real prod counts) — SHIPPED to prod
+    in v0.22.0.** Read-only prod check first showed **3,181 ACTIVE, 0 INACTIVE** (clean, no edge cases). Owner
+    approved `ACTIVE→NEW` (INACTIVE→EXPIRED a no-op). Prod DB backed up (`frms-prod-backup-pre-pushtoprod-*.sql.gz`),
+    `migrate deploy` applied all 3 migrations, backfill verified: **all 3,181 fisherfolk now `NEW`**. Reversible
+    from the pre-migrate backup if ever needed.
   - 🔧 **Dev-workflow caveat (not a prod blocker):** `ALTER TYPE ... ADD VALUE` can trip Prisma `migrate dev`'s
     shadow-DB (enum-value-in-transaction). Prod uses `migrate deploy` (no shadow DB) so it is unaffected; only
     a fresh local `migrate dev` reset would hit it.

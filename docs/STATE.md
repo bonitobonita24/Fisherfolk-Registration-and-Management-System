@@ -1,6 +1,42 @@
 # FRMS — Project State
 
-## Current State (2026-08-31, latest) — ✅ FIS-12 registration status model (NEW/RENEWED/EXPIRED) BUILT + verified, LOCAL/HARD HOLD
+## Current State (2026-09-02, latest) — 🚀 Presentation batch FIS-17..31 + FIS-12 status model SHIPPED to PRODUCTION as v0.22.0
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: `project_presentation_rounds123_shipped_0901.md` (+ this block).
+
+> **✅ PRODUCTION RELEASE COMPLETE.** Owner asked why prod didn't match demo → confirmed the batch was demo-only/HARD HOLD →
+> authorized the full prod release ("yes all the way"). Shipped **v0.22.0** to `frms.powerbyte.app`. `origin/main @6bf3701`.
+
+### ✅ DONE THIS SESSION (2026-09-02)
+- **FIS-12 migration-drift reconcile** — owner chose merge/rebase → merged `feat/fis12-registration-status-model` into the
+  release branch (`4aa229a`); schema auto-merged (EXPIRED + location coexist), 3 migrations in chronological order, docs
+  union-resolved. Gates: prisma validate · tsc (after `prisma generate`) · 416 tests · lint-gated build all green.
+- **FIS-17 scrollbar fix** — new `.tabs-scrollbar` themed thin-scrollbar utility on shared `UnderlineTabsList` (uniform
+  across 5 tab pages) (`ccbe876`). Replaces the raw native OS scrollbar on the fisherfolk detail tab bar.
+- **Production release v0.22.0** — merged batch → main (`0210621`, tree verified == branch, contains v0.21.0); consolidated
+  changelog + version-sync 7 pkgs + footer + tag (`6bf3701`); `git push --follow-tags` → **`origin/main == 6bf3701`**;
+  CI Docker build green (`sha-6bf3701`).
+- **Promoted to PROD** via `push-to-prod.sh sha-6bf3701`: prod DB backed up first → image promoted → app recreated →
+  `migrate deploy` applied add_expired + backfill + add_location_coordinates → **backfill verified: 3,181 ACTIVE→NEW**
+  (0 INACTIVE, read-only pre-check confirmed clean; owner signed off on the mapping). Health 200, `/` + `/login` 200.
+- Dev rebuilt off main (Rule 39).
+
+### ⏳ NEXT / OPEN
+- **DEMO is behind** — demo shows FIS-17..31 but lacks the FIS-12 merge + scrollbar fix + v0.22.0 versioning. ⚠ Demo/staging
+  now deploy to the **AWS box** (Powerbyte-AWS-Komodo), NOT the old Hostinger `push-to-demo.sh` target — see FIS-23. Refresh
+  demo via the AWS-targeted path when wanted (not a blocker; prod is the presentation-critical env).
+- **FIS-32/33/34** still un-gated: real-browser verify (maps + 4 location forms + mobile GPS), a11y pass, landing screenshot refresh.
+- Pre-existing queue: FIS-6 audit-log, FIS-7 user-management (stubs); FIS-8/10/11 build once prioritized; FIS-9/13/15/16 await [WHAT].
+
+### Git
+`main == origin/main == 6bf3701` (v0.22.0, pushed + tagged). Prod `frms.powerbyte.app` live on `sha-6bf3701`, healthy.
+Branch `feat/presentation-batch-0901` retained (merged). Tree otherwise clean.
+
+---
+
+## Current State (2026-08-31) — ✅ FIS-12 registration status model (NEW/RENEWED/EXPIRED) BUILT + verified, LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

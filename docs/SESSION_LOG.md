@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-02 — Shipped the presentation batch to PRODUCTION (v0.22.0)
+
+**In your words:** you noticed the demo site had the nicer spacing/bigger fonts but production "does not change at all" and asked whether we'd pushed the demo changes to prod — then, after I explained it was demo-only on hold, "Go for Production release now" and "yes all the way".
+
+✅ Done — **production now matches demo (v0.22.0 live at frms.powerbyte.app)**:
+- First reconciled the FIS-12 status-model drift (merged its branch into the release, all gates green) and fixed the ugly tab-bar scrollbar (FIS-17).
+- Before touching prod data, I read your live production numbers: **3,181 registrants, all ACTIVE, zero INACTIVE** — a clean case — and you approved the ACTIVE→NEW switch.
+- Merged → main, cut **v0.22.0** (changelog + versions), pushed, CI built the image, promoted to prod: **backed up the prod DB first**, deployed, ran the migration. Verified: **all 3,181 records switched ACTIVE→NEW**, health 200, landing + login 200.
+- The whole visual batch (bigger/clearer fonts + tighter spacing, Category chip, Renewal Date, Location field, cleaner tab bar) + the NEW/RENEWED/EXPIRED status model are now live in production.
+
+💬 Notes / next
+- **Demo is now slightly behind prod** (missing the FIS-12 merge + scrollbar fix). Demo/staging moved to the AWS box, so a demo refresh uses a different deploy path (FIS-23) — not urgent; prod is what matters for the presentation.
+- The prod DB is backed up (`frms-prod-backup-pre-pushtoprod-*.sql.gz`), so the ACTIVE→NEW change is reversible if ever needed.
+- Still open (un-gated, your call when): FIS-32 real-browser verification of the maps + 4 location forms + mobile GPS, FIS-33 a11y pass, FIS-34 landing screenshot refresh.
+
 ## 2026-09-01 (AM) — Real-browser demo smoke before presentation (FIS-32 partial) + stop loop
 
 **In your words:** "do the next cheapest thing I might need for the presentation to be presented, then save session, stop the reboot loop."
