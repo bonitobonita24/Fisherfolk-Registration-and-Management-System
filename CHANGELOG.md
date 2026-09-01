@@ -4,6 +4,44 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.22.0 — 2026-09-02
+
+### [FEATURE]
+- round-3 batch FIS-26..30 (colors, zoom, map fix, network, location) (`1ce2c18`)
+- FIS-25 coordinate capture — flagship (Fisherfolk) + household maps (`0394a97`)
+- FIS-17..24 detail-page polish + household maps (`faa591b`)
+- FIS-12 registration status model NEW/RENEWED/EXPIRED + post-election bulk-expire (`6892e64`)
+
+### [FIXED]
+- FIS-17 — themed thin scrollbar on overflowing tab strips (`ccbe876`)
+- dedupe RENEWED header badge (status badge already conveys it) (`d843dc4`)
+- give standalone /map page an explicit-height container (`a98858b`)
+
+### [DOCS]
+- FIS-17 scrollbar fix code-done (visual verify in FIS-32) (`9c613b4`)
+- close FIS-12 migration-drift reconcile; note backfill sign-off as residual pre-prod gate (`a4e58c6`)
+- real-browser demo smoke before presentation (FIS-32 partial) + basemap-CDN finding (`eddb52b`)
+- save-session — queue next-session plan (FIS-12 reconcile, real-browser verify, a11y, screenshots, prod release) (`f878a09`)
+- full-audit-check fixes — record FIS-12 drift blocker, soften map-verified claim, sweep stray screenshots (`9887835`)
+- FIS-31 landing copy shipped to demo; screenshots + prod release remain (`6482d75`)
+- save-session — rounds 1-3 (FIS-17..30) shipped to demo; queue FIS-31 landing page + prod release (`9da73a5`)
+- mark FIS-17..24 done, FIS-25 flagship partial; note prod target (`5a7fe4c`)
+- capture 2026-09-01 presentation batch FIS-17..FIS-24 (`665053f`)
+- capture FIS-17 — restyle fisherfolk detail tab-bar scrollbar (owner 2026-08-31) (`8863379`)
+- FIS-12 status model built + verified — handoff, decisions, changelog (`9335178`)
+- 2026-08-31 — FMO July-9 meeting captured (FIS-8..16) + pitch deck drafted (`5fff197`)
+- FIS-8/12 refined + FIS-14/16 resolved (owner 2026-08-31) (`c712240`)
+- capture FMO 2026-07-09 meeting items as FIS-8..16 (`4e67c29`)
+- FIS-4+FIS-3 shipped, v0.21.0 live on prod+demo; FIS-6/FIS-7 queued (`3ff8f0f`)
+- save-session — v0.21.0 promoted to prod+demo; queue FIS-6 audit-log + FIS-7 user-management (`fcffef3`)
+
+### [CHORE]
+- backfill renewal rows for RENEWED fisherfolk missing history (`54a9722`)
+
+### [OTHER]
+- overhaul public landing copy for LGU presentation (FIS-31) (`250f5b1`)
+
+
 ## v0.21.0 — 2026-08-30
 
 ### [FEATURE]
