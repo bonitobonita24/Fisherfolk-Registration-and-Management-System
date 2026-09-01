@@ -18,9 +18,10 @@ export function LandingCta() {
                 Built for the fisherfolk of Calapan City
               </h2>
               <p className="mt-4 text-lg text-secondary-foreground/80">
-                A modern, secure system of record for the City Fisheries
-                Management Office — bringing accuracy, transparency, and speed to
-                the services coastal communities rely on.
+                FRMS is the City Fisheries Management Office&apos;s system of
+                record, built so every fisherfolk, vessel, and catch in
+                Calapan City has one accurate, current entry instead of a
+                stack of forms in a filing cabinet.
               </p>
               <div className="mt-8 flex justify-center">
                 <Button asChild size="lg">

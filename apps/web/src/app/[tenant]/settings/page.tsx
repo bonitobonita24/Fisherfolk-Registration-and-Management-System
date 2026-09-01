@@ -76,7 +76,7 @@ export default async function SettingsPage({
 
       {/* Administrative Actions — danger zone, admin-only, placed last */}
       {isAdmin && tenantRecord ? (
-        <AnnualResetCard currentYear={tenantRecord.currentRegistrationYear} />
+        <AnnualResetCard />
       ) : null}
     </div>
   );

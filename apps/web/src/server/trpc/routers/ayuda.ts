@@ -323,6 +323,8 @@ export const ayudaRouter = createTRPCRouter({
             verifiedAt: true,
             createdAt: true,
             householdId: true,
+            latitude: true,
+            longitude: true,
             fisherfolk: {
               select: { id: true, fullName: true, idNumber: true },
             },
@@ -794,6 +796,8 @@ export const ayudaRouter = createTRPCRouter({
         .object({
           id: z.string().cuid(),
           verificationStatus: z.enum(["RECEIVED", "CANCELLED"]),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
         })
         .strict(),
     )
@@ -820,6 +824,10 @@ export const ayudaRouter = createTRPCRouter({
             verificationStatus: input.verificationStatus,
             verifiedById: ctx.userId!,
             verifiedAt: new Date(),
+            ...(input.latitude !== undefined && { latitude: input.latitude }),
+            ...(input.longitude !== undefined && {
+              longitude: input.longitude,
+            }),
           },
         }),
         ctx.db.ayudaProgram.update({

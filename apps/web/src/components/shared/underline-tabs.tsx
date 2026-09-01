@@ -20,7 +20,7 @@ const UnderlineTabsList = React.forwardRef<
   <TabsList
     ref={ref}
     className={cn(
-      "h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0",
+      "tabs-scrollbar h-10 w-full shrink-0 justify-start overflow-x-auto rounded-none border-b bg-transparent p-0",
       className
     )}
     {...props}

@@ -6,22 +6,22 @@ const STEPS = [
   {
     icon: ClipboardList,
     title: "Register",
-    body: "Enrol fisherfolk, households, and vessels — in the field or at the office — with photos and supporting documents.",
+    body: "Enrol fisherfolk, households, and vessels in the field or at the office, with photos, documents, and a location pinned on the spot.",
   },
   {
     icon: BadgeCheck,
     title: "Verify",
-    body: "Review and approve records with role-based controls and a complete audit trail.",
+    body: "Review and approve records with role-based access, so every change is traceable to who made it.",
   },
   {
     icon: LayoutDashboard,
     title: "Manage",
-    body: "Handle subsidies, catch logs, violations, and ID issuance from one connected workspace.",
+    body: "Handle ayuda distribution, catch logs, violations, and ID issuance from one workspace instead of four.",
   },
   {
     icon: LineChart,
     title: "Analyze & report",
-    body: "Turn live data into dashboards, density maps, and official reports for the city.",
+    body: "Turn live records into density maps, dashboards, and the reports the city actually needs to submit.",
   },
 ];
 
@@ -35,7 +35,7 @@ export function LandingProcess() {
               How it works
             </p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              From registration to insight
+              From the first record to the final report
             </h2>
           </div>
         </Reveal>

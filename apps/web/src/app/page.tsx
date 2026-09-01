@@ -12,7 +12,7 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 const TITLE =
   "FRMS — Fisherfolk Registration & Management System | Calapan City";
 const DESCRIPTION =
-  "The digital system of record for the City Fisheries Management Office of Calapan City — fisherfolk registration, vessels, subsidies, catch monitoring, compliance, and analytics in one platform.";
+  "The system the City Fisheries Management Office of Calapan City runs day to day: fisherfolk registration, vessels, catch monitoring, ayuda, compliance, and analytics, all in one place.";
 
 export const metadata: Metadata = {
   title: TITLE,

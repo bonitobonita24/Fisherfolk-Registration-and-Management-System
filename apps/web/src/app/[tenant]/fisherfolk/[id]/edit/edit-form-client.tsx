@@ -37,6 +37,7 @@ import {
   CategoryPicker,
   FormActions,
   FormSection,
+  LocationPicker,
   RecordHeader,
 } from "@/components/shared";
 import { PhotoUpload } from "@/components/fisherfolk/photo-upload";
@@ -74,6 +75,8 @@ const editFormSchema = z.object({
   categoryIds: z.array(z.string().cuid()).min(1, "Select at least one category"),
   photo: z.string().optional(),
   signature: z.string().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 type EditFormValues = z.infer<typeof editFormSchema>;
@@ -115,6 +118,8 @@ interface EditFormProps {
     categoryIds: string[];
     photo: string | null;
     signature: string | null;
+    latitude: number | null;
+    longitude: number | null;
   };
 }
 
@@ -169,6 +174,8 @@ function EditForm({ id, record }: EditFormProps) {
       categoryIds: record.categoryIds,
       photo: record.photo ?? undefined,
       signature: record.signature ?? undefined,
+      latitude: record.latitude,
+      longitude: record.longitude,
     },
   });
 
@@ -242,6 +249,14 @@ function EditForm({ id, record }: EditFormProps) {
     }
     if ((values.signature ?? null) !== (record.signature ?? null)) {
       changes.signature = values.signature ?? null;
+    }
+
+    // latitude / longitude — location pin
+    if ((values.latitude ?? null) !== (record.latitude ?? null)) {
+      changes.latitude = values.latitude ?? null;
+    }
+    if ((values.longitude ?? null) !== (record.longitude ?? null)) {
+      changes.longitude = values.longitude ?? null;
     }
 
     // ------------------------------------------------------------------
@@ -493,6 +508,41 @@ function EditForm({ id, record }: EditFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <LocationPicker
+                      value={
+                        form.watch("latitude") != null &&
+                        form.watch("longitude") != null
+                          ? {
+                              lat: form.watch("latitude")!,
+                              lng: form.watch("longitude")!,
+                            }
+                          : null
+                      }
+                      onChange={(next) => {
+                        form.setValue("latitude", next.lat, {
+                          shouldValidate: true,
+                        });
+                        form.setValue("longitude", next.lng, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      barangay={form.watch("barangay")}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Drag the pin, click the map, or use your current location.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </FormSection>
 
@@ -623,6 +673,8 @@ export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) 
           categoryIds: record.categoryIds ?? [],
           photo: record.photo ?? null,
           signature: record.signature ?? null,
+          latitude: record.latitude ?? null,
+          longitude: record.longitude ?? null,
         }}
       />
     </div>

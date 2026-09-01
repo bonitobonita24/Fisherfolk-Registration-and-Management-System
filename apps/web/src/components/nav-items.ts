@@ -19,6 +19,7 @@ import {
   HandHeart,
   Home,
   ShieldCheck,
+  Network,
 } from "lucide-react";
 import { hasPermission, type Actor, type FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -130,6 +131,12 @@ export const NAV_GROUPS: NavGroup[] = [
         label: "Household",
         icon: Home,
         href: "/households",
+        feature: "households",
+      },
+      {
+        label: "Municipal Network",
+        icon: Network,
+        href: "/households/network",
         feature: "households",
       },
       {

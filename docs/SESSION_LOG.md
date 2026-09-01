@@ -2,6 +2,78 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-01 (AM) — Real-browser demo smoke before presentation (FIS-32 partial) + stop loop
+
+**In your words:** "do the next cheapest thing I might need for the presentation to be presented, then save session, stop the reboot loop."
+
+✅ Done — live real-browser smoke of the demo (`frms-demo.powerbyte.app`), no code changes, no deploy:
+- Landing page (FIS-31) renders clean, **0 console errors**, correct title/H1.
+- Login works via org-first flow: org `calapan-city` → `admin@demo.com` → dashboard.
+- Dashboard + `/map` page structure render fully (controls, dataset selector, boundaries/heatmap toggles, category legend, zoom), **0 console errors**; WebGL context active.
+- Barangay boundary data layer (`/data/calapan-barangays.geojson`) loads **200** (same-origin, healthy).
+
+💬 Key presentation finding — **basemap tiles depend on an EXTERNAL CDN** (`basemaps.cartocdn.com`, dark-matter style). In the test browser the map canvas showed blank because that external request never completed (test-browser sandbox blocks external egress; the app's own data is fine). ⚠ **Action for you:** open the map in your actual presentation browser on the venue's network — if the venue blocks external CDNs, the basemap will render blank live too (barangay points/boundaries would still work; only the map backdrop is CDN-dependent). Could not be settled from a real ISP browser this session; chrome-devtools real Chrome or your own glance is the definitive check.
+
+💬 FIS-32 is therefore **partially** done: structure/data/console verified; the pure WebGL tile compositing still needs a genuine real-browser confirmation (the documented headless-MapLibre limitation held). FIS-33 (a11y) and FIS-34 (screenshot refresh) untouched.
+
+⛔ Unchanged blocker: **FIS-12 migration drift** remains the open release-blocker `[WHAT]` in PENDING_DECISIONS.md — gates any production release. Branch `feat/presentation-batch-0901` still LOCAL/HARD HOLD.
+
+## 2026-09-01 — Presentation batches (FIS-17..30) built + shipped to demo (full auto)
+
+**In your words:** three rounds of demo/presentation tasks — detail-page typography & density, category/renewal/household/map features, then a location-capture feature with draggable pins + mobile GPS; then bug-fixes + polish; "run it all in full auto, I need to sleep."
+
+✅ Done (all verified tsc/lint/416 tests/build, deployed to demo `frms-demo.powerbyte.app`, healthy):
+- Detail fonts ~30% larger + tighter density (all 6 detail pages, one shared component).
+- Fisherfolk sidebar Category chips (was Status); **distinct color per category**.
+- "Renewal Date" + past-renewals history popover + RENEWED badge (deduped); renewal data backfilled so renewed records show real dates.
+- Household: member photos (zoomable) + category chips + barangay-mismatch warnings; "already in HH-XXXX" message; 50/50 split with member map.
+- Municipal Network map (crown heads, connection lines, **jumped=pink**, **heatmap toggle**).
+- **Location capture**: draggable-pin LocationPicker (auto-centers on barangay) + mobile GPS; lat/lng added to 5 models; wired into Fisherfolk, Vessel, FishCatch, Violation, Ayuda.
+- **Fixed**: blank household map (WebGL 0×0 buffer in grid cell); photo/signature/QR enlarge now large + zoomable.
+
+💬 Notes: branch `feat/presentation-batch-0901` is LOCAL/unpushed (HARD HOLD); demo deployed (authorized), **prod untouched** (owner-gated). ⚠ Verification caveat (per full audit): tsc/lint/416 tests/build/deploy/health all machine-verified; the MapLibre map features (household member map, municipal network, location pickers) were confirmed **0 console errors** live but their **visual rendering is NOT yet confirmed** (headless browser can't do WebGL — needs a real-browser + a11y pass). The 4 new location forms + mobile GPS are wired but not runtime-exercised. These features also target Production — separate owner-gated release (merge→main + version + "push to production"); prod uses real renewal data, ayuda/vessels/violations stay dormant.
+
+✅ **FIS-31 — landing page overhaul**: all copy rewritten (hero/features/stats/process/CTA/footer/SEO) in grounded civic language + humanize + ai-check clean; deployed + verified live on demo. New H1 "Every fisherfolk, vessel, and catch in Calapan City, tracked in one system."
+
+✅ Ran a **full audit check** (4 adversarial read-only auditors + completeness critic): all features PASS, tsc/416 tests green, 263 deletions all deliberate, no secrets, scripts idempotent. Trivial fixes committed (`9887835`).
+
+⏳ Next session (your directive — "do the finding + gaps next session"), in order: **1)** reconcile the FIS-12 migration drift (release-blocker, in PENDING_DECISIONS); **2)** real-browser verification pass (maps actually render + the 4 new location forms + mobile GPS end-to-end); **3)** a11y pass on the new map/picker/zoom components; **4)** refresh landing showcase screenshots (real browser) + redeploy demo; **5)** then the owner-gated production release.
+## 2026-08-31 — Built FIS-12: registration status model NEW/RENEWED/EXPIRED + deferred bulk-expire
+
+**In your words:** "resume session" → "yes lets proceed" → picked **FIS-12** → "after that last on-going task, save session and stop reboot loop."
+
+✅ Done
+- **Built FIS-12** — the registration status model becomes **NEW / RENEWED / EXPIRED** (ACTIVE/INACTIVE retired). Schema enum + 2 migrations, backend (renew now requires EXPIRED; dashboards count NEW+RENEWED as valid), UI (badge, filter, admin card), seeds, and a **post-election bulk-expire** admin tool (confirm-guarded, audit-logged) — **built but deferred**, not to run until the next mayoral election. All via PM→worker dispatches, LOCAL on `feat/fis12-registration-status-model` (`6892e64`). **HARD HOLD — nothing pushed.**
+- **Verified:** typecheck 7/7, **586/586 tests** (lifecycle tests run against the real dev DB — EXPIRED transition, EXPIRE audit row, tenant isolation all pass), production build green. Dev DB backfilled: **3486 rows ACTIVE→NEW**.
+
+💬 Decisions/notes
+- **[HOW] I took a backfill default flagged for your sign-off before prod:** existing `ACTIVE→NEW`, `INACTIVE→EXPIRED` (otherwise retiring ACTIVE would hide every current fisherfolk from valid lists/counts). Local-only for now.
+- Scout mislabeled a few `ACTIVE` line refs that were actually Vessel/Violation/Category statuses — the worker verified each against the schema and left those untouched (converting them would've been wrong).
+- Not done yet (next session, un-gated): rebuild the dev app off the branch + a live visual QA of the badge/filter/admin card. FIS-9/13/15 still await your [WHAT] answers.
+
+## 2026-08-31 — Captured FMO July-9 meeting → FIS-8..16; drafted city-govt pitch deck
+
+**In your words:** "check the July-9 Notion meeting notes, make Todos from what could be a task" → then answered the [WHAT]s → "draft the pitch deck" → "save session, stop reboot loop."
+
+✅ Done
+- **Analyzed the July-9 FMO meeting notes + scouted the code** to ground each item, then distilled **9 tasks (FIS-8..16)** into `docs/TASK_QUEUE.md` + mirrored to Squirlnote (Pending, tagged). All builds HARD HOLD. Commits `4e67c29` + `c712240` on branch `docs/fis8-16-meeting-tasks-0709` (LOCAL).
+- **Owner-resolved the [WHAT]s this session:**
+  - FIS-8 → keep household grouping + head concept, but support MULTIPLE families/heads per household (schema `Household.headId` is `@unique` today → needs family sub-grouping).
+  - FIS-12 → status model NEW / RENEWED / EXPIRED + a deferred post-election single-shot "bulk-expire" admin command (build now, don't run until next mayoral election).
+  - FIS-14 → "RSVS" misheard = RSBSA (already on card) → no build → **For Review**.
+  - FIS-16 → existing `viewer` role is fine for the Mayor's read-only view → no build → **For Review**.
+- **Drafted the city-government pitch deck** — 14-slide speaker-led HTML deck (FRMS navy/teal/gold brand, Fraunces+Archivo+Plex Mono), leads with the dashboard, pricing in a "reveal-if-asked" appendix, framed around the AIP. Published as private Artifact: https://claude.ai/code/artifact/139eae6b-a1a0-4839-a8ef-1e0afdcd80c7 (source in scratchpad; not yet committed to repo).
+
+💬 Decisions/notes
+- Scout surprises baked into the tasks: aquaculture already a category (subcats/fields are the new work); QR already generated (scan/verify is new); senior-citizens report + kanban already exist (no task).
+- Deck placeholders to confirm before presenting: real per-barangay/household/aid numbers (only 3,200+ is real), ID-card sample data, no real app screenshots yet.
+
+⏳ Not yet / Next
+- **FIS-9 / FIS-13 / FIS-15 explained, awaiting owner answers** (FIS-9 label vs count + keep renewal-block?; FIS-13 public vs authed verify + how much PII; FIS-15 fold into FIS-12 or add a "valid-until" display).
+- FIS-8/10/11/12 ready to scope+build once prioritized (all HARD HOLD).
+- Pre-existing queue: FIS-6 audit-log, FIS-7 user-management (stubs).
+- Pitch deck: fill real numbers / add screenshots / export PDF / commit to repo — on request.
+
 ## 2026-08-30 — FIS-3 non-record module + /tm consistency; v0.20.0 released
 
 **In your words:** "1. keep FIS-4 on For Review · 2. do FIS-3 · 3. merge/push."

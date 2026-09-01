@@ -13,6 +13,8 @@ export const violationCreateSchema = z.object({
   evidenceImages: z.array(z.string()).default([]),
   notes: z.string().optional(),
   status: violationStatusSchema.optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 export const violationUpdateSchema = z.object({
@@ -28,4 +30,6 @@ export const violationUpdateSchema = z.object({
   liftedById: z.string().cuid().nullable().optional(),
   liftedAt: z.coerce.date().nullable().optional(),
   resolutionNotes: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });

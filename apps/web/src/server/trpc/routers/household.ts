@@ -11,6 +11,9 @@ const fisherfolkLiteSelect = {
   fullName: true,
   barangay: true,
   categoryIds: true,
+  photo: true,
+  latitude: true,
+  longitude: true,
 };
 
 // P2002 = Prisma unique-constraint violation. Duck-typed to avoid a hard
@@ -308,9 +311,23 @@ export const householdRouter = createTRPCRouter({
           (c) => c.householdId !== null && c.householdId !== household.id,
         );
         if (assigned) {
+          // FIS-22 — name the conflicting household so the caller can see
+          // exactly where the fisherfolk already lives, instead of a
+          // generic "already in a household" message.
+          const assignedFisherfolk = await ctx.db.fisherfolk.findFirst({
+            where: { id: assigned.id },
+            select: { fullName: true },
+          });
+          const conflictingHousehold = await ctx.db.household.findFirst({
+            where: { id: assigned.householdId as string },
+            select: { householdNumber: true },
+          });
+          const who = assignedFisherfolk?.fullName ?? "This fisherfolk";
+          const conflictHouseholdNumber =
+            conflictingHousehold?.householdNumber ?? "another household";
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "One or more members are already in a household.",
+            message: `${who} is already a member of household ${conflictHouseholdNumber}.`,
           });
         }
       }

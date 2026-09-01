@@ -37,16 +37,22 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { RecordHeader } from "@/components/shared/record-header";
+import { ZoomableImage } from "@/components/shared/zoomable-image";
+import { LocationPicker } from "@/components/shared/location-picker";
 import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared/underline-tabs";
 import {
   DefinitionGrid,
@@ -69,42 +75,26 @@ function formatDate(value: Date | string | null | undefined): string {
   });
 }
 
-/** Thumbnail that opens an enlarged view in a Dialog when clicked. */
-function ZoomableImage({
-  src,
-  alt,
-  thumbnailClassName,
-  enlargedClassName,
-  ariaLabel,
+/** Colored category chip — tinted from the category's own displayColor hex. */
+function CategoryChip({
+  name,
+  color,
 }: {
-  src: string;
-  alt: string;
-  thumbnailClassName: string;
-  enlargedClassName?: string;
-  ariaLabel: string;
+  name: string;
+  color: string | null | undefined;
 }) {
+  const hex = color && /^#[0-9A-Fa-f]{6}$/.test(color) ? color : "#6b7280";
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          className="block w-full cursor-zoom-in rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <img src={src} alt={alt} className={thumbnailClassName} />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="flex max-h-[85vh] w-fit max-w-[90vw] items-center justify-center border-none bg-transparent p-0 shadow-none sm:max-w-[90vw]">
-        <img
-          src={src}
-          alt={alt}
-          className={
-            enlargedClassName ??
-            "max-h-[85vh] max-w-full rounded-lg object-contain"
-          }
-        />
-      </DialogContent>
-    </Dialog>
+    <span
+      className="inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-medium"
+      style={{
+        backgroundColor: `${hex}1a`,
+        color: hex,
+        borderColor: `${hex}40`,
+      }}
+    >
+      {name}
+    </span>
   );
 }
 
@@ -120,6 +110,8 @@ export function FisherfolkDetailClient({ id }: Props) {
   } = trpc.fisherfolk.getById.useQuery({ id });
 
   const { data: me } = trpc.user.me.useQuery();
+
+  const { data: categories } = trpc.category.list.useQuery({});
 
   const { data: photoUrlResp } = trpc.upload.getDownloadUrl.useQuery(
     { key: record?.photo ?? "" },
@@ -369,7 +361,25 @@ export function FisherfolkDetailClient({ id }: Props) {
 
           <DetailField label="ID Number" value={record.idNumber} />
           <DetailField label="RSBSA Number" value={record.rsbsaNumber} />
-          <DetailField label="Status" value={record.status} />
+          <DetailField
+            label="Category"
+            value={
+              record.categoryIds.length > 0 ? (
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {record.categoryIds.map((catId) => {
+                    const category = categories?.find((c) => c.id === catId);
+                    return (
+                      <CategoryChip
+                        key={catId}
+                        name={category?.name ?? "Unknown"}
+                        color={category?.displayColor}
+                      />
+                    );
+                  })}
+                </span>
+              ) : null
+            }
+          />
         </FieldRail>
 
         {/* RIGHT — tabbed related-record sections */}
@@ -462,8 +472,43 @@ export function FisherfolkDetailClient({ id }: Props) {
                       value={formatDate(record.dateJoined)}
                     />
                     <DetailField
-                      label="Registration Year"
-                      value={record.registrationYear}
+                      label="Renewal Date"
+                      value={
+                        <span className="inline-flex items-center gap-1.5">
+                          {formatDate(latestRenewal?.renewedAt)}
+                          {record.renewals.length > 0 && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-5 shrink-0 text-muted-foreground hover:text-foreground"
+                                  aria-label="View renewal history"
+                                >
+                                  <History className="size-3.5" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-72" align="start">
+                                <p className="mb-2 text-xs font-medium text-foreground">
+                                  Renewal History
+                                </p>
+                                <ul className="max-h-64 space-y-2 overflow-y-auto">
+                                  {record.renewals.map((r) => (
+                                    <li key={r.id} className="text-xs">
+                                      <p className="font-medium text-foreground">
+                                        {r.renewalYear}
+                                      </p>
+                                      <p className="text-muted-foreground">
+                                        {formatDate(r.renewedAt)}
+                                      </p>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </PopoverContent>
+                            </Popover>
+                          )}
+                        </span>
+                      }
                     />
                     <DetailField
                       label="Renewal Status"
@@ -535,6 +580,25 @@ export function FisherfolkDetailClient({ id }: Props) {
                       className="sm:col-span-2 lg:col-span-3"
                     />
                   </DefinitionGrid>
+
+                  <Separator />
+
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Location
+                    </p>
+                    {record.latitude != null && record.longitude != null ? (
+                      <LocationPicker
+                        disabled
+                        value={{ lat: record.latitude, lng: record.longitude }}
+                        onChange={() => {}}
+                      />
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No location set
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

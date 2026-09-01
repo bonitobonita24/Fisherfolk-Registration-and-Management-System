@@ -6,6 +6,45 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+### 2026-09-01 presentation batch (owner-dumped). Map decision: barangay-level + draggable capture. ALSO targets Production (separate owner-gated release; ayuda/vessels/violations dormant in prod for now).
+
+> STATUS 2026-09-01: FIS-17..24 ✅ built+verified+committed (`faa591b`); FIS-25 🟡 flagship (Fisherfolk)
+> built+committed (`0394a97`), other 4 entity forms pending. Badge dedupe `d843dc4`. Renewal backfill
+> `<this commit>`. Branch `feat/presentation-batch-0901`; deploying to demo. tsc/lint/416 tests/build green.
+
+- 🔴 **FIS-17 — Detail fields ~30% larger + tighter density (ALL detail pages).** Shared `components/shared/detail-field.tsx`: bump `DetailField` label (`text-xs`) + value (`text-sm`) ~30%; tighten `DefinitionGrid` (`gap-x-6 gap-y-4`) + `FieldRail` (`space-y-4`). Propagates to all 6 detail pages (fisherfolk/households/vessels/violations/ayuda/fish-catches). Done: bigger + closer-spaced, axe AA 0 new, all 6 pages visually QA'd. `owner 2026-09-01` `design` `ui`
+- 🔴 **FIS-18 — Fisherfolk sidebar: replace "Status" with Category/categories.** `fisherfolk-detail-client.tsx:372` — swap `DetailField label="Status"` for resolved `categoryIds`→`Category` name+color chip(s). `owner 2026-09-01` `design` `ui`
+- 🔴 **FIS-19 — Rename "Registration Year"→"Renewal Date" + history icon + RENEWED header badge.** Profile tab: relabel field, show latest `renewals[].renewedAt` (— if none), history icon opens all past renewal dates (`RegistrationRenewal` table). Add "RENEWED" badge beside ACTIVE in `RecordHeader` when `status===RENEWED`. Confirm "Date Joined"=`dateJoined` (first record) — no change. `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-20 — Household member rows: photo thumbnail (click-to-enlarge) + category label.** `household-detail-client.tsx` member rows: add photo left of name (add `photo` to `fisherfolkLiteSelect` in `household.ts`, resolve download URL, lift `ZoomableImage` to shared); category label on right (fetch `category.list`, map ids→names). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-21 — Add-member barangay-mismatch warning + row warning icon.** At add-time, if candidate `barangay`≠head `barangay`: popup warning (still allow add); warning icon on that member's row. Barangay-string level (no coords needed). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-22 — "Already in another household" message points to WHERE.** `household.ts` update mutation already rejects; extend to look up + return the other household's number/link in the message. One-household-per-member already structurally enforced (single FK + `headId @unique`). `owner 2026-09-01` `feature` `api`
+- 🔴 **FIS-23 — Household detail ~50/50 split with barangay-level member map (right).** Wrap Details+Members in a grid; new `household-member-map.tsx` (MapLibre, reuse `CALAPAN_BARANGAY_CENTROIDS`) plots members at barangay centroids (jittered so overlaps show); king icon on Head. NO GPS — barangay-level only (owner-approved 2026-09-01). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-24 — Household submenu: municipal interconnection map.** New nav item under Records/Household + new route; municipal outline (derive via turf union of `calapan-barangays.geojson` polygons); plot all households, king icon on Heads, Head→member connection lines (barangay-centroid level), highlight members whose barangay≠Head's ("jumped"). Nav model is flat — add sibling `NavItem`. `owner 2026-09-01` `feature` `ui`
+
+- 🔴 **FIS-25 — Location capture (coordinate entry) — flagship-first (owner 2026-09-01).** Supersedes "barangay-level only": base maps keep barangay centroids as the DEFAULT pin, but pins become DRAGGABLE to capture an approximate real location, stored per registration. Scope: (a) Prisma migration add `latitude`/`longitude` Float? to Fisherfolk, Vessel, FishCatch, Violation, Ayuda (confirm ayuda target model) — ONE migration for all 5; (b) reusable `LocationPicker` (MapLibre draggable Marker + "Use my location" via browser Geolocation API — works on mobile browsers over HTTPS, no native app). AUTO-CENTER: selecting the barangay in the form recenters the map + drops the pin on that barangay's centroid, then encoder fine-drags to the exact spot (owner 2026-09-01). Ayuda coord stored on `AyudaBeneficiary`; (c) Zod + create/update wiring. FLAGSHIP: fully wire + polish FISHERFOLK form + detail map + household map uses real coords when present (fallback centroid). THEN wire vessels/fish-catches/violations/ayuda forms (may not all be demo-polished by tomorrow). Mobile GPS field-testing limited pre-demo. `owner 2026-09-01` `feature` `db` `ui`
+
+### 2026-09-01 round-3 batch (owner-dumped, FULL AUTO). Also targets Production (owner-gated release).
+
+- 🔴 **FIS-26 — Distinct color per category.** All `categories.display_color` = `#4F8EF7` (uniform); chips already honor displayColor → DATA fix: assign a distinct accessible palette per category (script `distinct-category-colors.sql`), update seed for future categories. `owner 2026-09-01` `design` `db`
+- 🔴 **FIS-27 — Photo/Signature/QR enlarge is too small + not resizable.** Upgrade ZoomableImage (shared + fisherfolk-local): large dialog (~90vw/900px, max-h 80vh) + zoom in/out/reset controls. Keep API stable (household MemberAvatar uses shared). `owner 2026-09-01` `design` `ui`
+- 🔴 **FIS-28 — BUG: household member map renders blank (real browser).** Container has height; municipal-network + dashboard maps work. Likely MapLibre init-before-container-sized in the grid cell + resize not recovering. Fix init/resize robustness (guard on clientHeight>0, resize on load+rAF, min-height fallback). `owner 2026-09-01` `bug` `ui`
+- 🔴 **FIS-29 — Municipal Network: jumped=PINK + heatmap toggle.** Jumped-barangay members/lines/legend → pink (#EC4899). Add heatmap toggle (barangay household density largest→smallest, mirror dashboard heatmap). 4a: map uses REAL captured coords when present (already falls back to centroid; realized as FIS-30 capture is used). `owner 2026-09-01` `feature` `ui`
+- 🔴 **FIS-30 — Location capture for the remaining 4 entities.** Wire LocationPicker (drag pin + barangay auto-center + mobile GPS) into Vessel, FishCatch, Violation, Ayuda(beneficiary) forms + detail + Zod (schema lat/lng already deployed). Mirrors shipped Fisherfolk pattern. `owner 2026-09-01` `feature` `ui` `db`
+### 2026-09-01 NEXT-SESSION queue (owner: "do the audit finding + gaps next session"). Do in order.
+
+- ✅ **FIS-12-RECONCILE — Reconciled (2026-09-01).** Owner chose merge/rebase → `git merge --no-ff feat/fis12-registration-status-model` (`4aa229a`); schema auto-merged, 3 migrations in order, docs union-resolved, all gates green (prisma validate · tsc · 416 tests · build). LOCAL/HARD HOLD. Residual pre-prod `[WHAT]`: backfill mapping (ACTIVE→NEW / INACTIVE→EXPIRED) needs owner sign-off before prod `migrate deploy`. `owner 2026-09-01` `chore` `db`
+- 🔴 **FIS-32 — Real-browser verification pass.** Confirm the MapLibre features RENDER (household member map, municipal network incl. pink jumped + heatmap, LocationPicker); exercise the 4 new location forms (vessel/fish-catch/violation register + ayuda Mark-Received) end-to-end (pin→save→read-back); test mobile GPS on HTTPS demo. Headless couldn't (no WebGL). `owner 2026-09-01` `test`
+- 🔴 **FIS-33 — a11y pass on new interactive components.** LocationPicker, ZoomableImage zoom dialog, member/network map controls, Mark-Received dialog — `a11y-skill`/`accessibility-agents` (keyboard, ARIA, focus trap). `owner 2026-09-01` `a11y` `test`
+- 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the maps/location capture headless couldn't capture; overwrite `public/showcase/*.png`. `owner 2026-09-01` `design`
+
+- 🔴 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task).** After round-3 ships: brainstorm + rebuild the public landing page with the latest features, updated screenshots, better statements/context (appropriate skills: brainstorming, frontend-design/web-motion, copywriting), then run **humanize** on all captions/statements + ai-check. `owner 2026-09-01` `design` `docs`
+- 🟡 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** ✅ CODE DONE (`ccbe876`, 2026-09-01): new `.tabs-scrollbar` themed thin-scrollbar utility on shared `UnderlineTabsList` (uniform across fisherfolk-detail/id-generator/analytics/reports/todo); lint-gated build green. Visual render confirmation folded into FIS-32 real-browser pass. Original ask below:
+  ~~🔴~~ On a specific fisherfolk detail page, the
+  tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw
+  native horizontal scrollbar. Restyle it to match the app's current CSS/scrollbar styling (thin/themed
+  overflow, not the default OS scrollbar) — likely the `UnderlineTabs`/tabs overflow container in
+  `fisherfolk-detail-client.tsx`. `source: owner 2026-08-31` `bug` `ui` `design`
+
 - 🔴 **Build `audit-log` feature (currently a 14-line stub).** `app/[tenant]/audit-log/page.tsx` has only a
   PageHeader; no table/data. Build the audit-trail view: paginated table of audit entries (adopt shared
   `DataTable` + `ListToolbar`/`ListPagination`), scoped to tenant, Viewer+ gate. Scout the existing AuditLog
@@ -16,6 +55,71 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   (reuse RBAC infra + `/tm` users-client pattern + role-builder). Scout the existing user/RBAC router first.
   SCOPE `[WHAT]` to confirm: which actions (invite/deactivate/role-change), permission gate (tenant_admin+),
   columns. Respect Rule 34 (never expose Billing/User-Mgmt below tenant_admin). `agent-found 2026-08-30` `feature`
+
+### FMO meeting 2026-07-09 — registration policy + ID changes (captured 2026-08-31; all builds HARD HOLD pending owner [WHAT])
+
+- 🔴 **FIS-8 — Multi-family households (support multiple heads per household).** ✅ **[WHAT] RESOLVED (owner
+  2026-08-31):** KEEP the household grouping AND the head-of-family concept — but one household may contain
+  MULTIPLE families (2–3 families living together), each with its OWN head. Current schema blocks this:
+  `Household.headId` is `@unique` (exactly one head per household). Work: introduce a family sub-grouping under
+  `Household` (each Family = one head + its members) OR relax the single-head constraint to allow multiple family
+  units per household; update household create/edit UI + "Head of Household" reporting to list per-family heads.
+  Design the multi-family-per-household model. `source: owner meeting 2026-07-09` `feature` `db` `design`
+
+- 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
+  dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
+  Violations" dashboard tile (`violations-group-tile.tsx`) + `activeViolationCount` renewal guard
+  (`fisherfolk.ts:505`). ⚠ **[WHAT]:** show a raw count instead of a badge? Keep the renewal-block semantics
+  (active violation blocks renewal) unchanged? `source: owner meeting 2026-07-09` `feature` `ui`
+
+- 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already exists as one of
+  the 6 `CANONICAL_CATEGORIES` (`lib/normalize/types.ts:13`). NEW work = subcategory taxonomy + aquaculture-only
+  fields: brackish (fishpond/fishpen/fishcage/fishcorral) + freshwater (backyard fishpond/fishpen/fishcage/
+  fishcorral); capture land area, lease-or-owned, commodity type, culture method (poly/monoculture). Operators
+  register (not non-operator landowners). ⚠ **Ordinance-gated — full implementation pending amendments (Jan);**
+  build the structure now, activate later. [WHAT]: new Prisma model vs JSON extension; which fields required.
+  `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-11 — Add full-time / part-time + primary source of income fields.** Not present today (no occupation/
+  livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
+  the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
+
+- ✅ **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command — BUILT 2026-08-31.**
+  Built + verified (typecheck 7/7 · 586 tests · build green) on `feat/fis12-registration-status-model` (`6892e64`), LOCAL/HARD HOLD.
+  Bulk-expire admin tool built but DEFERRED (do not run until next mayoral election). ⚠ Backfill mapping ACTIVE→NEW / INACTIVE→EXPIRED
+  needs owner sign-off before the prod migration. `feature` `db`
+  ✅ **[WHAT] RESOLVED (owner 2026-08-31).** Status meanings: **NEW** = brand-new registrant, never before in the
+  DB; **RENEWED** = re-registered, only possible AFTER a Mayor's-election renewal cycle; **EXPIRED** = flagged for
+  renewal. Flow: after each mayoral election an admin runs a SINGLE-SHOT command (Administrative Settings) that
+  bulk-sets all current active IDs → EXPIRED; then each fisherfolk is renewed one-by-one (EXPIRED → RENEWED) as
+  they complete the post-election renewal process. Build: retire ACTIVE/INACTIVE from active use (ALTER TYPE
+  discipline; add EXPIRED); add the admin bulk-expire tool (permission-gated, confirm-guarded, audit-logged).
+  ⚠ **DEFERRED activation** — this is year 1; the bulk-expire is NOT run until the next mayoral election. Build the
+  tool now, do not execute it. `source: owner meeting 2026-07-09` `feature` `db`
+
+- 🔴 **FIS-13 — QR scan & verification flow.** QR is ALREADY generated + printed on the ID card
+  (`Fisherfolk.qrCode`, `id-card-renderer.tsx` qr element). NEW = an in-app scan/verify surface: scan a fisherfolk
+  ID QR → resolve → show verification (valid/record summary). [WHAT]: public vs authed verify; camera-scan page
+  vs deep-link resolver. `source: owner meeting 2026-07-09` `feature`
+
+- ✅ **FIS-14 — RSBSA on ID card — RESOLVED, no build (owner 2026-08-31).** "RSVS" was misheard; owner confirms it
+  means **RSBSA**, which the ID card already supports (`{{rsbsa_number}}`). No work needed. Squirlnote → For Review
+  (owner to mark Done). `source: owner meeting 2026-07-09`
+
+- 🔴 **FIS-15 — 3-year renewal cycle (mayoral-term aligned).** `RegistrationRenewal` + `registrationYear` exist;
+  renewal is manual, no cadence enforcement. Add a 3-year renewal cadence: due-date/renewal-due computation +
+  indicator. [WHAT]: reminder-only vs status enforcement; anchor year. `source: owner meeting 2026-07-09` `feature`
+
+- ✅ **FIS-16 — Mayor read-only access — RESOLVED, no build (owner 2026-08-31 "yes").** The existing `viewer` role
+  (view-only across all mapped segments) is acceptable for the mayor's read-only dashboard; no new role needed.
+  Squirlnote → For Review (owner to mark Done). `source: owner meeting 2026-07-09`
+
+> **Already covered (no task):** Senior-citizens report EXISTS (`report.ts` `senior_citizens` "60+" + analytics
+> "Senior Citizens by Barangay"). Kanban/task module EXISTS (todo). QR generation EXISTS.
+> **Not FRMS-code tasks (business/proposal — tracked elsewhere):** benchmark maintenance pricing vs HR system ·
+> pitch slides (lead with dashboard demo) · cloud-cost justification in proposal · pricing/contract · formal
+> re-registration letter to fisherfolk · "Sheila to study fish catch/dashboard" (person-assigned).
+> **Parking lot (future, discussed as "potential"):** staff whereabouts/activity tracking.
 
 - ✅ **Cargorix redesign (Waves 0–5) SHIPPED as v0.19.0 to prod + demo (2026-08-28).** Full UI adoption +
   ⌘K/density/theme-customizer. Merged `f04a03e`, released `8a7bc41` (tag v0.19.0, main==origin), promoted

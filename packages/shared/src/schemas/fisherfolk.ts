@@ -29,6 +29,8 @@ export const fisherfolkCreateSchema = z.object({
   remarks: z.string().optional(),
   createdById: z.string().optional(),
   updatedById: z.string().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 export const fisherfolkSearchDuplicatesSchema = z
@@ -76,6 +78,8 @@ export const fisherfolkUpdateSchema = z.object({
   remarks: z.string().nullable().optional(),
   createdById: z.string().nullable().optional(),
   updatedById: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 export const fisherfolkRenewSchema = z.object({

@@ -4,6 +4,22 @@
 
 ---
 
+## FIS-12 registration status model — build decisions (2026-08-31)
+Decision: registration status is now **NEW / RENEWED / EXPIRED** (+ ARCHIVED for soft-delete); ACTIVE/INACTIVE
+retired from active use (enum values kept — Postgres can't drop them). "Valid/registered" = {NEW, RENEWED}.
+Renew requires status = EXPIRED. `resetAnnualRegistrations` repurposed as the tenant-scoped **post-election
+bulk-expire** (NEW/RENEWED → EXPIRED, audit-logged, adminProcedure-gated) — BUILT but DEFERRED (run only after
+a mayoral election).
+Sub-decisions ([HOW]):
+  (a) **Data backfill mapping (⚠ owner sign-off before prod):** existing `ACTIVE → NEW`, `INACTIVE → EXPIRED`.
+      Rationale: retiring ACTIVE from queries without migrating rows would hide every current fisherfolk from
+      valid lists/counts. Applied to dev only so far; the prod migration is a separate owner-gated deploy.
+  (b) **Enum migration discipline:** ADD VALUE (non-txn) in its own migration + a separate backfill migration
+      (`ALTER TYPE … ADD VALUE` cannot be used in the same txn it's created in). Never DROP/CREATE the enum.
+  (c) **Bulk-expire kept the existing name** (`resetAnnualRegistrations`) to minimize blast radius; a rename to
+      a bulk-expire-specific name is deferred, to be reconciled with FIS-15 (renewal cadence, still open).
+Locked: yes (backfill mapping provisional pending owner prod sign-off).
+
 ## ToDo (Kanban + Calendar) — [HOW] locked implementation decisions
 Decision: The standalone Kanban board is reframed as **ToDo**, a feature with two views (Kanban +
 Calendar) over the SAME underlying `KanbanTask` model/table — no rename at the DB layer.

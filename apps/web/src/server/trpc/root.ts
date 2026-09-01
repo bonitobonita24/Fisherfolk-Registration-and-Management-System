@@ -12,6 +12,7 @@ import { fishCatchRouter } from "./routers/fishCatch";
 import { fishCatchAnalyticsRouter } from "./routers/fishCatchAnalytics";
 import { fisherfolkRouter } from "./routers/fisherfolk";
 import { householdRouter } from "./routers/household";
+import { householdNetworkRouter } from "./routers/household-network";
 import { idTemplateRouter } from "./routers/idTemplate";
 import { idPrintRouter } from "./routers/idPrint";
 import { kanbanTaskRouter } from "./routers/kanbanTask";
@@ -39,6 +40,7 @@ export const appRouter = createTRPCRouter({
   fishCatchAnalytics: fishCatchAnalyticsRouter,
   fisherfolk: fisherfolkRouter,
   household: householdRouter,
+  householdNetwork: householdNetworkRouter,
   import: importRouter,
   idTemplate: idTemplateRouter,
   idPrint: idPrintRouter,

@@ -15,7 +15,7 @@ import {
   AttachmentUpload,
   type UploadedAttachment,
 } from "@/components/shared/attachment-upload";
-import { FormSection, FormActions } from "@/components/shared";
+import { FormSection, FormActions, LocationPicker } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +43,8 @@ const formSchema = z
     subject: z.string().min(1, "Subject is required"),
     details: z.string(),
     notes: z.string(),
+    latitude: z.number().nullable().optional(),
+    longitude: z.number().nullable().optional(),
   })
   .strict();
 
@@ -90,6 +92,8 @@ export function ViolationFormClient() {
       subject: "",
       details: "",
       notes: "",
+      latitude: null,
+      longitude: null,
     },
   });
 
@@ -150,6 +154,8 @@ export function ViolationFormClient() {
           violatorName: violatorName.trim(),
         }),
       ...(needsVessel && selectedVessel && { vesselId: selectedVessel.id }),
+      latitude: values.latitude ?? undefined,
+      longitude: values.longitude ?? undefined,
       attachments,
     });
   }
@@ -424,6 +430,41 @@ export function ViolationFormClient() {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="latitude"
+            render={() => (
+              <FormItem>
+                <FormLabel>Location</FormLabel>
+                <FormControl>
+                  <LocationPicker
+                    value={
+                      form.watch("latitude") != null &&
+                      form.watch("longitude") != null
+                        ? {
+                            lat: form.watch("latitude")!,
+                            lng: form.watch("longitude")!,
+                          }
+                        : null
+                    }
+                    onChange={(next) => {
+                      form.setValue("latitude", next.lat, {
+                        shouldValidate: true,
+                      });
+                      form.setValue("longitude", next.lng, {
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Optional — drag the pin, click the map, or use your current
+                  location to record where the violation occurred.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

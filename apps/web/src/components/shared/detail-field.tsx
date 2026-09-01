@@ -16,8 +16,8 @@ export function DetailField({ label, value, className }: DetailFieldProps) {
   const empty = value === null || value === undefined || value === "";
   return (
     <div className={cn("min-w-0 space-y-1", className)}>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <div className="text-sm text-foreground [overflow-wrap:anywhere]">
+      <p className="text-[0.95rem] text-muted-foreground">{label}</p>
+      <div className="text-[1.125rem] text-foreground [overflow-wrap:anywhere]">
         {empty ? "—" : value}
       </div>
     </div>
@@ -47,7 +47,7 @@ export function DefinitionGrid({
         ? "sm:grid-cols-2 lg:grid-cols-4"
         : "sm:grid-cols-2 lg:grid-cols-3";
   return (
-    <div className={cn("grid grid-cols-1 gap-x-6 gap-y-4", cols, className)}>
+    <div className={cn("grid grid-cols-1 gap-x-5 gap-y-2.5", cols, className)}>
       {children}
     </div>
   );
@@ -64,7 +64,7 @@ interface FieldRailProps {
  */
 export function FieldRail({ children, className }: FieldRailProps) {
   return (
-    <div className={cn("space-y-4 xl:border-r xl:py-4 xl:pr-6", className)}>
+    <div className={cn("space-y-3 xl:border-r xl:py-4 xl:pr-6", className)}>
       {children}
     </div>
   );

@@ -109,6 +109,8 @@ export const violationRouter = createTRPCRouter({
           evidenceImages: z.array(z.string()).default([]),
           notes: z.string().optional(),
           violatorName: z.string().max(255).optional(),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
           attachments: z
             .array(
               z.object({
@@ -169,6 +171,8 @@ export const violationRouter = createTRPCRouter({
           details: z.string().optional(),
           evidenceImages: z.array(z.string()).optional(),
           notes: z.string().optional(),
+          latitude: z.number().nullable().optional(),
+          longitude: z.number().nullable().optional(),
         })
         .strict(),
     )

@@ -522,8 +522,8 @@ async function main(): Promise<void> {
   }
 
   // ── 4. Fisherfolk ────────────────────────────────────────────────────────
-  const STATUS_WEIGHTED: Array<"ACTIVE" | "NEW" | "RENEWED"> = [
-    "ACTIVE", "ACTIVE", "ACTIVE", "ACTIVE", "ACTIVE", "NEW", "NEW", "RENEWED",
+  const STATUS_WEIGHTED: Array<"NEW" | "RENEWED"> = [
+    "NEW", "NEW", "NEW", "NEW", "NEW", "NEW", "NEW", "RENEWED",
   ];
   const CIVIL_STATUSES: Array<"SINGLE" | "MARRIED" | "WIDOWED" | "SEPARATED" | "DIVORCED"> = [
     "SINGLE", "MARRIED", "WIDOWED", "SEPARATED", "DIVORCED",

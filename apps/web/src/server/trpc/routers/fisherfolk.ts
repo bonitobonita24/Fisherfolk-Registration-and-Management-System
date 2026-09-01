@@ -34,7 +34,7 @@ export const fisherfolkRouter = createTRPCRouter({
           limit: z.number().int().min(1).max(200).default(50),
           search: z.string().optional(),
           status: z
-            .enum(["NEW", "ACTIVE", "RENEWED", "INACTIVE", "ARCHIVED"])
+            .enum(["NEW", "RENEWED", "EXPIRED", "ARCHIVED"])
             .optional(),
           barangay: z.string().optional(),
           missing: z.enum(["photo", "signature"]).optional(),
@@ -495,10 +495,10 @@ export const fisherfolkRouter = createTRPCRouter({
       });
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
-      if (existing.status !== "INACTIVE") {
+      if (existing.status !== "EXPIRED") {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
-          message: "Cannot renew: record is not INACTIVE",
+          message: "Cannot renew: record must be EXPIRED before it can be renewed",
         });
       }
 

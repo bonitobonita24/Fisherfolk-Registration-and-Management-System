@@ -38,7 +38,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarangayPicker, FormSection, FormActions } from "@/components/shared";
+import {
+  BarangayPicker,
+  FormSection,
+  FormActions,
+  LocationPicker,
+} from "@/components/shared";
 
 const GEAR_TYPES = Object.keys(GEAR_TYPE_LABELS) as GearType[];
 const DISPOSITIONS = Object.keys(CATCH_DISPOSITION_LABELS) as CatchDisposition[];
@@ -80,6 +85,8 @@ const formSchema = z.object({
   disposition: z.string(),
   source: z.string().min(1),
   remarks: z.string(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
   species: z.array(speciesRowSchema).min(1, "Add at least one species"),
 });
 
@@ -155,6 +162,8 @@ export function FishCatchFormClient() {
       disposition: "",
       source: "FMO_ENUMERATOR",
       remarks: "",
+      latitude: null,
+      longitude: null,
       species: [EMPTY_SPECIES_ROW],
     },
   });
@@ -260,6 +269,8 @@ export function FishCatchFormClient() {
       estimatedValuePhp: parseNonnegativeFloat(values.estimatedValuePhp),
       disposition: (trimOpt(values.disposition) as CatchDisposition) ?? undefined,
       remarks: trimOpt(values.remarks),
+      latitude: values.latitude ?? undefined,
+      longitude: values.longitude ?? undefined,
       source: values.source as
         | "FMO_ENUMERATOR"
         | "SELF_REPORT"
@@ -595,6 +606,43 @@ export function FishCatchFormClient() {
                   <FormControl>
                     <Input placeholder="e.g. Verde Island Passage" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="latitude"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Fishing Ground Location</FormLabel>
+                  <FormControl>
+                    <LocationPicker
+                      value={
+                        form.watch("latitude") != null &&
+                        form.watch("longitude") != null
+                          ? {
+                              lat: form.watch("latitude")!,
+                              lng: form.watch("longitude")!,
+                            }
+                          : null
+                      }
+                      onChange={(next) => {
+                        form.setValue("latitude", next.lat, {
+                          shouldValidate: true,
+                        });
+                        form.setValue("longitude", next.lng, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      barangay={form.watch("fishingGroundBarangay")}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Drag the pin, click the map, or use your current
+                    location. The pin auto-centers on the selected fishing
+                    ground barangay until moved.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

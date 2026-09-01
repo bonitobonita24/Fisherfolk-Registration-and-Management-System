@@ -23,9 +23,9 @@ export function LandingFooter() {
               <span className="text-lg font-semibold">FRMS</span>
             </div>
             <p className="mt-3 max-w-sm text-sm text-white/60">
-              Fisherfolk Registration &amp; Management System — the digital system
-              of record for the City Fisheries Management Office of Calapan City,
-              Oriental Mindoro.
+              Fisherfolk Registration &amp; Management System: the day-to-day
+              system of record for the City Fisheries Management Office of
+              Calapan City, Oriental Mindoro.
             </p>
           </div>
 
