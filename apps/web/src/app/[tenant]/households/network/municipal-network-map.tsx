@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc/client";
 import {
   CALAPAN_BARANGAY_CENTROIDS,
@@ -560,6 +562,16 @@ export function MunicipalNetworkMap() {
     }
   }, [displayMode, heads]);
 
+  // ── Keyboard-accessible list alternative (WCAG 2.1.1 / 4.1.2) ───────────
+  // The Crown head markers are DOM pins that aren't keyboard-focusable and
+  // share a generic accessible name; this list surfaces the same household
+  // points as real, uniquely-labelled, focusable buttons alongside the map.
+  function flyToHousehold(lat: number, lon: number) {
+    const map = mapRef.current;
+    if (map == null) return;
+    map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 14) });
+  }
+
   return (
     <Card className="flex h-full flex-col gap-0 overflow-hidden py-0">
       <CardHeader className="space-y-1 border-b px-6 py-5">
@@ -642,6 +654,33 @@ export function MunicipalNetworkMap() {
               </p>
             </div>
           )}
+        </div>
+
+        <div
+          role="region"
+          aria-label="Map locations (list view)"
+          className="mt-3 rounded-md border"
+        >
+          <h3 className="border-b px-3 py-2 text-xs font-medium">
+            Household locations (list view)
+          </h3>
+          <ScrollArea className="h-40">
+            <ul className="divide-y">
+              {heads.map(({ household, lat, lon }) => (
+                <li key={household.id}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-auto w-full justify-start rounded-none px-3 py-2 text-left text-xs font-normal"
+                    onClick={() => flyToHousehold(lat, lon)}
+                  >
+                    {household.head.fullName} — {household.householdNumber} (
+                    {household.head.barangay})
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
         </div>
       </CardContent>
     </Card>

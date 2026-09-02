@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -12,6 +12,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   CALAPAN_BARANGAY_CENTROIDS,
   CALAPAN_BOUNDS,
@@ -68,6 +70,20 @@ function jitterFor(id: string): { dLat: number; dLon: number } {
     dLat: Math.sin(angle) * magnitude,
     dLon: Math.cos(angle) * magnitude,
   };
+}
+
+/** Resolve a member's plotted [lat, lon] — real GPS when present, else barangay centroid + jitter. */
+function resolveMemberPosition(
+  member: HouseholdMemberMapMember,
+): { lat: number; lon: number } | null {
+  if (member.latitude != null && member.longitude != null) {
+    return { lat: member.latitude, lon: member.longitude };
+  }
+  const centroidKey = resolveCentroidKey(member.barangay);
+  const centroid = CALAPAN_BARANGAY_CENTROIDS[centroidKey];
+  if (centroid == null) return null;
+  const { dLat, dLon } = jitterFor(member.id);
+  return { lat: centroid.lat + dLat, lon: centroid.lon + dLon };
 }
 
 const HEAD_COLOR = "#eab308"; // gold
@@ -201,24 +217,9 @@ export default function HouseholdMemberMap({
       normalizeBarangay(headBarangay).value ?? headBarangay;
 
     for (const member of members) {
-      const hasRealCoords =
-        member.latitude != null && member.longitude != null;
-
-      let lat: number;
-      let lon: number;
-
-      if (hasRealCoords) {
-        lat = member.latitude as number;
-        lon = member.longitude as number;
-      } else {
-        const centroidKey = resolveCentroidKey(member.barangay);
-        const centroid = CALAPAN_BARANGAY_CENTROIDS[centroidKey];
-        if (centroid == null) continue;
-
-        const { dLat, dLon } = jitterFor(member.id);
-        lat = centroid.lat + dLat;
-        lon = centroid.lon + dLon;
-      }
+      const position = resolveMemberPosition(member);
+      if (position == null) continue;
+      const { lat, lon } = position;
 
       const sameBarangay =
         (normalizeBarangay(member.barangay).value ?? member.barangay) ===
@@ -256,6 +257,31 @@ export default function HouseholdMemberMap({
       markersRef.current.push(marker);
     }
   }, [mapReady, members, headBarangay]);
+
+  // ── Keyboard-accessible list alternative (WCAG 2.1.1 / 4.1.2) ───────────
+  // The map's markers are raster/DOM pins that aren't keyboard-focusable and
+  // share a generic accessible name. This list surfaces the same points as
+  // real, uniquely-labelled, focusable buttons alongside the map.
+  const listPoints = useMemo(
+    () =>
+      members
+        .map((member) => {
+          const position = resolveMemberPosition(member);
+          if (position == null) return null;
+          return { member, ...position };
+        })
+        .filter(
+          (entry): entry is { member: HouseholdMemberMapMember; lat: number; lon: number } =>
+            entry != null,
+        ),
+    [members],
+  );
+
+  function flyToMember(lat: number, lon: number) {
+    const map = mapRef.current;
+    if (map == null) return;
+    map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 14) });
+  }
 
   return (
     <Card className="flex h-full min-h-96 flex-col gap-0 overflow-hidden py-0">
@@ -305,6 +331,33 @@ export default function HouseholdMemberMap({
               </div>
             </div>
           </div>
+        </div>
+
+        <div
+          role="region"
+          aria-label="Map locations (list view)"
+          className="mt-3 rounded-md border"
+        >
+          <h3 className="border-b px-3 py-2 text-xs font-medium">
+            Member locations (list view)
+          </h3>
+          <ScrollArea className="h-32">
+            <ul className="divide-y">
+              {listPoints.map(({ member, lat, lon }) => (
+                <li key={member.id}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-auto w-full justify-start rounded-none px-3 py-2 text-left text-xs font-normal"
+                    onClick={() => flyToMember(lat, lon)}
+                  >
+                    {member.fullName} — {member.barangay}
+                    {member.isHead ? " (Household head)" : ""}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </ScrollArea>
         </div>
       </CardContent>
     </Card>
