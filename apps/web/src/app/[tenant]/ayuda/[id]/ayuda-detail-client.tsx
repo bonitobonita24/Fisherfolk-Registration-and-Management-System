@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Loader2, MapPin, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -358,12 +358,17 @@ function BeneficiaryActions({
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null,
   );
+  // The dialog is opened from a DropdownMenuItem that unmounts when the menu
+  // closes, so Radix has no trigger to restore focus to on dialog close and
+  // focus falls to <body> (WCAG 2.4.3). Restore focus to the Verify button.
+  const verifyTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button
+            ref={verifyTriggerRef}
             size="sm"
             variant="outline"
             className="h-8"
@@ -397,7 +402,14 @@ function BeneficiaryActions({
           if (!next) setCoords(null);
         }}
       >
-        <DialogContent>
+        <DialogContent
+          onCloseAutoFocus={(e) => {
+            // Restore focus to the Verify trigger; its DropdownMenuItem opener
+            // is already unmounted, so Radix would otherwise focus <body>.
+            e.preventDefault();
+            verifyTriggerRef.current?.focus();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Mark as Received</DialogTitle>
             <DialogDescription>

@@ -102,15 +102,25 @@ export function LocationPicker({
     // Intentionally init once; theme swaps are handled via setStyle below.
   }, [mounted]);
 
-  // Keep the map sized to its container.
+  // Keep the map sized to its container. When the picker mounts inside a
+  // dialog, the container settles AFTER the map inits (enter animation), so the
+  // canvas can be mis-measured and never corrected without a size change — this
+  // pushes the top-right NavigationControl off the visible area where
+  // `overflow-hidden` clips it below the 24px min target size (WCAG 2.5.8).
+  // Force an explicit resize once ready (+ an rAF) in addition to the observer.
   useEffect(() => {
     if (!mapReady) return;
     const el = containerRef.current;
     const map = mapRef.current;
     if (el == null || map == null) return;
+    map.resize();
+    const raf = requestAnimationFrame(() => map.resize());
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
   }, [mapReady]);
 
   // ── Theme swap ───────────────────────────────────────────────────────────
