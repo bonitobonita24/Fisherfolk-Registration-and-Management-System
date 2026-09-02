@@ -7,6 +7,9 @@ import {
   ShieldAlert,
   BarChart3,
   IdCard,
+  MapPin,
+  Network,
+  RefreshCcw,
   type LucideIcon,
 } from "lucide-react";
 
@@ -61,6 +64,21 @@ const FEATURES: {
     title: "Fisherfolk ID Generation",
     body: "Print an official, QR-coded fisherfolk ID straight from a verified record.",
   },
+  {
+    icon: MapPin,
+    title: "Location Capture",
+    body: "Tap \"use my location\" or drop a pin on the map when registering a fisherfolk, household, vessel, ayuda beneficiary, or catch, so every record has a real place on the ground.",
+  },
+  {
+    icon: Network,
+    title: "Household & Municipal Maps",
+    body: "See where a household's members live relative to each other, then zoom out to a city-wide map of how every registered household across all 62 barangays connects.",
+  },
+  {
+    icon: RefreshCcw,
+    title: "Registration Status Lifecycle",
+    body: "Every fisherfolk record carries a clear NEW, RENEWED, or EXPIRED badge that moves through the annual renewal cycle on its own, with a dashboard breakdown of where everyone stands.",
+  },
 ];
 
 export function LandingFeatures() {
@@ -76,7 +94,7 @@ export function LandingFeatures() {
               Built for the full fisheries lifecycle
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Eight modules cover the office's day-to-day work, from first
+              Modules covering the office's day-to-day work, from first
               registration to the annual report, in place of spreadsheets
               scattered across different desks.
             </p>
