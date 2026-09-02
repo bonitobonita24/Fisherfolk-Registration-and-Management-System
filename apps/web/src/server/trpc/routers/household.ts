@@ -80,7 +80,7 @@ export const householdRouter = createTRPCRouter({
             head: {
               select: { id: true, fullName: true, categoryIds: true },
             },
-            _count: { select: { members: true } },
+            _count: { select: { members: true, families: true } },
           },
         }),
         ctx.db.household.count({ where }),
@@ -92,6 +92,7 @@ export const householdRouter = createTRPCRouter({
         barangay: row.barangay,
         head: row.head,
         memberCount: row._count.members,
+        familyCount: row._count.families,
       }));
 
       return { items, total, page, limit };

@@ -13,6 +13,7 @@ export interface HouseholdListItem {
   householdNumber: string;
   barangay: string;
   memberCount: number;
+  familyCount: number;
   head: {
     id: string;
     fullName: string;
@@ -72,6 +73,15 @@ export const columns: ColumnDef<HouseholdListItem>[] = [
       <DataTableColumnHeader column={column} title="Head" />
     ),
     cell: ({ row }) => row.original.head.fullName,
+  },
+  {
+    accessorKey: "familyCount",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Families" />
+    ),
+    cell: ({ row }) => (
+      <span className="tabular-nums">{row.original.familyCount}</span>
+    ),
   },
   {
     accessorKey: "memberCount",
