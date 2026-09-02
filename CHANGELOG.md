@@ -4,6 +4,16 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.22.1 — 2026-09-02
+
+### [FIXED]
+- Permissions-Policy geolocation=() → geolocation=(self) so FIS-25 'Use my location' works (`6d50e53`)
+
+### [DOCS]
+- record a11y audit results — 3/4 components clean, Mark-Received remediation TODO (`2014a0b`)
+- v0.22.0 shipped to production — FIS-17..31 + FIS-12 status model live; backfill 3181 ACTIVE→NEW verified (`b3a1728`)
+
+
 ## v0.22.0 — 2026-09-02
 
 ### [FEATURE]
