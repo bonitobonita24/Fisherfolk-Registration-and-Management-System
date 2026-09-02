@@ -12,6 +12,12 @@ Owner ran Full Auto Mode ("do all pending tasks, I need to sleep"). The loop is 
 (FIS-8, FIS-9, FIS-11, FIS-31) LOCAL/HARD HOLD. These pending tasks carry a genuine product [WHAT] and were
 DEFERRED — not guessed. Each needs an owner decision before build:
 
+- [ ] **FIS-8 (Phase B follow-up) — Ayuda distribution grain [WHAT]:** with multi-family households now live at
+  the data/API layer, should ayuda that distributes per "HOUSEHOLD" instead distribute per **FAMILY** (each family
+  head a beneficiary)? Phase B LEFT ayuda unchanged (household-level) — `AyudaBeneficiary` has no `familyId`.
+  Flipping to per-family = a small schema migration (`AyudaBeneficiary.familyId`) + `ayuda.ts` enrollment change.
+  Product call, not guessed. (Surfaced 2026-09-02 full-auto; FIS-8 Phase B built + verified LOCAL on
+  `feat/fis8-phase-b-family-router`.)
 - [ ] **FIS-6 — Audit-log view [WHAT]:** which events/columns shown, filters, retention, AND who may view it
   (audit logs are sensitive — Viewer+ as the task says, or tenant_admin+ only?). Security-relevant → not guessed.
 - [ ] **FIS-7 — User-management [WHAT]:** which actions (invite/deactivate/role-change), the permission gate

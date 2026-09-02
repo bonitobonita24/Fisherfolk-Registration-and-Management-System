@@ -1,8 +1,23 @@
 # FRMS — Project State
 
-## Current State (2026-09-02, latest) — 🚀 Presentation batch FIS-17..31 + FIS-12 status model SHIPPED to PRODUCTION as v0.22.0
+## Current State (2026-09-02, LATEST — Full-Auto loop) — 🔨 FIS-8 Phase B (family-aware tRPC) DONE + verified, LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_fullauto_backlog_0902.md` (+ this block).
+
+> **Full-Auto overnight, owner asleep.** This loop built **FIS-8 Phase B** (family-aware tRPC layer): new
+> `family` router (create/update/remove), `household.create` seeds initial family "F-01", getById/network/
+> fisherfolk-detail expose `families`. Whole suite **594 tests** + tsc + lint green; 8 new `family.test.ts`
+> integration tests run vs dev DB. Code on `feat/fis8-phase-b-family-router` (`b280f59`, stacked on Phase A),
+> docs (plan/queue/pending) on `main` (`1d57a4c`). **NOTHING pushed/merged/deployed — HARD HOLD.**
+> **NEXT un-gated:** FIS-8 **Phase C** (households UI — heavy, fresh session) → Phase D → FIS-31 landing copy.
+> **Deferred [WHAT]s (owner asleep):** all in PENDING_DECISIONS.md incl. new FIS-8 ayuda distribution grain.
+> Prod remains v0.22.1 (healthy). Everything below this block predates this loop.
+
+---
+
+## Prior State (2026-09-02) — 🚀 Presentation batch FIS-17..31 + FIS-12 status model SHIPPED to PRODUCTION as v0.22.0
 
 Cold-start authority: `project_presentation_rounds123_shipped_0901.md` (+ this block).
 
