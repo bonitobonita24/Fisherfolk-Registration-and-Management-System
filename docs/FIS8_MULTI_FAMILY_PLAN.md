@@ -10,11 +10,14 @@ Approach = **add a `Family` model** (NOT merely relax `Household.headId @unique`
 - Migration `20260902160000_add_family_model`: create table + fisherfolk.family_id + FKs + backfill (one single-family Family per existing household; 45→45, 142 members linked). Applied to dev, tsc/lint/416 tests green.
 - ⚠ Migrations: `migrate dev` is broken (shadow-DB drift) — author via `migrate diff --from-url $DEV --to-schema-datamodel --script`, strip unrelated drift, `db execute` + `migrate resolve --applied`. See global lesson `prisma.dev-ledger-drift`.
 
-## Phase B — family-aware server/router (NEXT, un-gated)
-- `apps/web/src/server/trpc/routers/household.ts` (largest): `create` creates Household + first Family atomically; add family procedures (`addFamily`/`updateFamily`/`setFamilyHead`/`removeFamily`) or a new `family` router mounted in `root.ts` (L14-15/L42-43). `getById` include `families { head, members }`. Membership validation moves householdId→familyId. `newHeadId` (must-be-current-member) → per family.
-- `household-network.ts` — return `families` in the graph.
-- `fisherfolk.ts` L149 include; `ayuda.ts` L331 include + per-household distribution (decide HOUSEHOLD vs per-FAMILY unit; AyudaBeneficiary may need familyId).
-- Tests: `household.test.ts` (L170-209), `report.domain.test.ts` (L67/L217), `ayuda.test.ts` (L57).
+## Phase B — family-aware server/router ✅ DONE (branch `feat/fis8-phase-b-family-router`, `b280f59`, LOCAL/HARD HOLD)
+- NEW `apps/web/src/server/trpc/routers/family.ts` router (`create`/`update`/`remove`), mounted `family:` in `root.ts`. Mirrors the household idiom (protectedProcedure + inline tenant guard, P2002 retry, per-household `F-##` auto-numbering — count scoped `{ householdId }`, NOT tenant). Invariant enforced: a family's head + members share the same parent `householdId`; head-removal guarded; `newHeadId` must be a current family member.
+- `household.ts`: `create` now seeds one initial family **F-01** (head + all initial members) in the same transaction; `getById` includes `families { head, members }`; `update` clears `familyId` when a member is removed from the household.
+- `household-network.ts` returns `families` in the graph; `fisherfolk.ts` detail adds a parallel `family { id, familyNumber, headId }` include.
+- Verified: full suite **594 tests** (8 new `family.test.ts` integration tests run vs real dev DB, self-cleaning `fam-test-a-*` tenant), tsc 7/7, lint clean.
+- ⚠ **DEFERRED [WHAT] → PENDING_DECISIONS.md — ayuda distribution grain:** `AyudaBeneficiary` has NO `familyId` and `ayuda.ts` per-household distribution is LEFT UNCHANGED (per-FAMILY vs per-HOUSEHOLD is an owner call; also avoids a schema migration in Phase B).
+- ⚠ **Known hardening follow-up:** `family.update.addMemberIds` can move an existing family's head into another family as a member, orphaning the old head pointer (`headId @unique` blocks head-of-two, not this). Phase-C/UI guard. Logged: LESSONS_GLOBAL `prisma.data-model.unique-head-fk-plus-member-fk-orphans-source-head`.
+- Report/dashboard test updates (`report.domain.test.ts`, `ayuda.test.ts`) belong to Phase D — untouched here; existing suites stay green.
 
 ## Phase C — UI (households/)
 - `household-wizard.tsx` — allow 1-3 families, each own head + member picker (repeat head/members steps per family).

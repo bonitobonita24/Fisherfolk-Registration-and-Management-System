@@ -65,13 +65,15 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ### FMO meeting 2026-07-09 — registration policy + ID changes (captured 2026-08-31; all builds HARD HOLD pending owner [WHAT])
 
-- 🔴 **FIS-8 — Multi-family households (support multiple heads per household).** ✅ **[WHAT] RESOLVED (owner
-  2026-08-31):** KEEP the household grouping AND the head-of-family concept — but one household may contain
-  MULTIPLE families (2–3 families living together), each with its OWN head. Current schema blocks this:
-  `Household.headId` is `@unique` (exactly one head per household). Work: introduce a family sub-grouping under
-  `Household` (each Family = one head + its members) OR relax the single-head constraint to allow multiple family
-  units per household; update household create/edit UI + "Head of Household" reporting to list per-family heads.
-  Design the multi-family-per-household model. `source: owner meeting 2026-07-09` `feature` `db` `design`
+- 🟡 **FIS-8 — Multi-family households (support multiple heads per household).** ✅ **[WHAT] RESOLVED (owner
+  2026-08-31):** KEEP the household grouping AND head-of-family concept — one household may contain MULTIPLE
+  families (2–3), each with its OWN head. Approach = additive `Family` model (see `docs/FIS8_MULTI_FAMILY_PLAN.md`).
+  **Phase A ✅** schema + migration + backfill (`feat/fis8-multi-family-household-schema`, `7261dda`). **Phase B ✅
+  2026-09-02** family-aware tRPC layer — new `family` router (create/update/remove), household seeds initial F-01,
+  getById/network/detail expose families; 594 tests green (`feat/fis8-phase-b-family-router`, `b280f59`, LOCAL/HARD
+  HOLD). **NEXT: Phase C** (households UI — per-family sections, wizard, maps) then **Phase D** (reporting/dashboard
+  per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
+  `source: owner meeting 2026-07-09` `feature` `db` `design`
 
 - 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
   dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
