@@ -23,8 +23,10 @@ const securityHeaders = [
     value: "max-age=31536000; includeSubDomains",
   },
   {
+    // geolocation=(self): first-party "Use my location" capture (LocationPicker,
+    // FIS-25) needs the browser Geolocation API; cross-origin frames stay blocked.
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
+    value: "camera=(), microphone=(), geolocation=(self), payment=()",
   },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-XSS-Protection", value: "1; mode=block" },

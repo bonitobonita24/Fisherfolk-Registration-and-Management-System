@@ -62,7 +62,9 @@ export const STATIC_SECURITY_HEADERS: ReadonlyArray<{ key: string; value: string
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  // geolocation=(self): first-party "Use my location" capture (LocationPicker, FIS-25)
+  // needs the browser Geolocation API; cross-origin frames stay blocked.
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self), payment=()" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-XSS-Protection", value: "1; mode=block" },
 ];
