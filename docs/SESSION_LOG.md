@@ -10,10 +10,13 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 - **FIS-9** — relabelled "Active Violations" → "Number of Violations" + show count (display-only; renewal semantics untouched). `feat/fis9-violation-count-label`. tsc/lint green.
 - **FIS-11** — new fisherfolk fields **employment type (full-time/part-time)** + **primary source of income** end-to-end (schema, zod/types, register + edit forms, detail, report columns, seeds) + migration. `feat/fis11-employment-income-fields`. tsc/lint/416 tests green.
 - **FIS-8 Phase A** — **multi-family households** additive foundation: new `Family` model + `Fisherfolk.familyId` + backfill migration (45 households → 45 single-family families, 142 members linked). Keeps `Household.head` for back-compat, so nothing breaks. `feat/fis8-multi-family-household-schema`. tsc/lint/416 tests green. Phases B–D (router/UI/reporting/maps) planned in `docs/FIS8_MULTI_FAMILY_PLAN.md`.
+- **FIS-8 Phase B** — **family-aware tRPC layer**: new `family` router (create/update/remove), `household.create` now seeds an initial family "F-01", and getById/network/detail expose per-family data. New `family.test.ts` (8 integration tests vs dev DB). Whole suite **594 tests** + tsc + lint green. `feat/fis8-phase-b-family-router` (`b280f59`). Docs (plan/queue/pending) updated on `main` (`1d57a4c`).
 
 🔨 In progress / next (un-gated, for the next loop):
-- **FIS-31** — landing-page copy overhaul (add color-coding/renewal-history/municipal-map/location-capture; humanize the stats/CTA). Local only; screenshot refresh + demo deploy DEFERRED (gated on ② demo/EC2 access).
-- **FIS-8 Phase B–D** — see the plan doc.
+- **FIS-8 Phase C** (households UI: per-family sections in detail, multi-family wizard, member/network maps grouped per family) → then **Phase D** (reporting/dashboard per-family). See the plan doc.
+- **FIS-31** — landing-page copy overhaul (color-coding/renewal-history/municipal-map/location-capture; humanize the stats/CTA). Local only; screenshot refresh + demo deploy DEFERRED (gated on ② demo/EC2 access).
+
+💬 Added deferred [WHAT] this loop: **ayuda distribution grain** (per-family vs per-household) surfaced by Phase B → PENDING_DECISIONS.md (ayuda left unchanged; no migration).
 
 💬 Notes / decisions
 - Fixed a `[HOW]` blocker: `prisma migrate dev` is broken by a **dev-DB migration-ledger drift + shadow-DB defect** (pre-existing, from 2026-08-31). Worked around it (author migration via diff-from-live-dev → `db execute` → `migrate resolve`); logged the lesson. A full dev-ledger re-baseline is a pending `[HOW]` follow-up.
