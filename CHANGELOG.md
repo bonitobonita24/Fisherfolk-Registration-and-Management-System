@@ -4,6 +4,17 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.24.0 — 2026-09-03
+
+### [FEATURE]
+- optional family-grained ayuda beneficiaries (additive AyudaBeneficiary.familyId) (`029fa8a`)
+- landing callouts for shipped location/map/status features (`0ce8200`)
+- keyboard-accessible list alternative for member + network maps (WCAG 2.1.1/4.1.2) (`4f5de4b`)
+
+### [DOCS]
+- WAVE 1 shipped v0.23.0 to prod; record WAVE 2 best-judgment defaults (owner: continue all pending) (`69ad69c`)
+
+
 ## v0.23.0 — 2026-09-03
 
 ### [FEATURE]
