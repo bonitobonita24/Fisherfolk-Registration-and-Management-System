@@ -57,6 +57,8 @@ const FISHERFOLK_SELECT = {
   barangay: true,
   status: true,
   dateJoined: true,
+  employmentType: true,
+  primarySourceOfIncome: true,
 } satisfies Prisma.FisherfolkSelect;
 
 type FisherfolkRow = Prisma.FisherfolkGetPayload<{ select: typeof FISHERFOLK_SELECT }>;
@@ -70,6 +72,8 @@ const FISHERFOLK_COLUMNS: Column[] = [
   { key: "civilStatus", label: "Civil Status" },
   { key: "status", label: "Status" },
   { key: "dateJoined", label: "Date Joined" },
+  { key: "employmentType", label: "Employment Type" },
+  { key: "primarySourceOfIncome", label: "Primary Source of Income" },
 ];
 
 function mapFisherfolkRow(f: FisherfolkRow): Row {
@@ -82,6 +86,8 @@ function mapFisherfolkRow(f: FisherfolkRow): Row {
     civilStatus: f.civilStatus ?? "",
     status: f.status,
     dateJoined: formatDate(f.dateJoined),
+    employmentType: f.employmentType ?? "",
+    primarySourceOfIncome: f.primarySourceOfIncome ?? "",
   };
 }
 

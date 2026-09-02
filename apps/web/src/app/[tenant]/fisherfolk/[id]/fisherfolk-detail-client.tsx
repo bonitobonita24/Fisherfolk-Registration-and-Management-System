@@ -468,6 +468,14 @@ export function FisherfolkDetailClient({ id }: Props) {
                   <DefinitionGrid columns={3}>
                     <DetailField label="Civil Status" value={record.civilStatus} />
                     <DetailField
+                      label="Employment Type"
+                      value={record.employmentType}
+                    />
+                    <DetailField
+                      label="Primary Source of Income"
+                      value={record.primarySourceOfIncome}
+                    />
+                    <DetailField
                       label="Date Joined"
                       value={formatDate(record.dateJoined)}
                     />

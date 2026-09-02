@@ -113,6 +113,11 @@ enum CivilStatus {
   DIVORCED
 }
 
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+}
+
 enum ViolationTargetType {
   FISHERFOLK
   VESSEL
@@ -374,6 +379,8 @@ model Fisherfolk {
   longitude        Float?           @map("longitude")
   contactNumber    String?          @map("contact_number")
   rsbsaNumber      String?          @map("rsbsa_number")
+  employmentType   EmploymentType?  @map("employment_type")
+  primarySourceOfIncome String?     @map("primary_source_of_income")
   categoryIds      String[]         @map("category_ids")
   photo            String?
   signature        String?

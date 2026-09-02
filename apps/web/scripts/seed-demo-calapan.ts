@@ -528,6 +528,10 @@ async function main(): Promise<void> {
   const CIVIL_STATUSES: Array<"SINGLE" | "MARRIED" | "WIDOWED" | "SEPARATED" | "DIVORCED"> = [
     "SINGLE", "MARRIED", "WIDOWED", "SEPARATED", "DIVORCED",
   ];
+  const EMPLOYMENT_TYPES: Array<"FULL_TIME" | "PART_TIME"> = [
+    "FULL_TIME", "PART_TIME",
+  ];
+  const INCOME_SOURCES = ["Fishing", "Fish Vending", "Boat Rental", "Aquaculture"];
 
   let created = 0;
   let updated = 0;
@@ -552,6 +556,8 @@ async function main(): Promise<void> {
     const contactNumber = `09${String(randInt(100000000, 999999999))}`;
     const status = pick(STATUS_WEIGHTED);
     const civilStatus = pick(CIVIL_STATUSES);
+    const employmentType = pick(EMPLOYMENT_TYPES);
+    const primarySourceOfIncome = pick(INCOME_SOURCES);
     const photo = pick(photoKeys);
     const signature = pick(sigKeys);
     const categoryIds = pickCategoryIds();
@@ -575,6 +581,8 @@ async function main(): Promise<void> {
         dateOfBirth,
         sex,
         civilStatus,
+        employmentType,
+        primarySourceOfIncome,
         contactNumber,
         categoryIds,
         photo,
