@@ -1,6 +1,43 @@
 # FRMS — Project State
 
-## Current State (2026-09-03, LATEST — Full-Auto loop) — 🧭 Un-gated queue reconciled to empty; FIS-9/FIS-11 confirmed built-on-branch; holding on owner [WHAT]s
+## Current State (2026-09-03, LATEST — Full-Auto loop, later) — 🧭 FIS-31 scouted → scope is a [WHAT], not a clean un-gated build; docs reconciled; holding on owner [WHAT]s
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Full-Auto overnight, owner asleep.** Re-ran LOAD → DECISIONS → TASKS against ground truth. The prior handoff
+> declared the un-gated build queue "exhausted" but had overlooked **FIS-31 (landing-page overhaul)** — the one
+> remaining 🔴 that carries no `[WHAT]`. Investigated it as a genuine un-gated candidate rather than hold a third
+> time.
+>
+> **What the FIS-31 scout found (why it is NOT a clean overnight build):**
+> - **No FIS-31 branch/commits exist** — PENDING_DECISIONS's claim "landing page is being built locally" was
+>   inaccurate. Corrected in `PENDING_DECISIONS.md`.
+> - The current landing (`apps/web/src/app/page.tsx` + `components/landing/*`) is **NOT stale** — it is the recent
+>   **Sep-1 overhaul**: 8 sections (Nav→Hero→Stats→Features→Gallery→Process→CTA→Footer), Motion (motion.dev) with
+>   `useReducedMotion()`, full SEO (OG/Twitter/JSON-LD), copy already citing the status model + 62 barangays + ayuda.
+> - The **biggest value-add (screenshots of the new map/location features) is GATED** = FIS-34 (real GPU browser —
+>   maps composite black headless — + demo redeploy, both on hold pending EC2 access).
+> - The remaining delta = product/content judgment on a public surface the owner just approved (WHICH new features
+>   to advertise — and FIS-8 multi-family is **unshipped**, so it must NOT go on the public page). That is a genuine
+>   `[WHAT]`, not a `[HOW]` to ram through overnight.
+>
+> **Decision:** did NOT rebuild. Converted FIS-31 from a fuzzy "overhaul" into a **decision-ready scope [WHAT]**
+> (augment-with-shipped-callouts vs full rebuild vs wait-for-screenshots) in PENDING_DECISIONS.md, and reconciled
+> the FIS-31 entries in both docs. Un-gated *build* queue is genuinely empty now (FIS-31's un-gated slice is
+> product-judgment-gated; screenshots demo-gated). 15 open `[WHAT]`s remain → **reboot with `--hold`** (never
+> `--stop` while `[WHAT]`s are open). Prod remains v0.22.1 (healthy). NOTHING pushed/merged/deployed — HARD HOLD.
+>
+> **✅ Done this iteration (docs-only, LOCAL/HARD HOLD):** corrected the false "FIS-31 being built" claim + added
+> the sharpened FIS-31 scope `[WHAT]` (PENDING_DECISIONS.md); FIS-31 queue entry 🔴→🟡 with the real state
+> (TASK_QUEUE.md); this handoff block.
+
+### Git (this iteration)
+On `feat/fis8-phase-c-households-ui`, one docs-only commit on top of `b34b2c5`. `main` = local, 6 ahead of origin
+(HARD HOLD). All feature branches retained. Tree clean.
+
+---
+
+## Current State (2026-09-03 — Full-Auto loop) — 🧭 Un-gated queue reconciled to empty; FIS-9/FIS-11 confirmed built-on-branch; holding on owner [WHAT]s
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

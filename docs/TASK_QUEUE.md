@@ -44,7 +44,13 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   4. Secondary: `aria-modal="true"` on shared Dialog primitive (app-wide blast radius — care); initial dialog focus to heading not map canvas; make "No location set" an aria-live region; manual contrast check of network-map legend swatches (axe incomplete on canvas colors). `owner 2026-09-01` `a11y` `test`
 - 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the maps/location capture headless couldn't capture; overwrite `public/showcase/*.png`. `owner 2026-09-01` `design`
 
-- 🔴 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task).** After round-3 ships: brainstorm + rebuild the public landing page with the latest features, updated screenshots, better statements/context (appropriate skills: brainstorming, frontend-design/web-motion, copywriting), then run **humanize** on all captions/statements + ai-check. `owner 2026-09-01` `design` `docs`
+- 🟡 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task) — SCOPE NOW A [WHAT] (2026-09-03).** Scouted the
+  current page: it is NOT stale — already overhauled Sep 1 (8 sections, Motion+reduced-motion, full SEO, current
+  copy). So "rebuild" is ambiguous and the biggest value-add (new-feature screenshots) is gated on FIS-34/demo.
+  Deferred a rebuild rather than ram design-bearing changes through a recently-owner-approved public surface
+  overnight. Owner scope decision surfaced in `PENDING_DECISIONS.md` (augment-with-shipped-callouts vs full rebuild
+  vs wait-for-screenshots). ⚠ don't advertise Multi-Family Households (FIS-8 unshipped). Skills when built:
+  brainstorming, frontend-design/web-motion, copywriting → humanize + ai-check. `owner 2026-09-01` `design` `docs`
 - 🟡 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** ✅ CODE DONE (`ccbe876`, 2026-09-01): new `.tabs-scrollbar` themed thin-scrollbar utility on shared `UnderlineTabsList` (uniform across fisherfolk-detail/id-generator/analytics/reports/todo); lint-gated build green. Visual render confirmation folded into FIS-32 real-browser pass. Original ask below:
   ~~🔴~~ On a specific fisherfolk detail page, the
   tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw

@@ -2,6 +2,22 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-03 (Full Auto, overnight — loop, later) — checked the landing-page task; it needs your direction, not a solo rebuild
+
+**In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done
+- Looked hard at **FIS-31 (landing page overhaul)** — the last open task with no pending decision on it — to see if I could just build it overnight. I scouted the current landing page first.
+- Found two things worth flagging: (1) the note saying "the landing page is being built locally" was **wrong** — there's no such branch or work; I corrected it. (2) The current landing page is **not** old — you already gave it a full overhaul on Sep 1 (proper hero, animated stats, feature grid, screenshot gallery, SEO). It's genuinely good.
+
+💬 Why I didn't just rebuild it
+- The single biggest improvement — fresh screenshots showing the new maps and location-capture — is **blocked** (those need a real GPU browser + the demo box, which is down for the server move).
+- The rest is a judgement call I shouldn't make while you sleep: *which* new features to put on a public page you just approved — and one of them (multi-family households) isn't even live yet, so it must not go up publicly.
+- So instead of risking a worse version of a page you already like, I turned "overhaul the landing page" into a clear question for you: **augment it with callouts for the already-shipped new features, do a full rebuild (tell me the direction), or wait for the screenshots?** It's in your decisions list.
+
+⏳ Next when you're around
+- Same as before: green-light which deferred items to build, decide the multi-family screen design (FIS-8), and now also pick the FIS-31 landing scope. Production unchanged and healthy (v0.22.1).
+
 ## 2026-09-03 (Full Auto, overnight — loop) — queue reconcile; un-gated build work exhausted
 
 **In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.

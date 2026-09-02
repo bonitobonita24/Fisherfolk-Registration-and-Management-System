@@ -42,7 +42,26 @@ DEFERRED — not guessed. Each needs an owner decision before build:
 - [ ] **FIS-33 #3 — Map-marker a11y [WHAT]:** focusable pins with per-pin names vs a keyboard-accessible list
   alternative. (FIS-33 #1/#2 done+verified, held on `fix/fis33-a11y-mark-received`.)
 - [ ] **FIS-34 / FIS-23 / ② demo refresh — gated on demo access (Server-Setups EC2 migration, on hold).**
-  FIS-31 landing page is being built locally; its screenshot refresh + demo deploy wait on this.
+  FIS-34 = refresh landing showcase screenshots (real GPU browser — the newest map/location features composite
+  black headless) + redeploy demo. Both wait on demo/EC2 access. (Correction 2026-09-03: the earlier note here
+  that "FIS-31 landing page is being built locally" was inaccurate — verified no FIS-31 branch/commits exist; see
+  the FIS-31 scope decision below.)
+- [ ] **FIS-31 — landing-page overhaul SCOPE [WHAT] (sharpened 2026-09-03 full-auto after scouting the current page):**
+  the task reads "brainstorm + rebuild the public landing page with the latest features, updated screenshots,
+  better statements." BUT the current landing (`apps/web/src/app/page.tsx` + `components/landing/*`) was already
+  overhauled Sep 1 and is strong: 8 structured sections (Nav→Hero→Stats→Features→Gallery→Process→CTA→Footer),
+  Motion (motion.dev) with `useReducedMotion()`, full SEO (OG/Twitter/JSON-LD), copy already citing the status
+  model + 62 barangays + ayuda + maps. So the remaining delta is small and partly blocked — decide the scope
+  before any build:
+  (a) **Screenshots** = the biggest value-add (feature the new location-capture + household-network + municipal
+  interconnection maps) but is GATED → that's FIS-34 (real GPU browser + demo redeploy, on hold).
+  (b) **Feature callouts** = add the newest SHIPPED features to the Features grid / hero (Location Capture,
+  Municipal Interconnection / Household Network Map, NEW/RENEWED/EXPIRED status model — all in prod v0.22.0/.1).
+  ⚠ Do NOT advertise Multi-Family Households (FIS-8) — still LOCAL on branches, not shipped. Adding public
+  marketing copy is a product/content call on a surface you just approved → not guessed overnight.
+  (c) **Full from-scratch rebuild** vs (b) incremental augment vs (just wait for FIS-34 screenshots then refresh)?
+  Say "just augment with the shipped-feature callouts" or "full rebuild, here's the direction" or "wait for
+  screenshots" to unblock. Reference map: current page is NOT stale — it is the recent Sep-1 overhaul baseline.
 
 ### 2026-09-02 — FIS-32/FIS-33 verification session outcomes
 
