@@ -2,6 +2,20 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-02 (later) — Shipped the geolocation fix to PRODUCTION (v0.22.1)
+
+**In your words:** "just do the 1st option first" — ship the geolocation fix now, while the demo (option 2) stays on hold because Server-Setups is mid-migration to the new EC2 instance; you'll report back once it's done.
+
+✅ Done — **FIS-25 "Use my location" fix is live in production (v0.22.1)**:
+- The bug: the app's own `Permissions-Policy` header set `geolocation=()`, which disabled the browser Geolocation API for **everyone** — so "Use my location" was broken on production (and demo) in every browser. Fix = `geolocation=(self)` (first-party allowed, cross-origin frames still blocked).
+- Shipped only the geolocation fix (kept the FIS-33 a11y code fixes back for a later release with FIS-33 #3): merged → main, cut **v0.22.1** (changelog + version-sync 7 packages + tag), pushed. Pre-push gate all green: typecheck 7/7, lint, 416 tests, build.
+- CI built the image, promoted to prod: **backed up the prod DB first**, deployed `sha-20fbdaf`, migration was a no-op (header-only). Rebuilt local dev off main (Rule 39).
+- **Verified live on prod:** the `Permissions-Policy` header now reads `geolocation=(self)`, and health/root/login are all 200.
+
+💬 Notes / next
+- **② Demo refresh is ON HOLD** — waiting on the Server-Setups EC2 migration; demo is now behind prod by v0.22.0 + v0.22.1. You'll report back when the new box is ready.
+- **③ FIS-33 #3 (map-marker keyboard a11y) still needs your pick** — focusable pins vs a keyboard-accessible list. The FIS-33 #1/#2 fixes are done+verified, held on `fix/fis33-a11y-mark-received`, to ship together with #3.
+
 ## 2026-09-02 — Shipped the presentation batch to PRODUCTION (v0.22.0)
 
 **In your words:** you noticed the demo site had the nicer spacing/bigger fonts but production "does not change at all" and asked whether we'd pushed the demo changes to prod — then, after I explained it was demo-only on hold, "Go for Production release now" and "yes all the way".

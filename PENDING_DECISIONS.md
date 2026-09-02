@@ -6,6 +6,25 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-09-02 — FIS-32/FIS-33 verification session outcomes
+
+- [x] ✅ **① Geolocation Permissions-Policy fix — SHIPPED to production as v0.22.1 (owner "just do the 1st
+  option first").** Merged `fix/permissions-policy-geolocation` → main (`4243cac`), released v0.22.1 (tag
+  `20fbdaf`), pushed, CI built `sha-20fbdaf`, promoted via `push-to-prod.sh` (prod DB backed up; migrate no-op —
+  header-only; reseed-never). **Verified LIVE:** prod `Permissions-Policy` header now `geolocation=(self)`;
+  `/api/health`+`/`+`/login` = 200. FIS-25 "Use my location" unblocked across all 5 forms. Dev rebuilt off main
+  (Rule 39). Pre-push gate green (typecheck 7/7 · lint · 416 tests · build).
+- [ ] **② Demo box access — ⏸ ON HOLD per owner (2026-09-02): Server-Setups mid-migration to the new EC2
+  instance; owner will report back when ready.** Demo runs on AWS `13.213.232.194` but SSH times out from this
+  seat and `push-to-demo.sh` still targets the dead Hostinger box. ⚠ Demo now behind prod by v0.22.0 + v0.22.1
+  (incl. the geolocation fix). When EC2 is ready, need SSH / Komodo trigger / AWS deploy mechanism. Also gates
+  FIS-34 screenshot redeploy. Ref [[project_demo_staging_relocated_to_aws_0901]].
+- [ ] **③ FIS-33 #3 — map-marker a11y approach (still open).** Member + network map markers aren't
+  keyboard-focusable and share the generic name "Map marker" (WCAG 2.1.1/4.1.2, moderate). Pick: focusable pins
+  with per-pin names, OR a keyboard-accessible list alternative. The FIS-33 #1 target-size + #2 focus-restore
+  *code* fixes are done+verified but held on branch `fix/fis33-a11y-mark-received` (NOT shipped) — bundle all of
+  FIS-33 into one release once #3 is decided. That branch also carries the session-handoff docs.
+
 ### 2026-09-01 — ⚠ FIS-12 migration drift — RELEASE-BLOCKER before any prod migrate (surfaced by full audit)
 
 - [x] ✅ **RESOLVED (2026-09-01, owner chose "merge/rebase FIS-12 first") — MERGED into the release branch.**
