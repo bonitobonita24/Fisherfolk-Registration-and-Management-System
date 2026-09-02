@@ -536,9 +536,18 @@ export function FisherfolkDetailClient({ id }: Props) {
                             className="inline-flex items-center gap-2 font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           >
                             {record.household.householdNumber}
+                            {record.family ? (
+                              <Badge variant="outline">
+                                {record.family.familyNumber}
+                              </Badge>
+                            ) : null}
                             <Badge variant="secondary">
-                              {record.household.headId === record.id
-                                ? "Head"
+                              {(
+                                record.family
+                                  ? record.family.headId === record.id
+                                  : record.household.headId === record.id
+                              )
+                                ? "Family Head"
                                 : "Member"}
                             </Badge>
                           </Link>
