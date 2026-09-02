@@ -6,6 +6,22 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-09-02 — 3 decisions from the FIS-32/FIS-33 verification session (all LOCAL/HARD HOLD)
+
+- [ ] **① Ship the geolocation Permissions-Policy fix?** FIS-25 "Use my location" (mobile GPS) is currently
+  **broken on the live demo AND production** — the app's `Permissions-Policy: …geolocation=()…` header disabled
+  the Geolocation API for everyone. Fix ready (`geolocation=()`→`geolocation=(self)`) on branch
+  `fix/permissions-policy-geolocation` (`6d50e53`), verified in real browser. Shipping = merge + release +
+  promote prod (and demo, once box access exists). Owner word needed to deploy.
+- [ ] **② Demo box access — refresh demo→v0.22.0 is BLOCKED (also gates FIS-34 redeploy).** Demo runs on the
+  on-demand AWS box `13.213.232.194` (up + serving), but **SSH times out from this seat** and `push-to-demo.sh`
+  still targets the DEAD Hostinger box (`72.62.74.203`). Need ONE of: (a) open SSH to the AWS box for this
+  machine, (b) trigger the redeploy via Komodo `kmd.powerbyte.app`, or (c) tell me the AWS deploy mechanism so
+  I can script `deploy/compose/push-to-demo-aws.sh`. Ref [[project_demo_staging_relocated_to_aws_0901]].
+- [ ] **③ FIS-33 #3 — map-marker a11y approach.** Member + network map markers aren't keyboard-focusable and
+  share the generic name "Map marker" (WCAG 2.1.1/4.1.2, moderate). Pick: focusable pins with per-pin names,
+  OR a keyboard-accessible list alternative. (FIS-33 #1 target-size + #2 focus-restore already fixed+verified.)
+
 ### 2026-09-01 — ⚠ FIS-12 migration drift — RELEASE-BLOCKER before any prod migrate (surfaced by full audit)
 
 - [x] ✅ **RESOLVED (2026-09-01, owner chose "merge/rebase FIS-12 first") — MERGED into the release branch.**

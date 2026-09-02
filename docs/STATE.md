@@ -1,5 +1,42 @@
 # FRMS — Project State
 
+## Current State (2026-09-02, LATER) — ✅ FIS-32 real-browser pass (found+fixed+verified a geolocation bug) + FIS-33 a11y audit & 2 fixes — all LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: `project_fis32_fis33_verify_0902.md`. Owner: "refresh the demo, run FIS-32, continue the queue" → then "save session first."
+Prod v0.22.0 unchanged + healthy this session. **Nothing pushed/deployed — HARD HOLD.**
+
+### ✅ DONE THIS SESSION (built + verified)
+- **FIS-32 real-browser verification** (chrome-devtools-mcp, real Chrome, WebGL2/SwiftShader):
+  - 🐛🔧 **BUG found+fixed+verified:** FIS-25 "Use my location" (mobile GPS) was **dead in ALL browsers incl.
+    prod+demo** — the app's own `Permissions-Policy: …geolocation=()…` disabled the Geolocation API. Fixed
+    `geolocation=()`→`geolocation=(self)` in `apps/web/next.config.ts` + `apps/web/src/lib/security-headers.ts`.
+    Verified in-browser: permission `denied`→`prompt`. Lesson `http-headers.permissions-policy.geolocation-empty-blocks-feature`.
+  - ✅ Structural: dev status model correct (NEW 3614/RENEWED 67, 0 ACTIVE); maps mount 0-console-errors, CARTO
+    style loads, FIS-28 resize-fix + FIS-29 pink/heatmap in source; all 5 forms wire LocationPicker→persist lat/lng.
+  - ⚠ Needs real GPU browser/device (not headless): map visual paint (software-WebGL black-composite artifact) + on-device GPS.
+- **FIS-33 a11y** — audit done (axe 4.11.4 + manual), 3/4 components CLEAN. Report `test-artifacts/fis33-a11y-2026-09-02.md`.
+  - ✅ FIXED+VERIFIED live: **#1** target-size 2.5.8 (Mark-Received map zoom controls 2×29px→**29×29**; force-resize
+    on map-ready+rAF in `location-picker.tsx`, FIS-28-class root cause). **#2** focus-restore 2.4.3 (dialog from an
+    unmounting DropdownMenuItem→focus fell to `<body>`; `verifyTriggerRef`+`onCloseAutoFocus` in `ayuda-detail-client.tsx`).
+
+### 🌿 Git (all LOCAL/HARD HOLD, stacked; nothing pushed/deployed)
+- `fix/permissions-policy-geolocation` @ `6d50e53` (geolocation) + `2014a0b` (FIS-33 audit docs).
+- `fix/fis33-a11y-mark-received` @ `c488012` (FIS-33 #1+#2) — **current HEAD**, stacked on above. Dev rebuilt off it (Rule 39), healthy.
+- `main == origin/main` still only 1 ahead by pre-existing held docs commit `b3a1728`.
+
+### ⏳ OPEN — 3 OWNER DECISIONS (PENDING_DECISIONS.md)
+1. **Ship the geolocation fix?** (broken on live demo+prod now). 2. **Demo box access** — SSH to AWS `13.213.232.194`
+   times out; `push-to-demo.sh` targets dead Hostinger; need SSH/Komodo/mechanism (also gates FIS-34 redeploy).
+3. **FIS-33 #3** map-marker a11y approach (focusable pins vs keyboard list).
+
+### ⏳ UN-GATED NEXT
+FIS-33 secondary (aria-modal app-wide, initial-focus, aria-live, legend contrast) · FIS-34 (needs demo access) ·
+FIS-31 landing (own session) · FIS-6/7 stubs · 📥 incoming adopt: fleet default typeface IBM Plex Sans+JetBrains Mono.
+
+---
+
 ## Current State (2026-09-02, latest) — 🚀 Presentation batch FIS-17..31 + FIS-12 status model SHIPPED to PRODUCTION as v0.22.0
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]

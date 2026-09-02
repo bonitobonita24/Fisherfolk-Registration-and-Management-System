@@ -2,6 +2,24 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-02 (later) — Real-browser verification (FIS-32) + a11y pass (FIS-33): caught & fixed a real bug
+
+**In your words:** "refresh the demo, run the FIS-32 real-browser verification and continue whatever is in queue" — then "can we save session first?".
+
+✅ Done — verified, all kept LOCAL (nothing pushed/deployed):
+- **FIS-32 caught a genuine bug:** the "Use my location" (mobile GPS) button was actually **broken in every browser, including your live production and demo** — the app's own security header (`Permissions-Policy`) had geolocation switched off for everyone. I fixed it (allow first-party only) and confirmed in a real browser that geolocation now works. This unblocks "Use my location" on all 5 registration forms.
+- Also confirmed: the registration status model reads correctly, all the maps load with no errors, and every form correctly saves/reads back the pin coordinates. (The map *pictures* and on-phone GPS still need a real device to eyeball — headless can't paint WebGL.)
+- **FIS-33 accessibility pass:** audited the 4 new interactive pieces — 3 of 4 came back clean. On the "Mark Received" dialog I fixed two issues (map zoom buttons were too small to tap; keyboard focus was getting lost when the dialog closed) — both verified fixed.
+
+⏳ Waiting on you (3 decisions):
+1. **Ship the geolocation fix?** It's broken on the live demo + prod right now.
+2. **Demo refresh is blocked** — the demo's AWS box won't accept SSH from my machine and the old deploy script points at a retired server. Need you to open access, trigger it via Komodo, or tell me the deploy path. (Also blocks FIS-34's demo redeploy.)
+3. **FIS-33 leftover:** how should map pins be keyboard-accessible — focusable pins, or a list alternative?
+
+💬 Notes — everything sits on two local branches (`fix/permissions-policy-geolocation` → `fix/fis33-a11y-mark-received`), HARD HOLD. Prod v0.22.0 is unchanged and healthy. New fleet broadcast arrived: default typeface → IBM Plex Sans + JetBrains Mono (adopt task, not started).
+
+---
+
 ## 2026-09-02 — Shipped the presentation batch to PRODUCTION (v0.22.0)
 
 **In your words:** you noticed the demo site had the nicer spacing/bigger fonts but production "does not change at all" and asked whether we'd pushed the demo changes to prod — then, after I explained it was demo-only on hold, "Go for Production release now" and "yes all the way".
