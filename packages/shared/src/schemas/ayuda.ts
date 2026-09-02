@@ -73,6 +73,7 @@ export const ayudaBeneficiaryFilterSchema = z
   .object({
     barangays: z.array(z.string().min(1)).optional(),
     householdIds: z.array(z.string().cuid()).optional(),
+    familyIds: z.array(z.string().cuid()).optional(),
     categoryIds: z.array(z.string()).optional(),
     ageMin: z.number().int().min(0).max(150).optional(),
     ageMax: z.number().int().min(0).max(150).optional(),

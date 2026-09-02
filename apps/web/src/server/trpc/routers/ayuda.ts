@@ -30,6 +30,9 @@ export function buildFisherfolkFilterWhere(
   if (filter.householdIds !== undefined && filter.householdIds.length > 0) {
     where.householdId = { in: filter.householdIds };
   }
+  if (filter.familyIds !== undefined && filter.familyIds.length > 0) {
+    where.familyId = { in: filter.familyIds };
+  }
   if (filter.categoryIds !== undefined && filter.categoryIds.length > 0) {
     where.categoryIds = { hasSome: filter.categoryIds };
   }
@@ -520,6 +523,7 @@ export const ayudaRouter = createTRPCRouter({
           programId: z.string().cuid(),
           fisherfolkId: z.string().cuid().optional(),
           householdId: z.string().cuid().optional(),
+          familyId: z.string().cuid().optional(),
         })
         .strict(),
     )
@@ -536,6 +540,16 @@ export const ayudaRouter = createTRPCRouter({
 
       let fisherfolkId: string;
       let householdId: string | undefined;
+      let familyId: string | undefined;
+
+      if (input.familyId) {
+        const family = await ctx.db.family.findFirst({
+          where: { id: input.familyId, tenantId: ctx.tenantId },
+          select: { id: true },
+        });
+        if (!family) throw new TRPCError({ code: "NOT_FOUND" });
+        familyId = family.id;
+      }
 
       if (program.distributionUnit === "HOUSEHOLD") {
         if (!input.householdId) {
@@ -582,12 +596,14 @@ export const ayudaRouter = createTRPCRouter({
             programId: input.programId,
             fisherfolkId,
             householdId,
+            familyId,
           }),
           select: {
             id: true,
             verificationStatus: true,
             createdAt: true,
             householdId: true,
+            familyId: true,
           },
         }),
         ctx.db.ayudaProgram.update({
@@ -607,6 +623,7 @@ export const ayudaRouter = createTRPCRouter({
             programId: input.programId,
             fisherfolkId,
             householdId: householdId ?? null,
+            familyId: familyId ?? null,
           } as Record<string, unknown>,
         },
       });
@@ -621,6 +638,7 @@ export const ayudaRouter = createTRPCRouter({
           programId: z.string().cuid(),
           fisherfolkIds: z.array(z.string().cuid()).max(5000).optional(),
           householdIds: z.array(z.string().cuid()).max(5000).optional(),
+          familyIds: z.array(z.string().cuid()).max(5000).optional(),
         })
         .strict(),
     )
@@ -639,9 +657,14 @@ export const ayudaRouter = createTRPCRouter({
 
       let targetIds: string[];
       let householdByHead: Map<string, string> | undefined;
+      let familyByHead: Map<string, string> | undefined;
 
       if (program.distributionUnit === "HOUSEHOLD") {
-        if (input.fisherfolkIds !== undefined || input.householdIds === undefined) {
+        if (
+          input.fisherfolkIds !== undefined ||
+          input.familyIds !== undefined ||
+          input.householdIds === undefined
+        ) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Invalid input.",
@@ -653,6 +676,19 @@ export const ayudaRouter = createTRPCRouter({
         });
         householdByHead = new Map(households.map((h) => [h.headId, h.id]));
         targetIds = households.map((h) => h.headId);
+      } else if (input.familyIds !== undefined) {
+        if (input.householdIds !== undefined || input.fisherfolkIds !== undefined) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid input.",
+          });
+        }
+        const families = await ctx.db.family.findMany({
+          where: { id: { in: input.familyIds }, tenantId },
+          select: { id: true, headId: true },
+        });
+        familyByHead = new Map(families.map((f) => [f.headId, f.id]));
+        targetIds = families.map((f) => f.headId);
       } else {
         if (input.householdIds !== undefined || input.fisherfolkIds === undefined) {
           throw new TRPCError({
@@ -693,6 +729,7 @@ export const ayudaRouter = createTRPCRouter({
               programId: input.programId,
               fisherfolkId,
               householdId: householdByHead?.get(fisherfolkId),
+              familyId: familyByHead?.get(fisherfolkId),
             }),
           ),
           skipDuplicates: true,
