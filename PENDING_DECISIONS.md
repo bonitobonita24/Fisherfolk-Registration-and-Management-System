@@ -6,6 +6,35 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
+
+Owner authorized (this session): **(1) merge + push + promote to prod** the already-built/verified work, and
+**(2) build the gated [WHAT]s to best-judgment defaults, documenting each** — while **holding FIS-10**
+(ordinance-gated) and **FIS-14** (needs owner's RSBSA/RSVS clarification).
+
+**✅ WAVE 1 — SHIPPED to PRODUCTION as v0.23.0 (`sha-e4c6a67`), verified live.** Merged FIS-8 (Phase A+B+C
+multi-family) + FIS-9 (violation count label) + FIS-11 (employment type + income source) + FIS-33 #1/#2
+(Mark-Received a11y target-size + focus-restore) → main; released v0.23.0; pushed origin; `push-to-prod.sh`
+(prod DB backed up, both migrations `add_employment_income_fields` + `add_family_model` applied, reseed-never).
+Prod endpoints 200 (`/`, `/api/health`, `/login`; `/tm` 307). Family backfill correctly no-op on prod (0
+households — prod's official 3181 fisherfolk don't use households yet). 595 tests green pre-ship. These items
+are now CLOSED (were the "built, awaiting owner merge" set).
+
+**🔨 WAVE 2 — building to documented best-judgment defaults (each reversible; flip any):**
+- **FIS-16 mayor access** → DEFAULT: existing Viewer role suffices (no new role). Alt: narrower dashboard-only custom role.
+- **FIS-33 #3 map-marker a11y** → DEFAULT: keyboard-accessible list alternative beside each map (simpler/robust than focusable pins).
+- **FIS-15 3-year renewal cycle** → DEFAULT: reminder-only (no status enforcement), anchored to the FIS-12 status model.
+- **FIS-31 landing** → DEFAULT: augment with SHIPPED-feature callouts (Location Capture · Household/Municipal Network Map · NEW/RENEWED/EXPIRED status). NOT advertising multi-family yet (shipped but no prod data). Screenshots stay FIS-34 (gated).
+- **FIS-8 ayuda grain** → DEFAULT: additive nullable `AyudaBeneficiary.familyId` (enables family-grained ayuda without breaking household-level enrollment).
+- **FIS-13 QR verify** → DEFAULT: authed scan/verify surface (gov-PII-safe). Alt: public resolver.
+- **FIS-6 audit-log view** → DEFAULT: table gated to tenant_admin+ (audit logs sensitive). Alt: Viewer+.
+- **FIS-7 user-management** → DEFAULT: users table + role assign/invite, tenant_admin+ (Rule 34 — never Billing/User-Mgmt below tenant_admin).
+- **FIS-8 Phase C interactive UI** → build to `docs/FIS8_MULTI_FAMILY_PLAN.md` (wizard multi-family flow, per-family detail + Add-Family, map per-family).
+
+**⏸ HELD (owner instruction):** FIS-10 (aquaculture — ordinance-gated, Jan amendments) · FIS-14 (RSBSA vs "RSVS" — needs owner clarification).
+
+---
+
 ### 2026-09-02 (Full-Auto overnight) — deferred [WHAT]s from the pending-task lineup
 
 Owner ran Full Auto Mode ("do all pending tasks, I need to sleep"). The loop is building every UN-GATED task
