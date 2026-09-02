@@ -2,6 +2,22 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-03 (Full Auto, overnight — loop) — queue reconcile; un-gated build work exhausted
+
+**In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done
+- Reconciled the task queue: **FIS-9** ("Number of Violations" count) and **FIS-11** (full/part-time + income fields) were listed as not-started but are actually **already built** on their own branches from an earlier overnight run — relabelled them so a later run doesn't rebuild them. (`5ac4c80`, local only)
+
+💬 Where things stand
+- Everything that could be built without a decision from you is built and waiting on your review/merge: FIS-8 family support (Phases B + the safe display bits of C), FIS-9, FIS-11 — all local, nothing pushed or deployed.
+- The rest genuinely needs your call — 15 open decisions (the multi-family household screens design, audit-log & user-management scope, aquaculture/QR/renewal-cycle policy, one map-marker accessibility choice) plus the demo refresh that's waiting on the new server being ready.
+- Production is unchanged and healthy (v0.22.1, with the "Use my location" fix).
+
+⏳ Next when you're around
+- Pick which deferred items to green-light (I'll re-surface the list), and decide the multi-family household screen design so FIS-8 can finish.
+- A quick dev rebuild + eyeball of the two small FIS-8 display tweaks (family count column, family-head badge) — best done with you looking.
+
 ## 2026-09-02 (Full Auto, overnight — later loop) — FIS-8 Phase C safe slices + family-router hardening
 
 **In your words:** full-auto overnight — continue the un-gated pending-task lineup while you sleep; defer every [WHAT], no push/deploy.
