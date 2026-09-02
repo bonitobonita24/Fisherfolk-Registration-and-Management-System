@@ -2,6 +2,19 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-02 (Full Auto, overnight — later loop) — FIS-8 Phase C safe slices + family-router hardening
+
+**In your words:** full-auto overnight — continue the un-gated pending-task lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done (branch `feat/fis8-phase-c-households-ui`, LOCAL / HARD HOLD — verified tsc 7/7 · lint · **595 tests** · `next build` exit 0):
+- **FIS-8 Phase C — slice 1:** households list now shows a **Families** count column (`household.list` `_count.families`). (`0e0176d`)
+- **FIS-8 Phase C — slice 2:** fisherfolk detail "Household" field shows the **family number + Family Head/Member** badge from the family relation (falls back to household head if unlinked). (`012c226`)
+- **FIS-8 hardening (closes Phase B follow-up):** `family.create`/`update` now **reject pulling another family's head in as a member** (would orphan that family's head pointer); non-head moves stay allowed. +1 regression test (8→9). Global lesson marked fixed. (`96f47e5`)
+
+🔨 Deferred for your review — **design-bearing** interactive Phase C (wizard multi-family flow, per-family detail sections + "Add Family", map per-family iteration). All 45 households are single-family today (Phase A backfill), so the creation UX is the gate — didn't want to ram core-screen UX through unreviewed while you slept. Precise decomposition in `docs/FIS8_MULTI_FAMILY_PLAN.md` (Phase C section).
+
+💬 Notes: 14 open `[WHAT]`s in PENDING_DECISIONS.md left deferred (owner asleep), incl. ayuda distribution grain, FIS-6/7/10/13/14/15/16, FIS-33 #3, demo-access (EC2 migration). Nothing pushed/deployed.
+
 ## 2026-09-02 (Full Auto, overnight) — worked the pending-task backlog while you slept
 
 **In your words:** "you still have a lot of pending tasks in squirlnote… do it all and summon agent orchestration… full auto mode. i need to sleep."

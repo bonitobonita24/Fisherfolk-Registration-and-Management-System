@@ -71,8 +71,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   **Phase A ✅** schema + migration + backfill (`feat/fis8-multi-family-household-schema`, `7261dda`). **Phase B ✅
   2026-09-02** family-aware tRPC layer — new `family` router (create/update/remove), household seeds initial F-01,
   getById/network/detail expose families; 594 tests green (`feat/fis8-phase-b-family-router`, `b280f59`, LOCAL/HARD
-  HOLD). **NEXT: Phase C** (households UI — per-family sections, wizard, maps) then **Phase D** (reporting/dashboard
-  per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
+  HOLD). **Phase C 🟡 PARTIAL 2026-09-02** (`feat/fis8-phase-c-households-ui`, LOCAL/HARD HOLD): ✅ list family
+  count + ✅ fisherfolk-detail family-head badge + ✅ family-router orphan-guard hardening (595 tests, build green).
+  ⏳ **DEFERRED — design-bearing interactive rewrite (owner review)**: wizard multi-family flow, per-family detail
+  sections + Add-Family, map per-family iteration — no multi-family households exist yet (single-family backfill), so
+  creation UX is the design-bearing gate. Precise decomposition in `docs/FIS8_MULTI_FAMILY_PLAN.md`. Then **Phase D**
+  (reporting/dashboard per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
   `source: owner meeting 2026-07-09` `feature` `db` `design`
 
 - 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
