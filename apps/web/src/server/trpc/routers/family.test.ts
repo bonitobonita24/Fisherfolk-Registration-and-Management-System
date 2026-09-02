@@ -328,6 +328,49 @@ describe.skipIf(!hasDb)("family.update", () => {
     expect(m1Row!.familyId).toBeNull();
     expect(m1Row!.householdId).toBe(householdId);
   });
+
+  it("rejects adding the head of another family as a member (orphan guard), but allows a non-head move", async () => {
+    await wipe(testTenantAId);
+    const head = await makeFisherfolk(testTenantAId);
+    const m1 = await makeFisherfolk(testTenantAId);
+    const m2 = await makeFisherfolk(testTenantAId);
+    const { householdId, f01Id } = await seedHousehold(head.id, [m1.id, m2.id]);
+
+    // Split m1 (head) + m2 into F-02. Now F-01 = {head}, F-02 = {m1(head), m2}.
+    const { id: f02Id } = await familyCaller(testTenantAId).create({
+      householdId,
+      headId: m1.id,
+      memberIds: [m2.id],
+    });
+
+    // m1 heads F-02 → cannot be pulled into F-01 as a plain member.
+    await expect(
+      familyCaller(testTenantAId).update({ id: f01Id, addMemberIds: [m1.id] }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    const m1Row = await platformPrisma.fisherfolk.findUnique({
+      where: { id: m1.id },
+      select: { familyId: true },
+    });
+    expect(m1Row!.familyId).toBe(f02Id); // still heads F-02, not orphaned
+
+    // m2 is a non-head member of F-02 → moving it into F-01 is allowed.
+    await familyCaller(testTenantAId).update({
+      id: f01Id,
+      addMemberIds: [m2.id],
+    });
+    const m2Row = await platformPrisma.fisherfolk.findUnique({
+      where: { id: m2.id },
+      select: { familyId: true },
+    });
+    expect(m2Row!.familyId).toBe(f01Id);
+
+    // F-02 still intact with its head.
+    const f02 = await platformPrisma.family.findUnique({
+      where: { id: f02Id },
+      select: { headId: true },
+    });
+    expect(f02!.headId).toBe(m1.id);
+  });
 });
 
 describe.skipIf(!hasDb)("family.remove", () => {

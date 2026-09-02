@@ -66,7 +66,11 @@ const create = protectedProcedure
     if (memberIds.length > 0) {
       const members = await ctx.db.fisherfolk.findMany({
         where: { id: { in: memberIds }, tenantId },
-        select: { id: true, householdId: true },
+        select: {
+          id: true,
+          householdId: true,
+          headOfFamily: { select: { id: true } },
+        },
       });
       if (members.length !== memberIds.length) {
         throw new TRPCError({
@@ -79,6 +83,17 @@ const create = protectedProcedure
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "All family members must belong to this household.",
+        });
+      }
+      // A member who already heads another family cannot be pulled in as a
+      // plain member — doing so would orphan that family's head pointer
+      // (head no longer in their own family). Change that family's head first.
+      const otherHead = members.find((m) => m.headOfFamily != null);
+      if (otherHead) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "A selected member already heads another family. Change that family's head first.",
         });
       }
     }
@@ -167,7 +182,11 @@ const update = protectedProcedure
     if (addMemberIds.length > 0) {
       const candidates = await ctx.db.fisherfolk.findMany({
         where: { id: { in: addMemberIds }, tenantId },
-        select: { id: true, householdId: true },
+        select: {
+          id: true,
+          householdId: true,
+          headOfFamily: { select: { id: true } },
+        },
       });
       if (candidates.length !== addMemberIds.length) {
         throw new TRPCError({
@@ -182,6 +201,19 @@ const update = protectedProcedure
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "New family members must belong to the same household.",
+        });
+      }
+      // Reject pulling in the head of a DIFFERENT family as a member — it
+      // would orphan that family's head pointer. Non-head members may move
+      // freely (legitimate reassignment). Change that family's head first.
+      const otherHead = candidates.find(
+        (c) => c.headOfFamily != null && c.headOfFamily.id !== family.id,
+      );
+      if (otherHead) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Cannot add the head of another family as a member. Change that family's head first.",
         });
       }
     }
