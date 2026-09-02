@@ -2,6 +2,24 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-02 (Full Auto, overnight) — worked the pending-task backlog while you slept
+
+**In your words:** "you still have a lot of pending tasks in squirlnote… do it all and summon agent orchestration… full auto mode. i need to sleep."
+
+✅ Done (built + verified, each on its own branch, LOCAL / HARD HOLD — nothing pushed/deployed):
+- **FIS-9** — relabelled "Active Violations" → "Number of Violations" + show count (display-only; renewal semantics untouched). `feat/fis9-violation-count-label`. tsc/lint green.
+- **FIS-11** — new fisherfolk fields **employment type (full-time/part-time)** + **primary source of income** end-to-end (schema, zod/types, register + edit forms, detail, report columns, seeds) + migration. `feat/fis11-employment-income-fields`. tsc/lint/416 tests green.
+- **FIS-8 Phase A** — **multi-family households** additive foundation: new `Family` model + `Fisherfolk.familyId` + backfill migration (45 households → 45 single-family families, 142 members linked). Keeps `Household.head` for back-compat, so nothing breaks. `feat/fis8-multi-family-household-schema`. tsc/lint/416 tests green. Phases B–D (router/UI/reporting/maps) planned in `docs/FIS8_MULTI_FAMILY_PLAN.md`.
+
+🔨 In progress / next (un-gated, for the next loop):
+- **FIS-31** — landing-page copy overhaul (add color-coding/renewal-history/municipal-map/location-capture; humanize the stats/CTA). Local only; screenshot refresh + demo deploy DEFERRED (gated on ② demo/EC2 access).
+- **FIS-8 Phase B–D** — see the plan doc.
+
+💬 Notes / decisions
+- Fixed a `[HOW]` blocker: `prisma migrate dev` is broken by a **dev-DB migration-ledger drift + shadow-DB defect** (pre-existing, from 2026-08-31). Worked around it (author migration via diff-from-live-dev → `db execute` → `migrate resolve`); logged the lesson. A full dev-ledger re-baseline is a pending `[HOW]` follow-up.
+- **DEFERRED (not guessed):** 9 `[WHAT]`-gated tasks — FIS-6, FIS-7, FIS-10 (ordinance-gated), FIS-13, FIS-14, FIS-15, FIS-16, FIS-33 #3, and FIS-34/FIS-23/② demo (all in `PENDING_DECISIONS.md`, awaiting your call).
+- All three feature branches are LOCAL and unmerged — your merge/review call.
+
 ## 2026-09-02 (later) — Shipped the geolocation fix to PRODUCTION (v0.22.1)
 
 **In your words:** "just do the 1st option first" — ship the geolocation fix now, while the demo (option 2) stays on hold because Server-Setups is mid-migration to the new EC2 instance; you'll report back once it's done.
