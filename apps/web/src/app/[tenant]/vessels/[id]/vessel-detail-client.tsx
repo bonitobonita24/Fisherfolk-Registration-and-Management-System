@@ -296,11 +296,11 @@ export function VesselDetailClient({ id }: Props) {
           </CardContent>
         </Card>
 
-        {/* Active Violations */}
+        {/* Number of Violations */}
         <Card className="gap-0 py-5">
           <CardHeader className="px-6 pb-4 pt-0">
             <CardTitle className="text-sm font-medium">
-              Active Violations
+              Number of Violations ({record.violations.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="px-6 py-0">
