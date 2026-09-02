@@ -36,6 +36,16 @@ export const householdNetworkRouter = createTRPCRouter({
             longitude: true,
           },
         },
+        families: {
+          orderBy: { familyNumber: "asc" },
+          select: {
+            id: true,
+            familyNumber: true,
+            headId: true,
+            head: { select: { id: true, fullName: true, barangay: true, latitude: true, longitude: true } },
+            members: { select: { id: true, fullName: true, barangay: true, latitude: true, longitude: true } },
+          },
+        },
       },
     });
 
@@ -44,6 +54,7 @@ export const householdNetworkRouter = createTRPCRouter({
       householdNumber: h.householdNumber,
       head: h.head,
       members: h.members,
+      families: h.families,
     }));
   }),
 });

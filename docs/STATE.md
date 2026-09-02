@@ -1,6 +1,112 @@
 # FRMS — Project State
 
-## Current State (2026-09-02, LATEST — Full-Auto loop) — 🔨 FIS-8 Phase B (family-aware tRPC) DONE + verified, LOCAL/HARD HOLD
+## Current State (2026-09-03, LATEST — Full-Auto loop, later) — 🧭 FIS-31 scouted → scope is a [WHAT], not a clean un-gated build; docs reconciled; holding on owner [WHAT]s
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Full-Auto overnight, owner asleep.** Re-ran LOAD → DECISIONS → TASKS against ground truth. The prior handoff
+> declared the un-gated build queue "exhausted" but had overlooked **FIS-31 (landing-page overhaul)** — the one
+> remaining 🔴 that carries no `[WHAT]`. Investigated it as a genuine un-gated candidate rather than hold a third
+> time.
+>
+> **What the FIS-31 scout found (why it is NOT a clean overnight build):**
+> - **No FIS-31 branch/commits exist** — PENDING_DECISIONS's claim "landing page is being built locally" was
+>   inaccurate. Corrected in `PENDING_DECISIONS.md`.
+> - The current landing (`apps/web/src/app/page.tsx` + `components/landing/*`) is **NOT stale** — it is the recent
+>   **Sep-1 overhaul**: 8 sections (Nav→Hero→Stats→Features→Gallery→Process→CTA→Footer), Motion (motion.dev) with
+>   `useReducedMotion()`, full SEO (OG/Twitter/JSON-LD), copy already citing the status model + 62 barangays + ayuda.
+> - The **biggest value-add (screenshots of the new map/location features) is GATED** = FIS-34 (real GPU browser —
+>   maps composite black headless — + demo redeploy, both on hold pending EC2 access).
+> - The remaining delta = product/content judgment on a public surface the owner just approved (WHICH new features
+>   to advertise — and FIS-8 multi-family is **unshipped**, so it must NOT go on the public page). That is a genuine
+>   `[WHAT]`, not a `[HOW]` to ram through overnight.
+>
+> **Decision:** did NOT rebuild. Converted FIS-31 from a fuzzy "overhaul" into a **decision-ready scope [WHAT]**
+> (augment-with-shipped-callouts vs full rebuild vs wait-for-screenshots) in PENDING_DECISIONS.md, and reconciled
+> the FIS-31 entries in both docs. Un-gated *build* queue is genuinely empty now (FIS-31's un-gated slice is
+> product-judgment-gated; screenshots demo-gated). 15 open `[WHAT]`s remain → **reboot with `--hold`** (never
+> `--stop` while `[WHAT]`s are open). Prod remains v0.22.1 (healthy). NOTHING pushed/merged/deployed — HARD HOLD.
+>
+> **✅ Done this iteration (docs-only, LOCAL/HARD HOLD):** corrected the false "FIS-31 being built" claim + added
+> the sharpened FIS-31 scope `[WHAT]` (PENDING_DECISIONS.md); FIS-31 queue entry 🔴→🟡 with the real state
+> (TASK_QUEUE.md); this handoff block.
+
+### Git (this iteration)
+On `feat/fis8-phase-c-households-ui`, one docs-only commit on top of `b34b2c5`. `main` = local, 6 ahead of origin
+(HARD HOLD). All feature branches retained. Tree clean.
+
+---
+
+## Current State (2026-09-03 — Full-Auto loop) — 🧭 Un-gated queue reconciled to empty; FIS-9/FIS-11 confirmed built-on-branch; holding on owner [WHAT]s
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Full-Auto overnight, owner asleep.** Resumed, ran the LOAD → DECISIONS → TASKS routine against ground truth
+> (git branches, PENDING_DECISIONS, TASK_QUEUE). **No new build this iteration** — the un-gated *build* queue is
+> exhausted; ramming design-bearing/owner-gated work through unreviewed would violate the loop contract.
+>
+> **✅ Done this iteration (LOCAL/HARD HOLD, `5ac4c80` on `feat/fis8-phase-c-households-ui`):**
+> - **Already-done cross-check** caught doc drift: `docs/TASK_QUEUE.md` listed **FIS-9** and **FIS-11** as 🔴 TODO,
+>   but both are BUILT + committed on their own branches (`feat/fis9-violation-count-label` `5048d5c`;
+>   `feat/fis11-employment-income-fields` `8a95b5d`). Reconciled both entries → 🟡 built-on-branch / awaiting owner
+>   merge. Prevents a future loop re-building already-done work.
+>
+> **State of the queue (honest):**
+> - **Built, LOCAL/HARD HOLD, awaiting owner merge (owner-gated):** FIS-8 Phase B (`feat/fis8-phase-b-family-router`),
+>   FIS-8 Phase C safe slices (`feat/fis8-phase-c-households-ui`), **FIS-9**, **FIS-11**. FIS-11 carries a Prisma
+>   migration — no prod `migrate deploy` until owner authorizes.
+> - **[WHAT]-deferred (15 open in PENDING_DECISIONS.md, unchanged):** FIS-8 ayuda grain, FIS-8 Phase C interactive
+>   UI direction, FIS-6, FIS-7, FIS-10 (ordinance-gated), FIS-13, FIS-15, FIS-16 note, FIS-33 #3 map-marker a11y,
+>   FIS-34/FIS-23/② demo refresh (gated on EC2/demo access), etc.
+> - **Verification polish (un-gated but low-value overnight, deferred to an owner-present session):** dev rebuild off
+>   the Phase C branch + visual QA of the family-count column + family-head badge (trivial display changes already
+>   covered by 595 green tests + green build; a human eyeballing the screens is the natural time to do it).
+>
+> **Decision:** un-gated build queue empty; only owner-gated merges + [WHAT]s remain → **reboot with `--hold`** to
+> pace + re-surface, NOT stop (`--stop` is also mechanically refused while [WHAT]s are open). Prod remains v0.22.1
+> (healthy). NOTHING pushed/merged/deployed — HARD HOLD.
+
+### Git (this iteration)
+On `feat/fis8-phase-c-households-ui` @ `5ac4c80` (docs-only reconcile on top of `90865f4`). `main` = local, 6 ahead
+of origin (docs/AIEF-stamp commits, HARD HOLD). All feature branches retained. Tree clean.
+
+---
+
+## Current State (2026-09-02, LATEST — Full-Auto loop, later) — 🟡 FIS-8 Phase C partial (safe slices) + family-router hardening, LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_fis8_phasec_partial_0902.md` (+ this block).
+
+> **Full-Auto overnight, owner asleep.** Continued the un-gated lineup. Started **FIS-8 Phase C** (households UI)
+> on branch **`feat/fis8-phase-c-households-ui`** (off Phase B, merged main's docs). Landed the SAFE, unambiguous
+> slices + a backend hardening fix; DEFERRED the design-bearing interactive rewrite for owner review.
+>
+> **✅ Done + verified (tsc 7/7 · lint · 595 tests · `next build` exit 0), LOCAL/HARD HOLD:**
+> - Slice 1 (`0e0176d`) — households list **Families count** column (`household.list` `_count.families`).
+> - Slice 2 (`012c226`) — fisherfolk detail **family-head badge** + family number from `record.family`.
+> - Hardening (`96f47e5`) — `family.create`/`update` **reject adding another family's head as a member** (orphan
+>   guard); non-head moves stay allowed; +1 regression test (594→595). Closes Phase B follow-up; global lesson
+>   `prisma…orphans-source-head` → fixed.
+> - Docs (`90865f4`) — plan/queue/session-log updated.
+>
+> **⏳ DEFERRED (design-bearing, owner review) — remaining Phase C:** wizard multi-family flow, per-family detail
+> sections + "Add Family", map per-family iteration. Rationale: all 45 households are single-family (Phase A
+> backfill) so the *creation* UX is the gate — didn't ram core-screen UX through unreviewed. Precise decomposition
+> in `docs/FIS8_MULTI_FAMILY_PLAN.md` (Phase C section). Then **Phase D** (reporting/dashboard per-family).
+> **Deferred [WHAT]s (owner asleep):** all 14 in PENDING_DECISIONS.md, unchanged. Prod remains v0.22.1 (healthy).
+>
+> **NOTHING pushed/merged/deployed — HARD HOLD.** Everything below this block predates this loop iteration.
+
+### Git
+On `feat/fis8-phase-c-households-ui` @ `90865f4` (off `feat/fis8-phase-b-family-router` + merged main docs).
+`main` = local `6c35be7` (one chore commit ahead of origin — the AIEF:MANAGED stamp refresh), origin unchanged.
+Phase A/B branches retained. Tree clean. Dev NOT rebuilt off Phase C branch (no runtime UI change shipped;
+slices are list-column + detail-badge — a `dev-freshness` rebuild + visual QA is the next un-gated step if resumed).
+
+---
+
+## Current State (2026-09-02 — Full-Auto loop) — 🔨 FIS-8 Phase B (family-aware tRPC) DONE + verified, LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

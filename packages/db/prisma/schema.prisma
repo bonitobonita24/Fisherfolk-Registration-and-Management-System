@@ -300,6 +300,7 @@ model Tenant {
   registrationRenewals RegistrationRenewal[]
   idPrintBatches       IDPrintBatch[]
   households           Household[]
+  families             Family[]
   fishCatches          FishCatch[]
   fishCatchSpecies     FishCatchSpecies[]
   customRoles          CustomRole[]
@@ -396,6 +397,7 @@ model Fisherfolk {
   idReleasedAt     DateTime?        @map("id_released_at")
   idReleasedById   String?          @map("id_released_by_id")
   householdId      String?          @map("household_id")
+  familyId         String?          @map("family_id")
 
   tenant             Tenant                @relation(fields: [tenantId], references: [id])
   createdBy          User?                 @relation("FisherfolkCreatedBy", fields: [createdById], references: [id])
@@ -410,6 +412,8 @@ model Fisherfolk {
   household          Household?            @relation("HouseholdMembers", fields: [householdId], references: [id])
   headOf             Household?            @relation("HouseholdHead")
   fishCatches        FishCatch[]           @relation("FisherfolkFishCatches")
+  family             Family?               @relation("FamilyMembers", fields: [familyId], references: [id])
+  headOfFamily       Family?               @relation("FamilyHead")
 
   @@unique([tenantId, idNumber])
   @@index([tenantId])
@@ -418,6 +422,7 @@ model Fisherfolk {
   @@index([tenantId, barangay])
   @@index([tenantId, lastName, firstName])
   @@index([tenantId, householdId])
+  @@index([tenantId, familyId])
   @@map("fisherfolk")
 }
 
@@ -707,10 +712,32 @@ model Household {
   createdBy          User?              @relation("HouseholdCreatedBy", fields: [createdById], references: [id])
   members            Fisherfolk[]       @relation("HouseholdMembers")
   ayudaBeneficiaries AyudaBeneficiary[]
+  families           Family[]
 
   @@unique([tenantId, householdNumber])
   @@index([tenantId])
   @@map("households")
+}
+
+model Family {
+  id           String   @id @default(cuid())
+  tenantId     String   @map("tenant_id")
+  householdId  String   @map("household_id")
+  familyNumber String   @map("family_number")
+  headId       String   @unique @map("head_id")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  household Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  head      Fisherfolk   @relation("FamilyHead", fields: [headId], references: [id])
+  members   Fisherfolk[] @relation("FamilyMembers")
+
+  @@unique([householdId, familyNumber])
+  @@index([tenantId])
+  @@index([householdId])
+  @@map("families")
 }
 
 model AyudaUpload {
@@ -998,15 +1025,15 @@ model CustomRole {
 // tenantId column — platform roles are global. See
 // docs/SITE_ACCESS_STANDARD.md §2 + ~/.claude/library/tenant-rbac-standard.md.
 model PlatformRolePermission {
-  id             String                @id @default(cuid())
-  roleId         String                @map("role_id")
-  permissionKey  PlatformPermissionKey @map("permission_key")
-  view           Boolean               @default(false)
-  write          Boolean               @default(false)
-  update         Boolean               @default(false)
-  delete         Boolean               @default(false)
-  createdAt      DateTime              @default(now()) @map("created_at")
-  updatedAt      DateTime              @updatedAt @map("updated_at")
+  id            String                @id @default(cuid())
+  roleId        String                @map("role_id")
+  permissionKey PlatformPermissionKey @map("permission_key")
+  view          Boolean               @default(false)
+  write         Boolean               @default(false)
+  update        Boolean               @default(false)
+  delete        Boolean               @default(false)
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
 
   role CustomRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
