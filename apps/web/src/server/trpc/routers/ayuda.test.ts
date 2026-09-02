@@ -90,6 +90,17 @@ async function makeHousehold(tenantId: string) {
   return { householdId: id, headId: head.id };
 }
 
+// household.create auto-creates an "F-01" Family for the head — reuse it
+// rather than calling family.create again (the head already leads that family).
+async function makeFamily(tenantId: string) {
+  const { householdId, headId } = await makeHousehold(tenantId);
+  const family = await platformPrisma.family.findFirstOrThrow({
+    where: { householdId },
+    select: { id: true },
+  });
+  return { familyId: family.id, householdId, headId };
+}
+
 async function makeActiveProgram(
   tenantId: string,
   distributionUnit: "FISHERFOLK" | "HOUSEHOLD",
@@ -281,6 +292,87 @@ describe.skipIf(!hasDb)(
       await expect(
         ayudaCaller(testTenantId).addBeneficiary({ programId, householdId }),
       ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    });
+  },
+);
+
+describe.skipIf(!hasDb)(
+  "ayuda.addBeneficiary — optional familyId (additive, FIS-8)",
+  () => {
+    it("persists an optional familyId alongside a FISHERFOLK-distribution beneficiary", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const { familyId, headId } = await makeFamily(testTenantId);
+
+      const record = await ayudaCaller(testTenantId).addBeneficiary({
+        programId,
+        fisherfolkId: headId,
+        familyId,
+      });
+
+      expect(record.familyId).toBe(familyId);
+
+      const stored = await platformPrisma.ayudaBeneficiary.findUnique({
+        where: { id: record.id },
+      });
+      expect(stored!.familyId).toBe(familyId);
+    });
+
+    it("omitting familyId leaves it null (default behavior unchanged)", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const ff = await makeFisherfolk(testTenantId);
+
+      const record = await ayudaCaller(testTenantId).addBeneficiary({
+        programId,
+        fisherfolkId: ff.id,
+      });
+
+      expect(record.familyId).toBeNull();
+    });
+
+    it("rejects a familyId that does not exist", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const ff = await makeFisherfolk(testTenantId);
+      const { familyId: deletedFamilyId, householdId } = await makeFamily(
+        testTenantId,
+      );
+      // Delete the household — cascades to the family, leaving a syntactically
+      // valid but non-existent cuid to exercise the NOT_FOUND branch.
+      await platformPrisma.fisherfolk.updateMany({
+        where: { tenantId: testTenantId, householdId },
+        data: { householdId: null, familyId: null },
+      });
+      await platformPrisma.household.delete({ where: { id: householdId } });
+
+      await expect(
+        ayudaCaller(testTenantId).addBeneficiary({
+          programId,
+          fisherfolkId: ff.id,
+          familyId: deletedFamilyId,
+        }),
+      ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    });
+  },
+);
+
+describe.skipIf(!hasDb)(
+  "ayuda.addBeneficiaries — bulk-add by familyIds (additive, FIS-8)",
+  () => {
+    it("bulk-adds family heads and records familyId per beneficiary", async () => {
+      const programId = await makeActiveProgram(testTenantId, "FISHERFOLK");
+      const famA = await makeFamily(testTenantId);
+      const famB = await makeFamily(testTenantId);
+
+      const result = await ayudaCaller(testTenantId).addBeneficiaries({
+        programId,
+        familyIds: [famA.familyId, famB.familyId],
+      });
+
+      expect(result.added).toBe(2);
+
+      const storedA = await platformPrisma.ayudaBeneficiary.findFirst({
+        where: { programId, fisherfolkId: famA.headId },
+      });
+      expect(storedA!.familyId).toBe(famA.familyId);
     });
   },
 );

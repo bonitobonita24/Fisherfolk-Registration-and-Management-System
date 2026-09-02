@@ -680,18 +680,21 @@ model AyudaBeneficiary {
   longitude          Float?                 @map("longitude")
   createdAt          DateTime               @default(now()) @map("created_at")
   householdId        String?                @map("household_id")
+  familyId           String?                @map("family_id")
 
   tenant     Tenant       @relation(fields: [tenantId], references: [id])
   program    AyudaProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
   fisherfolk Fisherfolk   @relation(fields: [fisherfolkId], references: [id])
   verifiedBy User?        @relation("BeneficiaryVerifiedBy", fields: [verifiedById], references: [id])
   household  Household?   @relation(fields: [householdId], references: [id])
+  family     Family?      @relation(fields: [familyId], references: [id])
 
   @@unique([programId, fisherfolkId])
   @@index([tenantId])
   @@index([programId])
   @@index([fisherfolkId])
   @@index([householdId])
+  @@index([familyId])
   @@map("ayuda_beneficiaries")
 }
 
@@ -729,10 +732,11 @@ model Family {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  tenant    Tenant       @relation(fields: [tenantId], references: [id])
-  household Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  head      Fisherfolk   @relation("FamilyHead", fields: [headId], references: [id])
-  members   Fisherfolk[] @relation("FamilyMembers")
+  tenant             Tenant             @relation(fields: [tenantId], references: [id])
+  household          Household          @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  head               Fisherfolk         @relation("FamilyHead", fields: [headId], references: [id])
+  members            Fisherfolk[]       @relation("FamilyMembers")
+  ayudaBeneficiaries AyudaBeneficiary[]
 
   @@unique([householdId, familyNumber])
   @@index([tenantId])
