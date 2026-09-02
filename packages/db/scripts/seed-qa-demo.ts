@@ -71,6 +71,8 @@ interface DemoFisherfolk {
   address: string;
   sex: "MALE" | "FEMALE";
   civilStatus: "SINGLE" | "MARRIED" | "WIDOWED" | "SEPARATED" | "DIVORCED";
+  employmentType: "FULL_TIME" | "PART_TIME";
+  primarySourceOfIncome: string;
   dateOfBirth: string; // ISO date
   photoAsset: string;
   signatureAsset?: string;
@@ -86,6 +88,8 @@ const DEMO_FISHERFOLK: DemoFisherfolk[] = [
     address: "Purok 1, Suqui, Calapan City",
     sex: "MALE",
     civilStatus: "MARRIED",
+    employmentType: "FULL_TIME",
+    primarySourceOfIncome: "Fishing",
     dateOfBirth: "1980-03-15",
     photoAsset: "qa-fisherfolk-photo-1.jpg",
     signatureAsset: "qa-fisherfolk-signature-1.png",
@@ -99,6 +103,8 @@ const DEMO_FISHERFOLK: DemoFisherfolk[] = [
     address: "Sitio Baybay, Silonay, Calapan City",
     sex: "FEMALE",
     civilStatus: "WIDOWED",
+    employmentType: "PART_TIME",
+    primarySourceOfIncome: "Fish Vending",
     dateOfBirth: "1972-11-02",
     photoAsset: "qa-fisherfolk-photo-2.jpg",
     signatureAsset: "qa-fisherfolk-signature-2.png",
@@ -112,6 +118,8 @@ const DEMO_FISHERFOLK: DemoFisherfolk[] = [
     address: "Purok 3, Salong, Calapan City",
     sex: "MALE",
     civilStatus: "SINGLE",
+    employmentType: "FULL_TIME",
+    primarySourceOfIncome: "Fishing",
     dateOfBirth: "1995-06-21",
     photoAsset: "qa-fisherfolk-photo-3.jpg",
   },
@@ -124,6 +132,8 @@ const DEMO_FISHERFOLK: DemoFisherfolk[] = [
     address: "Riverside, Calero, Calapan City",
     sex: "FEMALE",
     civilStatus: "MARRIED",
+    employmentType: "PART_TIME",
+    primarySourceOfIncome: "Fish Vending",
     dateOfBirth: "1988-01-30",
     photoAsset: "qa-fisherfolk-photo-4.jpg",
   },
@@ -212,6 +222,8 @@ async function main() {
         dateOfBirth: new Date(ff.dateOfBirth),
         sex: ff.sex,
         civilStatus: ff.civilStatus,
+        employmentType: ff.employmentType,
+        primarySourceOfIncome: ff.primarySourceOfIncome,
         address: ff.address,
         barangay: ff.barangay,
         contactNumber: "0917-000-0000",

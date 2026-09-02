@@ -8,7 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Info } from "lucide-react";
 
-import { Gender, CivilStatus } from "@frms/shared/types";
+import { Gender, CivilStatus, EmploymentType } from "@frms/shared/types";
 import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
@@ -70,6 +70,11 @@ const editFormSchema = z.object({
     .optional(),
   contactNumber: z.string(),
   rsbsaNumber: z.string(),
+  employmentType: z
+    .enum([EmploymentType.FULL_TIME, EmploymentType.PART_TIME])
+    .or(z.literal(""))
+    .optional(),
+  primarySourceOfIncome: z.string(),
   address: z.string().min(1, "Address is required"),
   barangay: z.string().min(1, "Barangay is required"),
   categoryIds: z.array(z.string().cuid()).min(1, "Select at least one category"),
@@ -113,6 +118,8 @@ interface EditFormProps {
     civilStatus: string | null;
     contactNumber: string | null;
     rsbsaNumber: string | null;
+    employmentType: string | null;
+    primarySourceOfIncome: string | null;
     address: string;
     barangay: string;
     categoryIds: string[];
@@ -169,6 +176,9 @@ function EditForm({ id, record }: EditFormProps) {
       civilStatus: (record.civilStatus as EditFormValues["civilStatus"]) ?? "",
       contactNumber: record.contactNumber ?? "",
       rsbsaNumber: record.rsbsaNumber ?? "",
+      employmentType:
+        (record.employmentType as EditFormValues["employmentType"]) ?? "",
+      primarySourceOfIncome: record.primarySourceOfIncome ?? "",
       address: record.address,
       barangay: record.barangay,
       categoryIds: record.categoryIds,
@@ -229,6 +239,20 @@ function EditForm({ id, record }: EditFormProps) {
 
     const diffRsbsa = compareString(values.rsbsaNumber, record.rsbsaNumber);
     if (diffRsbsa !== undefined) changes.rsbsaNumber = diffRsbsa;
+
+    const newEmploymentType = values.employmentType ?? "";
+    const oldEmploymentType = record.employmentType ?? "";
+    if (newEmploymentType !== oldEmploymentType) {
+      changes.employmentType = newEmploymentType || null;
+    }
+
+    const diffPrimarySourceOfIncome = compareString(
+      values.primarySourceOfIncome,
+      record.primarySourceOfIncome,
+    );
+    if (diffPrimarySourceOfIncome !== undefined) {
+      changes.primarySourceOfIncome = diffPrimarySourceOfIncome;
+    }
 
     const diffAddress = compareString(values.address, record.address);
     if (diffAddress !== undefined) changes.address = diffAddress;
@@ -426,6 +450,34 @@ function EditForm({ id, record }: EditFormProps) {
             />
             <FormField
               control={form.control}
+              name="employmentType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employment type</FormLabel>
+                  <Select
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select employment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={EmploymentType.FULL_TIME}>
+                        Full-time
+                      </SelectItem>
+                      <SelectItem value={EmploymentType.PART_TIME}>
+                        Part-time
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="contactNumber"
               render={({ field }) => (
                 <FormItem>
@@ -449,6 +501,19 @@ function EditForm({ id, record }: EditFormProps) {
                   <FormDescription>
                     Registry System for Basic Sectors in Agriculture.
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primarySourceOfIncome"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Primary source of income</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Optional" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -668,6 +733,8 @@ export function FisherfolkEditFormClient({ id }: FisherfolkEditFormClientProps) 
           civilStatus: record.civilStatus ?? null,
           contactNumber: record.contactNumber ?? null,
           rsbsaNumber: record.rsbsaNumber ?? null,
+          employmentType: record.employmentType ?? null,
+          primarySourceOfIncome: record.primarySourceOfIncome ?? null,
           address: record.address,
           barangay: record.barangay,
           categoryIds: record.categoryIds ?? [],

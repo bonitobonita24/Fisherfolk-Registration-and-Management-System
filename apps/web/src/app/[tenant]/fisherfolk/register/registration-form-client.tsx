@@ -9,7 +9,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Loader2, Wand2 } from "lucide-react";
 
-import { Gender, CivilStatus } from "@frms/shared/types";
+import { Gender, CivilStatus, EmploymentType } from "@frms/shared/types";
 import { CALAPAN_BARANGAYS } from "@frms/shared/constants";
 
 import { trpc } from "@/lib/trpc/client";
@@ -55,6 +55,8 @@ const STEP_FIELDS = {
     "civilStatus",
     "contactNumber",
     "rsbsaNumber",
+    "employmentType",
+    "primarySourceOfIncome",
   ],
   2: ["address", "barangay", "categoryIds"],
   3: ["photo", "signature"],
@@ -85,6 +87,11 @@ const formSchema = z.object({
     .optional(),
   contactNumber: z.string(),
   rsbsaNumber: z.string(),
+  employmentType: z
+    .enum([EmploymentType.FULL_TIME, EmploymentType.PART_TIME])
+    .or(z.literal(""))
+    .optional(),
+  primarySourceOfIncome: z.string(),
   address: z.string().min(1, "Address is required"),
   barangay: z.string().min(1, "Barangay is required"),
   categoryIds: z
@@ -125,6 +132,8 @@ export function RegistrationFormClient({
       civilStatus: "",
       contactNumber: "",
       rsbsaNumber: "",
+      employmentType: "",
+      primarySourceOfIncome: "",
       address: "",
       barangay: "",
       categoryIds: [],
@@ -219,6 +228,13 @@ export function RegistrationFormClient({
       }),
       ...(values.rsbsaNumber.trim().length > 0 && {
         rsbsaNumber: values.rsbsaNumber.trim(),
+      }),
+      ...(values.employmentType != null &&
+        values.employmentType !== "" && {
+          employmentType: values.employmentType,
+        }),
+      ...(values.primarySourceOfIncome.trim().length > 0 && {
+        primarySourceOfIncome: values.primarySourceOfIncome.trim(),
       }),
       categoryIds: values.categoryIds,
       ...(values.photo && { photo: values.photo }),
@@ -473,6 +489,34 @@ function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
       />
       <FormField
         control={form.control}
+        name="employmentType"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Employment type</FormLabel>
+            <Select
+              value={field.value ?? ""}
+              onValueChange={field.onChange}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select employment type" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value={EmploymentType.FULL_TIME}>
+                  Full-time
+                </SelectItem>
+                <SelectItem value={EmploymentType.PART_TIME}>
+                  Part-time
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
         name="contactNumber"
         render={({ field }) => (
           <FormItem>
@@ -496,6 +540,19 @@ function PersonalStep({ form, onSuggestId, isSuggesting }: PersonalStepProps) {
             <FormDescription>
               Registry System for Basic Sectors in Agriculture.
             </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
+        name="primarySourceOfIncome"
+        render={({ field }) => (
+          <FormItem className="md:col-span-2">
+            <FormLabel>Primary source of income</FormLabel>
+            <FormControl>
+              <Input placeholder="Optional" {...field} />
+            </FormControl>
             <FormMessage />
           </FormItem>
         )}
@@ -709,6 +766,18 @@ function ReviewStep({ values, registrationYear }: ReviewStepProps) {
           [
             "RSBSA number",
             values.rsbsaNumber.length > 0 ? values.rsbsaNumber : "—",
+          ],
+          [
+            "Employment type",
+            values.employmentType != null && values.employmentType !== ""
+              ? values.employmentType
+              : "—",
+          ],
+          [
+            "Primary source of income",
+            values.primarySourceOfIncome.length > 0
+              ? values.primarySourceOfIncome
+              : "—",
           ],
           ["Address", values.address],
           ["Barangay", values.barangay],

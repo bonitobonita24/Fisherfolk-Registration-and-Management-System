@@ -38,13 +38,19 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   - ✅ **Structural (headless-verifiable):** dashboard density map, household member map (FIS-28 resize-fix present), municipal network (pink `#EC4899` jumped + `network|heatmap` mode in source) — all MOUNT with sized canvases, **0 console errors**; CARTO style loads (attribution present). Status model correct on dev (NEW/RENEWED, 0 ACTIVE).
   - ⚠ **NOT headless-verifiable — needs real GPU browser / mobile device:** map *visual paint* (software-WebGL composites the canvas black in screenshots — an artifact, not a failure) + on-device mobile GPS. Retest "Use my location"→save→DB read-back pending the dev rebuild that applies the header fix. `owner 2026-09-01` `test`
 - 🟡 **FIS-33 — a11y pass on new interactive components — AUDIT DONE (2026-09-02).** axe-core 4.11.4 (wcag2a/2aa/21/22aa) + manual keyboard/focus on real Chromium. Report: `test-artifacts/fis33-a11y-2026-09-02.md`. Result: Critical 0 · Serious 1 · Moderate 0 (axe) + 3 manual. **CLEAN (PASS):** LocationPicker (edit form), ZoomableImage dialog (focus-trap+Esc+return OK), member+network maps (controls OK). **Remediation TODO (Mark-Received dialog + shared bits):**
-  1. 🔴 [Serious·2.5.8 target-size] Mark-Received dialog MapLibre zoom-in control clipped to ~2×29px in the smaller dialog map (clean on full-size edit form) → render ≥24×24 w/ spacing.
-  2. 🔴 [Moderate·2.4.3] Mark-Received dialog does NOT restore focus to trigger on close (lands on `<body>`) → copy ZoomableImage's return-focus pattern.
-  3. 🔴 [Moderate·2.1.1/4.1.2 — has UX-design implication] map markers (member+network) not keyboard-focusable + share generic name "Map marker" → focusable pins w/ per-pin names OR a keyboard list alternative (owner may weigh the approach).
+  1. ✅ [Serious·2.5.8 target-size] FIXED (2026-09-02) — root cause was the LocationPicker map canvas mis-sized inside the animating dialog (same class as FIS-28), pushing the top-right control off-edge where `overflow-hidden` clipped it to 2px. Added force-`resize()` on map-ready + rAF in `location-picker.tsx`. Verified live: controls now **29×29px** (canvas 460 in 462 wrapper). Branch `fix/fis33-a11y-mark-received`.
+  2. ✅ [Moderate·2.4.3] FIXED (2026-09-02) — Mark-Received dialog opened from a DropdownMenuItem that unmounts, so focus fell to `<body>`; added `verifyTriggerRef` + `onCloseAutoFocus` restore in `ayuda-detail-client.tsx`. Verified live: focus returns to the Verify button on close.
+  3. 🔴 [Moderate·2.1.1/4.1.2 — HAS UX-DESIGN CHOICE, awaiting owner steer] map markers (member+network) not keyboard-focusable + share generic name "Map marker" → focusable pins w/ per-pin names OR a keyboard list alternative (owner to pick the approach).
   4. Secondary: `aria-modal="true"` on shared Dialog primitive (app-wide blast radius — care); initial dialog focus to heading not map canvas; make "No location set" an aria-live region; manual contrast check of network-map legend swatches (axe incomplete on canvas colors). `owner 2026-09-01` `a11y` `test`
 - 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the maps/location capture headless couldn't capture; overwrite `public/showcase/*.png`. `owner 2026-09-01` `design`
 
-- 🔴 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task).** After round-3 ships: brainstorm + rebuild the public landing page with the latest features, updated screenshots, better statements/context (appropriate skills: brainstorming, frontend-design/web-motion, copywriting), then run **humanize** on all captions/statements + ai-check. `owner 2026-09-01` `design` `docs`
+- 🟡 **FIS-31 — Landing page overhaul (POST-REBOOT handoff task) — SCOPE NOW A [WHAT] (2026-09-03).** Scouted the
+  current page: it is NOT stale — already overhauled Sep 1 (8 sections, Motion+reduced-motion, full SEO, current
+  copy). So "rebuild" is ambiguous and the biggest value-add (new-feature screenshots) is gated on FIS-34/demo.
+  Deferred a rebuild rather than ram design-bearing changes through a recently-owner-approved public surface
+  overnight. Owner scope decision surfaced in `PENDING_DECISIONS.md` (augment-with-shipped-callouts vs full rebuild
+  vs wait-for-screenshots). ⚠ don't advertise Multi-Family Households (FIS-8 unshipped). Skills when built:
+  brainstorming, frontend-design/web-motion, copywriting → humanize + ai-check. `owner 2026-09-01` `design` `docs`
 - 🟡 **Fix ugly horizontal scrollbar on fisherfolk detail tab bar.** ✅ CODE DONE (`ccbe876`, 2026-09-01): new `.tabs-scrollbar` themed thin-scrollbar utility on shared `UnderlineTabsList` (uniform across fisherfolk-detail/id-generator/analytics/reports/todo); lint-gated build green. Visual render confirmation folded into FIS-32 real-browser pass. Original ask below:
   ~~🔴~~ On a specific fisherfolk detail page, the
   tab strip (Profile · Vessels · Violations · Ayuda · Fish Catches · Renewals · Activity · To…) shows a raw
@@ -71,15 +77,19 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   **Phase A ✅** schema + migration + backfill (`feat/fis8-multi-family-household-schema`, `7261dda`). **Phase B ✅
   2026-09-02** family-aware tRPC layer — new `family` router (create/update/remove), household seeds initial F-01,
   getById/network/detail expose families; 594 tests green (`feat/fis8-phase-b-family-router`, `b280f59`, LOCAL/HARD
-  HOLD). **NEXT: Phase C** (households UI — per-family sections, wizard, maps) then **Phase D** (reporting/dashboard
-  per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
+  HOLD). **Phase C 🟡 PARTIAL 2026-09-02** (`feat/fis8-phase-c-households-ui`, LOCAL/HARD HOLD): ✅ list family
+  count + ✅ fisherfolk-detail family-head badge + ✅ family-router orphan-guard hardening (595 tests, build green).
+  ⏳ **DEFERRED — design-bearing interactive rewrite (owner review)**: wizard multi-family flow, per-family detail
+  sections + Add-Family, map per-family iteration — no multi-family households exist yet (single-family backfill), so
+  creation UX is the design-bearing gate. Precise decomposition in `docs/FIS8_MULTI_FAMILY_PLAN.md`. Then **Phase D**
+  (reporting/dashboard per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
   `source: owner meeting 2026-07-09` `feature` `db` `design`
 
-- 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
-  dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
-  Violations" dashboard tile (`violations-group-tile.tsx`) + `activeViolationCount` renewal guard
-  (`fisherfolk.ts:505`). ⚠ **[WHAT]:** show a raw count instead of a badge? Keep the renewal-block semantics
-  (active violation blocks renewal) unchanged? `source: owner meeting 2026-07-09` `feature` `ui`
+- 🟡 **FIS-9 — Rename "active violation" → "number of violations" (display) — BUILT on branch, LOCAL/HARD HOLD.**
+  `feat/fis9-violation-count-label` (`5048d5c`): relabel "Active Violations" → "Number of Violations" + show the
+  raw count (display-only). Renewal-block semantics UNCHANGED (active violation still blocks renewal). The embedded
+  ⚠[WHAT] was resolved-by-default (display-only count, non-destructive) — surface to owner at merge review; awaiting
+  owner merge decision (owner-gated). `source: owner meeting 2026-07-09` `feature` `ui`
 
 - 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already exists as one of
   the 6 `CANONICAL_CATEGORIES` (`lib/normalize/types.ts:13`). NEW work = subcategory taxonomy + aquaculture-only
@@ -89,9 +99,11 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   build the structure now, activate later. [WHAT]: new Prisma model vs JSON extension; which fields required.
   `source: owner meeting 2026-07-09` `feature` `db`
 
-- 🔴 **FIS-11 — Add full-time / part-time + primary source of income fields.** Not present today (no occupation/
-  livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
-  the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
+- 🟡 **FIS-11 — Full-time/part-time + primary source of income fields — BUILT on branch, LOCAL/HARD HOLD.**
+  `feat/fis11-employment-income-fields` (`8a95b5d`): employment-type enum (full-time/part-time) + primary-source-of-income
+  added to `Fisherfolk` (shared schema/enums + Prisma), registration + edit forms, detail view, and QA/demo seed.
+  Awaiting owner merge decision (owner-gated). ⚠ carries a Prisma migration — do NOT `migrate deploy` to prod until
+  the owner authorizes the merge/release. `source: owner meeting 2026-07-09` `feature` `db` `ui`
 
 - ✅ **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command — BUILT 2026-08-31.**
   Built + verified (typecheck 7/7 · 586 tests · build green) on `feat/fis12-registration-status-model` (`6892e64`), LOCAL/HARD HOLD.

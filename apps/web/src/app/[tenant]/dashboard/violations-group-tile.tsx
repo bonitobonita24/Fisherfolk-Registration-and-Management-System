@@ -26,7 +26,7 @@ export function ViolationsGroupTile({
   return (
     <Card className="flex flex-col gap-0 overflow-hidden py-0">
       <CardHeader className="space-y-1 border-b px-6 py-5">
-        <CardTitle className="text-sm font-medium">Active Violations</CardTitle>
+        <CardTitle className="text-sm font-medium">Number of Violations</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-center px-6 py-5">
         {loading ? (

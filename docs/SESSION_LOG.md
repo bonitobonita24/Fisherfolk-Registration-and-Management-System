@@ -2,6 +2,51 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-03 (Full Auto, overnight — loop, later) — checked the landing-page task; it needs your direction, not a solo rebuild
+
+**In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done
+- Looked hard at **FIS-31 (landing page overhaul)** — the last open task with no pending decision on it — to see if I could just build it overnight. I scouted the current landing page first.
+- Found two things worth flagging: (1) the note saying "the landing page is being built locally" was **wrong** — there's no such branch or work; I corrected it. (2) The current landing page is **not** old — you already gave it a full overhaul on Sep 1 (proper hero, animated stats, feature grid, screenshot gallery, SEO). It's genuinely good.
+
+💬 Why I didn't just rebuild it
+- The single biggest improvement — fresh screenshots showing the new maps and location-capture — is **blocked** (those need a real GPU browser + the demo box, which is down for the server move).
+- The rest is a judgement call I shouldn't make while you sleep: *which* new features to put on a public page you just approved — and one of them (multi-family households) isn't even live yet, so it must not go up publicly.
+- So instead of risking a worse version of a page you already like, I turned "overhaul the landing page" into a clear question for you: **augment it with callouts for the already-shipped new features, do a full rebuild (tell me the direction), or wait for the screenshots?** It's in your decisions list.
+
+⏳ Next when you're around
+- Same as before: green-light which deferred items to build, decide the multi-family screen design (FIS-8), and now also pick the FIS-31 landing scope. Production unchanged and healthy (v0.22.1).
+
+## 2026-09-03 (Full Auto, overnight — loop) — queue reconcile; un-gated build work exhausted
+
+**In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done
+- Reconciled the task queue: **FIS-9** ("Number of Violations" count) and **FIS-11** (full/part-time + income fields) were listed as not-started but are actually **already built** on their own branches from an earlier overnight run — relabelled them so a later run doesn't rebuild them. (`5ac4c80`, local only)
+
+💬 Where things stand
+- Everything that could be built without a decision from you is built and waiting on your review/merge: FIS-8 family support (Phases B + the safe display bits of C), FIS-9, FIS-11 — all local, nothing pushed or deployed.
+- The rest genuinely needs your call — 15 open decisions (the multi-family household screens design, audit-log & user-management scope, aquaculture/QR/renewal-cycle policy, one map-marker accessibility choice) plus the demo refresh that's waiting on the new server being ready.
+- Production is unchanged and healthy (v0.22.1, with the "Use my location" fix).
+
+⏳ Next when you're around
+- Pick which deferred items to green-light (I'll re-surface the list), and decide the multi-family household screen design so FIS-8 can finish.
+- A quick dev rebuild + eyeball of the two small FIS-8 display tweaks (family count column, family-head badge) — best done with you looking.
+
+## 2026-09-02 (Full Auto, overnight — later loop) — FIS-8 Phase C safe slices + family-router hardening
+
+**In your words:** full-auto overnight — continue the un-gated pending-task lineup while you sleep; defer every [WHAT], no push/deploy.
+
+✅ Done (branch `feat/fis8-phase-c-households-ui`, LOCAL / HARD HOLD — verified tsc 7/7 · lint · **595 tests** · `next build` exit 0):
+- **FIS-8 Phase C — slice 1:** households list now shows a **Families** count column (`household.list` `_count.families`). (`0e0176d`)
+- **FIS-8 Phase C — slice 2:** fisherfolk detail "Household" field shows the **family number + Family Head/Member** badge from the family relation (falls back to household head if unlinked). (`012c226`)
+- **FIS-8 hardening (closes Phase B follow-up):** `family.create`/`update` now **reject pulling another family's head in as a member** (would orphan that family's head pointer); non-head moves stay allowed. +1 regression test (8→9). Global lesson marked fixed. (`96f47e5`)
+
+🔨 Deferred for your review — **design-bearing** interactive Phase C (wizard multi-family flow, per-family detail sections + "Add Family", map per-family iteration). All 45 households are single-family today (Phase A backfill), so the creation UX is the gate — didn't want to ram core-screen UX through unreviewed while you slept. Precise decomposition in `docs/FIS8_MULTI_FAMILY_PLAN.md` (Phase C section).
+
+💬 Notes: 14 open `[WHAT]`s in PENDING_DECISIONS.md left deferred (owner asleep), incl. ayuda distribution grain, FIS-6/7/10/13/14/15/16, FIS-33 #3, demo-access (EC2 migration). Nothing pushed/deployed.
+
 ## 2026-09-02 (Full Auto, overnight) — worked the pending-task backlog while you slept
 
 **In your words:** "you still have a lot of pending tasks in squirlnote… do it all and summon agent orchestration… full auto mode. i need to sleep."

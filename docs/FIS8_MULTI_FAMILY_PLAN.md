@@ -19,12 +19,21 @@ Approach = **add a `Family` model** (NOT merely relax `Household.headId @unique`
 - ⚠ **Known hardening follow-up:** `family.update.addMemberIds` can move an existing family's head into another family as a member, orphaning the old head pointer (`headId @unique` blocks head-of-two, not this). Phase-C/UI guard. Logged: LESSONS_GLOBAL `prisma.data-model.unique-head-fk-plus-member-fk-orphans-source-head`.
 - Report/dashboard test updates (`report.domain.test.ts`, `ayuda.test.ts`) belong to Phase D — untouched here; existing suites stay green.
 
-## Phase C — UI (households/)
-- `household-wizard.tsx` — allow 1-3 families, each own head + member picker (repeat head/members steps per family).
-- `[id]/household-detail-client.tsx` — section per family (head block + members + ChangeHeadDialog + AddMember scoped to family); "Add Family"; delete warns across families.
-- `[id]/household-member-map.tsx` + `network/municipal-network-map.tsx` — iterate families (one crown per family head; member lines grouped per family).
-- `columns.tsx`, `households-list-client.tsx` — family count.
-- `fisherfolk/[id]/fisherfolk-detail-client.tsx` L540 — "Head of Family" vs family head.
+## Phase C — UI (households/) — 🟡 PARTIAL (branch `feat/fis8-phase-c-households-ui`, LOCAL/HARD HOLD)
+
+### ✅ DONE (safe, unambiguous display slices — full-auto 2026-09-02, verified tsc/lint/595 tests/build)
+- ✅ **Slice 1 — list family count** (`0e0176d`): `household.list` `_count.families`; new "Families" column in `columns.tsx` (`households-list-client.tsx` needed no change — types flow from the router).
+- ✅ **Slice 2 — fisherfolk detail family-head badge** (`012c226`): `fisherfolk-detail-client.tsx` L540 Household field now shows the family number + "Family Head"/"Member" from `record.family` (Phase B include), falling back to household head when no family link.
+- ✅ **Hardening (not strictly Phase C, closes Phase B follow-up)** (`96f47e5`): `family.create`/`update` reject pulling in the head of a DIFFERENT family as a member (orphan guard); +1 regression test (8→9). Non-head moves stay allowed. Global lesson `prisma…orphans-source-head` → fixed.
+
+### ⏳ DEFERRED — design-bearing interactive rewrite (owner review recommended; NOT built full-auto)
+Rationale: all 45 households are currently single-family (Phase A backfill), so per-family sectioning/creation is a visual no-op until multi-family households can be **created** — and the creation UX is the design-bearing part. Deferred rather than rammed through unreviewed while owner asleep. Precise scope for the next (reviewed) session:
+- `household-wizard.tsx` (425L) — allow 1-3 families, each own head + member picker (repeat head/members steps per family). **UX flow is a design decision** — confirm the step shape with owner before build. Calls `family.create` after `household.create` seeds F-01.
+- `[id]/household-detail-client.tsx` (811L) — section per family (head block + members + ChangeHeadDialog + AddMember **scoped to family**, using `family.update`); "Add Family" button (→ `family.create` picker); delete warns across families. Currently renders the flat household-level head+members (back-compat, not broken). Decompose by section (>500L → split: (a) Add-Family dialog + family.create wiring, (b) per-family sections replacing the single Members card, (c) delete-warning copy).
+- `[id]/household-member-map.tsx` (317L) + `network/municipal-network-map.tsx` (649L) — iterate `record.families` (one crown per family head; member lines grouped per family). Mechanical data-mapping once multi-family data exists; visually a no-op until then.
+
+### Not-yet-done small item
+- `households-list-client.tsx` — no change needed (covered by slice 1).
 
 ## Phase D — reporting/dashboard
 - `report/domain-charts.ts` L156-179 — size per family (`family._count.members + 1`); household size = sum of families; "Household Head by Sex" iterates family heads.
