@@ -79,11 +79,11 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   (reporting/dashboard per-family). ⚠ deferred [WHAT]: ayuda distribution grain (PENDING_DECISIONS.md).
   `source: owner meeting 2026-07-09` `feature` `db` `design`
 
-- 🔴 **FIS-9 — Rename "active violation" → "number of violations" (display).** Relabel the fisherfolk-record +
-  dashboard label; today it's a boolean `hasActiveViolation` (`fisherfolk-detail-client.tsx:187`) + "Active
-  Violations" dashboard tile (`violations-group-tile.tsx`) + `activeViolationCount` renewal guard
-  (`fisherfolk.ts:505`). ⚠ **[WHAT]:** show a raw count instead of a badge? Keep the renewal-block semantics
-  (active violation blocks renewal) unchanged? `source: owner meeting 2026-07-09` `feature` `ui`
+- 🟡 **FIS-9 — Rename "active violation" → "number of violations" (display) — BUILT on branch, LOCAL/HARD HOLD.**
+  `feat/fis9-violation-count-label` (`5048d5c`): relabel "Active Violations" → "Number of Violations" + show the
+  raw count (display-only). Renewal-block semantics UNCHANGED (active violation still blocks renewal). The embedded
+  ⚠[WHAT] was resolved-by-default (display-only count, non-destructive) — surface to owner at merge review; awaiting
+  owner merge decision (owner-gated). `source: owner meeting 2026-07-09` `feature` `ui`
 
 - 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already exists as one of
   the 6 `CANONICAL_CATEGORIES` (`lib/normalize/types.ts:13`). NEW work = subcategory taxonomy + aquaculture-only
@@ -93,9 +93,11 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   build the structure now, activate later. [WHAT]: new Prisma model vs JSON extension; which fields required.
   `source: owner meeting 2026-07-09` `feature` `db`
 
-- 🔴 **FIS-11 — Add full-time / part-time + primary source of income fields.** Not present today (no occupation/
-  livelihood/income field on `Fisherfolk`). Add enum (full-time/part-time) + primary-source-of-income capture to
-  the registration + edit forms, detail view, and reports. `source: owner meeting 2026-07-09` `feature` `db` `ui`
+- 🟡 **FIS-11 — Full-time/part-time + primary source of income fields — BUILT on branch, LOCAL/HARD HOLD.**
+  `feat/fis11-employment-income-fields` (`8a95b5d`): employment-type enum (full-time/part-time) + primary-source-of-income
+  added to `Fisherfolk` (shared schema/enums + Prisma), registration + edit forms, detail view, and QA/demo seed.
+  Awaiting owner merge decision (owner-gated). ⚠ carries a Prisma migration — do NOT `migrate deploy` to prod until
+  the owner authorizes the merge/release. `source: owner meeting 2026-07-09` `feature` `db` `ui`
 
 - ✅ **FIS-12 — Registration status model: NEW / RENEWED / EXPIRED + post-election bulk-expire command — BUILT 2026-08-31.**
   Built + verified (typecheck 7/7 · 586 tests · build green) on `feat/fis12-registration-status-model` (`6892e64`), LOCAL/HARD HOLD.
