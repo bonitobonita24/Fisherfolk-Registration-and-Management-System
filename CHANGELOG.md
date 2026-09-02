@@ -4,6 +4,38 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.23.0 — 2026-09-03
+
+### [FEATURE]
+- family-scoped head badge on fisherfolk detail (Phase C slice 2) (`012c226`)
+- show family count in households list (Phase C slice 1) (`0e0176d`)
+- Phase B — family-aware tRPC layer (multi-family households) (`b280f59`)
+- Phase A — add Family model (multi-family households, additive foundation) (`7261dda`)
+- add employment type (full-time/part-time) + primary source of income (`8a95b5d`)
+- relabel 'Active Violations' → 'Number of Violations' + show count (display-only) (`5048d5c`)
+
+### [FIXED]
+- reject adding another family's head as a member (orphan guard) (`96f47e5`)
+- FIS-33 Mark-Received dialog — target-size + focus-restore (WCAG 2.5.8, 2.4.3) (`c488012`)
+
+### [DOCS]
+- sharpen landing overhaul into a scope [WHAT]; correct 'being built' claim (`43aef47`)
+- full-auto loop handoff — un-gated build queue exhausted, holding on owner [WHAT]s (`b34b2c5`)
+- reconcile FIS-9/FIS-11 status — built on branches, awaiting owner merge (`5ac4c80`)
+- surface FIS-8 Phase C multi-family UI direction [WHAT] (`08ec236`)
+- FIS-8 Phase C partial + hardening handoff (full-auto loop) (`118ca5b`)
+- Phase C partial — safe slices done, interactive UI deferred for review (`90865f4`)
+- FIS-8 Phase B done — session log + STATE handoff (full-auto loop) (`e333814`)
+- Phase B done (family-aware tRPC) — plan/queue/pending updated (`1d57a4c`)
+- full-auto run — FIS-9/11/8A done (branches, HARD HOLD); FIS-8 phased plan; deferrals (`602d74d`)
+- defer 9 [WHAT]-gated FIS tasks (full-auto); un-gated FIS-8/9/11/31 in progress (`0a2f378`)
+- v0.22.1 geolocation fix shipped to prod; decision ① closed, ② on hold (EC2 migration), ③ open (`739ee48`)
+- save-session handoff — FIS-32 geolocation fix + FIS-33 a11y; 3 open owner decisions (`c254867`)
+
+### [CHORE]
+- refresh AIEF:MANAGED source-rev stamp (sync-context.sh) (`6c35be7`)
+
+
 ## v0.22.1 — 2026-09-02
 
 ### [FIXED]
