@@ -142,6 +142,12 @@ export const CivilStatus = {
 } as const;
 export type CivilStatus = (typeof CivilStatus)[keyof typeof CivilStatus];
 
+export const EmploymentType = {
+  FULL_TIME: "FULL_TIME",
+  PART_TIME: "PART_TIME",
+} as const;
+export type EmploymentType = (typeof EmploymentType)[keyof typeof EmploymentType];
+
 export const CategoryIconType = {
   EMOJI: "EMOJI",
   IMAGE: "IMAGE",

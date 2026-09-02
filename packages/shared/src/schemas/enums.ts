@@ -17,6 +17,7 @@ import {
   AyudaUploadType,
   Gender,
   CivilStatus,
+  EmploymentType,
   CategoryIconType,
   CategoryStatus,
   IDTemplateType,
@@ -136,6 +137,11 @@ export const civilStatusSchema = z.enum([
   CivilStatus.WIDOWED,
   CivilStatus.SEPARATED,
   CivilStatus.DIVORCED,
+]);
+
+export const employmentTypeSchema = z.enum([
+  EmploymentType.FULL_TIME,
+  EmploymentType.PART_TIME,
 ]);
 
 export const categoryIconTypeSchema = z.enum([

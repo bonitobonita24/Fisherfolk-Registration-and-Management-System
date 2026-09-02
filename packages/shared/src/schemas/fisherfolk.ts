@@ -3,6 +3,7 @@ import {
   fisherfolkStatusSchema,
   genderSchema,
   civilStatusSchema,
+  employmentTypeSchema,
 } from "./enums";
 
 export const fisherfolkCreateSchema = z.object({
@@ -19,6 +20,8 @@ export const fisherfolkCreateSchema = z.object({
   barangay: z.string().min(1),
   contactNumber: z.string().optional(),
   rsbsaNumber: z.string().optional(),
+  employmentType: employmentTypeSchema.optional(),
+  primarySourceOfIncome: z.string().optional(),
   categoryIds: z.array(z.string()).default([]),
   photo: z.string().optional(),
   signature: z.string().optional(),
@@ -68,6 +71,8 @@ export const fisherfolkUpdateSchema = z.object({
   barangay: z.string().min(1).optional(),
   contactNumber: z.string().nullable().optional(),
   rsbsaNumber: z.string().nullable().optional(),
+  employmentType: employmentTypeSchema.nullable().optional(),
+  primarySourceOfIncome: z.string().nullable().optional(),
   categoryIds: z.array(z.string()).optional(),
   photo: z.string().nullable().optional(),
   signature: z.string().nullable().optional(),
