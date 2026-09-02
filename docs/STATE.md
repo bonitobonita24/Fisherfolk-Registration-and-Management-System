@@ -1,6 +1,40 @@
 # FRMS — Project State
 
-## Current State (2026-09-02, LATEST — Full-Auto loop) — 🔨 FIS-8 Phase B (family-aware tRPC) DONE + verified, LOCAL/HARD HOLD
+## Current State (2026-09-02, LATEST — Full-Auto loop, later) — 🟡 FIS-8 Phase C partial (safe slices) + family-router hardening, LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_fis8_phasec_partial_0902.md` (+ this block).
+
+> **Full-Auto overnight, owner asleep.** Continued the un-gated lineup. Started **FIS-8 Phase C** (households UI)
+> on branch **`feat/fis8-phase-c-households-ui`** (off Phase B, merged main's docs). Landed the SAFE, unambiguous
+> slices + a backend hardening fix; DEFERRED the design-bearing interactive rewrite for owner review.
+>
+> **✅ Done + verified (tsc 7/7 · lint · 595 tests · `next build` exit 0), LOCAL/HARD HOLD:**
+> - Slice 1 (`0e0176d`) — households list **Families count** column (`household.list` `_count.families`).
+> - Slice 2 (`012c226`) — fisherfolk detail **family-head badge** + family number from `record.family`.
+> - Hardening (`96f47e5`) — `family.create`/`update` **reject adding another family's head as a member** (orphan
+>   guard); non-head moves stay allowed; +1 regression test (594→595). Closes Phase B follow-up; global lesson
+>   `prisma…orphans-source-head` → fixed.
+> - Docs (`90865f4`) — plan/queue/session-log updated.
+>
+> **⏳ DEFERRED (design-bearing, owner review) — remaining Phase C:** wizard multi-family flow, per-family detail
+> sections + "Add Family", map per-family iteration. Rationale: all 45 households are single-family (Phase A
+> backfill) so the *creation* UX is the gate — didn't ram core-screen UX through unreviewed. Precise decomposition
+> in `docs/FIS8_MULTI_FAMILY_PLAN.md` (Phase C section). Then **Phase D** (reporting/dashboard per-family).
+> **Deferred [WHAT]s (owner asleep):** all 14 in PENDING_DECISIONS.md, unchanged. Prod remains v0.22.1 (healthy).
+>
+> **NOTHING pushed/merged/deployed — HARD HOLD.** Everything below this block predates this loop iteration.
+
+### Git
+On `feat/fis8-phase-c-households-ui` @ `90865f4` (off `feat/fis8-phase-b-family-router` + merged main docs).
+`main` = local `6c35be7` (one chore commit ahead of origin — the AIEF:MANAGED stamp refresh), origin unchanged.
+Phase A/B branches retained. Tree clean. Dev NOT rebuilt off Phase C branch (no runtime UI change shipped;
+slices are list-column + detail-badge — a `dev-freshness` rebuild + visual QA is the next un-gated step if resumed).
+
+---
+
+## Current State (2026-09-02 — Full-Auto loop) — 🔨 FIS-8 Phase B (family-aware tRPC) DONE + verified, LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
