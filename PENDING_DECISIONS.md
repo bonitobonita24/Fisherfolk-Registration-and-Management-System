@@ -6,6 +6,29 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
+### 2026-09-02 (Full-Auto overnight) — deferred [WHAT]s from the pending-task lineup
+
+Owner ran Full Auto Mode ("do all pending tasks, I need to sleep"). The loop is building every UN-GATED task
+(FIS-8, FIS-9, FIS-11, FIS-31) LOCAL/HARD HOLD. These pending tasks carry a genuine product [WHAT] and were
+DEFERRED — not guessed. Each needs an owner decision before build:
+
+- [ ] **FIS-6 — Audit-log view [WHAT]:** which events/columns shown, filters, retention, AND who may view it
+  (audit logs are sensitive — Viewer+ as the task says, or tenant_admin+ only?). Security-relevant → not guessed.
+- [ ] **FIS-7 — User-management [WHAT]:** which actions (invite/deactivate/role-change), the permission gate
+  (Rule 34: never expose Billing/User-Mgmt below tenant_admin), columns. RBAC/security-sensitive → not guessed.
+- [ ] **FIS-10 — Aquaculture sub-registration [WHAT]:** model vs JSON for the subcategory taxonomy + required
+  fields. ⚠ ORDINANCE-GATED — full impl pending the January ordinance amendments; do not build ahead of the law.
+- [ ] **FIS-13 — QR scan/verify [WHAT]:** public vs authed surface; camera-scan page vs deep-link resolver.
+- [ ] **FIS-14 — RSBSA on ID card [WHAT]:** is the meeting's "RSVS" a mishearing of RSBSA (already tokenised),
+  or a separate ID to add? Needs owner clarification.
+- [ ] **FIS-15 — 3-year renewal cycle [WHAT]:** reminder-only vs status enforcement; which anchor year.
+- [ ] **FIS-16 — Mayor read-only access [WHAT]:** existing viewer role acceptable, or build a narrower
+  dashboard-only custom role?
+- [ ] **FIS-33 #3 — Map-marker a11y [WHAT]:** focusable pins with per-pin names vs a keyboard-accessible list
+  alternative. (FIS-33 #1/#2 done+verified, held on `fix/fis33-a11y-mark-received`.)
+- [ ] **FIS-34 / FIS-23 / ② demo refresh — gated on demo access (Server-Setups EC2 migration, on hold).**
+  FIS-31 landing page is being built locally; its screenshot refresh + demo deploy wait on this.
+
 ### 2026-09-02 — FIS-32/FIS-33 verification session outcomes
 
 - [x] ✅ **① Geolocation Permissions-Policy fix — SHIPPED to production as v0.22.1 (owner "just do the 1st
