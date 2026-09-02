@@ -110,6 +110,16 @@ export const householdRouter = createTRPCRouter({
             orderBy: { fullName: "asc" },
             select: fisherfolkLiteSelect,
           },
+          families: {
+            orderBy: { familyNumber: "asc" },
+            select: {
+              id: true,
+              familyNumber: true,
+              notes: true,
+              head: { select: fisherfolkLiteSelect },
+              members: { orderBy: { fullName: "asc" }, select: fisherfolkLiteSelect },
+            },
+          },
         },
       });
       if (!household) throw new TRPCError({ code: "NOT_FOUND" });
@@ -232,15 +242,26 @@ export const householdRouter = createTRPCRouter({
               select: { id: true },
             });
 
+            const family = await tx.family.create({
+              data: {
+                tenantId,
+                householdId: household.id,
+                familyNumber: "F-01",
+                headId: input.headId,
+                notes: null,
+              },
+              select: { id: true },
+            });
+
             await tx.fisherfolk.update({
               where: { id: input.headId },
-              data: { householdId: household.id },
+              data: { householdId: household.id, familyId: family.id },
             });
 
             if (memberIds.length > 0) {
               await tx.fisherfolk.updateMany({
                 where: { id: { in: memberIds }, tenantId },
-                data: { householdId: household.id },
+                data: { householdId: household.id, familyId: family.id },
               });
             }
 
@@ -346,7 +367,7 @@ export const householdRouter = createTRPCRouter({
               tenantId,
               householdId: household.id,
             },
-            data: { householdId: null },
+            data: { householdId: null, familyId: null },
           });
         }
 
