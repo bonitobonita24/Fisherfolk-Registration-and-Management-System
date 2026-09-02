@@ -18,6 +18,15 @@ DEFERRED — not guessed. Each needs an owner decision before build:
   Flipping to per-family = a small schema migration (`AyudaBeneficiary.familyId`) + `ayuda.ts` enrollment change.
   Product call, not guessed. (Surfaced 2026-09-02 full-auto; FIS-8 Phase B built + verified LOCAL on
   `feat/fis8-phase-b-family-router`.)
+- [ ] **FIS-8 Phase C — multi-family UI direction [WHAT] (surfaced 2026-09-02 full-auto):** the SAFE display slices
+  are done (list family count · fisherfolk family-head badge · family-router orphan-guard — `feat/fis8-phase-c-households-ui`,
+  595 tests green, LOCAL). The remaining Phase C is the design-bearing interactive rewrite of the app's core household
+  screens — deferred for your review rather than built unreviewed overnight. Decide the UX before build: (a) **Wizard
+  flow** — the plan's "repeat head+members steps per family (1-3)" vs a more compact single-screen family builder?
+  (b) **Add-Family on the detail page** — inline picker vs modal? (c) can a non-head member move between families in the
+  UI (backend already allows it)? All 45 households are single-family today (Phase A backfill), so nothing multi-family
+  is visible until this creation UI + Phase D seeds land. Precise decomposition: `docs/FIS8_MULTI_FAMILY_PLAN.md`.
+  Say "just build it to the plan" to proceed without further input.
 - [ ] **FIS-6 — Audit-log view [WHAT]:** which events/columns shown, filters, retention, AND who may view it
   (audit logs are sensitive — Viewer+ as the task says, or tenant_admin+ only?). Security-relevant → not guessed.
 - [ ] **FIS-7 — User-management [WHAT]:** which actions (invite/deactivate/role-change), the permission gate
