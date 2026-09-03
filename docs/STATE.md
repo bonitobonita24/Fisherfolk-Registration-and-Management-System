@@ -1,45 +1,46 @@
 # FRMS — Project State
 
-## Current State (2026-09-03, LATEST — owner "continue all pending in full auto") — ✅ FIS-6 + FIS-7 + FIS-8 Phase C BUILT + verified on LOCAL main (HARD HOLD); prod promotion awaits owner review
+## Current State (2026-09-03, LATEST — owner "continue all pending in full auto" + answers) — 🚀 FIS-6 + FIS-7 + FIS-8 Phase C SHIPPED TO PROD as v0.26.0, QA'd + verified live
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
 Cold-start authority: memory `project_fis678c_built_local_0903.md` (+ this block).
 
-> **Owner (awake) "please continue doing all pending tasks in full auto mode."** Built the remaining 3 pending
-> features to their documented defaults via PM → spec-executor workers, each on the FIS-8 shared branch or its own
-> branch, full Rule-32 bar per step, merged to LOCAL main. **HELD per owner:** FIS-10 (ordinance-gated), FIS-14
-> (RSBSA/RSVS clarification). **NOTHING pushed/deployed — HARD HOLD** (prod still v0.25.0, healthy).
+> **Owner (awake) "continue all pending in full auto" → then answered 4 questions:** (1) do the recommendation
+> (QA first, then ship) · (2) keep User Management superadmin/manager-only · (3) FIS-14 = RSBSA · (4) do the
+> audit-log EXPIRE filter tweak. All executed end-to-end.
 >
-> **✅ BUILT + VERIFIED, LOCAL main (9 commits ahead of origin `fb8ce31`):**
-> - **FIS-6 audit-log view** (`merge d6f98b8`) — UI-only; the `auditLog` tRPC router (`list`+`getById`, `adminProcedure`
->   = tenant_admin+) already existed → NO RBAC change. New `audit-log-list-client.tsx` + `columns.tsx` (action/entity/
->   date filters, before/after detail dialog). ⚠ minor follow-up: router Zod filter accepts 11/14 AuditAction values
->   (missing PRINT/MEDIA_DOWNLOAD/EXPIRE) — display covers all 14; extend the enum so admins can filter EXPIRE.
-> - **FIS-7 user-management** (`merge 1c908de`) — reused existing `userRouter` (`list`/`create`/`updateRole`/`deactivate`,
->   all `adminProcedure` = tenant_admin+, deliberate per `user.ts:317` comment "not superAdminProcedure"); added a
->   `setStatus` mutation (activate/deactivate, self-deactivation guard). New `users-client.tsx` + `create-user-dialog.tsx`
->   + `change-role-dialog.tsx`; page guarded tenant_admin+ (ShieldAlert in-page notice). Rule-34 held structurally
->   (user_management is NOT a FeatureKey; role-gated only; route-feature-map untouched). **ZERO RBAC-policy change.**
->   ⚠ OPEN [WHAT] (nav visibility): tenant_admin can USE it by URL (backend allows) but the sidebar link + a pinned
->   "by design" test hide it from tenant_admin — owner decides: show it in nav to tenant_admin, or keep superadmin/
->   manager-only. I did NOT flip that RBAC test.
-> - **FIS-8 Phase C multi-family interactive UI** (`merge 3235f67`) — the design-bearing rewrite, built to
->   `docs/FIS8_MULTI_FAMILY_PLAN.md`. Wizard 1–3 families (dynamic per-family head+members steps, global dedupe,
->   household-details promoted to step 1); detail page renders one `FamilySection` per family (family-scoped
->   change-head/add-member/remove via `family.update`) + "Add Family" modal (`family.create`, within-household pool)
->   + multi-family delete-warning copy; household-member-map + municipal-network-map iterate families (one crown per
->   family head). New: `family-section.tsx`, `add-family-dialog.tsx`. All 45 households single-family today → zero
->   regression; multi-family UX is additive.
+> **🚀 SHIPPED TO PRODUCTION as v0.26.0 (`sha-70b55b5`), verified LIVE (`frms.powerbyte.app` `/api/health`+`/`+`/login` = 200):**
+> - **FIS-6 audit-log view** — filterable trail table (all 14 actions incl. EXPIRE/MEDIA_DOWNLOAD after the tweak)
+>   + before/after detail. UI-only, existing adminProcedure, no RBAC change.
+> - **FIS-7 user-management** — users table + create/role-change/activate-deactivate. Reused existing adminProcedure
+>   (backend); page guard tightened to **superadmin/manager-only** per owner decision (nav link already superadmin/
+>   manager-only — kept; pinned "by design" test untouched). Rule-34 held structurally. Zero RBAC-matrix change.
+> - **FIS-8 Phase C multi-family UI** — wizard 1–3 families (dynamic per-family steps + add/remove family), per-family
+>   detail sections + Add-Family modal, family-aware maps (crown per family head). Built to `docs/FIS8_MULTI_FAMILY_PLAN.md`.
+> - **FIS-14 = RSBSA** (owner confirmed "RSVS"=RSBSA): no code — `{{rsbsa_number}}` already a supported+resolvable
+>   ID-template token; admin places it in their card layout.
 >
-> **Verify (full bar, on merged main):** tsc clean · **421 passed / 190 DB-skipped (611)** · `next build` exit 0 (all
-> 51 routes). Branches retained: `feat/fis6-audit-log-view`, `feat/fis7-user-management`, `feat/fis8-phase-c-interactive-ui`.
+> **QA (dev rebuilt off main, real browser, 0 console errors):** created a household via the wizard (F-01 seeded),
+> stepped the multi-family add/remove-family flow, verified detail per-family sections + Add-Family dialog + family
+> map, audit-log (61 rows, filters, pagination, MEDIA_DOWNLOAD), user-management (renders for superadmin, table+
+> filters+create+actions). Migrate deploy on prod = **No pending migrations** (Phase A/B migrations already shipped
+> in v0.23.0; this release is UI + one Zod-enum + one guard change).
 >
-> **⏳ DEPLOY DECISION (owner) — recommended: quick visual pass on FIS-8C multi-family screens before prod.** The 3
-> features are buildable-complete + green; STATE checkpointed them as "owner eyes before prod" (RBAC surfaces +
-> design-bearing UI). On owner "ship it": cut a consolidated release, push, `push-to-prod.sh`, dev rebuild (Rule 39).
-> Dev NOT yet rebuilt off this main (no runtime QA done this session — a `dev-freshness` rebuild + browse of the
-> multi-family wizard/detail is the natural next un-gated step).
+> **⏸ HELD per owner (unchanged):** FIS-10 (ordinance-gated, Jan amendments) · FIS-14 code n/a (resolved above).
+>
+### Git / deploy
+`main == origin/main == 70b55b5` (v0.26.0, pushed + tagged). Prod `frms.powerbyte.app` LIVE on `sha-70b55b5`,
+healthy. Prod DB backed up before promote (rollback point on the VPS). Dev rebuilt off main (Rule 39). Feature
+branches retained (`feat/fis6-audit-log-view`, `feat/fis7-user-management`, `feat/fis8-phase-c-interactive-ui`,
+`chore/fis-post-build-cleanup`). Tree clean. Build commits: FIS-6 `d6f98b8` · FIS-7 `1c908de` · FIS-8C `3235f67`
+· cleanup `fe909b5` · release `70b55b5`. ⚠ DEMO still behind prod (EC2/Komodo — future demo deploys target that box).
+
+### ⏳ NEXT / open (all un-gated or owner-gated, none blocking)
+- **FIS-8 Phase D** — reporting/dashboard per-family (size per family, per-family heads) + demo multi-family fixtures.
+  Un-gated; natural next FIS-8 slice. Detail in `docs/FIS8_MULTI_FAMILY_PLAN.md` Phase D.
+- **FIS-10** (ordinance-gated, HELD) · demo refresh (EC2 access, HELD) · FIS-34 landing screenshots (GPU browser, HELD).
+- A dev test household `HH-0001` (Wawa, single-family) was created during QA — harmless dev data.
 
 ---
 

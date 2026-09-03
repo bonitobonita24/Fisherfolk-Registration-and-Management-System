@@ -12,13 +12,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 > FIS-8 (multi-family: family model + tRPC + Phase-C safe slices + ayuda `familyId` grain) · FIS-9 (violation
 > count label) · FIS-11 (employment/income) · FIS-13 (authed QR verify) · FIS-15 (3-yr renewal-due reminder) ·
 > FIS-16 (mayor = existing viewer role, no code) · FIS-31 (landing shipped-feature callouts) · FIS-33 #1/#2/#3 (a11y).
-> **✅ BUILT + VERIFIED on LOCAL main (2026-09-03 later, "continue all pending in full auto") — HARD HOLD, prod awaits owner:**
-> 🟡 **FIS-6** audit-log view (`d6f98b8`) — UI-only, existing adminProcedure, NO RBAC change (filter enum 11/14, minor follow-up) ·
-> 🟡 **FIS-7** user-management (`1c908de`) — reused existing adminProcedure + new setStatus, Rule-34 held, ZERO RBAC-policy change
-> (OPEN [WHAT]: show nav link to tenant_admin?) · 🟡 **FIS-8 Phase C** interactive multi-family UI (`3235f67`) — wizard 1–3
-> families + per-family detail + Add-Family + family-aware maps (design-bearing, recommend visual review before prod).
-> Full bar: tsc clean · 421 tests · build green. **⏳ DEPLOY = owner go/no-go** (see PENDING_DECISIONS.md).
-> **⏸ HELD:** FIS-10 (ordinance-gated) · FIS-14 (needs owner clarification: RSBSA vs "RSVS").
+> **🚀 SHIPPED TO PROD as v0.26.0 (`sha-70b55b5`), verified live (2026-09-03 later, "continue all pending in full auto" + answers):**
+> ✅ **FIS-6** audit-log view (all 14 action filters incl. EXPIRE) · ✅ **FIS-7** user-management (kept superadmin/manager-only
+> per owner; zero RBAC-matrix change) · ✅ **FIS-8 Phase C** interactive multi-family UI (wizard 1–3 families + per-family
+> detail + Add-Family + family-aware maps) · ✅ **FIS-14** = RSBSA, no code (token already supported). QA'd in real browser
+> (dev rebuilt, 0 console errors); prod DB backed up; migrate = no pending. Full bar green.
+> **⏸ HELD:** FIS-10 (ordinance-gated) · demo refresh + FIS-34 (EC2 box). **⏳ NEXT un-gated:** FIS-8 Phase D (reporting/dashboard per-family).
 > (NOTE: FIS-17..30 lines below shipped earlier in v0.22.0 — pre-existing doc drift, not re-tracked here.)
 
 ### 2026-09-01 presentation batch (owner-dumped). Map decision: barangay-level + draggable capture. ALSO targets Production (separate owner-gated release; ayuda/vessels/violations dormant in prod for now).

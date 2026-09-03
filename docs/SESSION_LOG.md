@@ -2,22 +2,26 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
-## 2026-09-03 (later, owner "continue all pending in full auto") — built the last 3 pending features on local main (held from prod for your review)
+## 2026-09-03 (later, owner "continue all pending in full auto" + 4 answers) — 🚀 shipped the last 3 pending features to production as v0.26.0
 
-**In your words:** "please continue doing all pending tasks in full auto mode."
+**In your words:** "continue all pending in full auto" — then: do my recommendation (QA then ship), keep User Management superadmin/manager-only, "RSVS" = RSBSA, and add the audit-log EXPIRE filter tweak.
 
-✅ Done (built + verified — tsc clean, 421 tests + 190 DB-skipped, build green — merged to LOCAL main, nothing pushed)
-- **FIS-6 audit-log view** — the audit trail now has a real screen: a filterable table (by action / entity / date) with a before-after detail popup. The backend was already there and already admin-gated, so this was UI-only with no change to who can see it.
-- **FIS-7 user management** — a real Users screen for admins: list with search/role/status filters, create a user, change a role, activate/deactivate. It reuses the permission gates that already existed (tenant-admin and up), so nothing about who-can-do-what changed. One thing for you to decide: today the sidebar link is hidden from plain tenant-admins (a "by design" test froze that) even though the backend lets them use it — want the link shown to them, or kept to superadmin/manager only?
-- **FIS-8 multi-family screens** — the interactive part you'd been holding: the create wizard now lets a household have up to 3 families (each with its own head + members), the household page shows a section per family with its own add/change-head/remove controls plus an "Add Family" button, and both maps now draw a crown per family head. Every current household is single-family, so nothing existing changes look until someone builds a multi-family one.
+🚀 Shipped to production as **v0.26.0** (`frms.powerbyte.app`, verified live — health/home/login all 200; prod DB backed up first; no pending migrations)
+- **FIS-6 audit-log view** — filterable trail table (now all 14 action types incl. EXPIRE) + before/after detail.
+- **FIS-7 user management** — users table + create/role-change/activate-deactivate; kept **superadmin/manager-only** per your call (page guard tightened to match the nav; the "by design" test left as-is).
+- **FIS-8 multi-family screens** — the wizard (up to 3 families, add/remove per family), per-family household sections + Add-Family, and family-aware maps.
+- **FIS-14** — confirmed as RSBSA; no code needed (the RSBSA token already exists and prints on the ID card).
 
+✅ QA before shipping (dev rebuilt off main, real browser, **0 console errors**): created a household through the wizard, walked the add/remove-family flow, checked the per-family detail + Add-Family dialog + map, the audit-log page (61 rows, filters, paging), and the user-management page.
+
+✅ Earlier this turn — built + verified on local main first (tsc clean, 421 tests + 190 DB-skipped, build green) before the QA+ship
 ⏳ Not yet / Next
-- **Prod promotion of all 3** — held for your go. I recommend a quick look at the multi-family wizard/detail screens first (they're new core UX I built without a visual pass). On "ship it" I'll cut one consolidated release + promote + rebuild dev.
-- Minor: the audit-log filter dropdown lists 11 of 14 action types (the display already handles all 14) — a one-line backend tweak to add EXPIRE etc.
+- **FIS-8 Phase D** (un-gated) — the reporting/dashboard side of multi-family (household size per family, per-family heads) + demo multi-family fixtures. Natural next FIS-8 slice.
+- Still held per your instruction: **FIS-10** (ordinance-gated). Demo refresh + landing screenshots (FIS-34) still wait on the EC2/demo box.
 
 💬 Decisions/notes
-- Held per your instruction: **FIS-10** (ordinance-gated) and **FIS-14** (RSBSA vs "RSVS" — needs your confirmation).
-- No RBAC policy was changed on any of the three; I deliberately did not flip the pinned user-management nav test — that's your call.
+- Your 4 answers this turn are all applied: QA-then-ship done; User Management kept superadmin/manager-only (page guard tightened to match the nav — I did not touch the pinned "by design" test); FIS-14 = RSBSA (no code); audit-log EXPIRE filter added.
+- No RBAC *policy* changed — both admin surfaces reuse gates that already existed; the FIS-7 change only tightened the page to match the already-restricted nav.
 
 ## 2026-09-03 (owner "continue all pending") — shipped 8 pending features to production across 3 releases
 

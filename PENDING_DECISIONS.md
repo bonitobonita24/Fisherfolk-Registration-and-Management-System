@@ -23,29 +23,24 @@ Owner authorized (this session): **(1) merge + push + promote to prod** the alre
 - **FIS-16 mayor access** — CLOSED, no code: existing `viewer` role is already read-only across every feature (assign it to the mayor).
 All verified: 611 tests green, lint-gated builds green, prod endpoints 200, dev rebuilt off main (Rule 39) each ship.
 
-**✅ BUILT + VERIFIED on LOCAL main (2026-09-03 later, owner "continue all pending in full auto") — HARD HOLD, prod promotion awaits owner:**
-- **FIS-6 audit-log view** — BUILT (`merge d6f98b8`). UI-only; the `auditLog` router (`list`+`getById`) already existed
-  and is already `adminProcedure` (tenant_admin+) → **NO RBAC change** (the earlier "tightening" concern was moot). New
-  list client + filters + before/after detail dialog. ⚠ minor follow-up (non-blocking): the router's Zod filter accepts
-  11/14 AuditAction values (missing PRINT/MEDIA_DOWNLOAD/EXPIRE); display already covers all 14 — extend the enum so
-  admins can filter EXPIRE. [HOW], do anytime.
-- **FIS-7 user-management** — BUILT (`merge 1c908de`). Reused existing `userRouter` (all `adminProcedure`, deliberately
-  tenant_admin+ per `user.ts:317`); added `setStatus` (activate/deactivate + self-deactivation guard). Page guarded
-  tenant_admin+. Rule-34 held structurally (user_management not a FeatureKey). **ZERO RBAC-policy change.**
-  - [ ] **OPEN [WHAT] — nav visibility:** tenant_admin can USE User Management by URL (backend allows) but the sidebar
-    link + a pinned "by design" test (`sidebar-visibility.test.ts`) currently hide it from tenant_admin (superadmin/
-    manager only). Decide: (a) show the nav link to tenant_admin (loosen `nav-items.ts` minRoles + update the pinned
-    test), or (b) keep the link superadmin/manager-only. I did NOT flip the RBAC test either way. Not blocking use.
-- **FIS-8 Phase C interactive UI** — BUILT (`merge 3235f67`) to `docs/FIS8_MULTI_FAMILY_PLAN.md`. Wizard 1–3 families,
-  per-family detail sections + Add-Family modal, family-aware maps. Design-bearing — built in full-auto without a visual
-  pass; all 45 households single-family today (zero regression). ⚠ recommend an owner visual review before prod.
+**🚀 SHIPPED TO PROD as v0.26.0 (`sha-70b55b5`), verified live (2026-09-03 later, owner "continue all pending in full auto" + 4 answers):**
+- [x] ✅ **FIS-6 audit-log view** — SHIPPED. UI-only; existing `adminProcedure` (tenant_admin+), NO RBAC change. Filter
+  now covers all 14 AuditAction values (PRINT/MEDIA_DOWNLOAD/EXPIRE added — owner "do the tweak").
+- [x] ✅ **FIS-7 user-management** — SHIPPED. Reused existing `userRouter` (`adminProcedure`); added `setStatus`. **Owner
+  decision (2026-09-03): keep User Management superadmin/manager-only** → page guard tightened to superadmin/manager to
+  match the nav; the pinned `sidebar-visibility.test.ts` "by design" exclusion of tenant_admin left as-is. Rule-34 held;
+  ZERO RBAC-matrix change.
+- [x] ✅ **FIS-8 Phase C interactive UI** — SHIPPED. Wizard 1–3 families, per-family detail + Add-Family modal, family-aware
+  maps. QA'd in a real browser (dev rebuilt off main, 0 console errors): wizard add/remove-family, create→F-01, detail
+  per-family sections + Add-Family dialog + map.
+- [x] ✅ **DEPLOY** — done. Consolidated release **v0.26.0**, pushed + tagged, CI Docker build green (`sha-70b55b5`),
+  `push-to-prod.sh` (prod DB backed up; migrate deploy = No pending migrations; reseed-never). Prod healthy
+  (`/api/health`+`/`+`/login` 200). Dev rebuilt off main (Rule 39).
+- [x] ✅ **FIS-14 = RSBSA** (owner confirmed "RSVS"=RSBSA) — no code: `{{rsbsa_number}}` already a supported+resolvable
+  ID-template token; admin places it in their card layout.
 
-- [ ] **DEPLOY [WHAT] — promote FIS-6/7/8C to prod?** All 3 buildable-complete + green on local main (9 ahead of origin).
-  Held because STATE checkpointed them "owner eyes before prod" (RBAC surfaces + design-bearing UI) and the wake context
-  set HARD HOLD. On "ship it": consolidated release + push + `push-to-prod.sh` + dev rebuild (Rule 39). Recommend a dev
-  rebuild + Playwright browse of the multi-family wizard/detail first (no runtime QA done this session).
-
-**⏸ HELD (owner instruction):** FIS-10 (aquaculture — ordinance-gated, Jan amendments) · FIS-14 (RSBSA vs "RSVS" — needs owner clarification).
+**⏸ HELD (owner instruction):** FIS-10 (aquaculture — ordinance-gated, Jan amendments). Demo refresh + FIS-34 landing
+screenshots still gated on the EC2/demo box.
 
 ---
 
