@@ -6,6 +6,18 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+### ⭐ 2026-09-03 STATUS (owner "continue all pending") — 8 items SHIPPED to prod, 3 remaining
+> Authority: `docs/STATE.md` (top block) + `PENDING_DECISIONS.md` (2026-09-03 block).
+> **✅ SHIPPED to prod this session across v0.23.0 / v0.24.0 / v0.25.0 (611 tests green, verified live):**
+> FIS-8 (multi-family: family model + tRPC + Phase-C safe slices + ayuda `familyId` grain) · FIS-9 (violation
+> count label) · FIS-11 (employment/income) · FIS-13 (authed QR verify) · FIS-15 (3-yr renewal-due reminder) ·
+> FIS-16 (mayor = existing viewer role, no code) · FIS-31 (landing shipped-feature callouts) · FIS-33 #1/#2/#3 (a11y).
+> **⏳ REMAINING (defaults documented, checkpointed for focused sessions):** 🔴 **FIS-6** audit-log view
+> (default tenant_admin+ — ⚠ RBAC-preset tightening) · 🔴 **FIS-7** user-management (default tenant_admin+, Rule 34 —
+> ⚠ mutation-heavy gov RBAC) · 🔴 **FIS-8 Phase C interactive UI** (build to `docs/FIS8_MULTI_FAMILY_PLAN.md`).
+> **⏸ HELD:** FIS-10 (ordinance-gated) · FIS-14 (needs owner clarification: RSBSA vs "RSVS").
+> (NOTE: FIS-17..30 lines below shipped earlier in v0.22.0 — pre-existing doc drift, not re-tracked here.)
+
 ### 2026-09-01 presentation batch (owner-dumped). Map decision: barangay-level + draggable capture. ALSO targets Production (separate owner-gated release; ayuda/vessels/violations dormant in prod for now).
 
 > STATUS 2026-09-01: FIS-17..24 ✅ built+verified+committed (`faa591b`); FIS-25 🟡 flagship (Fisherfolk)

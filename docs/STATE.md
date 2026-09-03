@@ -1,6 +1,47 @@
 # FRMS — Project State
 
-## Current State (2026-09-03, LATEST — Full-Auto loop, later) — 🧭 FIS-31 scouted → scope is a [WHAT], not a clean un-gated build; docs reconciled; holding on owner [WHAT]s
+## Current State (2026-09-03, LATEST — owner "yes continue all pending") — 🚀 8 FIS items SHIPPED to prod across v0.23.0 / v0.24.0 / v0.25.0; 3 XL/sensitive features checkpointed
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_continue_all_pending_shipped_0903.md` (+ this block).
+
+> **Owner "resume session" → "yes continue all pending"**, then authorized (via AskUserQuestion): **(1) merge +
+> push + promote to PROD** the built work, and **(2) build gated [WHAT]s to best-judgment defaults, documenting
+> each** — holding **FIS-10** (ordinance-gated) + **FIS-14** (RSBSA/RSVS clarification). Executed as PM →
+> spec-executor workers (each on its own branch, verified full Rule-32 bar, merged, consolidated release, prod
+> promote, dev rebuilt Rule 39).
+>
+> **✅ SHIPPED TO PROD — THREE releases, verified live (prod healthy, 611 tests green, dev FRESH):**
+> - **v0.23.0** (`e4c6a67`) — FIS-8 A+B+C multi-family (family model + tRPC + Phase-C safe slices) · FIS-9 violation
+>   count label · FIS-11 employment/income fields · FIS-33 #1/#2 Mark-Received a11y. Migrations
+>   `add_employment_income_fields` + `add_family_model` applied to prod (family backfill no-op — 0 prod households).
+> - **v0.24.0** (`8bd8a21`) — FIS-33 #3 keyboard-accessible map list alternative · FIS-31 landing shipped-feature
+>   callouts · FIS-8 ayuda grain (additive `AyudaBeneficiary.familyId`). Migration `add_ayuda_beneficiary_family`.
+> - **v0.25.0** (`f433f95`) — FIS-15 3-year renewal-due reminder (dashboard card + list filter, reminder-only) ·
+>   FIS-13 authed QR verify page + tenant-scoped resolver. No migrations.
+> - **FIS-16** mayor access — CLOSED, no code (existing `viewer` role already read-only across all features).
+>
+> **⏳ REMAINING (3, defaults documented in PENDING_DECISIONS.md — checkpointed, NOT built):** FIS-6 audit-log view
+> (default tenant_admin+ — ⚠ RBAC-preset tightening, owner eyes before prod) · FIS-7 user-management (default
+> tenant_admin+, Rule 34 — ⚠ mutation-heavy gov RBAC surface, review before prod) · FIS-8 Phase C interactive UI
+> (build to `docs/FIS8_MULTI_FAMILY_PLAN.md`, design-bearing). Each merits its own focused session; defaults ready.
+> **⏸ HELD:** FIS-10 (ordinance-gated) · FIS-14 (needs owner clarification).
+>
+> **Decision to checkpoint the last 3:** FIS-6/FIS-7 change RBAC policy on a gov app (who sees audit logs / who
+> invites-deactivates-changes-roles) and FIS-8 UI is design-bearing — ramming them through one long context +
+> straight to prod unreviewed is the thrash/quality risk the loop contract guards against. Shipped everything safely
+> buildable; queued the sensitive remainder with defaults.
+
+### Git / deploy
+`main == origin/main == f433f95` (v0.25.0, pushed + tagged; tags v0.23.0/v0.24.0/v0.25.0 all published). Prod
+`frms.powerbyte.app` live on `sha-f433f95`, healthy (`/`,`/api/health`,`/login` 200, `/tm` 307). Prod DB backed up
+before each promote (rollback points on the VPS). Dev rebuilt off main (Rule 39). Feature branches retained. Tree
+clean. ⚠ DEMO still behind prod (EC2/Komodo `18.138.220.90` — future demo deploys target that box, not old Hostinger).
+
+---
+
+## Current State (2026-09-03 — Full-Auto loop, later) — 🧭 FIS-31 scouted → scope is a [WHAT], not a clean un-gated build; docs reconciled; holding on owner [WHAT]s
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

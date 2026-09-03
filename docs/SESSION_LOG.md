@@ -2,6 +2,24 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-03 (owner "continue all pending") — shipped 8 pending features to production across 3 releases
+
+**In your words:** resume, then "yes continue all pending" — you authorized shipping the built work to prod and building the remaining decisions to my best judgment (documented), holding the two that genuinely need you.
+
+✅ Done (all live on prod `frms.powerbyte.app`, verified, 611 tests green, dev rebuilt each time)
+- **Shipped v0.23.0** — multi-family households (the whole FIS-8 data layer: family model, tRPC, the safe display slices), the "Number of Violations" label (FIS-9), employment-type + income fields (FIS-11), and the Mark-Received accessibility fixes (FIS-33 #1/#2). Prod DB backed up first; the family backfill correctly did nothing on prod (your 3,181 fisherfolk don't use households yet).
+- **Shipped v0.24.0** — a keyboard-accessible list beside each map so the pins are reachable without a mouse (FIS-33 #3), landing-page callouts for the newly-shipped features (FIS-31), and optional family-level ayuda distribution (FIS-8 ayuda grain — added without disturbing the existing household-level flow).
+- **Shipped v0.25.0** — a 3-year renewal reminder on the dashboard + a "due for renewal" filter (FIS-15, reminder-only, no auto-changes), and an authenticated QR-verify page for checking a fisherfolk ID (FIS-13).
+- **FIS-16 (mayor access)** — no build needed: the existing Viewer role is already read-only everywhere; assign it to the mayor.
+
+⏳ Not yet / Next — 3 remaining, defaults ready, checkpointed for focused sessions
+- **FIS-6 audit-log view** and **FIS-7 user-management** both change who-can-do-what on sensitive gov surfaces (who sees audit logs / who can invite-deactivate-change-roles). I have defaults (tenant_admin+) documented, but these deserve your eyes before they hit prod, so I held them.
+- **FIS-8 interactive multi-family UI** — the create/edit screens (wizard, add-family, per-family map). Design-bearing; the data model behind it is already shipped. Build to `docs/FIS8_MULTI_FAMILY_PLAN.md`.
+
+💬 Decisions/notes
+- Held per your instruction: **FIS-10** (aquaculture — ordinance-gated until the January amendments) and **FIS-14** (need you to confirm: is the meeting's "RSVS" the RSBSA number, or a separate ID?).
+- Every default I took is written in `PENDING_DECISIONS.md` (2026-09-03 block) — each is reversible, flip any.
+
 ## 2026-09-03 (Full Auto, overnight — loop, later) — checked the landing-page task; it needs your direction, not a solo rebuild
 
 **In your words:** full-auto overnight — keep working the un-gated lineup while you sleep; defer every [WHAT], no push/deploy.

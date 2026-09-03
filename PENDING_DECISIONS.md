@@ -12,24 +12,27 @@ Owner authorized (this session): **(1) merge + push + promote to prod** the alre
 **(2) build the gated [WHAT]s to best-judgment defaults, documenting each** — while **holding FIS-10**
 (ordinance-gated) and **FIS-14** (needs owner's RSBSA/RSVS clarification).
 
-**✅ WAVE 1 — SHIPPED to PRODUCTION as v0.23.0 (`sha-e4c6a67`), verified live.** Merged FIS-8 (Phase A+B+C
-multi-family) + FIS-9 (violation count label) + FIS-11 (employment type + income source) + FIS-33 #1/#2
-(Mark-Received a11y target-size + focus-restore) → main; released v0.23.0; pushed origin; `push-to-prod.sh`
-(prod DB backed up, both migrations `add_employment_income_fields` + `add_family_model` applied, reseed-never).
-Prod endpoints 200 (`/`, `/api/health`, `/login`; `/tm` 307). Family backfill correctly no-op on prod (0
-households — prod's official 3181 fisherfolk don't use households yet). 595 tests green pre-ship. These items
-are now CLOSED (were the "built, awaiting owner merge" set).
+**✅ SHIPPED to PRODUCTION this session — THREE releases, verified live (prod `frms.powerbyte.app` healthy):**
+- **v0.23.0 (`sha-e4c6a67`)** — FIS-8 (Phase A+B+C multi-family) + FIS-9 (violation count label) + FIS-11
+  (employment type + income source) + FIS-33 #1/#2 (Mark-Received a11y). Migrations `add_employment_income_fields`
+  + `add_family_model` applied (family backfill no-op on prod — 0 households; prod's 3181 fisherfolk don't use them).
+- **v0.24.0 (`sha-8bd8a21`)** — FIS-33 #3 (keyboard-accessible map list alternative) + FIS-31 (landing shipped-feature
+  callouts) + FIS-8 ayuda grain (additive nullable `AyudaBeneficiary.familyId`). Migration `add_ayuda_beneficiary_family`.
+- **v0.25.0 (`sha-f433f95`)** — FIS-15 (3-year renewal-due reminder: dashboard card + list filter, reminder-only) +
+  FIS-13 (authed QR verify page + tenant-scoped resolver). No migrations.
+- **FIS-16 mayor access** — CLOSED, no code: existing `viewer` role is already read-only across every feature (assign it to the mayor).
+All verified: 611 tests green, lint-gated builds green, prod endpoints 200, dev rebuilt off main (Rule 39) each ship.
 
-**🔨 WAVE 2 — building to documented best-judgment defaults (each reversible; flip any):**
-- **FIS-16 mayor access** → DEFAULT: existing Viewer role suffices (no new role). Alt: narrower dashboard-only custom role.
-- **FIS-33 #3 map-marker a11y** → DEFAULT: keyboard-accessible list alternative beside each map (simpler/robust than focusable pins).
-- **FIS-15 3-year renewal cycle** → DEFAULT: reminder-only (no status enforcement), anchored to the FIS-12 status model.
-- **FIS-31 landing** → DEFAULT: augment with SHIPPED-feature callouts (Location Capture · Household/Municipal Network Map · NEW/RENEWED/EXPIRED status). NOT advertising multi-family yet (shipped but no prod data). Screenshots stay FIS-34 (gated).
-- **FIS-8 ayuda grain** → DEFAULT: additive nullable `AyudaBeneficiary.familyId` (enables family-grained ayuda without breaking household-level enrollment).
-- **FIS-13 QR verify** → DEFAULT: authed scan/verify surface (gov-PII-safe). Alt: public resolver.
-- **FIS-6 audit-log view** → DEFAULT: table gated to tenant_admin+ (audit logs sensitive). Alt: Viewer+.
-- **FIS-7 user-management** → DEFAULT: users table + role assign/invite, tenant_admin+ (Rule 34 — never Billing/User-Mgmt below tenant_admin).
-- **FIS-8 Phase C interactive UI** → build to `docs/FIS8_MULTI_FAMILY_PLAN.md` (wizard multi-family flow, per-family detail + Add-Family, map per-family).
+**⏳ REMAINING — 3 XL/sensitive features, DEFAULTS DOCUMENTED, checkpointed for focused sessions (owner: continue if desired):**
+- **FIS-6 audit-log view** → DEFAULT: read-only audit-trail table gated to **tenant_admin+**. ⚠ SENSITIVE: the current
+  `viewer` preset grants view on ALL features, so gating audit-log to admin+ is a deliberate RBAC-preset TIGHTENING
+  (changes who can see audit logs) — worth owner eyes before prod. Read-only otherwise; uses existing `auditLog` table.
+- **FIS-7 user-management** → DEFAULT: users table + role assign/invite/deactivate, **tenant_admin+** (Rule 34 — never
+  Billing/User-Mgmt below tenant_admin). ⚠ SENSITIVE: mutation-heavy RBAC surface (invite/deactivate/role-change) on a
+  gov app — highest-risk of the remaining; owner review recommended before prod. Reuse `/tm` users-client + RBAC.
+- **FIS-8 Phase C interactive UI** → build to `docs/FIS8_MULTI_FAMILY_PLAN.md` (wizard multi-family flow, per-family
+  detail + Add-Family, map per-family). Design-bearing; multi-family data model + ayuda grain already shipped, so this
+  is the creation/edit UX layer. No prod multi-family data exists yet, so nothing user-visible regresses.
 
 **⏸ HELD (owner instruction):** FIS-10 (aquaculture — ordinance-gated, Jan amendments) · FIS-14 (RSBSA vs "RSVS" — needs owner clarification).
 
