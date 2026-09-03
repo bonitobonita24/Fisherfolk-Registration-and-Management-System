@@ -1,6 +1,49 @@
 # FRMS — Project State
 
-## Current State (2026-09-03, LATEST — owner "continue all pending in full auto" + answers) — 🚀 FIS-6 + FIS-7 + FIS-8 Phase C SHIPPED TO PROD as v0.26.0, QA'd + verified live
+## Current State (2026-09-04, LATEST — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_v0270_plans_fixes_0904.md` (+ this block).
+
+> **Owner queued 5 items:** 3 "make a plan" features (#1 Calendar-of-Activities home, #2 Notion diary/notes→Projects,
+> #3 Mobile app) + 2 fixes (#4 prod Fisherfolk count 6362, #5 Fish-Catch-form scrollbars). Also the prior un-gated
+> FIS-8 Phase D. All addressed this turn.
+>
+> **🚀 SHIPPED TO PROD as v0.27.0 (`sha-289086d`), no migrations, verified live (`frms.powerbyte.app` health/home/login 200):**
+> - **#4 / FIS-38 — dashboard Fisherfolk tile double-count (6362→3181).** ROOT CAUSE: `fisherfolk-group-tile.tsx`
+>   summed `activeFisherfolk` (count status in NEW/RENEWED = full valid registry) + `newFisherfolk` (this-year NEW),
+>   double-counting every current registration. **Verified prod data was CORRECT (read-only: 3181 rows, 0 renewals) —
+>   display-only bug, NO demo/duplicate data.** Fix: headline = activeFisherfolk; NEW/RENEWED = this-year. Verified live
+>   in dev (now 3,181 · 3,181 NEW · 0 RENEWED).
+> - **#5 / FIS-39 — app-shell window scrollbar / scroll-into-blank.** ROOT CAUSE: tenant shell `h-screen` in normal flow
+>   + `body min-h-screen` leaked tall content past the viewport → a 3rd (window) scrollbar scrolling the fixed shell into
+>   blank. Fix: `#tenant-theme-root` → `fixed inset-0 overflow-hidden`. Verified live: window scroll 1457px → 0; only the
+>   2 legit scrollbars (sidebar nav + main content) remain.
+> - **FIS-8 Phase D — family-aware household reporting/dashboard (single-family parity).** dashboard `getHouseholdStats`
+>   byCategory → family-head count; `householdCharts` size/head-by-sex iterate families; report ledgers (+legacy) gain a
+>   "Families" column. Multi-family seed fixtures + parity tests (616 tests). A parity test CAUGHT a pre-existing bug
+>   (`family._count.members` already includes the head → dropped the erroneous +1). QA'd in dev browser: created a
+>   2-family household, verified per-family reporting, 0 console errors.
+>
+> **📋 3 FEATURE PLANS DRAFTED (owner review + decide [WHAT]s before ANY build) — `docs/plans/`:**
+> - **FIS-35** `PLAN_calendar_activities_dashboard.md` — replace heatmap home with a unified Calendar/agenda; extend
+>   `KanbanTask` (start/kind/audience/share) + reuse existing `todo-calendar.tsx`; relocate (not delete) the heatmap. 7 open [WHAT]s.
+> - **FIS-36** `PLAN_diary_notes_projects.md` — Notion-style location/time-stamped notes w/ TipTap slash-editor (help +
+>   entity pickers), inline photos via the storage adapter, accomplishment-report export → grows to a Projects/PM module. 6 open [WHAT]s.
+> - **FIS-37** `PLAN_mobile_app.md` — Expo/RN field app, QR-driven (reuse FIS-13 verifyByQr) + manual search, note-taking,
+>   violation entry, status confirm; needs a new mobile bearer-auth path. Gaps flagged (vessel/ayuda QR resolvers, violation.create gate). 9 open [WHAT]s.
+>
+> Squirlnote board: FIS-35..39. Dev rebuilt off main (Rule 39, FRESH). ⏸ HELD: FIS-10 (ordinance) · demo refresh/FIS-34 (EC2 box).
+
+### Git / deploy
+`main == origin/main == 289086d` (v0.27.0, pushed + tagged) + ONE local docs commit (plans + this block, held from push to
+avoid a redundant CI build). Prod `frms.powerbyte.app` LIVE on `sha-289086d`, healthy. Prod DB backed up pre-promote.
+Feature branches retained (`fix/dashboard-fisherfolk-double-count`, `fix/app-shell-window-scroll`, `feat/fis8-phase-d-reporting`).
+
+---
+
+## Current State (2026-09-03 — owner "continue all pending in full auto" + answers) — 🚀 FIS-6 + FIS-7 + FIS-8 Phase C SHIPPED TO PROD as v0.26.0, QA'd + verified live
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

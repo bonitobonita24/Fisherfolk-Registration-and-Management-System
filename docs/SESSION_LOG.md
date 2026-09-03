@@ -2,6 +2,26 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-04 (owner batch — 3 plans + 2 fixes) — shipped Phase D + 2 fixes as v0.27.0; drafted 3 feature plans
+
+**In your words:** queue 3 "make a plan" features (Calendar-of-Activities home, Notion diary/notes→Projects, mobile app); fix the prod Fisherfolk count showing 6,362; fix the 3 scrollbars on the Fish Catch form. Plus the leftover FIS-8 Phase D.
+
+🚀 Shipped to production as **v0.27.0** (verified live; no migrations)
+- **The 6,362 count** — it was NOT demo/duplicate data. I checked prod directly: exactly 3,181 fisherfolk, 0 renewals. The home "Fisherfolk" tile was double-adding (valid-registry count + this-year-new count). Fixed the math; it now reads 3,181. Your Demographics number was right all along.
+- **The scrollbars** — the app shell was leaking a whole-page browser scrollbar that let you scroll the fixed layout down into blank space. Pinned the shell to the screen; now only the two normal scrollbars (the sidebar menu and the page content) remain, and there's no more scroll-into-nothing.
+- **FIS-8 Phase D** — the reporting/dashboard side of multi-family households (family-aware counts + a "Families" column), with parity tests so single-family numbers are unchanged. Testing even caught and fixed a small pre-existing head-count bug.
+
+📋 Plans drafted (in `docs/plans/`, each with open decisions for you — nothing built yet)
+- **Calendar-of-Activities home** (`PLAN_calendar_activities_dashboard.md`) — a unified agenda of everyone's scheduled tasks/events, built on the existing task system.
+- **Diary/notes → Projects** (`PLAN_diary_notes_projects.md`) — Notion-style stamped notes with `/` commands + entity pickers, exportable as an accomplishment report, growing into a Project Management module.
+- **Mobile app** (`PLAN_mobile_app.md`) — Expo/React Native, QR-scan-driven field app reusing the QR verify we already shipped.
+
+⏳ Next / Decisions
+- Review the 3 plans and pick scope/answers on their open [WHAT]s before I build any of them.
+- Still held: FIS-10 (ordinance); demo refresh + landing screenshots (EC2 box).
+
+
+
 ## 2026-09-03 (later, owner "continue all pending in full auto" + 4 answers) — 🚀 shipped the last 3 pending features to production as v0.26.0
 
 **In your words:** "continue all pending in full auto" — then: do my recommendation (QA then ship), keep User Management superadmin/manager-only, "RSVS" = RSBSA, and add the audit-log EXPIRE filter tweak.

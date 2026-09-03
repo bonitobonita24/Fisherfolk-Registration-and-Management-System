@@ -6,6 +6,17 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+### ⭐ 2026-09-04 (owner batch: 3 plans + 2 fixes) — FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
+> Authority: `docs/STATE.md` (top block). Squirlnote board FIS-35..39.
+> **✅ SHIPPED to prod v0.27.0 (`sha-289086d`), no migrations:**
+> - ✅ **FIS-38** dashboard Fisherfolk tile double-count fix (6362→3181; display-only, prod data was correct). Verified live.
+> - ✅ **FIS-39** app-shell window-scrollbar / scroll-into-blank fix (pin shell `fixed inset-0`; window scroll 1457→0). Verified live.
+> - ✅ **FIS-8 Phase D** family-aware household reporting/dashboard (single-family parity) + multi-family seed + parity tests (616 tests). QA'd (2-family household in dev browser, 0 console errors).
+> **📋 PLANS DRAFTED (review + decide [WHAT]s before any build) — `docs/plans/`:**
+> - 🔴 **FIS-35** Calendar-of-Activities home → `PLAN_calendar_activities_dashboard.md` (extend KanbanTask + reuse todo-calendar; 7 open decisions).
+> - 🔴 **FIS-36** Notion diary/notes → Projects/PM → `PLAN_diary_notes_projects.md` (TipTap slash-editor, location/time stamp, accomplishment report; 6 open decisions).
+> - 🔴 **FIS-37** Mobile app (Android/iOS) → `PLAN_mobile_app.md` (Expo/RN, reuse FIS-13 QR, new mobile-auth; 9 open decisions).
+
 ### ⭐ 2026-09-03 STATUS (owner "continue all pending") — 8 items SHIPPED to prod, 3 remaining
 > Authority: `docs/STATE.md` (top block) + `PENDING_DECISIONS.md` (2026-09-03 block).
 > **✅ SHIPPED to prod this session across v0.23.0 / v0.24.0 / v0.25.0 (611 tests green, verified live):**
