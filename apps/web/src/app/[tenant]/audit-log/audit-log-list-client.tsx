@@ -33,10 +33,13 @@ const ACTIONS = [
   "APPROVE",
   "REJECT",
   "RENEW",
+  "PRINT",
   "VIOLATION_FILED",
   "VIOLATION_LIFTED",
   "LOGIN",
   "EXPORT",
+  "MEDIA_DOWNLOAD",
+  "EXPIRE",
 ] as const;
 
 type AuditAction = (typeof ACTIONS)[number];

@@ -6,19 +6,19 @@ import { PageHeader } from "@/components/shared";
 import { UsersClient } from "./users-client";
 
 /**
- * User Management (FIS-7) — tenant_admin+ (tenant_admin / tenant_superadmin /
- * tenant_manager). NOT a FeatureKey (Rule 34 — user_management is
- * deliberately excluded from the custom-role matrix; see
- * route-feature-map.ts + nav-items.ts). Guarded by fixed role list only,
- * same in-page-notice pattern as Settings → Role Builder.
+ * User Management (FIS-7) — tenant_superadmin+ (tenant_superadmin /
+ * tenant_manager) ONLY. Owner decision 2026-09-03: User Management stays
+ * superadmin/manager-only (matches nav-items.ts + the pinned
+ * sidebar-visibility "by design" exclusion of tenant_admin). NOT a FeatureKey
+ * (Rule 34 — user_management is deliberately excluded from the custom-role
+ * matrix; see route-feature-map.ts + nav-items.ts). Guarded by fixed role
+ * list only, same in-page-notice pattern as Settings → Role Builder.
  */
 export default async function UserManagementPage() {
   const session = await auth();
   const role = session?.user?.role;
   const isAdmin =
-    role === "tenant_manager" ||
-    role === "tenant_superadmin" ||
-    role === "tenant_admin";
+    role === "tenant_manager" || role === "tenant_superadmin";
 
   if (!isAdmin) {
     return (
