@@ -165,9 +165,14 @@ async function householdCharts(
   ]);
   for (const r of rows) {
     // FIS-8 Phase D: size = sum across all families in the household of
-    // (family._count.members + 1 head). Single-family parity: with exactly 1
-    // family per household this equals the old `_count.members + 1`.
-    const size = r.families.reduce((s, f) => s + f._count.members + 1, 0);
+    // family._count.members. Family.members is the Fisherfolk[] relation keyed
+    // on fisherfolk.familyId — and household.ts/family.ts create BOTH set the
+    // head's familyId to its own family (so the head satisfies "FamilyHead" AND
+    // "FamilyMembers" at once) — meaning _count.members already INCLUDES the
+    // head; no separate "+1 head" term is needed (fixed regression found by
+    // report.domain.test.ts's single-family parity test, which asserts size
+    // equals a direct head+member computation).
+    const size = r.families.reduce((s, f) => s + f._count.members, 0);
     const bucket = size <= 1 ? "1" : size <= 3 ? "2-3" : size <= 5 ? "4-5" : "6+";
     sizeBuckets.set(bucket, (sizeBuckets.get(bucket) ?? 0) + 1);
   }

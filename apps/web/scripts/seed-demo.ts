@@ -286,6 +286,104 @@ async function main(): Promise<void> {
     }
     console.log(`✅  Households heal: ${householdsHealed} re-synced to head barangay/address.`);
 
+    // ── Multi-family fixtures (FIS-8 Phase D demo data) ─────────────────────────
+    // Give a handful of households a SECOND (and occasionally THIRD) Family so
+    // the multi-family household charts/stats have real demo data to render.
+    // Self-heals: households created directly by this script (or predating the
+    // Family model) never got their baseline "F-01" from householdRouter.create
+    // — this pass creates it first, exactly mirroring that router's seeding
+    // (apps/web/src/server/trpc/routers/household.ts), before splitting a few
+    // households into F-02/F-03. Idempotent — re-running never duplicates.
+    const MULTI_FAMILY_HOUSEHOLDS_TARGET = 3;
+    const householdsForFamilies = await prisma.household.findMany({
+      where: { tenantId },
+      select: {
+        id: true,
+        headId: true,
+        members: { select: { id: true }, orderBy: { idNumber: "asc" } },
+      },
+      orderBy: { householdNumber: "asc" },
+      take: 20,
+    });
+
+    let multiFamilyHouseholds = 0;
+    let extraFamiliesCreated = 0;
+    for (const hh of householdsForFamilies) {
+      if (multiFamilyHouseholds >= MULTI_FAMILY_HOUSEHOLDS_TARGET) break;
+
+      // Self-heal: ensure the baseline F-01 exists before splitting further.
+      const f01 = await prisma.family.findFirst({
+        where: { householdId: hh.id, familyNumber: "F-01" },
+        select: { id: true },
+      });
+      if (!f01) {
+        const created = await prisma.family.create({
+          data: { tenantId, householdId: hh.id, familyNumber: "F-01", headId: hh.headId },
+          select: { id: true },
+        });
+        await prisma.fisherfolk.update({
+          where: { id: hh.headId },
+          data: { familyId: created.id },
+        });
+        const memberOnlyIds = hh.members.map((m) => m.id).filter((id) => id !== hh.headId);
+        if (memberOnlyIds.length > 0) {
+          await prisma.fisherfolk.updateMany({
+            where: { id: { in: memberOnlyIds }, tenantId },
+            data: { familyId: created.id },
+          });
+        }
+      }
+
+      // Idempotent: a household already split into 2+ families (a prior run)
+      // still counts toward the target, but is never re-split.
+      const existingFamilyCount = await prisma.family.count({ where: { householdId: hh.id } });
+      if (existingFamilyCount >= 2) {
+        multiFamilyHouseholds++;
+        continue;
+      }
+
+      // Candidates for a new family: household members other than the head
+      // (the head stays put in F-01 unless explicitly reassigned elsewhere).
+      const nonHeadIds = hh.members.map((m) => m.id).filter((id) => id !== hh.headId);
+      if (nonHeadIds.length < 2) continue; // need a head + ≥1 member to split out
+
+      // 4+ spare members → split into two additional families (F-02 + F-03);
+      // otherwise just one (F-02). Matches the household-seed group size
+      // (1 head + 2-4 members), so most qualifying households get F-02 only.
+      const extraFamilyCount = nonHeadIds.length >= 4 ? 2 : 1;
+
+      let cursor = 0;
+      for (let fnum = 2; fnum <= 1 + extraFamilyCount; fnum++) {
+        if (cursor >= nonHeadIds.length) break;
+        const newHeadId = nonHeadIds[cursor]!;
+        cursor++;
+        const isLastExtraFamily = fnum === 1 + extraFamilyCount;
+        const newMemberIds = isLastExtraFamily ? nonHeadIds.slice(cursor) : [];
+        if (isLastExtraFamily) cursor = nonHeadIds.length;
+
+        const familyNumber = `F-${String(fnum).padStart(2, "0")}`;
+        const family = await prisma.family.create({
+          data: { tenantId, householdId: hh.id, familyNumber, headId: newHeadId },
+          select: { id: true },
+        });
+        await prisma.fisherfolk.update({
+          where: { id: newHeadId },
+          data: { familyId: family.id },
+        });
+        if (newMemberIds.length > 0) {
+          await prisma.fisherfolk.updateMany({
+            where: { id: { in: newMemberIds }, tenantId },
+            data: { familyId: family.id },
+          });
+        }
+        extraFamiliesCreated++;
+      }
+      multiFamilyHouseholds++;
+    }
+    console.log(
+      `✅  Multi-family fixtures: ${multiFamilyHouseholds} households multi-family (${extraFamiliesCreated} extra families created this run).`,
+    );
+
     // ── Ayuda programs + beneficiaries ──────────────────────────────────────────
     const PROGRAMS = [
       { title: "Fuel Subsidy 2026 (Demo)", status: "ACTIVE" as const },

@@ -20,6 +20,7 @@ import { platformPrisma, prisma } from "@frms/db";
 import type { TRPCContext } from "../context";
 import { reportRouter } from "./report";
 import { householdRouter } from "./household";
+import { familyRouter } from "./family";
 import { createCallerFactory } from "../trpc";
 
 // ─── DB gate ─────────────────────────────────────────────────────────────────
@@ -74,6 +75,10 @@ const reportCaller = (
 
 const householdCaller = (tenantId: string, userId: string) =>
   householdCallerFactory(makeCtx(tenantId, userId, "tenant_superadmin"));
+
+const familyCallerFactory = createCallerFactory(familyRouter);
+const familyCaller = (tenantId: string, userId: string) =>
+  familyCallerFactory(makeCtx(tenantId, userId, "tenant_superadmin"));
 
 const TARGET_BARANGAY = `RptTargetBrgy-${RUN}`;
 const OTHER_BARANGAY = `RptOtherBrgy-${RUN}`;
@@ -412,3 +417,170 @@ describe.skipIf(!hasDb)("report.exportDomainExcel", () => {
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });
+
+// ─── household domain chart — multi-family parity (FIS-8 Phase D) ──────────────
+//
+// Dedicated tenant + fixtures (isolated from the shared tenant-A fixtures above)
+// so household counts here are exact and self-contained.
+
+describe.skipIf(!hasDb)(
+  "report.getDomainChartData — household domain (multi-family parity, FIS-8 Phase D)",
+  () => {
+    const SLUG_HH = `rpt-hh-test-${RUN}`;
+    let tenantId: string;
+    let userId: string;
+
+    async function makeFf(overrides: Record<string, unknown> = {}) {
+      ffSeq += 1;
+      const n = ffSeq;
+      return platformPrisma.fisherfolk.create({
+        data: {
+          tenantId,
+          idNumber: `RPTHHFF-${RUN}-${n}`,
+          fullName: `RptHhTok${RUN} Fisher ${n}`,
+          lastName: `Fisher${n}`,
+          firstName: "Test",
+          address: `${n} Test St`,
+          barangay: `RptHhBrgy-${RUN}`,
+          categoryIds: [],
+          registrationYear: new Date().getFullYear(),
+          createdById: userId,
+          updatedById: userId,
+          ...overrides,
+        },
+      });
+    }
+
+    beforeAll(async () => {
+      if (!hasDb) return;
+
+      const existing = await platformPrisma.tenant.findUnique({ where: { slug: SLUG_HH } });
+      if (existing) await wipeTenant(existing.id);
+      if (existing) {
+        await platformPrisma.tenant.delete({ where: { id: existing.id } }).catch(() => {});
+      }
+
+      const tenant = await platformPrisma.tenant.create({
+        data: {
+          name: "Report Household Test Tenant",
+          slug: SLUG_HH,
+          status: "ACTIVE",
+          currentRegistrationYear: new Date().getFullYear(),
+        },
+      });
+      tenantId = tenant.id;
+
+      const user = await platformPrisma.user.create({
+        data: {
+          tenantId,
+          email: `rpt-hh-admin-${RUN}@local`,
+          username: `rpt-hh-admin-${RUN}`,
+          passwordHash: "not-real",
+          name: "Test Household Admin",
+          role: "tenant_superadmin",
+        },
+      });
+      userId = user.id;
+
+      // Category used to verify getHouseholdStats.byCategory counts EACH family
+      // head (a 2-head household in the same category contributes 2, not 1).
+      const category = await platformPrisma.category.create({
+        data: {
+          tenantId,
+          name: `RptHhCat-${RUN}`,
+          slug: `rpt-hh-cat-${RUN}`,
+          displayColor: "#123456",
+        },
+      });
+
+      // ── Household A — single family (parity baseline): head + 2 members ──
+      const headA = await makeFf({ sex: "MALE" });
+      const memberA1 = await makeFf();
+      const memberA2 = await makeFf();
+      await householdCaller(tenantId, userId).create({
+        headId: headA.id,
+        memberIds: [memberA1.id, memberA2.id],
+      });
+
+      // ── Household B — multi-family: F-01 (head + 1 member) + F-02 (head + 1
+      // member) split out via family.create. Both heads placed in the shared
+      // category so byCategory must count BOTH (2), not 1.
+      const headB1 = await makeFf({ sex: "FEMALE", categoryIds: [category.id] });
+      const memberB2 = await makeFf();
+      const headB2 = await makeFf({ sex: "MALE", categoryIds: [category.id] });
+      const memberB4 = await makeFf();
+      const { id: hhB } = await householdCaller(tenantId, userId).create({
+        headId: headB1.id,
+        memberIds: [memberB2.id, headB2.id, memberB4.id],
+      });
+
+      // Split headB2 + memberB4 out of F-01 into a new family F-02.
+      await familyCaller(tenantId, userId).create({
+        householdId: hhB,
+        headId: headB2.id,
+        memberIds: [memberB4.id],
+      });
+    });
+
+    afterAll(async () => {
+      if (!hasDb) return;
+      if (!tenantId) return;
+      await wipeTenant(tenantId);
+      await platformPrisma.category.deleteMany({ where: { tenantId } }).catch(() => {});
+      await platformPrisma.tenant.delete({ where: { id: tenantId } }).catch(() => {
+        /* already gone */
+      });
+    });
+
+    it("single-family parity: sizeDistribution/headBySex match a direct head+member computation", async () => {
+      const chartData = await reportCaller(tenantId, userId).getDomainChartData({
+        domain: "household",
+        filter: {},
+      });
+
+      // Household A: exactly 1 family (F-01) — direct computation from
+      // head(1) + members(2) must equal the chart's aggregated size.
+      const directSizeA = 1 /* head */ + 2 /* members */; // = 3 → bucket "2-3"
+      const sizeDist = chartData.charts.find((c) => c.key === "sizeDistribution");
+      expect(sizeDist).toBeDefined();
+      const bucket23 = sizeDist!.data.find((d) => d.label === "2-3");
+      expect(directSizeA).toBe(3);
+      // Isolated tenant: only hhA (size 3) lands in "2-3" — hhB (size 4) lands
+      // in "4-5" (covered in the multi-family test below).
+      expect(bucket23?.value).toBe(1);
+
+      const headBySex = chartData.charts.find((c) => c.key === "headBySex");
+      expect(headBySex).toBeDefined();
+      // hhA's single family head is MALE — tallied exactly once for hhA
+      // (hhB also contributes 1 MALE head — see the multi-family test).
+      const maleCount = headBySex!.data.find((d) => d.label === "MALE")?.value ?? 0;
+      expect(maleCount).toBe(2);
+    });
+
+    it("multi-family semantics: headBySex counts both heads, size sums across families", async () => {
+      const chartData = await reportCaller(tenantId, userId).getDomainChartData({
+        domain: "household",
+        filter: {},
+      });
+
+      const sizeDist = chartData.charts.find((c) => c.key === "sizeDistribution");
+      const headBySex = chartData.charts.find((c) => c.key === "headBySex");
+      expect(sizeDist).toBeDefined();
+      expect(headBySex).toBeDefined();
+
+      // Household B size = sum across its 2 families of (members + 1 head):
+      // F-01 (head + 1 member = 2) + F-02 (head + 1 member = 2) = 4 → "4-5".
+      const directSizeB = (1 + 1) + (1 + 1);
+      expect(directSizeB).toBe(4);
+      const bucket45 = sizeDist!.data.find((d) => d.label === "4-5");
+      expect(bucket45?.value).toBe(1); // only hhB lands here (hhA is "2-3")
+
+      // Total tenant tally: exactly hhA(MALE) + hhB(FEMALE + MALE) = 2 MALE, 1 FEMALE
+      // (tenant is isolated to this describe block's fixtures only).
+      const maleCount = headBySex!.data.find((d) => d.label === "MALE")?.value ?? 0;
+      const femaleCount = headBySex!.data.find((d) => d.label === "FEMALE")?.value ?? 0;
+      expect(maleCount).toBe(2); // hhA head + hhB F-02 head
+      expect(femaleCount).toBe(1); // hhB F-01 head
+    });
+  },
+);
