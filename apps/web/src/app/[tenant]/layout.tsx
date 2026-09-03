@@ -70,7 +70,11 @@ export default async function TenantLayout({
     : undefined;
 
   return (
-    <div id="tenant-theme-root" className="h-screen overflow-hidden" style={themeVars}>
+    <div
+      id="tenant-theme-root"
+      className="fixed inset-0 overflow-hidden"
+      style={themeVars}
+    >
       <AppShell tenantSlug={tenant} role={role} userName={name ?? "User"}>
         {children}
       </AppShell>
