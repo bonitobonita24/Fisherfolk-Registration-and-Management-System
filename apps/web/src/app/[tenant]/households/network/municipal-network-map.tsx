@@ -74,11 +74,20 @@ function resolveLocation(
   return { lat: centroid.lat + dLat, lon: centroid.lon + dLon };
 }
 
+interface NetworkFamily {
+  id: string;
+  familyNumber: string;
+  headId: string;
+  head: NetworkMember;
+  members: NetworkMember[];
+}
+
 interface NetworkHousehold {
   id: string;
   householdNumber: string;
   head: NetworkMember;
   members: NetworkMember[];
+  families: NetworkFamily[];
 }
 
 interface LineProps {
@@ -277,6 +286,7 @@ export function MunicipalNetworkMap() {
   const { heads, memberFeatures, lineFeatures } = useMemo(() => {
     const headsOut: Array<{
       household: NetworkHousehold;
+      head: NetworkMember;
       lat: number;
       lon: number;
     }> = [];
@@ -285,18 +295,22 @@ export function MunicipalNetworkMap() {
     > = [];
     const lineFeaturesOut: Array<GeoJSON.Feature<LineString, LineProps>> = [];
 
-    for (const household of households ?? []) {
-      const headLocation = resolveLocation(household.head);
-      if (headLocation == null) continue;
+    /** Plot one head→members group (either a family or the flat household), producing one crown + its lines. */
+    function plotGroup(
+      household: NetworkHousehold,
+      head: NetworkMember,
+      members: NetworkMember[],
+    ) {
+      const headLocation = resolveLocation(head);
+      if (headLocation == null) return;
       const { lat: headLat, lon: headLon } = headLocation;
-      headsOut.push({ household, lat: headLat, lon: headLon });
+      headsOut.push({ household, head, lat: headLat, lon: headLon });
 
       const normalizedHeadBarangay =
-        normalizeBarangay(household.head.barangay).value ??
-        household.head.barangay;
+        normalizeBarangay(head.barangay).value ?? head.barangay;
 
-      for (const member of household.members) {
-        if (member.id === household.head.id) continue;
+      for (const member of members) {
+        if (member.id === head.id) continue;
 
         const memberLocation = resolveLocation(member);
         if (memberLocation == null) continue;
@@ -323,6 +337,18 @@ export function MunicipalNetworkMap() {
             ],
           },
         });
+      }
+    }
+
+    for (const household of households ?? []) {
+      if (household.families.length > 0) {
+        // One crown per family head, members grouped/compared per family.
+        for (const family of household.families) {
+          plotGroup(household, family.head, family.members);
+        }
+      } else {
+        // Fallback: flat head/members (no families recorded on this household).
+        plotGroup(household, household.head, household.members);
       }
     }
 
@@ -532,7 +558,7 @@ export function MunicipalNetworkMap() {
     for (const marker of headMarkersRef.current) marker.remove();
     headMarkersRef.current = [];
 
-    for (const { household, lat, lon } of heads) {
+    for (const { household, head, lat, lon } of heads) {
       const el = document.createElement("div");
       el.style.display = "flex";
       el.style.alignItems = "center";
@@ -543,7 +569,7 @@ export function MunicipalNetworkMap() {
       el.style.backgroundColor = HEAD_COLOR;
       el.style.border = "2px solid #ffffff";
       el.style.boxShadow = "0 1px 4px rgba(0,0,0,0.4)";
-      el.title = `${household.head.fullName} — ${household.householdNumber} (${household.head.barangay})`;
+      el.title = `${head.fullName} — ${household.householdNumber} (${head.barangay})`;
       el.innerHTML = renderCrownSvg();
 
       const marker = new maplibregl.Marker({ element: el })
@@ -666,16 +692,16 @@ export function MunicipalNetworkMap() {
           </h3>
           <ScrollArea className="h-40">
             <ul className="divide-y">
-              {heads.map(({ household, lat, lon }) => (
-                <li key={household.id}>
+              {heads.map(({ household, head, lat, lon }) => (
+                <li key={head.id}>
                   <Button
                     type="button"
                     variant="ghost"
                     className="h-auto w-full justify-start rounded-none px-3 py-2 text-left text-xs font-normal"
                     onClick={() => flyToHousehold(lat, lon)}
                   >
-                    {household.head.fullName} — {household.householdNumber} (
-                    {household.head.barangay})
+                    {head.fullName} — {household.householdNumber} (
+                    {head.barangay})
                   </Button>
                 </li>
               ))}

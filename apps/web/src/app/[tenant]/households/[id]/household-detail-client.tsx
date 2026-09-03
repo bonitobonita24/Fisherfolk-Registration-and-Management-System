@@ -4,26 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  ArrowLeft,
-  Crown,
-  Trash2,
-  TriangleAlert,
-  UserMinus,
-  UserPlus,
-} from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
-import { normalizeBarangay } from "@/lib/normalize/barangay";
-import { SearchInput } from "@/components/shared/search-input";
 import {
   RecordHeader,
   DetailField,
   DefinitionGrid,
   ZoomableImage,
 } from "@/components/shared";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,16 +42,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import HouseholdMemberMap from "./household-member-map";
+import { FamilySection } from "./family-section";
+import { AddFamilyDialog } from "./add-family-dialog";
 
 // ── Types ────────────────────────────────────────────────────────────────
-interface FisherfolkLite {
+export interface FisherfolkLite {
   id: string;
   idNumber: string;
   fullName: string;
@@ -76,13 +62,6 @@ interface Props {
   id: string;
 }
 
-/** True when two barangay names refer to a different place, normalized. */
-function isDifferentBarangay(a: string, b: string): boolean {
-  const na = normalizeBarangay(a).value ?? a;
-  const nb = normalizeBarangay(b).value ?? b;
-  return na !== nb;
-}
-
 function initials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -92,7 +71,7 @@ function initials(fullName: string): string {
 }
 
 /** 36px round photo thumbnail (enlargeable) with an initials fallback. */
-function MemberAvatar({
+export function MemberAvatar({
   photoKey,
   fullName,
 }: {
@@ -123,7 +102,7 @@ function MemberAvatar({
 }
 
 /** Comma-joined category name badges for a member row (FIS-20b). */
-function MemberCategories({
+export function MemberCategories({
   categoryIds,
   categoriesMap,
 }: {
@@ -158,211 +137,6 @@ function MemberCategories({
         );
       })}
     </div>
-  );
-}
-
-// ── Add Member dialog ───────────────────────────────────────────────────
-function AddMemberDialog({
-  householdId,
-  currentMemberIds,
-  headBarangay,
-  open,
-  onOpenChange,
-  onAdded,
-}: {
-  householdId: string;
-  currentMemberIds: string[];
-  headBarangay: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onAdded: () => void;
-}) {
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    if (open) setSearch("");
-  }, [open]);
-
-  const results = trpc.household.availableFisherfolk.useQuery(
-    { search, excludeHouseholdId: householdId },
-    { enabled: open },
-  );
-
-  const filtered = useMemo(() => {
-    if (!results.data) return [];
-    return results.data.filter((p) => !currentMemberIds.includes(p.id));
-  }, [results.data, currentMemberIds]);
-
-  const addMember = trpc.household.update.useMutation({
-    onSuccess: () => {
-      toast.success("Member added.");
-      onAdded();
-    },
-    onError: (err) => {
-      toast.error(err.message ?? "Failed to add member.");
-    },
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Add Household Member</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="add-member-search">Search fisherfolk</Label>
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search by name or ID number..."
-              className="w-full max-w-none"
-            />
-          </div>
-
-          <div className="max-h-72 space-y-2 overflow-y-auto">
-            {results.isLoading && (
-              <p className="text-sm text-muted-foreground">Loading…</p>
-            )}
-            {!results.isLoading && filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No available fisherfolk found.
-              </p>
-            )}
-            {filtered.map((person) => {
-              const mismatch = isDifferentBarangay(
-                person.barangay,
-                headBarangay,
-              );
-              return (
-                <div
-                  key={person.id}
-                  className="space-y-2 rounded-lg border p-3"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-foreground">
-                        {person.fullName}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {person.idNumber} · {person.barangay}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={addMember.isPending}
-                      onClick={() =>
-                        addMember.mutate({
-                          id: householdId,
-                          addMemberIds: [person.id],
-                        })
-                      }
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  {mismatch && (
-                    <p className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-500">
-                      <TriangleAlert className="size-3.5 shrink-0" />
-                      Not in the same barangay as the head — add anyway?
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Done
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ── Change Head dialog ──────────────────────────────────────────────────
-function ChangeHeadDialog({
-  householdId,
-  headId,
-  members,
-  open,
-  onOpenChange,
-  onChanged,
-}: {
-  householdId: string;
-  headId: string;
-  members: FisherfolkLite[];
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onChanged: () => void;
-}) {
-  const changeHead = trpc.household.update.useMutation({
-    onSuccess: () => {
-      toast.success("Household head changed.");
-      onOpenChange(false);
-      onChanged();
-    },
-    onError: (err) => {
-      toast.error(err.message ?? "Failed to change head.");
-    },
-  });
-
-  const candidates = members.filter((m) => m.id !== headId);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Change Household Head</DialogTitle>
-        </DialogHeader>
-
-        <div className="max-h-72 space-y-2 overflow-y-auto">
-          {candidates.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              Add another member first to be able to change the head.
-            </p>
-          )}
-          {candidates.map((person) => (
-            <div
-              key={person.id}
-              className="flex items-center justify-between gap-3 rounded-lg border p-3"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-medium text-foreground">
-                  {person.fullName}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {person.idNumber} · {person.barangay}
-                </p>
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={changeHead.isPending}
-                onClick={() =>
-                  changeHead.mutate({ id: householdId, newHeadId: person.id })
-                }
-              >
-                Make Head
-              </Button>
-            </div>
-          ))}
-        </div>
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -495,24 +269,13 @@ export function HouseholdDetailClient({ id }: Props) {
     return map;
   }, [categories]);
 
-  const [addMemberOpen, setAddMemberOpen] = useState(false);
-  const [changeHeadOpen, setChangeHeadOpen] = useState(false);
   const [editDetailsOpen, setEditDetailsOpen] = useState(false);
+  const [addFamilyOpen, setAddFamilyOpen] = useState(false);
 
   function refresh() {
     void utils.household.getById.invalidate({ id });
     void utils.household.list.invalidate();
   }
-
-  const removeMember = trpc.household.update.useMutation({
-    onSuccess: () => {
-      toast.success("Member removed.");
-      refresh();
-    },
-    onError: (err) => {
-      toast.error(err.message ?? "Failed to remove member.");
-    },
-  });
 
   const removeHousehold = trpc.household.remove.useMutation({
     onSuccess: () => {
@@ -572,10 +335,13 @@ export function HouseholdDetailClient({ id }: Props) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete this household?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will unlink all {currentMemberIds.length} member
-                  {currentMemberIds.length !== 1 ? "s" : ""} from this
-                  household. Fisherfolk records themselves are not deleted.
-                  This action cannot be undone.
+                  This will delete this household and all{" "}
+                  {record.families.length} famil
+                  {record.families.length !== 1 ? "ies" : "y"} within it,
+                  unlinking all {currentMemberIds.length} member
+                  {currentMemberIds.length !== 1 ? "s" : ""}. Fisherfolk
+                  records themselves are not deleted. This action cannot be
+                  undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -627,131 +393,27 @@ export function HouseholdDetailClient({ id }: Props) {
             </CardContent>
           </Card>
 
-          {/* Members */}
-          <Card className="gap-0 py-5">
-            <CardHeader className="flex flex-row items-center justify-between gap-2 px-6 pb-4 pt-0">
-              <CardTitle className="text-sm font-medium">Members</CardTitle>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setChangeHeadOpen(true)}
-                >
-                  <Crown className="mr-2 h-4 w-4" />
-                  Change Head
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => setAddMemberOpen(true)}
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Member
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="px-6 py-0">
-              <TooltipProvider>
-                <ul className="divide-y">
-                  <li className="flex items-center gap-3 py-2 first:pt-0">
-                    <MemberAvatar
-                      photoKey={record.head.photo}
-                      fullName={record.head.fullName}
-                    />
-                    <Link
-                      href={tenantHref(`/fisherfolk/${record.head.id}`)}
-                      className="min-w-0 flex-1 hover:underline"
-                    >
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {record.head.fullName}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {record.head.idNumber} · {record.head.barangay}
-                      </p>
-                    </Link>
-                    <div className="w-28 shrink-0">
-                      <MemberCategories
-                        categoryIds={record.head.categoryIds}
-                        categoriesMap={categoriesMap}
-                      />
-                    </div>
-                    <Badge variant="secondary">Head</Badge>
-                  </li>
-                  {record.members
-                    .filter((m) => m.id !== record.head.id)
-                    .map((member) => {
-                      const mismatch = isDifferentBarangay(
-                        member.barangay,
-                        record.head.barangay,
-                      );
-                      return (
-                        <li
-                          key={member.id}
-                          className="flex items-center gap-3 py-2 last:pb-0"
-                        >
-                          <MemberAvatar
-                            photoKey={member.photo}
-                            fullName={member.fullName}
-                          />
-                          <Link
-                            href={tenantHref(`/fisherfolk/${member.id}`)}
-                            className="min-w-0 flex-1 hover:underline"
-                          >
-                            <p className="truncate text-sm font-medium text-foreground">
-                              {member.fullName}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {member.idNumber} · {member.barangay}
-                            </p>
-                          </Link>
-                          <div className="w-28 shrink-0">
-                            <MemberCategories
-                              categoryIds={member.categoryIds}
-                              categoriesMap={categoriesMap}
-                            />
-                          </div>
-                          {mismatch && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <TriangleAlert
-                                  className="size-4 shrink-0 text-amber-600 dark:text-amber-500"
-                                  aria-label={`${member.fullName} is in a different barangay from the head of family`}
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Different barangay from head of family
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            disabled={removeMember.isPending}
-                            onClick={() =>
-                              removeMember.mutate({
-                                id: record.id,
-                                removeMemberIds: [member.id],
-                              })
-                            }
-                            aria-label={`Remove ${member.fullName} from household`}
-                          >
-                            <UserMinus className="h-4 w-4" />
-                          </Button>
-                        </li>
-                      );
-                    })}
-                  {record.members.filter((m) => m.id !== record.head.id)
-                    .length === 0 && (
-                    <li className="py-2 text-sm text-muted-foreground first:pt-0 last:pb-0">
-                      No additional members.
-                    </li>
-                  )}
-                </ul>
-              </TooltipProvider>
-            </CardContent>
-          </Card>
+          {/* Families */}
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-medium text-foreground">Families</h2>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setAddFamilyOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Family
+            </Button>
+          </div>
+          {record.families.map((family) => (
+            <FamilySection
+              key={family.id}
+              family={family}
+              householdId={record.id}
+              categoriesMap={categoriesMap}
+              onChanged={refresh}
+            />
+          ))}
         </div>
 
         <div className="lg:sticky lg:top-4 lg:self-start">
@@ -777,25 +439,18 @@ export function HouseholdDetailClient({ id }: Props) {
                 })),
             ]}
             headBarangay={record.head.barangay}
+            families={record.families}
           />
         </div>
       </div>
 
-      <AddMemberDialog
+      <AddFamilyDialog
         householdId={record.id}
-        currentMemberIds={currentMemberIds}
-        headBarangay={record.head.barangay}
-        open={addMemberOpen}
-        onOpenChange={setAddMemberOpen}
-        onAdded={refresh}
-      />
-      <ChangeHeadDialog
-        householdId={record.id}
-        headId={record.head.id}
+        head={record.head}
         members={record.members}
-        open={changeHeadOpen}
-        onOpenChange={setChangeHeadOpen}
-        onChanged={refresh}
+        open={addFamilyOpen}
+        onOpenChange={setAddFamilyOpen}
+        onCreated={refresh}
       />
       <EditDetailsDialog
         householdId={record.id}

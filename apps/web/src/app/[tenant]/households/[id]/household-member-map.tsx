@@ -41,9 +41,61 @@ export interface HouseholdMemberMapMember {
   longitude?: number | null;
 }
 
+/** A fisherfolk record as it appears on a family's `head`/`members` (fisherfolkLiteSelect subset). */
+export interface FamilyMemberForMap {
+  id: string;
+  fullName: string;
+  barangay: string;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+/** One `household.families[]` entry, from `household.getById`. */
+export interface FamilyForMap {
+  id: string;
+  familyNumber: string;
+  head: FamilyMemberForMap;
+  members: FamilyMemberForMap[];
+}
+
 export interface HouseholdMemberMapProps {
   members: HouseholdMemberMapMember[];
   headBarangay: string;
+  /**
+   * When present and non-empty, markers are built per-family instead of from
+   * the flat `members`/`headBarangay` — one crown per family head, each
+   * family's own members compared against THAT family's head barangay.
+   * Falls back to the flat props when absent/empty (single-family
+   * households, or callers not yet passing families).
+   */
+  families?: FamilyForMap[];
+}
+
+/** Build the flat marker list by iterating families — one crown per family head. */
+function buildFamilyMarkers(families: FamilyForMap[]): HouseholdMemberMapMember[] {
+  const markers: HouseholdMemberMapMember[] = [];
+  for (const family of families) {
+    markers.push({
+      id: family.head.id,
+      fullName: family.head.fullName,
+      barangay: family.head.barangay,
+      isHead: true,
+      latitude: family.head.latitude,
+      longitude: family.head.longitude,
+    });
+    for (const member of family.members) {
+      if (member.id === family.head.id) continue;
+      markers.push({
+        id: member.id,
+        fullName: member.fullName,
+        barangay: member.barangay,
+        isHead: false,
+        latitude: member.latitude,
+        longitude: member.longitude,
+      });
+    }
+  }
+  return markers;
 }
 
 /** Resolve a raw stored barangay string to its canonical centroid key. */
@@ -101,6 +153,7 @@ const DIFFERENT_BARANGAY_COLOR = "#f59e0b"; // amber warning
 export default function HouseholdMemberMap({
   members,
   headBarangay,
+  families,
 }: HouseholdMemberMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -110,6 +163,35 @@ export default function HouseholdMemberMap({
   const { resolvedTheme } = useTheme();
 
   useEffect(() => setMounted(true), []);
+
+  // When `families` is present and non-empty, iterate families instead of
+  // the flat props — one crown per family head, each family's members
+  // compared against THAT family's head barangay. Falls back to the flat
+  // `members`/`headBarangay` otherwise.
+  const useFamilies = families != null && families.length > 0;
+  const effectiveMembers = useMemo(
+    () => (useFamilies ? buildFamilyMarkers(families) : members),
+    [useFamilies, families, members],
+  );
+  const compareBarangayById = useMemo(() => {
+    const map = new Map<string, string>();
+    if (useFamilies) {
+      for (const family of families) {
+        const normalizedFamilyHead =
+          normalizeBarangay(family.head.barangay).value ?? family.head.barangay;
+        map.set(family.head.id, normalizedFamilyHead);
+        for (const member of family.members) {
+          map.set(member.id, normalizedFamilyHead);
+        }
+      }
+    } else {
+      const normalizedHead = normalizeBarangay(headBarangay).value ?? headBarangay;
+      for (const member of members) {
+        map.set(member.id, normalizedHead);
+      }
+    }
+    return map;
+  }, [useFamilies, families, members, headBarangay]);
 
   // ── Map init (once) ─────────────────────────────────────────────────────
   // Unlike BarangayDensityMap (a full-height route page), this card sits in a
@@ -213,17 +295,15 @@ export default function HouseholdMemberMap({
     for (const marker of markersRef.current) marker.remove();
     markersRef.current = [];
 
-    const normalizedHead =
-      normalizeBarangay(headBarangay).value ?? headBarangay;
-
-    for (const member of members) {
+    for (const member of effectiveMembers) {
       const position = resolveMemberPosition(member);
       if (position == null) continue;
       const { lat, lon } = position;
 
+      const normalizedCompare = compareBarangayById.get(member.id);
       const sameBarangay =
         (normalizeBarangay(member.barangay).value ?? member.barangay) ===
-        normalizedHead;
+        normalizedCompare;
 
       const el = document.createElement("div");
       el.style.display = "flex";
@@ -256,7 +336,7 @@ export default function HouseholdMemberMap({
         .addTo(map);
       markersRef.current.push(marker);
     }
-  }, [mapReady, members, headBarangay]);
+  }, [mapReady, effectiveMembers, compareBarangayById]);
 
   // ── Keyboard-accessible list alternative (WCAG 2.1.1 / 4.1.2) ───────────
   // The map's markers are raster/DOM pins that aren't keyboard-focusable and
@@ -264,7 +344,7 @@ export default function HouseholdMemberMap({
   // real, uniquely-labelled, focusable buttons alongside the map.
   const listPoints = useMemo(
     () =>
-      members
+      effectiveMembers
         .map((member) => {
           const position = resolveMemberPosition(member);
           if (position == null) return null;
@@ -274,7 +354,7 @@ export default function HouseholdMemberMap({
           (entry): entry is { member: HouseholdMemberMapMember; lat: number; lon: number } =>
             entry != null,
         ),
-    [members],
+    [effectiveMembers],
   );
 
   function flyToMember(lat: number, lon: number) {
