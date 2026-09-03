@@ -39,6 +39,10 @@ export const SEGMENT_FEATURE_MAP: Readonly<Record<string, FeatureKey>> = {
   reports: "reports",
   vessels: "vessels",
   violations: "violations",
+  // FIS-13 — QR verify reuses the `fisherfolk` feature: verifyByQr is
+  // gated matrixProcedure("fisherfolk", "view"), same as the fisherfolk
+  // list/detail pages.
+  verify: "fisherfolk",
 };
 
 /**

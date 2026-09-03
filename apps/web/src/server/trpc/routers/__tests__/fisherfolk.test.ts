@@ -16,6 +16,8 @@ import type { Session } from "next-auth";
 
 import { platformPrisma, prisma } from "@frms/db";
 
+import { buildQRPayload } from "@/lib/qr-code";
+
 import type { TRPCContext } from "../../context";
 import { fisherfolkRouter } from "../fisherfolk";
 import { createCallerFactory } from "../../trpc";
@@ -346,5 +348,90 @@ describe.skipIf(!hasDb)("cross-tenant isolation", () => {
 
     // Clean up
     await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+});
+
+describe.skipIf(!hasDb)("fisherfolk.verifyByQr — FIS-13", () => {
+  it("resolves a valid same-tenant QR payload", async () => {
+    const ff = await createTestFisherfolk(testTenantAId, {
+      fullName: "Verify Valid",
+    });
+    const raw = buildQRPayload({
+      id: ff.id,
+      regNo: ff.idNumber,
+      tenantId: testTenantAId,
+    });
+
+    const result = await caller(testTenantAId, "viewer").verifyByQr({ raw });
+
+    expect(result).toMatchObject({
+      valid: true,
+      fisherfolk: {
+        id: ff.id,
+        fullName: "Verify Valid",
+        status: "NEW",
+        barangay: "Barangay Test",
+      },
+    });
+
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("returns invalid for a QR payload minted by a different tenant", async () => {
+    const ff = await createTestFisherfolk(testTenantAId);
+    // Payload claims a different tenant than the caller's ctx.tenantId —
+    // must never resolve, even though the id is real and belongs to A.
+    const raw = buildQRPayload({
+      id: ff.id,
+      regNo: ff.idNumber,
+      tenantId: testTenantBId,
+    });
+
+    const result = await caller(testTenantAId, "viewer").verifyByQr({ raw });
+    expect(result).toEqual({ valid: false });
+
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("returns invalid when the caller's own tenant doesn't own the id", async () => {
+    const ff = await createTestFisherfolk(testTenantAId);
+    const raw = buildQRPayload({
+      id: ff.id,
+      regNo: ff.idNumber,
+      tenantId: testTenantAId,
+    });
+
+    // Tenant B caller scans a QR that is validly tenant-A-shaped, but B is
+    // not that tenant — the payload's embedded tenantId check rejects it
+    // before ever touching the DB.
+    const result = await caller(testTenantBId, "viewer").verifyByQr({ raw });
+    expect(result).toEqual({ valid: false });
+
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("resolves a bare fisherfolk id typed/pasted as a fallback", async () => {
+    const ff = await createTestFisherfolk(testTenantAId);
+
+    const result = await caller(testTenantAId, "viewer").verifyByQr({
+      raw: ff.id,
+    });
+    expect(result).toMatchObject({ valid: true, fisherfolk: { id: ff.id } });
+
+    await platformPrisma.fisherfolk.delete({ where: { id: ff.id } });
+  });
+
+  it("returns invalid for garbage input", async () => {
+    const result = await caller(testTenantAId, "viewer").verifyByQr({
+      raw: "not-json-not-a-cuid",
+    });
+    expect(result).toEqual({ valid: false });
+  });
+
+  it("returns invalid for a well-formed cuid that doesn't exist", async () => {
+    const result = await caller(testTenantAId, "viewer").verifyByQr({
+      raw: "clxxxxxxxxxxxxxxxxxxxxxxx",
+    });
+    expect(result).toEqual({ valid: false });
   });
 });

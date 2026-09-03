@@ -20,6 +20,7 @@ import {
   Home,
   ShieldCheck,
   Network,
+  QrCode,
 } from "lucide-react";
 import { hasPermission, type Actor, type FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -199,6 +200,14 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: CreditCard,
         href: "/id-generator",
         feature: "id_generator",
+      },
+      {
+        // FIS-13 — QR verify reuses the `fisherfolk` feature (see
+        // route-feature-map.ts); no dedicated FeatureKey needed.
+        label: "Verify ID",
+        icon: QrCode,
+        href: "/verify",
+        feature: "fisherfolk",
       },
     ],
   },

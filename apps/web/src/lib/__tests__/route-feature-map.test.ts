@@ -52,6 +52,7 @@ describe("canAccessRouteSegment — encoder preset: derived from DOMAIN_ROLE_PRE
         "kanban",
         "id-generator",
         "notifications",
+        "verify",
       ].sort(),
     );
   });
@@ -85,7 +86,7 @@ describe("canAccessRouteSegment — viewer preset: every mapped segment allowed 
 describe("canAccessRouteSegment — bantay_dagat preset: enforcement-scoped subset", () => {
   const actor: Actor = { role: UserRole.BANTAY_DAGAT };
 
-  const expectedVisible = ["violations", "fisherfolk", "vessels", "fish-catches"];
+  const expectedVisible = ["violations", "fisherfolk", "vessels", "fish-catches", "verify"];
   const expectedHidden = MAPPED_SEGMENTS.filter((s) => !expectedVisible.includes(s));
 
   it.each(expectedVisible)("allows /%s", (segment) => {
