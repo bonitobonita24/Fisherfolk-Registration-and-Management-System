@@ -10,7 +10,7 @@ import {
   fisherfolkUpdateSchema,
 } from "@frms/shared/schemas";
 
-import { buildQRPayload } from "@/lib/qr-code";
+import { buildQRPayload, parseQRPayload } from "@/lib/qr-code";
 
 import { omitUndefined } from "../../lib/prisma-input";
 import type { TRPCContext } from "../context";
@@ -670,5 +670,67 @@ export const fisherfolkRouter = createTRPCRouter({
         actorName: log.user?.name ?? log.user?.email ?? null,
         createdAt: log.createdAt,
       }));
+    }),
+
+  // FIS-13 — authed QR verify. Accepts either a raw scanned QR payload
+  // (JSON, see lib/qr-code.ts) or a bare fisherfolk cuid typed/pasted as a
+  // fallback. Tenant-scoped: a QR minted by another tenant, or a raw id
+  // belonging to another tenant, resolves to { valid: false } — never
+  // leaks cross-tenant existence. Returns a SAFE summary only (no address,
+  // birthdate, contact number, RSBSA, etc. — a strict subset of what the
+  // fisherfolk detail page already shows a Viewer).
+  verifyByQr: matrixProcedure("fisherfolk", "view")
+    .input(z.object({ raw: z.string().min(1).max(2000) }).strict())
+    .query(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+
+      const payload = parseQRPayload(input.raw);
+      let candidateId: string | undefined;
+
+      if (payload) {
+        // Embedded tenant must match the caller's tenant — a QR minted by
+        // a different tenant never resolves here, even if the id happens
+        // to collide (cuids are globally unique in practice, but this is
+        // belt-and-suspenders against a forged/edited payload).
+        if (payload.tenantId !== ctx.tenantId) {
+          return { valid: false as const };
+        }
+        candidateId = payload.id;
+      } else {
+        // Fallback: treat the raw input as a bare fisherfolk id (manual
+        // entry / a QR reader that returned just the id string).
+        const trimmed = input.raw.trim();
+        candidateId = z.string().cuid().safeParse(trimmed).success
+          ? trimmed
+          : undefined;
+      }
+
+      if (!candidateId) return { valid: false as const };
+
+      const record = await ctx.db.fisherfolk.findFirst({
+        where: { id: candidateId, tenantId: ctx.tenantId },
+        select: {
+          id: true,
+          fullName: true,
+          status: true,
+          registrationYear: true,
+          barangay: true,
+          photo: true,
+        },
+      });
+
+      if (!record) return { valid: false as const };
+
+      return {
+        valid: true as const,
+        fisherfolk: {
+          id: record.id,
+          fullName: record.fullName,
+          status: record.status,
+          registrationYear: record.registrationYear,
+          barangay: record.barangay,
+          photoKey: record.photo,
+        },
+      };
     }),
 });
