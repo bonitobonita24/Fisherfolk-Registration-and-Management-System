@@ -92,7 +92,7 @@ function initials(fullName: string): string {
 }
 
 /** 36px round photo thumbnail (enlargeable) with an initials fallback. */
-function MemberAvatar({
+export function MemberAvatar({
   photoKey,
   fullName,
 }: {
@@ -123,7 +123,7 @@ function MemberAvatar({
 }
 
 /** Comma-joined category name badges for a member row (FIS-20b). */
-function MemberCategories({
+export function MemberCategories({
   categoryIds,
   categoriesMap,
 }: {
