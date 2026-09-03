@@ -19,7 +19,20 @@ Approach = **add a `Family` model** (NOT merely relax `Household.headId @unique`
 - ⚠ **Known hardening follow-up:** `family.update.addMemberIds` can move an existing family's head into another family as a member, orphaning the old head pointer (`headId @unique` blocks head-of-two, not this). Phase-C/UI guard. Logged: LESSONS_GLOBAL `prisma.data-model.unique-head-fk-plus-member-fk-orphans-source-head`.
 - Report/dashboard test updates (`report.domain.test.ts`, `ayuda.test.ts`) belong to Phase D — untouched here; existing suites stay green.
 
-## Phase C — UI (households/) — 🟡 PARTIAL (branch `feat/fis8-phase-c-households-ui`, LOCAL/HARD HOLD)
+## Phase C — UI (households/) — ✅ DONE (branch `feat/fis8-phase-c-interactive-ui` → merged LOCAL main `3235f67`, HARD HOLD)
+
+> **2026-09-03 (owner "continue all pending in full auto") — interactive rewrite COMPLETE, built + verified LOCAL main.**
+> The design-bearing deferred work below was built to this plan's safe defaults via PM → 5 spec-executor tasks
+> (Task 1 per-family section component `98f6da9` · Task 5 multi-family wizard `624be6a` · Tasks 6+7 family-aware maps
+> `4b44b9f` · Tasks 2–4 detail wiring + Add-Family + delete copy `d5c01b2`). New files `family-section.tsx`,
+> `add-family-dialog.tsx`. Full bar per step + on merged main: tsc clean · 421 tests / 190 DB-skipped · build green.
+> Safe defaults taken: wizard repeats head+members steps per family (1–3) with household-details as step 1; Add-Family
+> = modal drawing from within-household members only; family-scoped change-head/add-member/remove via `family.update`;
+> maps draw one crown per family head with per-family fallback to flat head/members. All 45 households single-family
+> today → additive, zero regression. ⏳ Recommend an owner visual pass before prod promotion. Phase D (reporting/
+> dashboard per-family) still pending.
+
+### (historical) partial state — safe display slices (branch `feat/fis8-phase-c-households-ui`, superseded/shipped in v0.23.0)
 
 ### ✅ DONE (safe, unambiguous display slices — full-auto 2026-09-02, verified tsc/lint/595 tests/build)
 - ✅ **Slice 1 — list family count** (`0e0176d`): `household.list` `_count.families`; new "Families" column in `columns.tsx` (`households-list-client.tsx` needed no change — types flow from the router).

@@ -12,9 +12,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 > FIS-8 (multi-family: family model + tRPC + Phase-C safe slices + ayuda `familyId` grain) · FIS-9 (violation
 > count label) · FIS-11 (employment/income) · FIS-13 (authed QR verify) · FIS-15 (3-yr renewal-due reminder) ·
 > FIS-16 (mayor = existing viewer role, no code) · FIS-31 (landing shipped-feature callouts) · FIS-33 #1/#2/#3 (a11y).
-> **⏳ REMAINING (defaults documented, checkpointed for focused sessions):** 🔴 **FIS-6** audit-log view
-> (default tenant_admin+ — ⚠ RBAC-preset tightening) · 🔴 **FIS-7** user-management (default tenant_admin+, Rule 34 —
-> ⚠ mutation-heavy gov RBAC) · 🔴 **FIS-8 Phase C interactive UI** (build to `docs/FIS8_MULTI_FAMILY_PLAN.md`).
+> **✅ BUILT + VERIFIED on LOCAL main (2026-09-03 later, "continue all pending in full auto") — HARD HOLD, prod awaits owner:**
+> 🟡 **FIS-6** audit-log view (`d6f98b8`) — UI-only, existing adminProcedure, NO RBAC change (filter enum 11/14, minor follow-up) ·
+> 🟡 **FIS-7** user-management (`1c908de`) — reused existing adminProcedure + new setStatus, Rule-34 held, ZERO RBAC-policy change
+> (OPEN [WHAT]: show nav link to tenant_admin?) · 🟡 **FIS-8 Phase C** interactive multi-family UI (`3235f67`) — wizard 1–3
+> families + per-family detail + Add-Family + family-aware maps (design-bearing, recommend visual review before prod).
+> Full bar: tsc clean · 421 tests · build green. **⏳ DEPLOY = owner go/no-go** (see PENDING_DECISIONS.md).
 > **⏸ HELD:** FIS-10 (ordinance-gated) · FIS-14 (needs owner clarification: RSBSA vs "RSVS").
 > (NOTE: FIS-17..30 lines below shipped earlier in v0.22.0 — pre-existing doc drift, not re-tracked here.)
 

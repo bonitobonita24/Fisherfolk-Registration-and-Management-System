@@ -1,6 +1,49 @@
 # FRMS — Project State
 
-## Current State (2026-09-03, LATEST — owner "yes continue all pending") — 🚀 8 FIS items SHIPPED to prod across v0.23.0 / v0.24.0 / v0.25.0; 3 XL/sensitive features checkpointed
+## Current State (2026-09-03, LATEST — owner "continue all pending in full auto") — ✅ FIS-6 + FIS-7 + FIS-8 Phase C BUILT + verified on LOCAL main (HARD HOLD); prod promotion awaits owner review
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_fis678c_built_local_0903.md` (+ this block).
+
+> **Owner (awake) "please continue doing all pending tasks in full auto mode."** Built the remaining 3 pending
+> features to their documented defaults via PM → spec-executor workers, each on the FIS-8 shared branch or its own
+> branch, full Rule-32 bar per step, merged to LOCAL main. **HELD per owner:** FIS-10 (ordinance-gated), FIS-14
+> (RSBSA/RSVS clarification). **NOTHING pushed/deployed — HARD HOLD** (prod still v0.25.0, healthy).
+>
+> **✅ BUILT + VERIFIED, LOCAL main (9 commits ahead of origin `fb8ce31`):**
+> - **FIS-6 audit-log view** (`merge d6f98b8`) — UI-only; the `auditLog` tRPC router (`list`+`getById`, `adminProcedure`
+>   = tenant_admin+) already existed → NO RBAC change. New `audit-log-list-client.tsx` + `columns.tsx` (action/entity/
+>   date filters, before/after detail dialog). ⚠ minor follow-up: router Zod filter accepts 11/14 AuditAction values
+>   (missing PRINT/MEDIA_DOWNLOAD/EXPIRE) — display covers all 14; extend the enum so admins can filter EXPIRE.
+> - **FIS-7 user-management** (`merge 1c908de`) — reused existing `userRouter` (`list`/`create`/`updateRole`/`deactivate`,
+>   all `adminProcedure` = tenant_admin+, deliberate per `user.ts:317` comment "not superAdminProcedure"); added a
+>   `setStatus` mutation (activate/deactivate, self-deactivation guard). New `users-client.tsx` + `create-user-dialog.tsx`
+>   + `change-role-dialog.tsx`; page guarded tenant_admin+ (ShieldAlert in-page notice). Rule-34 held structurally
+>   (user_management is NOT a FeatureKey; role-gated only; route-feature-map untouched). **ZERO RBAC-policy change.**
+>   ⚠ OPEN [WHAT] (nav visibility): tenant_admin can USE it by URL (backend allows) but the sidebar link + a pinned
+>   "by design" test hide it from tenant_admin — owner decides: show it in nav to tenant_admin, or keep superadmin/
+>   manager-only. I did NOT flip that RBAC test.
+> - **FIS-8 Phase C multi-family interactive UI** (`merge 3235f67`) — the design-bearing rewrite, built to
+>   `docs/FIS8_MULTI_FAMILY_PLAN.md`. Wizard 1–3 families (dynamic per-family head+members steps, global dedupe,
+>   household-details promoted to step 1); detail page renders one `FamilySection` per family (family-scoped
+>   change-head/add-member/remove via `family.update`) + "Add Family" modal (`family.create`, within-household pool)
+>   + multi-family delete-warning copy; household-member-map + municipal-network-map iterate families (one crown per
+>   family head). New: `family-section.tsx`, `add-family-dialog.tsx`. All 45 households single-family today → zero
+>   regression; multi-family UX is additive.
+>
+> **Verify (full bar, on merged main):** tsc clean · **421 passed / 190 DB-skipped (611)** · `next build` exit 0 (all
+> 51 routes). Branches retained: `feat/fis6-audit-log-view`, `feat/fis7-user-management`, `feat/fis8-phase-c-interactive-ui`.
+>
+> **⏳ DEPLOY DECISION (owner) — recommended: quick visual pass on FIS-8C multi-family screens before prod.** The 3
+> features are buildable-complete + green; STATE checkpointed them as "owner eyes before prod" (RBAC surfaces +
+> design-bearing UI). On owner "ship it": cut a consolidated release, push, `push-to-prod.sh`, dev rebuild (Rule 39).
+> Dev NOT yet rebuilt off this main (no runtime QA done this session — a `dev-freshness` rebuild + browse of the
+> multi-family wizard/detail is the natural next un-gated step).
+
+---
+
+## Current State (2026-09-03 — owner "yes continue all pending") — 🚀 8 FIS items SHIPPED to prod across v0.23.0 / v0.24.0 / v0.25.0; 3 XL/sensitive features checkpointed
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

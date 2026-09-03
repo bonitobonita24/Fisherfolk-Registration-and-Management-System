@@ -23,16 +23,27 @@ Owner authorized (this session): **(1) merge + push + promote to prod** the alre
 - **FIS-16 mayor access** — CLOSED, no code: existing `viewer` role is already read-only across every feature (assign it to the mayor).
 All verified: 611 tests green, lint-gated builds green, prod endpoints 200, dev rebuilt off main (Rule 39) each ship.
 
-**⏳ REMAINING — 3 XL/sensitive features, DEFAULTS DOCUMENTED, checkpointed for focused sessions (owner: continue if desired):**
-- **FIS-6 audit-log view** → DEFAULT: read-only audit-trail table gated to **tenant_admin+**. ⚠ SENSITIVE: the current
-  `viewer` preset grants view on ALL features, so gating audit-log to admin+ is a deliberate RBAC-preset TIGHTENING
-  (changes who can see audit logs) — worth owner eyes before prod. Read-only otherwise; uses existing `auditLog` table.
-- **FIS-7 user-management** → DEFAULT: users table + role assign/invite/deactivate, **tenant_admin+** (Rule 34 — never
-  Billing/User-Mgmt below tenant_admin). ⚠ SENSITIVE: mutation-heavy RBAC surface (invite/deactivate/role-change) on a
-  gov app — highest-risk of the remaining; owner review recommended before prod. Reuse `/tm` users-client + RBAC.
-- **FIS-8 Phase C interactive UI** → build to `docs/FIS8_MULTI_FAMILY_PLAN.md` (wizard multi-family flow, per-family
-  detail + Add-Family, map per-family). Design-bearing; multi-family data model + ayuda grain already shipped, so this
-  is the creation/edit UX layer. No prod multi-family data exists yet, so nothing user-visible regresses.
+**✅ BUILT + VERIFIED on LOCAL main (2026-09-03 later, owner "continue all pending in full auto") — HARD HOLD, prod promotion awaits owner:**
+- **FIS-6 audit-log view** — BUILT (`merge d6f98b8`). UI-only; the `auditLog` router (`list`+`getById`) already existed
+  and is already `adminProcedure` (tenant_admin+) → **NO RBAC change** (the earlier "tightening" concern was moot). New
+  list client + filters + before/after detail dialog. ⚠ minor follow-up (non-blocking): the router's Zod filter accepts
+  11/14 AuditAction values (missing PRINT/MEDIA_DOWNLOAD/EXPIRE); display already covers all 14 — extend the enum so
+  admins can filter EXPIRE. [HOW], do anytime.
+- **FIS-7 user-management** — BUILT (`merge 1c908de`). Reused existing `userRouter` (all `adminProcedure`, deliberately
+  tenant_admin+ per `user.ts:317`); added `setStatus` (activate/deactivate + self-deactivation guard). Page guarded
+  tenant_admin+. Rule-34 held structurally (user_management not a FeatureKey). **ZERO RBAC-policy change.**
+  - [ ] **OPEN [WHAT] — nav visibility:** tenant_admin can USE User Management by URL (backend allows) but the sidebar
+    link + a pinned "by design" test (`sidebar-visibility.test.ts`) currently hide it from tenant_admin (superadmin/
+    manager only). Decide: (a) show the nav link to tenant_admin (loosen `nav-items.ts` minRoles + update the pinned
+    test), or (b) keep the link superadmin/manager-only. I did NOT flip the RBAC test either way. Not blocking use.
+- **FIS-8 Phase C interactive UI** — BUILT (`merge 3235f67`) to `docs/FIS8_MULTI_FAMILY_PLAN.md`. Wizard 1–3 families,
+  per-family detail sections + Add-Family modal, family-aware maps. Design-bearing — built in full-auto without a visual
+  pass; all 45 households single-family today (zero regression). ⚠ recommend an owner visual review before prod.
+
+- [ ] **DEPLOY [WHAT] — promote FIS-6/7/8C to prod?** All 3 buildable-complete + green on local main (9 ahead of origin).
+  Held because STATE checkpointed them "owner eyes before prod" (RBAC surfaces + design-bearing UI) and the wake context
+  set HARD HOLD. On "ship it": consolidated release + push + `push-to-prod.sh` + dev rebuild (Rule 39). Recommend a dev
+  rebuild + Playwright browse of the multi-family wizard/detail first (no runtime QA done this session).
 
 **⏸ HELD (owner instruction):** FIS-10 (aquaculture — ordinance-gated, Jan amendments) · FIS-14 (RSBSA vs "RSVS" — needs owner clarification).
 
