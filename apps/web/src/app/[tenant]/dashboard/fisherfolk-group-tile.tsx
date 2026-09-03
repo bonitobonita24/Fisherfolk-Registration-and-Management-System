@@ -96,9 +96,13 @@ export function FisherfolkGroupTile({
   year,
   registrationType,
 }: FisherfolkGroupTileProps) {
-  const headline = activeFisherfolk + newFisherfolk + renewedFisherfolk;
-  // Display-only: all this-year registrations (active + new) are shown as NEW.
-  const displayedNewFisherfolk = activeFisherfolk + newFisherfolk;
+  // Total valid registry = count(status in NEW/RENEWED), which `activeFisherfolk`
+  // already is. It ALREADY includes this-year's NEW records, so it must NOT be
+  // summed with newFisherfolk/renewedFisherfolk (that double-counted every
+  // this-year registration — e.g. 3181 valid shown as 6362). Matches Demographics.
+  const headline = activeFisherfolk;
+  // NEW · RENEWED breakdown = this registration year's new / renewed counts.
+  const displayedNewFisherfolk = newFisherfolk;
 
   const { data: categoryBreakdown, isLoading: catLoading } =
     trpc.dashboard.getFisherfolkCategoryBreakdown.useQuery({
