@@ -148,8 +148,12 @@ async function householdCharts(
     where,
     select: {
       barangay: true,
-      head: { select: { sex: true } },
-      _count: { select: { members: true } },
+      families: {
+        select: {
+          head: { select: { sex: true } },
+          _count: { select: { members: true } },
+        },
+      },
     },
   });
 
@@ -160,8 +164,10 @@ async function householdCharts(
     ["6+", 0],
   ]);
   for (const r of rows) {
-    // _count.members counts only additional household members (head is separate).
-    const size = r._count.members + 1;
+    // FIS-8 Phase D: size = sum across all families in the household of
+    // (family._count.members + 1 head). Single-family parity: with exactly 1
+    // family per household this equals the old `_count.members + 1`.
+    const size = r.families.reduce((s, f) => s + f._count.members + 1, 0);
     const bucket = size <= 1 ? "1" : size <= 3 ? "2-3" : size <= 5 ? "4-5" : "6+";
     sizeBuckets.set(bucket, (sizeBuckets.get(bucket) ?? 0) + 1);
   }
@@ -176,7 +182,10 @@ async function householdCharts(
     {
       key: "headBySex",
       title: "Household Head by Sex",
-      data: tally(rows.map((r) => r.head.sex ?? undefined)),
+      // FIS-8 Phase D: tallied over ALL family heads (was the single household
+      // head). Single-family parity: with exactly 1 family per household this
+      // is byte-identical to the old rows.map((r) => r.head.sex) tally.
+      data: tally(rows.flatMap((r) => r.families.map((f) => f.head?.sex ?? undefined))),
     },
   ];
 }
