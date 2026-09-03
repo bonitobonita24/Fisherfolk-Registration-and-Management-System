@@ -13,11 +13,44 @@ import {
 import { buildQRPayload } from "@/lib/qr-code";
 
 import { omitUndefined } from "../../lib/prisma-input";
+import type { TRPCContext } from "../context";
 import {
   createTRPCRouter,
   encoderProcedure,
   matrixProcedure,
 } from "../trpc";
+
+// FIS-15: 3-year renewal cycle, reminder-only. A fisherfolk's "anchor year"
+// is the latest of its registrationYear and the max renewalYear among its
+// renewals (falls back to registrationYear when it has never renewed). It
+// is "due for renewal" once anchorYear + RENEWAL_CYCLE_YEARS has reached the
+// current year, and only while still NEW/RENEWED (EXPIRED has already
+// lapsed; ARCHIVED is out of scope). This never mutates status — display
+// only. Tenant-scoped raw query: the anchor-year computation needs
+// GREATEST()/MAX() across a LEFT JOIN, which Prisma's query builder can't
+// express directly.
+const RENEWAL_CYCLE_YEARS = 3;
+
+async function getRenewalDueIds(
+  db: TRPCContext["db"],
+  tenantId: string,
+  currentYear: number,
+): Promise<string[]> {
+  const rows = await db.$queryRaw<Array<{ id: string }>>`
+    SELECT sub.id
+    FROM (
+      SELECT f.id AS id,
+             GREATEST(f.registration_year, COALESCE(MAX(r.renewal_year), 0)) AS anchor_year
+      FROM fisherfolk f
+      LEFT JOIN registration_renewals r ON r.fisherfolk_id = f.id
+      WHERE f.tenant_id = ${tenantId}
+        AND f.status IN ('NEW', 'RENEWED')
+      GROUP BY f.id, f.registration_year
+    ) sub
+    WHERE sub.anchor_year + ${RENEWAL_CYCLE_YEARS} <= ${currentYear}
+  `;
+  return rows.map((r) => r.id);
+}
 
 export const fisherfolkRouter = createTRPCRouter({
   // PD-005 Chunk 3 pilot: list/getById/getActivity/create/update/archive run
@@ -38,13 +71,22 @@ export const fisherfolkRouter = createTRPCRouter({
             .optional(),
           barangay: z.string().optional(),
           missing: z.enum(["photo", "signature"]).optional(),
+          // FIS-15: reminder-only 3-year renewal-cycle filter. When true,
+          // restrict to fisherfolk whose renewal anchor year is due (see
+          // getRenewalDueIds below) — never mutates status.
+          dueForRenewal: z.boolean().optional(),
         })
         .strict(),
     )
     .query(async ({ ctx, input }) => {
       if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
-      const { page, limit, search, status, barangay, missing } = input;
+      const { page, limit, search, status, barangay, missing, dueForRenewal } = input;
       const skip = (page - 1) * limit;
+
+      const dueIds =
+        dueForRenewal === true
+          ? await getRenewalDueIds(ctx.db, ctx.tenantId, new Date().getFullYear())
+          : undefined;
 
       const where = {
         tenantId: ctx.tenantId,
@@ -52,6 +94,7 @@ export const fisherfolkRouter = createTRPCRouter({
         ...(barangay && { barangay }),
         ...(missing === "photo" && { photo: null }),
         ...(missing === "signature" && { signature: null }),
+        ...(dueIds !== undefined && { id: { in: dueIds } }),
         ...(search && {
           OR: [
             { fullName: { contains: search, mode: "insensitive" as const } },
@@ -84,6 +127,15 @@ export const fisherfolkRouter = createTRPCRouter({
 
       return { items, total, page, limit };
     }),
+
+  // FIS-15: reminder-only. Count of fisherfolk currently due for renewal
+  // under the 3-year cycle — never changes status, no cron, no
+  // enforcement. See getRenewalDueIds for the anchor-year rule.
+  renewalDue: matrixProcedure("fisherfolk", "view").query(async ({ ctx }) => {
+    if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+    const ids = await getRenewalDueIds(ctx.db, ctx.tenantId, new Date().getFullYear());
+    return { count: ids.length };
+  }),
 
   getById: matrixProcedure("fisherfolk", "view")
     .input(z.object({ id: z.string().cuid() }).strict())
