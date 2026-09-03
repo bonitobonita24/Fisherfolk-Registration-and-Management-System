@@ -447,6 +447,8 @@ async function buildReport(
         : {}),
     };
 
+    // TODO(FIS-8 Phase D): per-family rows pending owner decision — kept one
+    // row per household (safest default); familyCount is additive.
     const households = await ctx.db.household.findMany({
       where: householdWhere,
       select: {
@@ -454,7 +456,7 @@ async function buildReport(
         barangay: true,
         address: true,
         head: { select: { fullName: true, categoryIds: true } },
-        _count: { select: { members: true } },
+        _count: { select: { members: true, families: true } },
       },
       orderBy: { householdNumber: "asc" },
     });
@@ -466,6 +468,7 @@ async function buildReport(
       { key: "headName", label: "Head of Household" },
       { key: "headCategory", label: "Head's Category" },
       { key: "memberCount", label: "Member Count" },
+      { key: "familyCount", label: "Families" },
     ];
 
     const rows: Row[] = households.map((h) => ({
@@ -477,6 +480,7 @@ async function buildReport(
         .map((id) => categoryMap.get(id) ?? id)
         .join(", "),
       memberCount: h._count.members,
+      familyCount: h._count.families,
     }));
 
     return { title, columns: cols, rows, generatedAt, count: rows.length };

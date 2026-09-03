@@ -661,9 +661,13 @@ export const dashboardRouter = createTRPCRouter({
       }),
     ]);
 
+    // FIS-8 Phase D: dimension is "family heads by category" — a household may
+    // have multiple families/heads, so this counts family.head, not household.head.
+    // Single-family parity: with exactly 1 family per household this is
+    // byte-identical to the old household-head count.
     const categoryCounts = await Promise.all(
       cats.map((c: { id: string; name: string }) =>
-        ctx.db.household.count({
+        ctx.db.family.count({
           where: { tenantId, head: { categoryIds: { has: c.id } } },
         }),
       ),

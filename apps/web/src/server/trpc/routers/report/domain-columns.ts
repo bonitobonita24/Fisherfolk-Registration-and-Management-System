@@ -95,12 +95,14 @@ function mapFisherfolkRow(f: FisherfolkRow): Row {
 // household
 // ---------------------------------------------------------------------------
 
+// TODO(FIS-8 Phase D): per-family rows pending owner decision — kept one row
+// per household (safest default); familyCount is additive.
 const HOUSEHOLD_SELECT = {
   householdNumber: true,
   barangay: true,
   address: true,
   head: { select: { fullName: true } },
-  _count: { select: { members: true } },
+  _count: { select: { members: true, families: true } },
 } satisfies Prisma.HouseholdSelect;
 
 type HouseholdRow = Prisma.HouseholdGetPayload<{ select: typeof HOUSEHOLD_SELECT }>;
@@ -111,6 +113,7 @@ const HOUSEHOLD_COLUMNS: Column[] = [
   { key: "address", label: "Address" },
   { key: "headName", label: "Head of Household" },
   { key: "memberCount", label: "Member Count" },
+  { key: "familyCount", label: "Families" },
 ];
 
 function mapHouseholdRow(h: HouseholdRow): Row {
@@ -120,6 +123,7 @@ function mapHouseholdRow(h: HouseholdRow): Row {
     address: h.address,
     headName: h.head.fullName,
     memberCount: h._count.members,
+    familyCount: h._count.families,
   };
 }
 
