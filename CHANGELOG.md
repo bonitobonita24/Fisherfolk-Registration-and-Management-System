@@ -4,6 +4,13 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.25.0 — 2026-09-03
+
+### [FEATURE]
+- authed QR verify page + tenant-scoped resolver (`08b772b`)
+- 3-year renewal-due reminder (dashboard card + count, reminder-only) (`23dd654`)
+
+
 ## v0.24.0 — 2026-09-03
 
 ### [FEATURE]
