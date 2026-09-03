@@ -268,6 +268,69 @@ describe.skipIf(!hasDb)("fisherfolk.getActivity", () => {
   });
 });
 
+describe.skipIf(!hasDb)("fisherfolk.renewalDue (FIS-15, reminder-only)", () => {
+  it("counts only NEW/RENEWED fisherfolk whose anchor year is 3+ years old, and the list filter matches the same set", async () => {
+    const currentYear = new Date().getFullYear();
+
+    // Due: NEW, registered 4 years ago, never renewed.
+    const due = await createTestFisherfolk(testTenantAId, {
+      status: "NEW",
+      registrationYear: currentYear - 4,
+    });
+    // Not due: NEW, registered this year.
+    const notDue = await createTestFisherfolk(testTenantAId, {
+      status: "NEW",
+      registrationYear: currentYear,
+    });
+    // Not due: RENEWED last year via a RegistrationRenewal row (anchor year
+    // moves forward even though registrationYear is stale).
+    const renewedRecently = await createTestFisherfolk(testTenantAId, {
+      status: "RENEWED",
+      registrationYear: currentYear - 5,
+    });
+    await platformPrisma.registrationRenewal.create({
+      data: {
+        tenantId: testTenantAId,
+        fisherfolkId: renewedRecently.id,
+        renewalYear: currentYear - 1,
+        renewedById: testUserId,
+      },
+    });
+    // Excluded despite an overdue anchor year: already EXPIRED.
+    const expired = await createTestFisherfolk(testTenantAId, {
+      status: "EXPIRED",
+      registrationYear: currentYear - 6,
+    });
+
+    const before = await caller(testTenantAId, "viewer").renewalDue();
+
+    const list = await caller(testTenantAId, "viewer").list({
+      page: 1,
+      limit: 200,
+      dueForRenewal: true,
+    });
+    const listIds = list.items.map((i) => i.id);
+
+    expect(listIds).toContain(due.id);
+    expect(listIds).not.toContain(notDue.id);
+    expect(listIds).not.toContain(renewedRecently.id);
+    expect(listIds).not.toContain(expired.id);
+    expect(before.count).toBe(listIds.length);
+
+    // Cross-tenant: tenant B sees none of tenant A's due fisherfolk.
+    const crossTenant = await caller(testTenantBId, "viewer").renewalDue();
+    expect(crossTenant.count).toBe(0);
+
+    // Clean up
+    await platformPrisma.registrationRenewal.deleteMany({
+      where: { fisherfolkId: renewedRecently.id },
+    });
+    await platformPrisma.fisherfolk.deleteMany({
+      where: { id: { in: [due.id, notDue.id, renewedRecently.id, expired.id] } },
+    });
+  });
+});
+
 describe.skipIf(!hasDb)("cross-tenant isolation", () => {
   it("renew and markIdReleased deny access to fisherfolk from another tenant", async () => {
     const ff = await createTestFisherfolk(testTenantAId);

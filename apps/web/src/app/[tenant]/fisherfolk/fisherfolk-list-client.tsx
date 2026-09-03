@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { keepPreviousData } from "@tanstack/react-query";
-import { Plus, ImageOff, X, Users } from "lucide-react";
+import { Plus, ImageOff, CalendarClock, X, Users } from "lucide-react";
 
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
@@ -33,16 +33,17 @@ export function FisherfolkListClient() {
   const missingParam = searchParams.get("missing");
   const missing: "photo" | "signature" | undefined =
     missingParam === "photo" || missingParam === "signature" ? missingParam : undefined;
+  const dueForRenewal = searchParams.get("dueForRenewal") === "true";
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState<number>(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
 
-  // Reset to page 1 when the missing filter changes via URL
+  // Reset to page 1 when the missing/dueForRenewal filter changes via URL
   useEffect(() => {
     setPage(1);
-  }, [missing]);
+  }, [missing, dueForRenewal]);
 
   const { data } = trpc.fisherfolk.list.useQuery(
     {
@@ -51,6 +52,7 @@ export function FisherfolkListClient() {
       search: search || undefined,
       status: status as (typeof STATUSES)[number] | undefined,
       ...(missing !== undefined ? { missing } : {}),
+      ...(dueForRenewal ? { dueForRenewal: true } : {}),
     },
     { placeholderData: keepPreviousData },
   );
@@ -112,6 +114,25 @@ export function FisherfolkListClient() {
           <span className="flex-1">
             Showing only records missing a{" "}
             <span className="font-medium text-foreground">{missing}</span>
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2"
+            onClick={() => router.replace(pathname)}
+          >
+            <X className="h-3 w-3" />
+            <span className="sr-only">Clear filter</span>
+          </Button>
+        </div>
+      )}
+
+      {dueForRenewal && (
+        <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+          <CalendarClock className="h-4 w-4 shrink-0" />
+          <span className="flex-1">
+            Showing only records{" "}
+            <span className="font-medium text-foreground">due for renewal</span> (3-year cycle) — reminder only, no status is changed automatically.
           </span>
           <Button
             variant="ghost"

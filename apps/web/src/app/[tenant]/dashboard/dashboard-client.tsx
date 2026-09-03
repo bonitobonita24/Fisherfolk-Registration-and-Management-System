@@ -37,7 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageOff, FileX2 } from "lucide-react";
+import { ImageOff, FileX2, CalendarClock } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { useTenantHref } from "@/lib/use-tenant-href";
 import { StatCard } from "@/components/shared";
@@ -171,6 +171,8 @@ function DashboardClientInner() {
     trpc.dashboard.getViolationBreakdown.useQuery();
   const { data: householdStats, isLoading: householdLoading } =
     trpc.dashboard.getHouseholdStats.useQuery();
+  const { data: renewalDue, isLoading: renewalDueLoading } =
+    trpc.fisherfolk.renewalDue.useQuery();
 
   // ── Derived data ────────────────────────────────────────────────────────────
   const top15Barangay = barangayData?.slice(0, 15) ?? [];
@@ -791,6 +793,20 @@ function DashboardClientInner() {
             />
           </Link>
         </div>
+      </section>
+
+      {/* ── FIS-15: Renewal reminder (3-year cycle, reminder-only) ────────── */}
+      <section aria-label="Renewal reminders">
+        <h2 className="mb-3 text-sm font-semibold text-foreground">Renewal Reminders</h2>
+        <Link href={tenantHref("/fisherfolk?dueForRenewal=true")} className="block max-w-sm">
+          <StatCard
+            icon={<CalendarClock className="size-5" />}
+            value={(renewalDue?.count ?? 0).toLocaleString()}
+            title="Due for renewal (3-year cycle)"
+            loading={renewalDueLoading}
+            className="cursor-pointer transition-colors hover:border-primary/50"
+          />
+        </Link>
       </section>
     </div>
   );
