@@ -19,10 +19,13 @@ export const auditLogRouter = createTRPCRouter({
               "APPROVE",
               "REJECT",
               "RENEW",
+              "PRINT",
               "VIOLATION_FILED",
               "VIOLATION_LIFTED",
               "LOGIN",
               "EXPORT",
+              "MEDIA_DOWNLOAD",
+              "EXPIRE",
             ])
             .optional(),
           entityType: z.string().optional(),
