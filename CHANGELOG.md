@@ -4,6 +4,24 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.26.0 — 2026-09-03
+
+### [FEATURE]
+- FIS-8 Phase C Tasks 2-4 — detail per-family sections + Add Family + multi-family delete copy (`d5c01b2`)
+- FIS-8 Phase C Tasks 6+7 — maps iterate families (crown per family head) (`4b44b9f`)
+- FIS-8 Phase C Task 5 — multi-family create wizard (1-3 families) (`624be6a`)
+- FIS-8 Phase C Task 1 — per-family section + family-scoped dialogs component (`98f6da9`)
+- FIS-7 tenant user management (list + create + role change + status), tenant_admin+, Rule-34 role-gated (`3d2c3d8`)
+- FIS-6 audit-log view UI (list + filters + before/after detail) (`60bd04d`)
+
+### [DOCS]
+- FIS-6/7/8C built + verified on local main (HARD HOLD); prod promotion + nav-visibility [WHAT] surfaced (`15ada3d`)
+- continue-all-pending — 8 FIS items shipped (v0.23.0-v0.25.0); FIS-6/7/8-UI checkpointed (`fb8ce31`)
+
+### [CHORE]
+- post-build cleanup — audit-log filter all 14 actions (FIS-6), user-management page guard superadmin/manager-only (FIS-7 owner decision) (`ed91b29`)
+
+
 ## v0.25.0 — 2026-09-03
 
 ### [FEATURE]
