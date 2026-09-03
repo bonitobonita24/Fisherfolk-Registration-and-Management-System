@@ -263,6 +263,57 @@ export const userRouter = createTRPCRouter({
       return { success: true };
     }),
 
+  // setStatus — FIS-7 tenant user-management: symmetric activate/deactivate
+  // endpoint (mirrors the platform-side tenantUser.setStatus idiom). Kept
+  // alongside the existing `deactivate` mutation (unchanged, still used by
+  // any other consumer) rather than replacing it.
+  setStatus: adminProcedure
+    .input(
+      z
+        .object({
+          id: z.string().cuid(),
+          status: z.enum(["ACTIVE", "DEACTIVATED"]),
+        })
+        .strict(),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.tenantId) throw new TRPCError({ code: "FORBIDDEN" });
+      if (input.status === "DEACTIVATED" && input.id === ctx.userId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid input.",
+        });
+      }
+
+      const existing = await ctx.db.user.findFirst({
+        where: { id: input.id, tenantId: ctx.tenantId },
+      });
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const updated = await ctx.db.user.update({
+        where: { id: input.id },
+        data: {
+          status: input.status,
+          securityVersion: { increment: 1 },
+        },
+        select: { id: true, status: true },
+      });
+
+      await ctx.db.auditLog.create({
+        data: {
+          tenantId: ctx.tenantId,
+          userId: ctx.userId!,
+          action: "UPDATE",
+          entityType: "User",
+          entityId: input.id,
+          before: { status: existing.status } as Record<string, unknown>,
+          after: { status: updated.status } as Record<string, unknown>,
+        },
+      });
+
+      return updated;
+    }),
+
   // adminProcedure (not superAdminProcedure): after the tenant-manager role split
   // (2026-07-09) the LGU top account is role `admin`, and it must be able to reset
   // its own staff's passwords. Safe: hard-scoped to ctx.tenantId below, and
