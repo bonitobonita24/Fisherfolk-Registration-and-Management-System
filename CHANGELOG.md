@@ -4,6 +4,22 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.27.0 — 2026-09-04
+
+### [FEATURE]
+- FIS-8 Phase D — family-aware household stats/charts/columns (single-family parity) (`224a085`)
+
+### [FIXED]
+- app-shell leaked a full-page window scrollbar (scroll-into-blank) (`50cf075`)
+- FIS — Fisherfolk tile double-counted valid registry (6362→3181) (`74bee62`)
+
+### [DOCS]
+- FIS-6/7/8C shipped to prod as v0.26.0 (QA'd + verified live); FIS-14=RSBSA, FIS-7 superadmin-only per owner (`b41a518`)
+
+### [TEST]
+- FIS-8 Phase D — household chart/stats parity + multi-family tests; seed multi-family fixtures (`a1fb80e`)
+
+
 ## v0.26.0 — 2026-09-03
 
 ### [FEATURE]
