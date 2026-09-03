@@ -5,7 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-type BadgeColor = "green" | "red" | "yellow" | "blue" | "gray" | "purple" | "orange";
+export type BadgeColor = "green" | "red" | "yellow" | "blue" | "gray" | "purple" | "orange";
 
 // NexaCRM tinted-pair pattern (port map §3.5): light `bg-{hue}-50 text-{hue}-700`
 // / dark `bg-{hue}-950 text-{hue}-400`. Light text uses -700 (not the template's
