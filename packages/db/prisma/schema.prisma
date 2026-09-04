@@ -224,6 +224,8 @@ enum FeatureKey {
   import
   audit_log
   data_management
+  notes
+  projects
 }
 
 // Discriminates a CustomRole as tenant-scoped (existing custom-role system,
@@ -305,6 +307,8 @@ model Tenant {
   fishCatchSpecies     FishCatchSpecies[]
   customRoles          CustomRole[]
   mediaObjects         MediaObject[]
+  notes                Note[]
+  noteEntityRefs       NoteEntityRef[]
 
   @@map("tenants")
 }
@@ -355,6 +359,7 @@ model User {
   fishCatchesRecorded   FishCatch[]           @relation("FishCatchRecordedBy")
   fishCatchesCreated    FishCatch[]           @relation("FishCatchCreatedBy")
   fishCatchesUpdated    FishCatch[]           @relation("FishCatchUpdatedBy")
+  authoredNotes         Note[]                @relation("NoteAuthor")
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -1093,4 +1098,87 @@ model MediaObject {
   @@index([tenantId])
   @@index([tenantId, backend])
   @@map("media_objects")
+}
+
+// ─── Field Diary / Notes (FIS-36) ───────────────────────────────────────────
+// Free-form, geo-stamped field notes taken by staff (TipTap/ProseMirror rich
+// text), optionally linked to one or more domain entities and carrying photo
+// attachments backed by the Telegram media ledger (see MediaObject above).
+// Phase 1+2 data layer only — deliberately omits Project (deferred phase).
+
+enum NoteVisibility {
+  private
+  shared
+}
+
+enum NoteRefType {
+  fisherfolk
+  vessel
+  violation
+  ayuda_program
+  ayuda_beneficiary
+  household
+  family
+  kanban_task
+  fish_catch
+}
+
+model Note {
+  id            String         @id @default(cuid())
+  tenantId      String         @map("tenant_id")
+  authorId      String         @map("author_id")
+  title         String?
+  body          Json
+  bodyText      String         @map("body_text")
+  capturedAt    DateTime       @map("captured_at")
+  latitude      Float          @map("latitude")
+  longitude     Float          @map("longitude")
+  locationLabel String         @map("location_label")
+  visibility    NoteVisibility @default(private)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id])
+  author     User            @relation("NoteAuthor", fields: [authorId], references: [id])
+  entityRefs NoteEntityRef[]
+  media      NoteMedia[]
+
+  @@index([tenantId])
+  @@index([tenantId, authorId])
+  @@index([tenantId, capturedAt])
+  @@map("notes")
+}
+
+model NoteMedia {
+  id               String   @id @default(cuid())
+  noteId           String   @map("note_id")
+  storageKey       String   @map("storage_key")
+  originalFilename String   @map("original_filename")
+  mimeType         String   @map("mime_type")
+  fileSize         Int      @map("file_size")
+  blockId          String?  @map("block_id")
+  uploadedAt       DateTime @default(now()) @map("uploaded_at")
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([noteId])
+  @@map("note_media")
+}
+
+model NoteEntityRef {
+  id            String      @id @default(cuid())
+  tenantId      String      @map("tenant_id")
+  noteId        String      @map("note_id")
+  refType       NoteRefType @map("ref_type")
+  entityId      String      @map("entity_id")
+  labelSnapshot String      @map("label_snapshot")
+  blockId       String?     @map("block_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([noteId])
+  @@index([tenantId, refType, entityId])
+  @@map("note_entity_refs")
 }
