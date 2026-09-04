@@ -1,6 +1,33 @@
 # FRMS — Project State
 
-## Current State (2026-09-04, LATEST — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
+## Current State (2026-09-05, LATEST) — 🏗️ FIS-36 Field Diary Phase-1 BUILT + browser-verified, LOCAL / HARD HOLD (this branch); FIS-35 on its own branch; FIS-37 gated
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **⚠ TWO feature branches live this session (both LOCAL / HARD HOLD, both off `main`, unmerged):**
+> - `feat/fis35-calendar-activities` — FIS-35 Calendar of Activities Phase-1 (6 commits `ba35747`→`7bf5550`), browser-verified.
+> - `feat/fis36-field-diary-notes` — FIS-36 Field Diary Phase-1 (THIS branch, 4 commits `a0514ae`→`f12a37c`), browser-verified.
+> Each branch has its own doc edits (STATE/SESSION_LOG/DECISIONS_LOG/TASK_QUEUE) — they will union-merge to `main` when the owner authorizes. Cross-branch authority = project MEMORY.md cold-start.
+>
+> **✅ FIS-36 Field Diary — Phase-1 MVP DONE + browser-verified (this branch).** Notion-style stamped field diary at
+> `/[tenant]/notes`: TipTap v3 editor (`/` slash menu = formatting + insert-photo), MANDATORY location+time stamp (save
+> blocked until a location is set), inline photos via the storage adapter, notes private-by-default + author-only edit/
+> delete + audit-logged, list/detail/compose/edit pages, Field Diary nav. Schema additive (Note/NoteMedia/NoteEntityRef
+> + enums + FeatureKey notes/projects; migration `20260905090000_add_field_diary_notes` applied to dev). 638 tests green
+> (17 new); tsc/lint/build clean. Browser QA: created a stamped note → detail + list render, 0 console errors, stamp-gate
+> confirmed. Decisions D1–D6 in DECISIONS_LOG (conservative defaults; D3 privacy + D6 back-date window ⚠ owner-confirm).
+> Phases 2 (entity-mention chips + reverse lookup), 3 (accomplishment report), 4 (Projects module) = remaining roadmap.
+>
+> **⏳ FIS-37 (mobile app) — NOT started; genuinely gated on owner [WHAT]s** (mobile auth strategy — Auth.js is
+> cookie-based, needs a bearer/token path; Expo vs bare; offline scope; roles; Apple/Google developer accounts). A native
+> app is a large multi-week commitment with external-account prerequisites → surfaced for owner decision, not guessed.
+>
+> **⏳ Also owed:** merge/push both branches (owner-gated); FIS-35 Phase 2/3 + FIS-36 Phase 2/3/4 (roadmap); PRODUCT.md
+> back-port of FIS-35 + FIS-36 (Rule 1).
+
+---
+
+## Current State (2026-09-04 — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
