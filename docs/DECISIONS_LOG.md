@@ -871,3 +871,27 @@ access shape; cleanly separates the SaaS platform owner (`/tm`) from the client'
 real-app owner (SaaS operator); `tenant_superadmin` = per-tenant client topmost access; demo needs no
 Tenant Manager because it is always a single-tenant subdomain.
 Locked: yes. HARD HOLD — local commits only; deploys + live re-seeds owner-gated.
+
+---
+
+## FIS-37 Mobile App — [WHAT] locked (2026-09-05, owner-answered)
+Owner: "start FIS-37" + answered the 3 pivotal decisions. Plan: `docs/plans/PLAN_mobile_app.md`.
+  - **D1 Stack** — ⭐ OWNER: **Expo (managed React Native)**, new `apps/mobile/` workspace, consumes the tRPC API
+    (AppRouter type only, never @frms/db — Rule 13) + `@frms/shared` RBAC.
+  - **D2 Offline** — ⭐ OWNER: **online-first MVP** (reads cache, writes need connectivity + graceful errors); full
+    offline write-outbox is a later phase.
+  - **D5 Field-staff violation creation** — ⭐ OWNER: **NO** — mobile is read/scan/confirm + notes only; `violation.create`
+    stays admin-only, ZERO authz change (safest; keeps the permission model intact).
+  - **D9 Diary alignment** — RESOLVED: mobile notes reuse the FIS-36 `note` router (already built).
+  [HOW] calls taken: additive Auth.js-Credentials-backed **bearer-token** endpoint → Expo SecureStore (ONE shared
+  credential-verify path for web+mobile, never fork bcrypt/securityVersion); QR **payload v2 type-tag** (`t:`), backward-
+  compatible with printed v1 cards; ayuda `regNo` optional in v2 payload. Push notifications DEFERRED.
+Still OWNER-owed (do NOT block the build — distribution/branding prerequisites, tracked in PENDING_DECISIONS):
+  - **D3 App-store accounts** — Apple Developer ($99/yr) + Google Play ($25); under Powerbyte or the LGU? (blocks store
+    DISTRIBUTION only, not building/dev testing).
+  - **D4 App identity/branding** — name, icon, splash, bundle id (`ph.gov.calapan.frms`?), LGU vs Powerbyte white-label.
+  - **D6 Push notifications** — in scope at all? (recommend post-MVP).
+Scope note: FIS-37 is a greenfield native app — CANNOT be browser-verified here (needs emulator/device). This session
+builds the VERIFIABLE, security-critical foundation (the mobile bearer-token auth endpoint, server-side, unit-tested);
+the Expo app scaffold + screens + device QA are the dedicated follow-on. Locked: yes. HARD HOLD — local commits only,
+no store submission, no deploy.

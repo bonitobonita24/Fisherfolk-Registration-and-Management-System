@@ -1,5 +1,4 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import bcrypt from "bcryptjs";
 import NextAuth, { type Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
@@ -8,15 +7,7 @@ import { prisma, platformPrisma } from "@frms/db";
 import type { UserRole } from "@frms/shared/types";
 
 import { authConfig } from "./config";
-import { loadCustomRoleView } from "../rbac/mint";
-
-/** The 3 fixed system tiers — mirrors resolve.ts FIXED_TIER_ROLES. Never
- * carry a `customRoleId`, so `loadCustomRoleView` is never called for them. */
-const FIXED_TIER_ROLES: ReadonlySet<UserRole> = new Set([
-  "tenant_manager",
-  "tenant_superadmin",
-  "tenant_admin",
-]);
+import { authorizeCredentials } from "./authorize";
 
 const loginSchema = z.object({
   username: z.string().min(1),
@@ -56,42 +47,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { username, password, tenantSlug, rememberMe } = parsed.data;
 
-        const user = await platformPrisma.user.findFirst({
-          where: { username, status: "ACTIVE" },
-          include: { tenant: true },
+        const user = await authorizeCredentials({
+          username,
+          password,
+          tenantSlug,
         });
-
         if (!user) return null;
 
-        const passwordValid = await bcrypt.compare(password, user.passwordHash);
-        if (!passwordValid) return null;
-
-        if (user.role !== "tenant_manager") {
-          if (!user.tenantId) return null;
-          if (tenantSlug && user.tenant?.slug !== tenantSlug) return null;
-        }
-
-        if (user.tenant?.status === "SUSPENDED") return null;
-
-        // Mint the custom-role "view" feature set (PD-005 Chunk 4). Fixed
-        // tiers never carry a customRoleId — skip the DB round trip and
-        // attach nothing (undefined), matching resolve.ts's short-circuit.
-        const customView = FIXED_TIER_ROLES.has(user.role)
-          ? undefined
-          : await loadCustomRoleView(platformPrisma, user.id, user.tenantId ?? "");
-
-        return {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          tenantId: user.tenantId,
-          tenantSlug: user.tenant?.slug ?? null,
-          securityVersion: user.securityVersion,
-          rememberMe,
-          customView,
-        };
+        return { ...user, rememberMe };
       },
     }),
   ],
