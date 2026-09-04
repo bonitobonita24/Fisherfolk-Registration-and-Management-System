@@ -1,6 +1,29 @@
 # FRMS — Project State
 
-## Current State (2026-09-04, LATEST — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
+## Current State (2026-09-05, LATEST) — 🏗️ FIS-37 mobile auth foundation done (this branch); FIS-35 + FIS-36 on their own branches; all HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Cross-branch authority = project memory `project_three_features_branches_0905.md`.** Three feature branches this
+> session, all LOCAL / HARD HOLD, off `main` (unchanged `f5c6a2e`), UNMERGED + UNPUSHED:
+> `feat/fis35-calendar-activities` (FIS-35 Calendar Phase-1, browser-verified) · `feat/fis36-field-diary-notes`
+> (FIS-36 Field Diary Phase-1, browser-verified) · `feat/fis37-mobile-auth` (THIS branch — FIS-37 auth foundation).
+>
+> **✅ FIS-37 mobile bearer-token auth endpoint (`cac0f53`)** — server foundation for the Expo app. authorizeCredentials
+> extracted (ONE web+mobile verify path), jose HS256 token (sv/tenant/role claims, 30d), bearer context with
+> securityVersion-revocation + tenant-from-DB (never client-trusted), mobileAuth router (rate-limited generic-error login;
+> me cookie-or-bearer). 11 new tests; 627 passing; build clean. Web cookie-auth unchanged. Owner decisions: Expo managed ·
+> online-first · read/scan/confirm-only (no violation-create). Distribution prereqs (app-store accounts, branding, push) in
+> PENDING_DECISIONS.
+>
+> **⏳ FIS-37 Expo app** = dedicated follow-on (native app not verifiable here — needs emulator/device; store release needs
+> owner Apple/Google accounts). The server it needs is ready.
+> **⏳ Owed:** merge/push all 3 branches (owner-gated); PRODUCT.md back-port FIS-35+36 (Rule 1); FIS-35 P2/3 + FIS-36 P2/3/4.
+> ⚠ After switching between these branches run `pnpm --filter @frms/db exec prisma generate` (shared client vs per-branch schema).
+
+---
+
+## Current State (2026-09-04 — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
