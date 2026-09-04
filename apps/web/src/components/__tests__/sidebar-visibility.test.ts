@@ -29,7 +29,7 @@ function visibleLabels(actor: Actor): string[] {
   return ALL_ITEMS.filter((i) => canSeeNavItem(actor, i)).map((i) => i.label);
 }
 
-describe("canSeeNavItem — Dashboard is alwaysVisible for every authenticated role", () => {
+describe("canSeeNavItem — Calendar is alwaysVisible for every authenticated role", () => {
   const roles: UserRole[] = [
     UserRole.TENANT_MANAGER,
     UserRole.TENANT_SUPERADMIN,
@@ -40,14 +40,14 @@ describe("canSeeNavItem — Dashboard is alwaysVisible for every authenticated r
   ];
 
   for (const role of roles) {
-    it(`${role} sees Dashboard`, () => {
-      expect(visibleLabels({ role })).toContain("Dashboard");
+    it(`${role} sees Calendar`, () => {
+      expect(visibleLabels({ role })).toContain("Calendar");
     });
   }
 
-  it("a custom-role actor with an empty matrix still sees Dashboard", () => {
+  it("a custom-role actor with an empty matrix still sees Calendar", () => {
     expect(visibleLabels({ role: UserRole.ENCODER, matrix: {} })).toContain(
-      "Dashboard",
+      "Calendar",
     );
   });
 });
@@ -98,7 +98,8 @@ describe("canSeeNavItem — encoder: only its operational write+update features"
   const labels = visibleLabels({ role: UserRole.ENCODER });
 
   const expectedVisible = [
-    "Dashboard",
+    "Calendar",
+    "Insights",
     "Fisherfolk",
     "Household",
     "Vessels",
@@ -133,7 +134,7 @@ describe("canSeeNavItem — encoder: only its operational write+update features"
 describe("canSeeNavItem — bantay_dagat: enforcement-scoped view+write subset", () => {
   const labels = visibleLabels({ role: UserRole.BANTAY_DAGAT });
 
-  const expectedVisible = ["Dashboard", "Violations", "Fisherfolk", "Vessels", "Fish Catches"];
+  const expectedVisible = ["Calendar", "Insights", "Violations", "Fisherfolk", "Vessels", "Fish Catches"];
   const expectedHidden = [
     "Household",
     "Ayuda",
@@ -166,8 +167,10 @@ describe("canSeeNavItem — custom role (matrix): deny-by-default, only the gran
   };
   const labels = visibleLabels({ role: UserRole.ENCODER, matrix });
 
-  it("sees Dashboard (alwaysVisible) and Fisherfolk (the one granted feature)", () => {
-    expect(labels).toEqual(expect.arrayContaining(["Dashboard", "Fisherfolk"]));
+  it("sees Calendar + Insights (alwaysVisible) and Fisherfolk (the one granted feature)", () => {
+    expect(labels).toEqual(
+      expect.arrayContaining(["Calendar", "Insights", "Fisherfolk"]),
+    );
   });
 
   it("sees nothing else — every other feature item is denied", () => {

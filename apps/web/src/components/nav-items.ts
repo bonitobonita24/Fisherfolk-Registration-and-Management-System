@@ -96,7 +96,7 @@ export const NAV_GROUPS: NavGroup[] = [
         // Not a FeatureKey — the tenant home screen (FIS-35: now the
         // calendar of activities), visible to every authenticated tenant
         // user regardless of role/matrix.
-        label: "Dashboard",
+        label: "Calendar",
         icon: LayoutDashboard,
         href: "/dashboard",
         alwaysVisible: true,
