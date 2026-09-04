@@ -50,6 +50,7 @@ describe("canAccessRouteSegment — encoder preset: derived from DOMAIN_ROLE_PRE
         "edit-requests",
         "todo",
         "kanban",
+        "notes",
         "id-generator",
         "notifications",
         "verify",
