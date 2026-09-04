@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "./trpc";
+import { agendaRouter } from "./routers/agenda";
 import { analyticsRouter } from "./routers/analytics";
 import { auditLogRouter } from "./routers/auditLog";
 import { importRouter } from "./routers/import";
@@ -29,6 +30,7 @@ import { vesselRouter } from "./routers/vessel";
 import { violationRouter } from "./routers/violation";
 
 export const appRouter = createTRPCRouter({
+  agenda: agendaRouter,
   analytics: analyticsRouter,
   auditLog: auditLogRouter,
   ayuda: ayudaRouter,
