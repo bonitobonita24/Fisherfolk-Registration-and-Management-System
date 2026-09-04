@@ -23,11 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { YearSelect } from "@/app/[tenant]/dashboard/year-select";
+import { YearSelect } from "@/app/[tenant]/insights/year-select";
 import {
   RegistrationTypeSelect,
   type RegistrationType,
-} from "@/app/[tenant]/dashboard/registration-type-select";
+} from "@/app/[tenant]/insights/registration-type-select";
 
 interface HeaderProps {
   userName: string;
@@ -38,7 +38,9 @@ interface HeaderProps {
 
 // Isolated so useSearchParams() doesn't force the whole Header (and thus
 // every authenticated route via AppShell) to bail out of static rendering.
-function DashboardHeaderFilters() {
+// FIS-35: these filters drive the analytics/heatmap surface, which now
+// lives at /insights (the calendar-of-activities home took over /dashboard).
+function InsightsHeaderFilters() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -88,7 +90,7 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar }: HeaderP
       .toUpperCase() || "U";
 
   const pathname = usePathname();
-  const onDashboard = pathname?.endsWith("/dashboard") ?? false;
+  const onInsights = pathname?.endsWith("/insights") ?? false;
   const tenantHref = useTenantHref();
 
   return (
@@ -120,10 +122,10 @@ export function Header({ userName, role, onMenuClick, onToggleSidebar }: HeaderP
         </>
       )}
 
-      {/* Dashboard-only filters — desktop only */}
-      {onDashboard ? (
+      {/* Insights-only filters — desktop only */}
+      {onInsights ? (
         <Suspense fallback={<div className="hidden flex-1 md:flex" />}>
-          <DashboardHeaderFilters />
+          <InsightsHeaderFilters />
         </Suspense>
       ) : (
         <div className="hidden flex-1 md:flex" />
