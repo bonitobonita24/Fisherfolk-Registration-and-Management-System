@@ -2,6 +2,21 @@
 
 Human-readable per-session accomplishment ledger (newest on top). The dense reload
 
+## 2026-09-05 — FIS-35 Calendar of Activities built (Phase 1) — LOCAL / HARD HOLD
+
+**In your words:** resume; you don't get FIS-10 (explained); leave demo/FIS-34 held; push the docs commit; then start FIS-35, then FIS-36, then FIS-37.
+
+✅ Done — pushed the held v0.27.0 docs/plans commit to origin (`f5c6a2e`).
+✅ Done — **FIS-35 Calendar of Activities, Phase-1 MVP**, built + browser-verified in dev (branch `feat/fis35-calendar-activities`, 5 commits, LOCAL / HARD HOLD):
+  - New **Calendar** home at `/[tenant]/dashboard` — month + list agenda of your tasks, shared items, org announcements, and record-linked to-dos; source/status/"only mine" filters; colour+icon+label chips (WCAG-safe); keyboard-navigable.
+  - The old heatmap/KPI dashboard **moved intact to `/insights`** (nothing deleted; the 3,181 count fix is preserved).
+  - You can create a task OR a scheduled **Event**, set a start time, **share it to specific staff**, or (admins + encoders + bantay-dagat) **announce it to everyone's calendar**.
+  - 631 tests green (13 new); tsc/lint/build clean; live smoke: created a task → it appeared on the calendar, 0 console errors; `/insights` heatmap intact.
+💬 Decisions locked (DECISIONS_LOG 2026-09-05): Calendar replaces the home (heatmap→/insights); announce allowed for admins+encoder+bantay_dagat (not viewer); reuse KanbanTask for events; hand-rolled grid; recurrence/notifications/week-day views = later phases.
+💬 FIS-10 explained: it's the aquaculture (fish-farming) sub-registration — held because it depends on the January city ordinance amendments; we shouldn't build the required fields ahead of the law.
+⏳ Next — FIS-36 (diary/notes→projects), then FIS-37 (mobile app). FIS-35 Phase 2/3 (week/day views, notifications, recurrence) available if wanted.
+
+
 ## 2026-09-04 (owner batch — 3 plans + 2 fixes) — shipped Phase D + 2 fixes as v0.27.0; drafted 3 feature plans
 
 **In your words:** queue 3 "make a plan" features (Calendar-of-Activities home, Notion diary/notes→Projects, mobile app); fix the prod Fisherfolk count showing 6,362; fix the 3 scrollbars on the Fish Catch form. Plus the leftover FIS-8 Phase D.

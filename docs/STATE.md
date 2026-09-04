@@ -1,6 +1,35 @@
 # FRMS — Project State
 
-## Current State (2026-09-04, LATEST — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
+## Current State (2026-09-05, LATEST) — 🏗️ FIS-35 Calendar of Activities Phase-1 BUILT + browser-verified, LOCAL / HARD HOLD; FIS-36 next
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Owner (resume session):** explained FIS-10 (aquaculture, ordinance-gated); demo/FIS-34 stays held; **pushed** the v0.27.0
+> docs/plans commit (`f5c6a2e` → origin); then **"start FIS-35 then FIS-36 then FIS-37."**
+>
+> **✅ FIS-35 Calendar of Activities — Phase-1 MVP DONE + browser-verified (LOCAL, HARD HOLD).** Branch
+> `feat/fis35-calendar-activities`, 5 commits (schema `ba35747` → router `9e376e7` → UI+relocation `191b8eb` →
+> create UI `d687a0a` → tests+nav `d793bd0`). Decisions locked in DECISIONS_LOG (2026-09-05): Calendar REPLACES the home
+> at `/[tenant]/dashboard`; heatmap `DashboardClient` relocated intact to `/[tenant]/insights` (3,181 count fix preserved);
+> announce-to-all allowed for admins+encoder+bantay_dagat (viewer excluded); reuse KanbanTask (kind=EVENT/audience=ANNOUNCED);
+> hand-rolled month+list grid; recurrence/notif-fan-out/week-day views deferred to Phase 2/3.
+> - Schema: additive migration `20260904165426_add_calendar_activities` (KanbanTask +createdById/startAt/endAt/allDay/kind/
+>   audience, new KanbanTaskShare table, enums KanbanTaskKind/TaskAudience) applied to dev; also resolved pre-existing
+>   dev-ledger drift via `migrate resolve --applied` (bookkeeping only).
+> - Router `agenda` (myAgenda union self+shared+announced+entity, date-ranged, mineOnly; upcoming; create/share/unshare/
+>   setAudience/announce with non-viewer announce gate). Calendar UI (month+list, filters, WCAG chips, roving-tabindex).
+>   make-todo dialog extended (Task/Event, schedule, share, role-gated announce) + calendar "New" button. Nav Dashboard→Calendar
+>   + Insights entry. 631 tests green (13 new agenda tests); tsc/lint/build clean.
+> - **Browser QA (dev rebuilt off branch off Rule 39):** login → Calendar home renders; created a task → landed on Sep 15 cell,
+>   0 console errors; /insights heatmap intact (3,181), 0 errors; announce control visible for superadmin.
+> - **Cross-scope note:** /dashboard deep-links now show the calendar (not stats); showcase OG `public/showcase/01-dashboard.png`
+>   depicts stale content → regen/repoint follow-up. header year/type filter bar now on /insights.
+>
+> **⏳ NEXT (this session, owner-queued): FIS-36 (diary/notes→projects), then FIS-37 (mobile app).** FIS-35 ship = owner-gated.
+
+---
+
+## Current State (2026-09-04 — owner batch: 3 plans + 2 fixes) — 🚀 FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
