@@ -871,3 +871,25 @@ access shape; cleanly separates the SaaS platform owner (`/tm`) from the client'
 real-app owner (SaaS operator); `tenant_superadmin` = per-tenant client topmost access; demo needs no
 Tenant Manager because it is always a single-tenant subdomain.
 Locked: yes. HARD HOLD — local commits only; deploys + live re-seeds owner-gated.
+
+---
+
+## FIS-35 Calendar of Activities (unified agenda home) — [WHAT] locked (2026-09-05, owner-approved)
+Owner green-lit the build (resume session: "start FIS-35 then FIS-36 then FIS-37"). The 7 plan
+decisions (`docs/plans/PLAN_calendar_activities_dashboard.md`) resolve as:
+  1. **Recurring events** — DEFERRED (single-instance MVP; RRULE = Phase 3). _[HOW default]_
+  2. **Events model** — REUSE `KanbanTask` (`kind=EVENT`, `audience=ANNOUNCED`); NO separate `Event`
+     model — one agenda query, one detail dialog, one colour system. _[HOW default]_
+  3. **Calendar rendering** — hand-rolled month + list grid (reuse existing `monthMatrix`); no calendar
+     library dep in MVP; revisit only if week/day time-grids get heavy. _[HOW default]_
+  4. **Home layout** — ⭐ OWNER: **Calendar becomes the home** at `/[tenant]/dashboard`; the heatmap +
+     KPI + barangay-density `DashboardClient` RELOCATES intact to `/[tenant]/insights` with a new sidebar
+     nav link. Nothing deleted. (Option A.)
+  5. **Announce-to-all rights** — ⭐ OWNER: `tenant_admin`+ **AND `encoder` + `bantay_dagat`** may post
+     org-wide announced events; `viewer` may NOT (read-only). Broader than the plan's admin-only default.
+  6. **Announcement lifecycle** — events stay (no auto-archive in MVP); per-user hide → Phase 2. _[HOW default]_
+  7. **Notification fan-out** on share/announce — Phase 2 (calendar renders without it). _[HOW default]_
+Data model: additive only — new nullable/defaulted columns on `KanbanTask` (`createdById`, `startAt`,
+`endAt`, `allDay`, `kind`, `audience`) + new `KanbanTaskShare` join table + new enums `KanbanTaskKind`,
+`TaskAudience`. No `ALTER TYPE`, no destructive change, existing rows valid (calendar falls back
+`startAt ?? dueDate`). Locked: yes. HARD HOLD — local commits only; deploy owner-gated.

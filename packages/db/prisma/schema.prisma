@@ -75,6 +75,17 @@ enum KanbanTaskPriority {
   URGENT
 }
 
+enum KanbanTaskKind {
+  TASK
+  EVENT
+}
+
+enum TaskAudience {
+  PERSONAL
+  SHARED
+  ANNOUNCED
+}
+
 enum NotificationType {
   INFO
   WARNING
@@ -305,6 +316,7 @@ model Tenant {
   fishCatchSpecies     FishCatchSpecies[]
   customRoles          CustomRole[]
   mediaObjects         MediaObject[]
+  kanbanTaskShares     KanbanTaskShare[]
 
   @@map("tenants")
 }
@@ -355,6 +367,8 @@ model User {
   fishCatchesRecorded   FishCatch[]           @relation("FishCatchRecordedBy")
   fishCatchesCreated    FishCatch[]           @relation("FishCatchCreatedBy")
   fishCatchesUpdated    FishCatch[]           @relation("FishCatchUpdatedBy")
+  createdKanbanTasks    KanbanTask[]          @relation("KanbanTaskCreatedBy")
+  kanbanTaskShares      KanbanTaskShare[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, username])
@@ -609,17 +623,42 @@ model KanbanTask {
   sourceEntityId   String?            @map("source_entity_id")
   createdAt        DateTime           @default(now()) @map("created_at")
   updatedAt        DateTime           @updatedAt @map("updated_at")
+  createdById      String?            @map("created_by_id")
+  startAt          DateTime?          @map("start_at")
+  endAt            DateTime?          @map("end_at")
+  allDay           Boolean            @default(false) @map("all_day")
+  kind             KanbanTaskKind     @default(TASK)
+  audience         TaskAudience       @default(PERSONAL) @map("audience")
 
   tenant        Tenant             @relation(fields: [tenantId], references: [id])
   assignedTo    User               @relation(fields: [assignedToId], references: [id])
   sourceComment Comment?           @relation(fields: [sourceCommentId], references: [id])
   attachments   KanbanAttachment[]
+  createdBy     User?              @relation("KanbanTaskCreatedBy", fields: [createdById], references: [id])
+  shares        KanbanTaskShare[]
 
   @@index([tenantId])
   @@index([tenantId, assignedToId])
   @@index([tenantId, status])
   @@index([tenantId, dueDate])
+  @@index([tenantId, startAt])
   @@map("kanban_tasks")
+}
+
+model KanbanTaskShare {
+  id        String   @id @default(cuid())
+  tenantId  String   @map("tenant_id")
+  taskId    String   @map("task_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  task   KanbanTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id])
+  tenant Tenant     @relation(fields: [tenantId], references: [id])
+
+  @@unique([taskId, userId])
+  @@index([tenantId, userId])
+  @@map("kanban_task_shares")
 }
 
 model Notification {
