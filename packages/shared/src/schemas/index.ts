@@ -15,3 +15,4 @@ export * from "./id-template";
 export * from "./id-print";
 export * from "./fish-catch";
 export * from "./report";
+export * from "./note";

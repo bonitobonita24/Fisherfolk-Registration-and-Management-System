@@ -104,8 +104,12 @@ describe("hasPermission — encoder preset (Operator shape)", () => {
     "id_generator",
     "notifications",
   ];
+  // FIS-36 Field Diary: encoder gets FULL CRUD (incl. delete) on notes —
+  // distinct from OWNED's write+update-no-delete shape, so it is tested
+  // separately below rather than folded into OWNED.
+  const FULL_CRUD_OWNED: FeatureKey[] = ["notes"];
   const NOT_OWNED = FEATURE_KEYS.filter(
-    (f) => !OWNED.includes(f),
+    (f) => !OWNED.includes(f) && !FULL_CRUD_OWNED.includes(f),
   );
 
   for (const feature of OWNED) {
@@ -122,6 +126,16 @@ describe("hasPermission — encoder preset (Operator shape)", () => {
       expect(
         hasPermission({ role: UserRole.ENCODER }, feature, "delete"),
       ).toBe(false);
+    });
+  }
+
+  for (const feature of FULL_CRUD_OWNED) {
+    it(`encoder can view+write+update+delete ${feature} (own field notes)`, () => {
+      for (const action of ACTIONS) {
+        expect(
+          hasPermission({ role: UserRole.ENCODER }, feature, action),
+        ).toBe(true);
+      }
     });
   }
 
