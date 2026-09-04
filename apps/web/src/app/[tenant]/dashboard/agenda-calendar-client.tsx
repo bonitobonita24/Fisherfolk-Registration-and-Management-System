@@ -11,6 +11,7 @@ import {
   ChevronRight,
   HandHeart,
   Megaphone,
+  Plus,
   Ship,
   Tag,
   User,
@@ -42,6 +43,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { UnderlineTabsList, UnderlineTabsTrigger } from "@/components/shared";
+import { MakeTodoDialog } from "@/components/todo/make-todo-dialog";
 import { TaskDetailDialog } from "../todo/todo-board-client";
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -392,31 +394,42 @@ export function AgendaCalendarClient() {
             ))}
           </div>
 
-          {view === "month" && (
-            <div className="ml-auto flex items-center gap-1">
-              <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={goToday}>
-                Today
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                onClick={goPrev}
-                aria-label="Previous month"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7"
-                onClick={goNext}
-                aria-label="Next month"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+          <div className="ml-auto flex items-center gap-1">
+            {view === "month" && (
+              <>
+                <Button variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={goToday}>
+                  Today
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={goPrev}
+                  aria-label="Previous month"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={goNext}
+                  aria-label="Next month"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            <MakeTodoDialog
+              defaultTitle=""
+              trigger={
+                <Button size="sm" className="h-7 gap-1 px-2.5 text-xs">
+                  <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                  New
+                </Button>
+              }
+            />
+          </div>
         </div>
 
         {/* ── Month view ───────────────────────────────────────────────── */}
