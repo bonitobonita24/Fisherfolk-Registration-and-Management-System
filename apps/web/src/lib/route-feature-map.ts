@@ -35,6 +35,7 @@ export const SEGMENT_FEATURE_MAP: Readonly<Record<string, FeatureKey>> = {
   kanban: "kanban",
   todo: "kanban",
   map: "map",
+  notes: "notes",
   notifications: "notifications",
   reports: "reports",
   vessels: "vessels",
