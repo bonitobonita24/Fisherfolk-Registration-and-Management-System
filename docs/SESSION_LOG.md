@@ -26,6 +26,13 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
   - 638 tests green (17 new note tests); tsc/lint/build clean. Live smoke: wrote a stamped note → saved → rendered on its detail page and in the list, 0 console errors; the save-gate correctly blocked until a location + label were set.
 💬 Decisions (DECISIONS_LOG 2026-09-05, conservative defaults): TipTap v3 editor; **notes private-by-default** (⚠ confirm the sharing policy); back-dating allowed up to 14 days (⚠ confirm window); accomplishment report + entity-mention chips + Projects module = later phases (2/3/4).
 ⏳ Next — FIS-37 (mobile app): needs your decisions first (mobile auth strategy, Expo vs bare, offline scope, app-store accounts) — it's the one genuinely gated on [WHAT]s + external accounts before any build.
+## 2026-09-05 — FIS-37 Mobile App: auth foundation built (server) — LOCAL / HARD HOLD
+
+**In your words:** (resume) start FIS-35, then FIS-36, then FIS-37; + answered: Expo, online-first, read-only (no violation creation). [This entry = FIS-37; FIS-35/36 are on their own branches — see project memory.]
+
+✅ Done — **FIS-37 mobile bearer-token auth endpoint** (branch `feat/fis37-mobile-auth`, commit `cac0f53`, LOCAL / HARD HOLD): the security-critical server foundation the future mobile app logs in through. One shared username/password verify path for web + mobile, a 30-day bearer token stored on the phone, and full revocation (a password/security change invalidates old tokens; tenant + role always come from the server, never the app). 627 tests green (11 new), build clean. No change to how the website logs in.
+💬 Decisions (owner-answered): **Expo managed React Native** · **online-first** MVP (writes need signal; full offline later) · field staff **read/scan/confirm only — cannot create violations** (no permission change). Push/app-store accounts/branding = deferred (in PENDING_DECISIONS).
+⏳ Next — the **Expo app itself** (login, QR scanner, record view + status confirm, field notes) is a dedicated follow-on session: a native app can't be verified here (needs an emulator/device), and store release needs your Apple/Google developer accounts. The server it talks to is now ready + tested.
 
 
 ## 2026-09-04 (owner batch — 3 plans + 2 fixes) — shipped Phase D + 2 fixes as v0.27.0; drafted 3 feature plans
