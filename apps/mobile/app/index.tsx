@@ -14,7 +14,7 @@ export default function Index() {
   }
 
   if (status === "authed") {
-    return <Redirect href="/home" />;
+    return <Redirect href="/scan" />;
   }
 
   return <Redirect href="/login" />;

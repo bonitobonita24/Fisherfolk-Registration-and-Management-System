@@ -12,6 +12,7 @@
     "doctor": "expo-doctor"
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@frms/api-client": "workspace:*",
     "@frms/shared": "workspace:*",
     "@tanstack/react-query": "^5.62.2",

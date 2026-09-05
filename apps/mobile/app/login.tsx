@@ -25,7 +25,7 @@ export default function LoginScreen() {
     setSubmitting(true);
     try {
       await signIn(orgSlug.trim() || undefined, username.trim(), password);
-      router.replace("/home");
+      router.replace("/scan");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Sign in failed. Check your credentials.");
     } finally {

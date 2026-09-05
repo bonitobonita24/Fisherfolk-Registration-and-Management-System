@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { UserRole } from "@frms/shared/types";
 import { makeTrpcClient, type MobileTrpcClient } from "./trpc";
 
 const TOKEN_KEY = "frms.token";
@@ -19,7 +20,7 @@ const USER_KEY = "frms.user";
 export type MobileUser = {
   id: string;
   name: string | null;
-  role: string;
+  role: UserRole;
   tenantSlug: string | null;
 };
 

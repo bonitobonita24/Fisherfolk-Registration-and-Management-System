@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useTrpc } from "@/lib/auth";
+import { useCan } from "@/lib/permissions";
 
 // Inferred from `fisherfolk.verifyByQr` — the `valid: true` branch's payload.
 // This screen is READ-ONLY (M1 field staff view); no mutations here.
@@ -14,13 +15,15 @@ type VerifiedFisherfolk = Extract<
 export default function FisherfolkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const trpc = useTrpc();
+  const { can } = useCan();
+  const canView = can("fisherfolk", "view");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [record, setRecord] = useState<VerifiedFisherfolk | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !canView) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -48,6 +51,31 @@ export default function FisherfolkDetailScreen() {
       cancelled = true;
     };
   }, [id, trpc]);
+
+  // Cosmetic-only gate (server remains authoritative) — never query this
+  // record if the role can't view fisherfolk records.
+  if (!canView) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.center}>
+          <Text style={styles.message} accessibilityRole="header">
+            No access
+          </Text>
+          <Text style={styles.message}>
+            Your role can&apos;t view fisherfolk records.
+          </Text>
+        </View>
+        <Pressable
+          style={styles.backButton}
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <Text style={styles.backButtonText}>Back</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

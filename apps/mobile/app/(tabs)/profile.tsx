@@ -1,9 +1,20 @@
 import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "@/lib/auth";
+import { useCan } from "@/lib/permissions";
+import type { FeatureKey } from "@frms/shared/rbac";
 
-export default function HomeScreen() {
+// A compact subset of features relevant to a field-staff mobile user.
+// Client-side, cosmetic display only — the server remains authoritative.
+const DISPLAYED_FEATURES: { key: FeatureKey; label: string }[] = [
+  { key: "fisherfolk", label: "Fisherfolk" },
+  { key: "vessels", label: "Vessels" },
+  { key: "violations", label: "Violations" },
+];
+
+export default function ProfileScreen() {
   const { user, signOut } = useAuth();
+  const { can } = useCan();
 
   async function handleSignOut() {
     await signOut();
@@ -18,23 +29,18 @@ export default function HomeScreen() {
       <Text style={styles.meta}>Role: {user?.role ?? "—"}</Text>
       <Text style={styles.meta}>Tenant: {user?.tenantSlug ?? "—"}</Text>
 
-      <Pressable
-        style={styles.primaryButton}
-        onPress={() => router.push("/scan")}
-        accessibilityRole="button"
-        accessibilityLabel="Scan QR"
-      >
-        <Text style={styles.buttonText}>Scan QR</Text>
-      </Pressable>
-
-      <Pressable
-        style={styles.secondaryButton}
-        onPress={() => router.push("/search")}
-        accessibilityRole="button"
-        accessibilityLabel="Search fisherfolk"
-      >
-        <Text style={styles.secondaryButtonText}>Search fisherfolk</Text>
-      </Pressable>
+      <View style={styles.permTable}>
+        <Text style={styles.permTitle}>What you can do</Text>
+        {DISPLAYED_FEATURES.map(({ key, label }) => (
+          <View key={key} style={styles.permRow}>
+            <Text style={styles.permLabel}>{label}</Text>
+            <Text style={styles.permValue}>
+              View {can(key, "view") ? "✓" : "✗"}  Write{" "}
+              {can(key, "write") ? "✓" : "✗"}
+            </Text>
+          </View>
+        ))}
+      </View>
 
       <Pressable
         style={styles.button}
@@ -65,25 +71,32 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 4,
   },
-  primaryButton: {
+  permTable: {
     marginTop: 24,
-    backgroundColor: "#1d4ed8",
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  secondaryButton: {
-    marginTop: 12,
     marginBottom: 24,
-    backgroundColor: "#f3f4f6",
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: "center",
+    gap: 8,
   },
-  secondaryButtonText: {
-    color: "#111",
-    fontSize: 16,
+  permTitle: {
+    fontSize: 14,
     fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  permRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 6,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#e5e7eb",
+  },
+  permLabel: {
+    fontSize: 14,
+    color: "#111",
+  },
+  permValue: {
+    fontSize: 13,
+    color: "#444",
   },
   button: {
     backgroundColor: "#b91c1c",

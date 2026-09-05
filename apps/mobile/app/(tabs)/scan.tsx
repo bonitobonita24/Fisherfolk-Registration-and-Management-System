@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useTrpc } from "@/lib/auth";
+import { useCan } from "@/lib/permissions";
 
 // Inferred from `fisherfolk.verifyByQr` — the `valid: true` branch's payload.
 type VerifiedFisherfolk = Extract<
@@ -19,6 +20,8 @@ type VerifiedFisherfolk = Extract<
 
 export default function ScanScreen() {
   const trpc = useTrpc();
+  const { can } = useCan();
+  const permission_gated = !can("fisherfolk", "view");
   const [permission, requestPermission] = useCameraPermissions();
   const scannedRef = useRef(false);
   const [loading, setLoading] = useState(false);
@@ -51,6 +54,21 @@ export default function ScanScreen() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Cosmetic-only gate (server remains authoritative) — don't even request
+  // camera permission if this role can't view fisherfolk records.
+  if (permission_gated) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.message} accessibilityRole="header">
+          No access
+        </Text>
+        <Text style={styles.message}>
+          Your role can&apos;t view fisherfolk records.
+        </Text>
+      </View>
+    );
   }
 
   if (!permission) {

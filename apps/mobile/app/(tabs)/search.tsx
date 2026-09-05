@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useTrpc } from "@/lib/auth";
+import { useCan } from "@/lib/permissions";
 
 // Inferred from `fisherfolk.list` — one entry of the `items` array.
 type ListResult = Awaited<ReturnType<ReturnType<typeof useTrpc>["fisherfolk"]["list"]["query"]>>;
@@ -20,6 +21,7 @@ const DEBOUNCE_MS = 350;
 
 export default function SearchScreen() {
   const trpc = useTrpc();
+  const { can } = useCan();
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,6 +62,21 @@ export default function SearchScreen() {
       cancelled = true;
     };
   }, [debounced, trpc]);
+
+  // Cosmetic-only gate (server remains authoritative) — hide the search UI
+  // entirely if this role can't view fisherfolk records.
+  if (!can("fisherfolk", "view")) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.message} accessibilityRole="header">
+          No access
+        </Text>
+        <Text style={styles.message}>
+          Your role can&apos;t view fisherfolk records.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -127,10 +144,23 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     backgroundColor: "#fff",
   },
+  centerContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    backgroundColor: "#fff",
+    gap: 8,
+  },
   title: {
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 16,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#333",
   },
   input: {
     borderWidth: 1,
