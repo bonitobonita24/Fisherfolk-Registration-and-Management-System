@@ -14,9 +14,19 @@ Owner answered the 3 build-gating decisions earlier (Expo · online-first · rea
 - [x] ✅ **App identity / branding** — placeholders fine; bundle id `ph.gov.calapan.frms` acceptable for a
   self-hosted build (no store review to satisfy). Refine at Expo-scaffold time; not a blocker.
 - [x] ✅ **Push notifications** — **deferred (post-MVP)** per owner. Not in the mobile MVP scope.
-Status: FIS-37 server auth foundation SHIPPED to prod in v0.28.0 (2026-09-05). The **Expo app scaffold + screens
-+ device QA remain a dedicated follow-on workstream** (a native app can't be browser-verified from this seat) —
-awaiting owner go-ahead to start.
+Status: FIS-37 server auth foundation SHIPPED to prod in v0.28.0 (2026-09-05). **Expo app kicked off:** Phase M1
+Module A (scaffold + tRPC/SecureStore auth spine + login/home screens, wired to `mobileAuth.login`) authored on
+branch `feat/fis37-mobile-app` (`c52b6c5`, 17 files, LOCAL/HARD HOLD). ⚠ **NOT yet installed / typechecked /
+device-verified** — see the install gate below.
+
+- [ ] **⚙ [WHAT/validation] FIS-37 mobile install gate — repo-root `node-linker=hoisted`.** pnpm + React Native
+  needs `node-linker=hoisted` in the **repo-root `.npmrc`** (none exists today) before `pnpm install` will produce
+  an RN-resolvable tree. This is a **monorepo-wide** change that alters `apps/web`'s install topology → must be
+  re-validated (web typecheck + build + a smoke) before it lands. Until this is done, the mobile app can't be
+  typechecked/bundled and **Modules B/C + device QA are blocked**. Options: (a) add root `node-linker=hoisted` +
+  re-verify web, then install + `expo-doctor` + bundle the mobile app; (b) keep the mobile app in a **separate
+  repo** (no monorepo linker change — loses direct `@frms/shared`/`@frms/api-client` workspace reuse). Recommend
+  (a). Owner call because it touches the shipped web app's build. (Bring-up steps: `apps/mobile/README.md`.)
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
