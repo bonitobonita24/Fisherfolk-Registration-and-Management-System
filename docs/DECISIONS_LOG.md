@@ -4,6 +4,20 @@
 
 ---
 
+## FIS-36 / FIS-37 owner confirmations + integration ship (2026-09-05, owner-answered on resume)
+Owner answered the two open confirmations and the FIS-37 distribution [WHAT], then authorized
+"merge/ship all the branches and do all other pending tasks":
+- **FIS-36 D3 (privacy)** → ✅ CONFIRMED: notes **private by default** (author + admins) is accepted. Locked.
+- **FIS-36 D6 (back-date window)** → ✅ CONFIRMED: **14-day** back-date window for `capturedAt` approved. Locked.
+- **FIS-37 distribution** → ⭐ OWNER: the mobile app is **self-hosted and downloadable — NOT published to the
+  App Store / Play Store.** No Apple/Google developer accounts needed; the Expo client ships as a sideloadable
+  build (Android APK / self-hosted download). Push notifications remain **deferred** (post-MVP). This shapes the
+  Expo build (self-hosted/unsigned distribution, no store submission pipeline). Locked.
+- **Integration** → FIS-35 + FIS-36 + FIS-37 merged into `main` (dep-order 35→36→37; schema/appRouter/nav union
+  merges, docs union), consolidated release **v0.28.0**, full gate green, shipped to prod (see CHANGELOG v0.28.0).
+- **Owed (Rule 1):** PRODUCT.md back-port of FIS-35 (Calendar) + FIS-36 (Field Diary) remains a human/owner edit.
+Locked: yes.
+
 ## FIS-12 registration status model — build decisions (2026-08-31)
 Decision: registration status is now **NEW / RENEWED / EXPIRED** (+ ARCHIVED for soft-delete); ACTIVE/INACTIVE
 retired from active use (enum values kept — Postgres can't drop them). "Valid/registered" = {NEW, RENEWED}.

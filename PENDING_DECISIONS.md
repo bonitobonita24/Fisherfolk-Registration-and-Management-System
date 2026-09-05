@@ -6,17 +6,17 @@ conductor's to decide and never lands here.
 
 ## Open decisions / next-loop follow-ups
 
-### 2026-09-05 — FIS-37 Mobile App: distribution/branding prerequisites (do NOT block the build)
-Owner answered the 3 build-gating decisions (Expo · online-first · read-only, no violation-create — see DECISIONS_LOG).
-These remaining items block STORE DISTRIBUTION / identity, not building or dev-testing, and are owner-owned:
-- [ ] **App-store accounts** — Apple Developer ($99/yr) + Google Play ($25 one-time). Registered under Powerbyte
-  or the LGU (City of Calapan)? Needed only for store submission / TestFlight / internal-track distribution.
-- [ ] **App identity / branding** — app name, icon, splash, bundle id (`ph.gov.calapan.frms`?), and LGU vs
-  Powerbyte white-label. Placeholders fine for dev builds; lock before first store submission.
-- [ ] **Push notifications** — in scope at all for the mobile app? (recommend post-MVP; adds Expo push tokens +
-  a device-registration table + dispatch changes). Default: deferred.
-Status: the FIS-37 server auth foundation is being built this session; the Expo app scaffold + screens + device QA
-are a dedicated follow-on (a native app can't be browser-verified here).
+### 2026-09-05 — FIS-37 Mobile App: distribution/branding — ✅ RESOLVED (owner-answered on resume)
+Owner answered the 3 build-gating decisions earlier (Expo · online-first · read-only) AND the distribution [WHAT]:
+- [x] ✅ **Distribution = SELF-HOSTED / DOWNLOADABLE — NOT App Store / Play Store** (owner 2026-09-05). No Apple
+  ($99/yr) or Google Play ($25) developer accounts needed. Ships as a sideloadable Android APK / self-hosted
+  download. This shapes the Expo build (unsigned/self-distributed, no store-submission pipeline).
+- [x] ✅ **App identity / branding** — placeholders fine; bundle id `ph.gov.calapan.frms` acceptable for a
+  self-hosted build (no store review to satisfy). Refine at Expo-scaffold time; not a blocker.
+- [x] ✅ **Push notifications** — **deferred (post-MVP)** per owner. Not in the mobile MVP scope.
+Status: FIS-37 server auth foundation SHIPPED to prod in v0.28.0 (2026-09-05). The **Expo app scaffold + screens
++ device QA remain a dedicated follow-on workstream** (a native app can't be browser-verified from this seat) —
+awaiting owner go-ahead to start.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
