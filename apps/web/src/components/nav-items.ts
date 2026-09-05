@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Network,
   QrCode,
+  LineChart,
 } from "lucide-react";
 import { hasPermission, type Actor, type FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -92,11 +93,21 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Overview",
     items: [
       {
-        // Not a FeatureKey — the tenant home screen, visible to every
-        // authenticated tenant user regardless of role/matrix.
-        label: "Dashboard",
+        // Not a FeatureKey — the tenant home screen (FIS-35: now the
+        // calendar of activities), visible to every authenticated tenant
+        // user regardless of role/matrix.
+        label: "Calendar",
         icon: LayoutDashboard,
         href: "/dashboard",
+        alwaysVisible: true,
+      },
+      {
+        // FIS-35 — the former dashboard's analytics/heatmap surface,
+        // relocated to /insights. Same always-visible reach as the old
+        // Dashboard entry it replaces (no FeatureKey by design).
+        label: "Insights",
+        icon: LineChart,
+        href: "/insights",
         alwaysVisible: true,
       },
       {

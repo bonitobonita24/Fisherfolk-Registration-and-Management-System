@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/shared";
-import { BarangayDensityMap } from "../dashboard/barangay-density-map";
+import { BarangayDensityMap } from "../insights/barangay-density-map";
 
 export default function MapPage() {
   return (

@@ -13,7 +13,7 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 > - ✅ **FIS-39** app-shell window-scrollbar / scroll-into-blank fix (pin shell `fixed inset-0`; window scroll 1457→0). Verified live.
 > - ✅ **FIS-8 Phase D** family-aware household reporting/dashboard (single-family parity) + multi-family seed + parity tests (616 tests). QA'd (2-family household in dev browser, 0 console errors).
 > **📋 PLANS DRAFTED (review + decide [WHAT]s before any build) — `docs/plans/`:**
-> - 🔴 **FIS-35** Calendar-of-Activities home → `PLAN_calendar_activities_dashboard.md` (extend KanbanTask + reuse todo-calendar; 7 open decisions).
+> - 🟡 **FIS-35** Calendar-of-Activities home — **Phase-1 MVP DONE + browser-verified, LOCAL/HARD HOLD** (branch `feat/fis35-calendar-activities`, 5 commits ba35747→d793bd0). Calendar=home, heatmap→/insights; task/event/share/announce (admins+encoder+bantay_dagat); 631 tests green. Phase 2/3 (week/day views, notif fan-out, recurrence, per-user hide) = future. Ship = owner-gated.
 > - 🔴 **FIS-36** Notion diary/notes → Projects/PM → `PLAN_diary_notes_projects.md` (TipTap slash-editor, location/time stamp, accomplishment report; 6 open decisions).
 > - 🔴 **FIS-37** Mobile app (Android/iOS) → `PLAN_mobile_app.md` (Expo/RN, reuse FIS-13 QR, new mobile-auth; 9 open decisions).
 
