@@ -1,6 +1,22 @@
 # FRMS — Session Log
 
-Human-readable per-session accomplishment ledger (newest on top). The dense reload
+Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
+`docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
+
+## 2026-09-05 — Merged + shipped FIS-35 · FIS-36 · FIS-37 to production (v0.28.0)
+
+**In your words:** FIS-36 — yes to all; FIS-37 — not app store, self-hosted downloadable; then merge/ship all the branches and do all other pending tasks (orchestrated).
+
+✅ Done — **FIS-36 & FIS-37 owner decisions locked:** notes private-by-default + 14-day back-date approved; mobile app is **self-hosted / downloadable (no App Store / Play Store)**, push notifications deferred.
+✅ Done — **merged all three feature branches into `main`** (order 35→36→37), resolved schema/router/nav conflicts as unions, regenerated Prisma client. Full gate green: typecheck 7/7 · lint · 428 unit tests · build 1/1.
+✅ Done — **cut consolidated release v0.28.0**, pushed `main` + tag → CI built `sha-ab4abd4`.
+✅ Done — **dev rebuilt off main + browser-smoked** (Rule 39): Calendar home, Field Diary `/notes`, relocated `/insights` all render, 0 console errors, count 3,181 preserved, footer v0.28.0.
+✅ Done — **promoted to PRODUCTION** (`push-to-prod.sh sha-ab4abd4`): prod DB backed up, both additive migrations applied, reseed-never. **Verified live: `/api/health` + `/` + `/login` = 200.** (The deploy script's step-5 404 was a boot-window false alarm — container is healthy, 0 restarts.)
+🔨 Next — FIS-37 **Expo mobile app** is the remaining buildable piece (self-hosted, dedicated follow-on; can't be browser-verified from this seat) — awaiting go-ahead.
+💬 Notes — PRODUCT.md back-port of FIS-35 + FIS-36 owed (Rule 1, human-only). Remaining pending items are gated (FIS-10 ordinance; demo/FIS-34 on EC2 access) or cross-seat (AIEF standard merge; per-app site-access).
+⛔ Blocked — demo refresh + FIS-34 screenshots (EC2/demo-box access, Server-Setups migration); FIS-10 (Jan ordinance).
+
+
 
 ## 2026-09-05 — FIS-35 Calendar of Activities built (Phase 1) — LOCAL / HARD HOLD
 

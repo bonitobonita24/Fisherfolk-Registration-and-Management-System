@@ -1,8 +1,30 @@
 # FRMS — Project State
 
-## Current State (2026-09-05, LATEST) — 🏗️ FIS-35 Calendar of Activities Phase-1 BUILT + browser-verified, LOCAL / HARD HOLD; FIS-36 next
+## Current State (2026-09-05, LATEST) — 🚀 FIS-35 + FIS-36 + FIS-37 MERGED + SHIPPED to PROD as v0.28.0, verified live
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Owner (resume):** "B (FIS-36) yes to all; C (FIS-37) self-hosted/downloadable, NOT app-store; merge/ship all
+> the branches and do all other pending tasks in agent orchestration."
+>
+> **🚀 SHIPPED to PRODUCTION as v0.28.0 (`sha-ab4abd4`), verified live (`/api/health` + `/` + `/login` = 200).**
+> Merged the three feature branches into `main` in dep-order 35→36→37 (schema.prisma / tRPC appRouter / nav-items
+> union-merges; docs unioned). Consolidated release v0.28.0 (7 pkgs bumped, categorized changelog, tag). Full gate
+> green on the merged tree: typecheck 7/7 · lint clean · 428 unit tests (236 DB-gated skip w/o DB) · build 1/1.
+> Dev rebuilt off main (Rule 39) + browser-smoked: Calendar home, /notes, /insights all render, 0 console errors,
+> fisherfolk count 3,181 preserved, footer shows v0.28.0. Prod migrate deploy applied both additive migrations
+> (`add_calendar_activities`, `add_field_diary_notes`); prod DB backed up first; reseed-never.
+> - **FIS-35 Calendar of Activities** — unified agenda home at `/[tenant]/dashboard`; old dashboard → `/[tenant]/insights`.
+> - **FIS-36 Field Diary / Notes** — stamped TipTap notes at `/[tenant]/notes`, private-by-default, 14-day back-date.
+> - **FIS-37 mobile auth (server foundation)** — bearer-token login/me endpoints + tRPC bearer context (dormant).
+>
+> **⏳ NEXT / OWED:** FIS-37 **Expo mobile app** (self-hosted/downloadable per owner decision — dedicated follow-on,
+> not browser-verifiable from this seat); PRODUCT.md back-port of FIS-35 + FIS-36 (Rule 1, human-owned). All other
+> pending items remain GATED (FIS-10 ordinance; demo refresh + FIS-34 on EC2 access) or CROSS-SEAT (AIEF, per-app site-access).
+
+---
+
+### (superseded) Prior state — FIS-35 branch build (2026-09-05, pre-merge)
 
 > **Owner (resume session):** explained FIS-10 (aquaculture, ordinance-gated); demo/FIS-34 stays held; **pushed** the v0.27.0
 > docs/plans commit (`f5c6a2e` → origin); then **"start FIS-35 then FIS-36 then FIS-37."**
