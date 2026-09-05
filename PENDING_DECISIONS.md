@@ -19,14 +19,15 @@ Module A (scaffold + tRPC/SecureStore auth spine + login/home screens, wired to 
 branch `feat/fis37-mobile-app` (`c52b6c5`, 17 files, LOCAL/HARD HOLD). ⚠ **NOT yet installed / typechecked /
 device-verified** — see the install gate below.
 
-- [ ] **⚙ [WHAT/validation] FIS-37 mobile install gate — repo-root `node-linker=hoisted`.** pnpm + React Native
-  needs `node-linker=hoisted` in the **repo-root `.npmrc`** (none exists today) before `pnpm install` will produce
-  an RN-resolvable tree. This is a **monorepo-wide** change that alters `apps/web`'s install topology → must be
-  re-validated (web typecheck + build + a smoke) before it lands. Until this is done, the mobile app can't be
-  typechecked/bundled and **Modules B/C + device QA are blocked**. Options: (a) add root `node-linker=hoisted` +
-  re-verify web, then install + `expo-doctor` + bundle the mobile app; (b) keep the mobile app in a **separate
-  repo** (no monorepo linker change — loses direct `@frms/shared`/`@frms/api-client` workspace reuse). Recommend
-  (a). Owner call because it touches the shipped web app's build. (Bring-up steps: `apps/mobile/README.md`.)
+- [x] ✅ **RESOLVED (2026-09-05, owner "do option A") — install gate cleared + M1 A+B built & verified.** Added
+  repo-root `.npmrc` `node-linker=hoisted` + `pnpm.overrides` react/react-dom=19.2.3; **`apps/web` re-verified GREEN**
+  (typecheck+lint+build — no regression). Mobile Modules A (auth spine) + B (QR scan + search + read-only status)
+  built on `feat/fis37-mobile-app`. Verified: mobile `tsc` clean, **expo-doctor 21/21**, **`expo export` bundles**.
+  LOCAL/HARD HOLD.
+- [ ] **FIS-37 mobile — remaining follow-on (needs a physical device — can't be done from this WSL seat):**
+  device/emulator QA (login round-trip against the dev API, camera QR scan, confirm single-React at runtime);
+  Module C polish (RBAC-aware action gating, nav shell); an EAS `android-apk` build → sideload for field testing
+  (`eas.json` profile already present). Owner: when ready to device-test, run the `apps/mobile/README.md` bring-up.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
