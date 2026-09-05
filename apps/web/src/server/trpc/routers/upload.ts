@@ -26,6 +26,7 @@ const ENTITY_TYPES = [
   "ayuda-upload",
   "kanban-attachment",
   "id-template-bg",
+  "note-photo",
 ] as const;
 
 const MAX_BYTES_BY_ENTITY: Record<(typeof ENTITY_TYPES)[number], number> = {
@@ -36,6 +37,7 @@ const MAX_BYTES_BY_ENTITY: Record<(typeof ENTITY_TYPES)[number], number> = {
   "ayuda-upload": 15 * 1024 * 1024,
   "kanban-attachment": 15 * 1024 * 1024,
   "id-template-bg": 5 * 1024 * 1024,
+  "note-photo": 5 * 1024 * 1024,
 };
 
 export const uploadRouter = createTRPCRouter({

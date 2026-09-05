@@ -15,6 +15,17 @@ Human-readable per-session accomplishment ledger (newest on top). The dense relo
 💬 Decisions locked (DECISIONS_LOG 2026-09-05): Calendar replaces the home (heatmap→/insights); announce allowed for admins+encoder+bantay_dagat (not viewer); reuse KanbanTask for events; hand-rolled grid; recurrence/notifications/week-day views = later phases.
 💬 FIS-10 explained: it's the aquaculture (fish-farming) sub-registration — held because it depends on the January city ordinance amendments; we shouldn't build the required fields ahead of the law.
 ⏳ Next — FIS-36 (diary/notes→projects), then FIS-37 (mobile app). FIS-35 Phase 2/3 (week/day views, notifications, recurrence) available if wanted.
+## 2026-09-05 — FIS-36 Field Diary (Phase 1) built + browser-verified — LOCAL / HARD HOLD
+
+**In your words:** (resume) start FIS-35, then FIS-36, then FIS-37. [This entry = FIS-36; FIS-35 is on its own branch.]
+
+✅ Done — **FIS-36 Field Diary / Notes, Phase-1 MVP**, built + browser-verified in dev (branch `feat/fis36-field-diary-notes`, 4 commits, LOCAL / HARD HOLD):
+  - A **Notion-style field diary** at `/[tenant]/notes` — staff write rich notes (TipTap editor, `/` slash menu for formatting + insert-photo) that are **always location + time stamped** (a note can't be saved without a location); inline photos upload through the existing storage adapter.
+  - Notes are **private by default** (only you + admins), with author-only edit/delete; a note can be marked "shared". Audit-logged.
+  - List / detail / compose / edit pages; "Field Diary" in the sidebar.
+  - 638 tests green (17 new note tests); tsc/lint/build clean. Live smoke: wrote a stamped note → saved → rendered on its detail page and in the list, 0 console errors; the save-gate correctly blocked until a location + label were set.
+💬 Decisions (DECISIONS_LOG 2026-09-05, conservative defaults): TipTap v3 editor; **notes private-by-default** (⚠ confirm the sharing policy); back-dating allowed up to 14 days (⚠ confirm window); accomplishment report + entity-mention chips + Projects module = later phases (2/3/4).
+⏳ Next — FIS-37 (mobile app): needs your decisions first (mobile auth strategy, Expo vs bare, offline scope, app-store accounts) — it's the one genuinely gated on [WHAT]s + external accounts before any build.
 
 
 ## 2026-09-04 (owner batch — 3 plans + 2 fixes) — shipped Phase D + 2 fixes as v0.27.0; drafted 3 feature plans

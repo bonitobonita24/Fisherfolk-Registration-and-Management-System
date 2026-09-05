@@ -22,6 +22,8 @@ export const FEATURE_LABELS: Record<FeatureKey, string> = {
   import: "Data Import",
   audit_log: "Audit Log",
   data_management: "Data Management",
+  notes: "Field Diary",
+  projects: "Projects",
 };
 
 export const MATRIX_ACTION_LABELS: Record<string, string> = {

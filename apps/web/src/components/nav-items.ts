@@ -22,6 +22,7 @@ import {
   Network,
   QrCode,
   LineChart,
+  NotebookPen,
 } from "lucide-react";
 import { hasPermission, type Actor, type FeatureKey } from "@frms/shared/rbac";
 import type { UserRole } from "@frms/shared/types";
@@ -180,6 +181,14 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Operations",
     items: [
+      {
+        // FIS-36 Field Diary — Phase 1. Every role gets FULL_FEATURE_PERMISSIONS
+        // on `notes` by default (own-notes CRUD), so this is visible fleet-wide.
+        label: "Field Diary",
+        icon: NotebookPen,
+        href: "/notes",
+        feature: "notes",
+      },
       {
         label: "Edit Requests",
         icon: FileEdit,

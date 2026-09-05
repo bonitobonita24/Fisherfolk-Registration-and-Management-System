@@ -127,6 +127,11 @@ export const DOMAIN_ROLE_PRESETS: Record<
     kanban: WRITE_UPDATE_NO_DELETE_FEATURE_PERMISSIONS,
     id_generator: WRITE_UPDATE_NO_DELETE_FEATURE_PERMISSIONS,
     notifications: WRITE_UPDATE_NO_DELETE_FEATURE_PERMISSIONS,
+    // FIS-36 Field Diary — full CRUD (incl. delete): a diary entry is the
+    // encoder's own field note, not shared operational data; the router
+    // additionally enforces author-only delete/update (tenant_admin+ may
+    // act on any author's note) on top of this feature-level grant.
+    notes: FULL_FEATURE_PERMISSIONS,
   }),
 
   /**

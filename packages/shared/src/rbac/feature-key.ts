@@ -33,6 +33,8 @@ export const FEATURE_KEYS = [
   "import",
   "audit_log",
   "data_management",
+  "notes",
+  "projects",
 ] as const;
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number];

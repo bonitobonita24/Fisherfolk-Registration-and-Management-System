@@ -893,3 +893,20 @@ Data model: additive only — new nullable/defaulted columns on `KanbanTask` (`c
 `endAt`, `allDay`, `kind`, `audience`) + new `KanbanTaskShare` join table + new enums `KanbanTaskKind`,
 `TaskAudience`. No `ALTER TYPE`, no destructive change, existing rows valid (calendar falls back
 `startAt ?? dueDate`). Locked: yes. HARD HOLD — local commits only; deploy owner-gated.
+## FIS-36 Field Diary / Notes → Projects — [WHAT] defaults (2026-09-05, owner green-lit build)
+Owner: "start FIS-35 then FIS-36 then FIS-37." FIS-36 is a 4-phase module (`docs/plans/PLAN_diary_notes_projects.md`);
+this session builds **Phase 1 (usable stamped field diary)**. The 6 plan [WHAT]s taken to conservative best-judgment
+defaults (documented; owner may override) — the two ⚠ flagged are worth explicit owner confirmation:
+  - **D1 Editor** — TipTap v2 (ProseMirror, headless, JSON doc → Note.body). _[HOW]_ (verify API via context7, Rule 30).
+  - **D2 Report format** — print→PDF first (Phase 3), XLSX follow-on reusing report.ts ExcelJS; DOCX only on demand. _[HOW]_
+  - **D3 Privacy** ⚠ — **notes PRIVATE by default** (author + tenant_admin+ only); author may mark a note `shared`
+    (visible to tenant users with notes:view). This is the SAFEST/most privacy-conservative default (RA 10173 / Rule 33,
+    notes reference citizen PII). Owner may widen/narrow. Audit-logged (entityType "note").
+  - **D4 Projects vs Kanban** — Projects/ProjectTodo DEFERRED (Phase 4); when built, lightweight ProjectTodo checklist +
+    LINK KanbanTask (never merge the models). _[HOW]_
+  - **D5 Chip depth** — entity chip = labelSnapshot (link + snapshot text), no live-fetch detail block in MVP. _[HOW]_
+  - **D6 Back-dating capturedAt** ⚠ — allow back-dating within a 14-day window (payroll integrity); default now(). Owner
+    may change the window or lock to createdAt.
+Data model: additive migration (Note, NoteMedia, NoteEntityRef + enums NoteVisibility/NoteRefType + FeatureKey values
+`notes`,`projects`); Project* models NOT added yet. Notes are personal data → authed routes noindex (Rule 35), audit-logged
+(Rule 33). PRODUCT.md back-port owed on accept (Rule 1). Locked: Phase-1 defaults; HARD HOLD — local commits only.

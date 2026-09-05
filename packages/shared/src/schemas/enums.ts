@@ -24,6 +24,8 @@ import {
   IDTemplateStatus,
   CommentTicketStatus,
   EntityType,
+  NoteVisibility,
+  NoteRefType,
 } from "../types/enums";
 
 export const fisherfolkStatusSchema = z.enum([
@@ -179,4 +181,21 @@ export const entityTypeSchema = z.enum([
   EntityType.KANBAN_TASK,
   EntityType.AYUDA_PROGRAM,
   EntityType.AYUDA_BENEFICIARY,
+]);
+
+export const noteVisibilitySchema = z.enum([
+  NoteVisibility.PRIVATE,
+  NoteVisibility.SHARED,
+]);
+
+export const noteRefTypeSchema = z.enum([
+  NoteRefType.FISHERFOLK,
+  NoteRefType.VESSEL,
+  NoteRefType.VIOLATION,
+  NoteRefType.AYUDA_PROGRAM,
+  NoteRefType.AYUDA_BENEFICIARY,
+  NoteRefType.HOUSEHOLD,
+  NoteRefType.FAMILY,
+  NoteRefType.KANBAN_TASK,
+  NoteRefType.FISH_CATCH,
 ]);

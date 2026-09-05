@@ -196,6 +196,27 @@ export const EntityType = {
 } as const;
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
+// FIS-36 Field Diary — mirrors Prisma `enum NoteVisibility` / `enum
+// NoteRefType` (packages/db/prisma/schema.prisma).
+export const NoteVisibility = {
+  PRIVATE: "private",
+  SHARED: "shared",
+} as const;
+export type NoteVisibility = (typeof NoteVisibility)[keyof typeof NoteVisibility];
+
+export const NoteRefType = {
+  FISHERFOLK: "fisherfolk",
+  VESSEL: "vessel",
+  VIOLATION: "violation",
+  AYUDA_PROGRAM: "ayuda_program",
+  AYUDA_BENEFICIARY: "ayuda_beneficiary",
+  HOUSEHOLD: "household",
+  FAMILY: "family",
+  KANBAN_TASK: "kanban_task",
+  FISH_CATCH: "fish_catch",
+} as const;
+export type NoteRefType = (typeof NoteRefType)[keyof typeof NoteRefType];
+
 export const GearType = {
   GILL_NET: "GILL_NET",
   HOOK_AND_LINE: "HOOK_AND_LINE",
