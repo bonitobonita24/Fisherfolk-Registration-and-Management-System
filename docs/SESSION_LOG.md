@@ -3,6 +3,22 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-05 (later) — FIS-37 mobile app kicked off: Phase M1 complete (Expo, self-hosted)
+
+**In your words:** kick off FIS-37 → then "do the recommended option A" (root node-linker change, re-verify web, install, continue Modules B/C) → then "yes do it" for Module C polish.
+
+✅ Done — **FIS-37 Expo mobile app, Phase M1 COMPLETE** (branch `feat/fis37-mobile-app`, 9 commits, LOCAL / HARD HOLD, nothing pushed):
+  - **Sign-in** on the phone using the bearer-token endpoint we shipped in v0.28.0; token stored in the phone's secure keychain and reused on every call.
+  - **Scan a fisherfolk QR** with the camera → instantly resolves the record and shows its status; **manual search** by name/ID as the fallback; a **read-only detail** view. All read-only, as agreed for field staff.
+  - **Tabbed app shell** (Scan · Search · Profile) with icons; screens are **hidden from staff whose role can't view fisherfolk** (the server still enforces this for real — the app just hides what you can't use).
+  - Built as a **self-hosted, sideloadable Android app — no App Store / Play Store**, per your decision.
+✅ Done — **made the monorepo able to build a React Native app** (root `.npmrc` hoisted linker + pinning React to one version). ⚠ These are repo-wide, so I **re-checked the website after every change: typecheck + build + 428 tests all green** — the live web app is unaffected.
+✅ Verified (as far as possible without a phone): mobile typecheck clean · Expo health check **21/21** · the app **fully bundles** (3.2 MB).
+🔨 Partial — the app has **never actually run on a phone** (this machine has no device/emulator). That's the next real step.
+⏳ Next — device test (login round-trip, camera scan) then build a sideloadable APK: `eas build --profile android-apk`. Steps are in `apps/mobile/README.md`.
+💬 Decisions — mobile = self-hosted/downloadable, no store accounts needed; push notifications deferred. **Your call pending:** whether to merge this branch into `main` (it carries the two repo-wide install changes), and — before Phase M2 — whether non-admin field staff should be allowed to **create violations** (today only admins can).
+⛔ Blocked — device testing (no hardware here); FIS-10 (Jan ordinance); demo refresh + FIS-34 (EC2 access).
+
 ## 2026-09-05 — Merged + shipped FIS-35 · FIS-36 · FIS-37 to production (v0.28.0)
 
 **In your words:** FIS-36 — yes to all; FIS-37 — not app store, self-hosted downloadable; then merge/ship all the branches and do all other pending tasks (orchestrated).
