@@ -4,6 +4,31 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.28.0 — 2026-09-05
+
+Three features integrated from their branches (FIS-35 · FIS-36 · FIS-37).
+
+### [FEATURE]
+- **FIS-35 Calendar of Activities** — a unified agenda **home** at `/[tenant]/dashboard`: month + list
+  view of your tasks, shared items, org announcements, and record-linked to-dos; create tasks or scheduled
+  **Events**, share to specific staff, or announce org-wide (admins + encoder + bantay-dagat). The prior
+  heatmap/KPI dashboard relocated intact to `/[tenant]/insights` (nothing removed).
+- **FIS-36 Field Diary / Notes** — a Notion-style stamped field diary at `/[tenant]/notes`: TipTap editor
+  with a `/` slash menu + inline photos, **mandatory location + time stamp** on every note, **private by
+  default** (author + admins), author-only edit/delete, back-dating within a 14-day window, audit-logged.
+- **FIS-37 Mobile auth (server foundation)** — bearer-token (JWT via `jose`) login + `me` endpoints and a
+  tRPC bearer-context path, reusing the extracted `authorizeCredentials` shared with web Auth.js. Dormant
+  server surface for the self-hosted, downloadable mobile app (no store distribution); Expo client is a
+  dedicated follow-on.
+
+### [TEST]
+- New unit/integration coverage for the calendar agenda router, the notes router, and the mobile
+  bearer-token module + auth router (DB-gated integration tests run under a live dev DB).
+
+### [DOCS]
+- Owner decisions locked: FIS-36 private-by-default notes + 14-day back-date approved; FIS-37 distribution
+  = self-hosted/downloadable, no App Store / Play Store, push notifications deferred.
+
 ## v0.27.0 — 2026-09-04
 
 ### [FEATURE]
