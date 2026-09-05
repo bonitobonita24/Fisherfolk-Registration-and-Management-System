@@ -18,9 +18,23 @@ export default function HomeScreen() {
       <Text style={styles.meta}>Role: {user?.role ?? "—"}</Text>
       <Text style={styles.meta}>Tenant: {user?.tenantSlug ?? "—"}</Text>
 
-      <Text style={styles.note}>
-        QR scan + search — coming in Module B (FIS-37).
-      </Text>
+      <Pressable
+        style={styles.primaryButton}
+        onPress={() => router.push("/scan")}
+        accessibilityRole="button"
+        accessibilityLabel="Scan QR"
+      >
+        <Text style={styles.buttonText}>Scan QR</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.secondaryButton}
+        onPress={() => router.push("/search")}
+        accessibilityRole="button"
+        accessibilityLabel="Search fisherfolk"
+      >
+        <Text style={styles.secondaryButtonText}>Search fisherfolk</Text>
+      </Pressable>
 
       <Pressable
         style={styles.button}
@@ -51,12 +65,25 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 4,
   },
-  note: {
+  primaryButton: {
     marginTop: 24,
+    backgroundColor: "#1d4ed8",
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  secondaryButton: {
+    marginTop: 12,
     marginBottom: 24,
-    fontSize: 14,
-    color: "#888",
-    fontStyle: "italic",
+    backgroundColor: "#f3f4f6",
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  secondaryButtonText: {
+    color: "#111",
+    fontSize: 16,
+    fontWeight: "600",
   },
   button: {
     backgroundColor: "#b91c1c",

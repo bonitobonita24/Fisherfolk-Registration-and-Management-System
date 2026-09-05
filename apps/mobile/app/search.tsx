@@ -1,0 +1,187 @@
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { StatusBadge } from "@/components/StatusBadge";
+import { useTrpc } from "@/lib/auth";
+
+// Inferred from `fisherfolk.list` — one entry of the `items` array.
+type ListResult = Awaited<ReturnType<ReturnType<typeof useTrpc>["fisherfolk"]["list"]["query"]>>;
+type FisherfolkRow = ListResult["items"][number];
+
+const DEBOUNCE_MS = 350;
+
+export default function SearchScreen() {
+  const trpc = useTrpc();
+  const [query, setQuery] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<FisherfolkRow[]>([]);
+
+  useEffect(() => {
+    const handle = setTimeout(() => setDebounced(query.trim()), DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [query]);
+
+  useEffect(() => {
+    if (debounced.length === 0) {
+      setResults([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    trpc.fisherfolk.list
+      .query({ search: debounced, limit: 25 })
+      .then((res) => {
+        if (!cancelled) setResults(res.items);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Search failed.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced, trpc]);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title} accessibilityRole="header">
+        Search fisherfolk
+      </Text>
+
+      <TextInput
+        style={styles.input}
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search name or ID number"
+        autoCapitalize="none"
+        autoCorrect={false}
+        accessibilityLabel="Search name or ID number"
+      />
+
+      <Pressable
+        onPress={() => router.push("/scan")}
+        accessibilityRole="link"
+        accessibilityLabel="Scan a QR code"
+        style={styles.link}
+      >
+        <Text style={styles.linkText}>Scan a QR code</Text>
+      </Pressable>
+
+      {loading ? <ActivityIndicator style={styles.spinner} /> : null}
+
+      {error ? (
+        <Text style={styles.errorText} accessibilityRole="alert">
+          {error}
+        </Text>
+      ) : null}
+
+      {!loading && !error && debounced.length > 0 && results.length === 0 ? (
+        <Text style={styles.empty}>No matches</Text>
+      ) : null}
+
+      <FlatList
+        data={results}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Pressable
+            style={styles.row}
+            onPress={() => router.push({ pathname: "/fisherfolk/[id]", params: { id: item.id } })}
+            accessibilityRole="button"
+            accessibilityLabel={`View ${item.fullName}`}
+          >
+            <View style={styles.rowText}>
+              <Text style={styles.rowName}>{item.fullName}</Text>
+              <Text style={styles.rowMeta}>{item.barangay ?? "—"}</Text>
+            </View>
+            <StatusBadge status={item.status} />
+          </Pressable>
+        )}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#d0d0d0",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    backgroundColor: "#fafafa",
+    marginBottom: 8,
+  },
+  link: {
+    marginBottom: 16,
+  },
+  linkText: {
+    color: "#1d4ed8",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  spinner: {
+    marginBottom: 12,
+  },
+  errorText: {
+    color: "#c0392b",
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  empty: {
+    color: "#888",
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#e5e7eb",
+  },
+  rowText: {
+    flexShrink: 1,
+    paddingRight: 12,
+  },
+  rowName: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  rowMeta: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 2,
+  },
+});
