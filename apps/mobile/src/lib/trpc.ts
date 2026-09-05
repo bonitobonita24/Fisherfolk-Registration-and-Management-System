@@ -2,6 +2,7 @@
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { AppRouter } from "@frms/web-router";
 import { createApiClient, httpBatchLink } from "@frms/api-client";
+import superjson from "superjson";
 import { TRPC_URL } from "./api-url";
 
 export type MobileTrpcClient = ReturnType<typeof createApiClient<AppRouter>>;
@@ -14,6 +15,8 @@ export function makeTrpcClient(getToken: () => Promise<string | null>): MobileTr
   return createApiClient<AppRouter>([
     httpBatchLink({
       url: TRPC_URL,
+      // Must match the server's transformer (apps/web/src/server/trpc/trpc.ts).
+      transformer: superjson,
       async headers() {
         const token = await getToken();
         return token ? { Authorization: `Bearer ${token}` } : {};

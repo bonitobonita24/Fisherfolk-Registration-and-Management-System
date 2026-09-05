@@ -9,7 +9,6 @@ const config: ExpoConfig = {
   scheme: "frmsfield",
   version: "0.28.0",
   orientation: "portrait",
-  newArchEnabled: true,
   ios: {
     bundleIdentifier: "ph.gov.calapan.frms",
   },

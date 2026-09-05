@@ -2,8 +2,10 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "skipLibCheck": true,
+    "lib": ["esnext", "dom", "dom.iterable"],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*", "../web/src/*"],
       "@frms/web-router": ["../web/src/server/trpc/root.ts"]
     }
   },

@@ -14,11 +14,13 @@ import { makeTrpcClient, type MobileTrpcClient } from "./trpc";
 const TOKEN_KEY = "frms.token";
 const USER_KEY = "frms.user";
 
+// Shape mirrors the server's `mobileAuth.login` -> `user` payload, where
+// name/tenantSlug are nullable in the underlying user record.
 export type MobileUser = {
   id: string;
-  name: string;
+  name: string | null;
   role: string;
-  tenantSlug: string;
+  tenantSlug: string | null;
 };
 
 export type AuthStatus = "loading" | "authed" | "anon";
