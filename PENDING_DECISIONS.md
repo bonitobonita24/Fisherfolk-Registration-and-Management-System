@@ -24,10 +24,17 @@ device-verified** — see the install gate below.
   (typecheck+lint+build — no regression). Mobile Modules A (auth spine) + B (QR scan + search + read-only status)
   built on `feat/fis37-mobile-app`. Verified: mobile `tsc` clean, **expo-doctor 21/21**, **`expo export` bundles**.
   LOCAL/HARD HOLD.
-- [ ] **FIS-37 mobile — remaining follow-on (needs a physical device — can't be done from this WSL seat):**
-  device/emulator QA (login round-trip against the dev API, camera QR scan, confirm single-React at runtime);
-  Module C polish (RBAC-aware action gating, nav shell); an EAS `android-apk` build → sideload for field testing
-  (`eas.json` profile already present). Owner: when ready to device-test, run the `apps/mobile/README.md` bring-up.
+- [x] ✅ **Phase M1 COMPLETE (Modules A + B + C)** — auth spine, QR scan + search + read-only status, tab shell +
+  RBAC gating. Verified: mobile typecheck · expo-doctor 21/21 · `expo export` bundles; `apps/web` re-verified
+  GREEN (typecheck + build + 428 tests) after every install. 8 commits on `feat/fis37-mobile-app`, LOCAL/HARD HOLD.
+- [ ] **FIS-37 mobile — device bring-up (needs a physical device — cannot be done from this WSL seat):**
+  device/emulator QA (login round-trip against the dev API, camera QR scan, confirm single-React at runtime),
+  then an EAS `android-apk` build → sideload for field testing (`eas.json` profile already present). Owner: run
+  the `apps/mobile/README.md` bring-up when ready to field-test.
+- [ ] **FIS-37 Phase M2+ (not started):** violation entry (camera evidence + GPS) — ⚠ carries a real [WHAT]:
+  `violation.create` is `adminProcedure` today, so non-admin field staff cannot create violations without either
+  widening it or adding a `matrixProcedure("violations","create")` variant. Also M2 offline write outbox, M3
+  notes (align to the FIS-36 notes router), M4 refresh-token rotation. See `docs/plans/PLAN_mobile_app.md` §7.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)

@@ -52,20 +52,43 @@ It never imports server or `@frms/db` runtime code — enforced by an ESLint
 
 ## Status
 
-- Scaffold + auth spine (login screen, token/user persistence via `expo-secure-store`, protected
-  tRPC calls with `Authorization: Bearer <token>`) is **authored**, matching the server contract
-  shipped in `mobileAuth.login` / `mobileAuth.me`.
-- **NOT yet installed, built, or device-verified** — this seat has no device/emulator. The next
-  step is running the Bring-up steps above and manually verifying: login succeeds against a real
-  dev server, the token survives an app restart (SecureStore), `mobileAuth.me` succeeds while
-  signed in, and sign-out clears the session.
-- Root `.npmrc` `node-linker=hoisted` change and its impact on `apps/web` has **not** been
-  validated — do this as part of first install.
+**Phase M1 COMPLETE (Modules A + B + C) — verified as far as is possible without a device.**
 
-## Next (Module B / C)
+- **Module A** — scaffold, tRPC client (bearer headers, type-only `AppRouter`), `expo-secure-store`
+  auth, login screen. Matches the server contract shipped in `mobileAuth.login` / `mobileAuth.me`.
+- **Module B** — QR scan (`expo-camera` -> `fisherfolk.verifyByQr`), debounced manual search
+  (`fisherfolk.list`), read-only fisherfolk status detail, `StatusBadge`.
+- **Module C** — `(tabs)` nav shell (Scan | Search | Profile) with Ionicons, `useCan()` RBAC gating
+  on `fisherfolk:view` (cosmetic only — the server is authoritative), profile capability table.
 
-- QR scan (`expo-camera` → `fisherfolk.verifyByQr` or equivalent lookup procedure).
-- Manual fisherfolk search screen.
-- RBAC-aware gating of screens/actions based on `user.role` (mirror the web app's tenant-RBAC
-  model — Rule 34).
-- Revisit offline/read-caching only if a future owner decision changes the online-first stance.
+Verified on this seat:
+
+| Check | Result |
+|---|---|
+| `pnpm --filter @frms/mobile typecheck` | clean (end-to-end types vs the real `AppRouter`) |
+| `npx expo-doctor` | 21/21 checks pass |
+| `npx expo export --platform android` | bundles (3.2 MB Hermes, 1395 modules) |
+| `apps/web` regression after the monorepo install changes | typecheck + build + 428 tests GREEN |
+
+Install changes that were made and validated: root `.npmrc` `node-linker=hoisted` and
+`pnpm.overrides` react/react-dom=19.2.3 (single React instance, required by RN). Both are
+monorepo-wide; `apps/web` was re-verified green after each.
+
+**NOT yet done — needs a physical device (this seat has none):** run the app and confirm the
+login round-trip against a real dev server, that the token survives an app restart (SecureStore),
+that the camera QR scan resolves a real fisherfolk QR, and that there is a single React instance at
+runtime. Then produce a sideloadable build: `eas build --profile android-apk`.
+
+## Next (Phase M2+)
+
+Per `docs/plans/PLAN_mobile_app.md` §7 phasing — none of this is started:
+
+- **M2 — Violation entry** (camera evidence + GPS via `violation.create`).
+  ⚠ Carries a real `[WHAT]`: `violation.create` is `adminProcedure` today, so non-admin field staff
+  cannot create violations without either widening it or adding a
+  `matrixProcedure("violations","create")` variant. Owner decision before build.
+  Also needs `vessel.verifyByQr` (vessel QR is minted, resolver missing) and an offline write outbox.
+- **M3 — Notes**, aligned to the FIS-36 notes router (shipped in v0.28.0) rather than a second model.
+- **M4 — Hardening**: refresh-token rotation (today's token is single, with `expiresAt`), OTA update
+  flow, broader read screens.
+- Offline read-caching stays out until a future owner decision changes the online-first stance.
