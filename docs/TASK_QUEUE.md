@@ -33,6 +33,15 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   scan, single-React runtime check) → EAS `android-apk` build → sideload. ⛔ **BLOCKED** — no physical device on
   this WSL seat. Owner runs `apps/mobile/README.md` bring-up when ready. `feature` `mobile`
 
+### 🔴 Agent-found — un-gated [HOW] (fix anytime; does NOT block web deploy)
+
+- 🔴 **`@frms/mobile` lint fails in CI (`expo lint` → "all files matching glob are ignored").** Pre-existing,
+  arrived with the FIS-37 M1 mobile merge (prod is web-only, unaffected — `docker-publish.yml` builds
+  `apps/web/Dockerfile` only and is independent of `ci.yml`). Root cause: ESLint 8.57 resolves `expo lint`
+  in legacy mode and ignores the flat `apps/mobile/eslint.config.js`; forcing `ESLINT_USE_FLAT_CONFIG=true`
+  did not help (expo CLI passes its own `src` glob). Fix = align the mobile lint invocation to the flat
+  config (expo SDK 57 lint setup) so `pnpm turbo run lint` is green on main. `agent-found 2026-09-08` `chore` `mobile`
+
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 
 - 🟡 **FIS-37a — Expo mobile app Phase M1 MERGED to `main`** (`a4a9055`); gate green on merged tree (typecheck

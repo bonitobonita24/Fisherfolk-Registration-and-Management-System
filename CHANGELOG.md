@@ -4,6 +4,31 @@ All notable changes per release. A version is assigned at each push/merge to `ma
 entries are auto-derived from Conventional-Commit types. See
 `~/.claude/rules/release-changelog-discipline.md`.
 
+## v0.29.0 — 2026-09-08
+
+FIS-37c violation-filing authorization (prod-facing) plus the FIS-37 Expo mobile app Phase M1
+integrated into the repo (client-only; not part of the web deployment).
+
+### [FEATURE]
+- **FIS-37c — field enforcement staff may file violations** — `violation.create` migrated off the fixed
+  `adminProcedure` allow-list onto the data-driven RBAC matrix (`matrixProcedure('violations','write')`).
+  The 3 fixed admin tiers **plus `bantay_dagat`** (enforcement preset) and any custom role holding the
+  grant may now create violations; encoder/viewer remain denied by default. **CREATE-only** — `update`
+  and `lift` stay `adminProcedure` (`05f68d4`).
+- **FIS-37 Mobile app — Phase M1 (Expo client)** — sign-in against the mobile bearer-token endpoints, QR
+  scan + manual fisherfolk search, read-only registration status, and a tab-nav shell with RBAC-aware
+  gating. Self-hosted / sideloadable (no store distribution). Client code only — **not built or served by
+  the web deployment**; device bring-up + APK build remain a physical-device follow-on (`c52b6c5`,
+  `5332a38`, `a7cbc93`).
+
+### [TEST]
+- New `violation.test.ts` covering the matrix-gated create path (bantay_dagat allowed; encoder/viewer
+  denied; admin tiers allowed) — DB-gated integration coverage (`05f68d4`).
+
+### [DOCS]
+- FIS-32 — paste-ready PRODUCT.md back-port candidates O/P for FIS-35 (Calendar) and FIS-36 (Field
+  Diary); candidates only, the PRODUCT.md edit remains a human-only Rule 1 step (`6c70bd3`).
+
 ## v0.28.0 — 2026-09-05
 
 Three features integrated from their branches (FIS-35 · FIS-36 · FIS-37).
