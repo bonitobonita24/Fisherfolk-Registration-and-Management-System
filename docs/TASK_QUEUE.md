@@ -15,21 +15,21 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ### ⛔ Gated / blocked — the 4 live Squirlnote Pending (NONE un-gated; the loop must DEFER, not build)
 
-- 🔴 **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already a canonical
+- ⛔ **FIS-10 — Aquaculture sub-registration (subcategories + fields).** "Aquaculture" already a canonical
   category (`lib/normalize/types.ts`). NEW = subcategory taxonomy + aquaculture-only fields: brackish
   (fishpond/fishpen/fishcage/fishcorral) + freshwater (backyard variants); capture land area, lease-or-owned,
   commodity type, culture method (poly/monoculture); operators register (not non-operator landowners).
   ⛔ **ORDINANCE-GATED** — full impl pending the January ordinance amendments; build structure now, activate later.
   [WHAT]: new Prisma model vs JSON extension; which fields required. `source: owner meeting 2026-07-09` `feature` `db`
-- 🔴 **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the new
+- ⛔ **FIS-34 — Refresh landing showcase screenshots (real browser) + redeploy demo.** Feature the new
   maps/location-capture surfaces headless can't capture (software-WebGL composites map canvas black); overwrite
   `public/showcase/*.png`. ⛔ **BLOCKED** — needs a real GPU browser + demo/EC2 access (Server-Setups migration).
   `owner 2026-09-01` `design`
-- 🔴 **FIS-23 — Retarget demo + staging CI/CD deploys to the new AWS box (post-relocation).** Demo/staging now
+- ⛔ **FIS-23 — Retarget demo + staging CI/CD deploys to the new AWS box (post-relocation).** Demo/staging now
   run on the AWS box, not the old Hostinger `push-to-demo.sh` target. ⏳ **NEEDS OWNER** — the actual box/EIP
   value (`13.213.232.194` vs `18.138.220.90` vs other) before I touch deploy config; actual deploy stays
   access-gated. `agent-found` `infra`
-- 🔴 **FIS-37b — Mobile device bring-up + sideloadable APK.** Device/emulator QA (login round-trip, camera QR
+- ⛔ **FIS-37b — Mobile device bring-up + sideloadable APK.** Device/emulator QA (login round-trip, camera QR
   scan, single-React runtime check) → EAS `android-apk` build → sideload. ⛔ **BLOCKED** — no physical device on
   this WSL seat. Owner runs `apps/mobile/README.md` bring-up when ready. `feature` `mobile`
 
