@@ -276,3 +276,43 @@
   Reports role-label mentions.
 - **Deferred (logged, not built):** the data-driven custom-role permission-matrix + role-builder UI
   (PENDING_DECISIONS PD-005).
+
+---
+
+## Candidate O — Calendar of Activities (FIS-35, shipped v0.28.0)
+
+- **Status:** ⏳ PENDING owner back-port (Rule 1 — PRODUCT.md is human-only; this is paste-ready text, agent does NOT write PRODUCT.md). Squirlnote FIS-32.
+- **Feature shipped:** merged to `main` + prod v0.28.0 (`sha-ab4abd4`), verified live. Migration `add_calendar_activities`.
+- **Proposed PRODUCT.md addition — new subsection under `## Modules + Features`:**
+  > ### Calendar of Activities
+  > - The tenant home at `/{tenant}/dashboard` is a unified **agenda calendar** (month + list views) of
+  >   tasks and events; the previous stats/heatmap dashboard was relocated intact to `/{tenant}/insights`.
+  > - Staff schedule **Tasks** and **Events** (start/end, all-day) from a single "New" dialog; each item can
+  >   be kept private, **shared** with specific users, or **announced** tenant-wide.
+  > - **Announce-to-all** is available to Tenant Manager/Superadmin/Admin, Encoder, and Bantay Dagat; the
+  >   Viewer role is excluded from announcing.
+  > - Agenda combines the viewer's own items, items shared with them, tenant announcements, and
+  >   entity-linked activities, date-ranged, with a "mine only" filter.
+  > - (Deferred to later phases: recurrence, notification fan-out, week/day views.)
+- **Data Entities note:** the existing `KanbanTask` entity gained `createdById`, `startAt`, `endAt`,
+  `allDay`, `kind` (TASK/EVENT), `audience` (PRIVATE/SHARED/ANNOUNCED); a new **KanbanTaskShare**
+  join entity records per-user shares. Owner may add a one-line KanbanTask/KanbanTaskShare mention under
+  `## Data Entities` if that section enumerates task fields.
+- **Recommended section:** **## Modules + Features** (new `### Calendar of Activities`, near Daily Operations).
+
+---
+
+## Candidate P — Field Diary / Notes (FIS-36, shipped v0.28.0)
+
+- **Status:** ⏳ PENDING owner back-port (Rule 1 — paste-ready; agent does NOT write PRODUCT.md). Squirlnote FIS-32.
+- **Feature shipped:** merged to `main` + prod v0.28.0 (`sha-ab4abd4`), verified live. Migration `add_field_diary_notes`.
+- **Proposed PRODUCT.md addition — new subsection under `## Modules + Features`:**
+  > ### Field Diary / Notes
+  > - A **Field Diary** at `/{tenant}/notes` lets staff keep rich, time-stamped notes (TipTap editor).
+  > - Notes are **private by default** to their author; each note is stamped with its author and time.
+  > - A note may be **back-dated up to 14 days** to record field activity logged after the fact.
+  > - (Foundation for a future Projects/PM module — accomplishment-report export and entity linking planned.)
+- **Data Entities note:** a new **Note** (field-diary) entity was added (author, tenant, body/richtext,
+  createdAt with back-date support, privacy flag). Owner may add a one-line **Note** mention under
+  `## Data Entities`.
+- **Recommended section:** **## Modules + Features** (new `### Field Diary / Notes`).
