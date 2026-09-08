@@ -1,6 +1,36 @@
 # FRMS — Project State
 
-## Current State (2026-09-08, LATEST) — FIS-37 M1 MERGED to main (verified) + FIS-37c violation authz built (branch) + FIS-32 back-port candidates drafted — all LOCAL/HARD HOLD
+## Current State (2026-09-08, LATEST — loop slot 12 re-verify) — independently confirmed NO un-gated work; reconciled TASK_QUEUE drift; holding on owner [WHAT]s
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Full-Auto loop iteration (owner away).** The ⚠RESCAN stamp flagged the prior handoff as unrefreshed → did NOT
+> trust its "queue drained" conclusion; re-derived from ground truth instead.
+>
+> **Independent re-verification (this iteration):**
+> - **Authoritative Squirlnote board (project FIS):** **4 Pending · 0 On-Going · 27 For Review.** All 4 Pending are
+>   gated/blocked — **FIS-10** (ordinance-gated, Jan) · **FIS-34** (real GPU browser + demo/EC2 access) · **FIS-23**
+>   retarget-deploys-to-AWS (needs owner box/EIP value) · **FIS-37b** (physical device). **No un-gated build work.**
+> - **Git:** `main` = **12 ahead of origin** (HARD HOLD). Two BUILT branches UNMERGED awaiting owner integration:
+>   `feat/fis37c-violation-create-authz` (`51bfd83`) · `docs/fis32-backport-candidates` (`0b43bac`). FIS-37 M1 already
+>   merged into `main` (`a4a9055`). Prod `frms.powerbyte.app` unchanged on **v0.28.0** (`sha-ab4abd4`), healthy.
+>
+> **✅ Done this iteration (docs-only, LOCAL/HARD HOLD):** reconciled `docs/TASK_QUEUE.md` — the long stale 🔴 batch
+> (FIS-17..39, Cargorix, etc.) was actually SHIPPED to prod v0.19.0→v0.28.0; collapsed it into "✅ Shipped
+> (historical)" so the queue no longer lists false un-gated work. Open section now mirrors the board: 4 gated
+> Pending + 4 built/drafted-awaiting-owner (FIS-37a push · FIS-37c merge · FIS-32 paste · FIS-33#3 [WHAT]).
+>
+> **⚖️ Open owner [WHAT]s (HARD HOLD — re-surfaced, not decided):** merge `feat/fis37c-violation-create-authz` +
+> `docs/fis32-backport-candidates` into `main`? Push `main` (12 ahead)? Paste FIS-32 candidates O/P into PRODUCT.md?
+> Plus FIS-23 box/EIP value, FIS-33 #3 a11y approach, and 18 open items in `PENDING_DECISIONS.md`.
+>
+> **Decision:** un-gated build queue genuinely empty; only owner-gated integration + gated/blocked items remain →
+> reboot with `--hold` to pace + re-surface, NOT stop (never `--stop` while `[WHAT]`s are open). Nothing
+> pushed/merged/deployed.
+
+---
+
+## Current State (2026-09-08) — FIS-37 M1 MERGED to main (verified) + FIS-37c violation authz built (branch) + FIS-32 back-port candidates drafted — all LOCAL/HARD HOLD
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

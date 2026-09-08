@@ -3,6 +3,21 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-08 — Loop re-verify + TASK_QUEUE drift reconcile (holding on owner [WHAT]s)
+
+**In your words:** (autonomous loop iteration — no new instruction) re-check the whole backlog for un-gated work.
+
+✅ Done (docs-only, LOCAL / HARD HOLD)
+- Independently re-verified against the **authoritative Squirlnote board** (4 Pending, all gated/blocked: FIS-10
+  ordinance · FIS-34 GPU/demo · FIS-23 AWS box value · FIS-37b device) + git (main 12-ahead, 2 built branches
+  unmerged). Confirmed **no un-gated build work** remains — did not trust the prior handoff blindly.
+- Reconciled `docs/TASK_QUEUE.md`: collapsed the long stale 🔴 batch (actually shipped to prod v0.19.0→v0.28.0)
+  into a "✅ Shipped (historical)" ledger; Open section now mirrors the board (4 gated + 4 built-awaiting-owner).
+
+💬 Held for owner: merge FIS-37c + FIS-32 branches into `main`, push `main` (12 ahead), paste FIS-32 back-port
+into PRODUCT.md, FIS-23 box/EIP value, FIS-33 #3 a11y approach, 18 open `PENDING_DECISIONS.md` items. Prod
+unchanged on v0.28.0. → reboot with `--hold`.
+
 ## 2026-09-08 — FIS-37 M1 merged + FIS-37c violation authz + FIS-32 back-port drafted (pending-task sweep)
 
 **In your words:** "merge FIS-37 M1" → "do all pending tasks in squirlnote, but analyze + plan first and use the
