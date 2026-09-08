@@ -44,15 +44,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 
-- 🟡 **FIS-37a — Expo mobile app Phase M1 MERGED to `main`** (`a4a9055`); gate green on merged tree (typecheck
-  8/8 · 428 tests · build 1/1). Carries 2 monorepo-wide install changes (`.npmrc` hoisted + react 19.2.3 pin);
-  apps/web re-verified GREEN. On `main` (part of the 12-ahead HARD HOLD). Squirlnote → For Review. Owner call: push.
-- 🟡 **FIS-37c — bantay_dagat + admins may file violations.** `violation.create` `adminProcedure` →
-  `matrixProcedure("violations","write")` (CREATE only; update/lift stay admin). Live-DB proven 4/4. Branch
-  `feat/fis37c-violation-create-authz` (`51bfd83`), UNMERGED/LOCAL. Squirlnote → For Review. Owner call: merge.
-- 🟡 **FIS-32 — PRODUCT.md back-port candidates O (FIS-35 Calendar) + P (FIS-36 Field Diary)** drafted paste-ready
-  in `docs/BACKPORT_CANDIDATES.md`, branch `docs/fis32-backport-candidates` (`0b43bac`). Rule 1 — owner pastes into
-  PRODUCT.md (human-only). Squirlnote → For Review.
+- ✅ **FIS-37a / FIS-37c / FIS-32 — SHIPPED to prod as v0.29.0 (owner "proceed with #1", 2026-09-08).**
+  `origin/main == 3feca30`, tag `v0.29.0`. FIS-37c (`matrixProcedure("violations","write")`, create-only) is
+  LIVE on prod — bantay_dagat + admins can now file violations; prod endpoints 200. FIS-37 mobile M1 client
+  integrated into the repo (not web-deployed; device bring-up = FIS-37b, blocked). FIS-32 back-port candidates
+  landed in `docs/BACKPORT_CANDIDATES.md` (still owner-pastes into PRODUCT.md — Rule 1). Migrate deploy = no
+  pending migrations. See CHANGELOG v0.29.0 + `feat/fis37c-violation-create-authz` graft `05f68d4`.
 - 🟡 **FIS-33 #3 — map-marker a11y approach (still open [WHAT]).** Member + network map markers not
   keyboard-focusable + share generic name "Map marker" (WCAG 2.1.1/4.1.2, moderate). Owner picks: focusable pins
   with per-pin names OR a keyboard-list alternative. (#1 target-size + #2 focus-restore already shipped; a

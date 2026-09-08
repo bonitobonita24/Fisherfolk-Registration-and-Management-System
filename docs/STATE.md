@@ -1,6 +1,31 @@
 # FRMS — Project State
 
-## Current State (2026-09-08, LATEST — loop slot 12 re-verify) — independently confirmed NO un-gated work; reconciled TASK_QUEUE drift; holding on owner [WHAT]s
+## Current State (2026-09-08, LATEST) — v0.29.0 SHIPPED to prod (FIS-37c violation authz live)
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Owner authorized "#1" (merge held branches + push/promote to prod). DONE + verified live.**
+>
+> - **Release v0.29.0** — `origin/main == main == 3feca30`, tag `v0.29.0` published, **nothing left on HARD HOLD**
+>   (origin is current). CI built `sha-3feca30`; promoted via `push-to-prod.sh` (prod DB backed up; migrate
+>   deploy = **no pending migrations**; reseed-never). Prod `frms.powerbyte.app` **healthy** (`/api/health`, `/`,
+>   `/login` = 200).
+> - **What shipped:** FIS-37c (`violation.create` → `matrixProcedure("violations","write")`, create-only →
+>   bantay_dagat + admins can file violations — LIVE) · FIS-37 mobile M1 client (repo only, not web-deployed) ·
+>   FIS-32 back-port candidates in `docs/BACKPORT_CANDIDATES.md`.
+> - **Integration note:** grafted only the real deliverables onto current main (code + test + candidates doc);
+>   the feature branches' stale doc churn was omitted to preserve main's reconciled docs. Source branches
+>   (`feat/fis37c-violation-create-authz`, `docs/fis32-backport-candidates`) retained but now superseded.
+> - **Pre-ship gate:** typecheck 8/8 · web lint · 428 tests · build ✓. Agent-found: `@frms/mobile` expo-lint CI
+>   failure (non-blocking, web deploy unaffected) — logged in TASK_QUEUE.
+> - **Rule 39:** dev app/worker were DOWN (no stale-serving risk); rebuild off main on next `start.sh dev up`.
+>
+> **⚖️ Still open for owner (unchanged — HARD-HOLD/gated, not blocking anything un-gated):** paste FIS-32
+> candidates O/P into `PRODUCT.md` (Rule 1, human-only) · FIS-37b device bring-up + APK (needs physical device) ·
+> FIS-23 AWS box/EIP value · FIS-34 demo screenshots + refresh (demo/EC2 access) · FIS-10 (ordinance, Jan) ·
+> FIS-33 #3 a11y approach · the 18 items in `PENDING_DECISIONS.md`.
+
+## Current State (2026-09-08, prior — loop slot 12 re-verify) — independently confirmed NO un-gated work; reconciled TASK_QUEUE drift; holding on owner [WHAT]s
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

@@ -3,6 +3,31 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-08 — v0.29.0 SHIPPED to prod (FIS-37c violation authz + FIS-37 mobile M1 + FIS-32 candidates)
+
+**In your words:** "yes proceed with #1" — merge the held branches into main and push/promote to prod.
+
+✅ Done — verified live on prod
+- **FIS-37c — field enforcement staff may file violations.** `violation.create` moved off `adminProcedure`
+  onto `matrixProcedure("violations","write")` (create-only; update/lift stay admin) → bantay_dagat + admins
+  can now file violations. LIVE on `frms.powerbyte.app` (endpoints 200).
+- **Integrated cleanly, avoiding a stale-docs revert:** grafted only the real deliverables (fis37c code +
+  test, fis32 `BACKPORT_CANDIDATES.md`) onto current main; the feature branches' stale STATE/SESSION_LOG/
+  TASK_QUEUE churn was intentionally omitted so main's reconciled docs were preserved.
+- **Released v0.29.0:** version-sync 8 packages 0.28.0→0.29.0, CHANGELOG, annotated tag; pushed
+  `origin/main == 3feca30`; CI built `sha-3feca30`; `push-to-prod.sh` (prod DB backed up, migrate deploy =
+  no pending migrations, reseed-never). Pre-ship gate: typecheck 8/8 · web lint · 428 tests · build ✓.
+- FIS-37 mobile M1 client also now on origin/main (repo code only — not part of the web deploy).
+
+🔨 Agent-found (logged, un-gated, non-blocking)
+- `@frms/mobile` `expo lint` fails in CI ("all files ignored" — flat-config not picked up by ESLint 8.57).
+  Does NOT block prod (docker-publish builds apps/web only, independent of ci.yml). Logged in TASK_QUEUE.
+
+💬 Notes
+- Rule 39: dev app/worker containers were down (no stale-serving risk); rebuild off main on next `start.sh dev up`.
+- FIS-32 candidates are on main but the PRODUCT.md paste is still yours (Rule 1, human-only).
+- Prod step-5 health showed 404 for ~15s (known boot-window race) → confirmed 200 on retry.
+
 ## 2026-09-08 — Loop re-verify + TASK_QUEUE drift reconcile (holding on owner [WHAT]s)
 
 **In your words:** (autonomous loop iteration — no new instruction) re-check the whole backlog for un-gated work.
