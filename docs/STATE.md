@@ -18,9 +18,23 @@
 > - **FIS-36 Field Diary / Notes** — stamped TipTap notes at `/[tenant]/notes`, private-by-default, 14-day back-date.
 > - **FIS-37 mobile auth (server foundation)** — bearer-token login/me endpoints + tRPC bearer context (dormant).
 >
-> **⏳ NEXT / OWED:** FIS-37 **Expo mobile app** (self-hosted/downloadable per owner decision — dedicated follow-on,
-> not browser-verifiable from this seat); PRODUCT.md back-port of FIS-35 + FIS-36 (Rule 1, human-owned). All other
-> pending items remain GATED (FIS-10 ordinance; demo refresh + FIS-34 on EC2 access) or CROSS-SEAT (AIEF, per-app site-access).
+> **🏗️ FIS-37 Expo mobile app — Phase M1 COMPLETE (Modules A+B+C), LOCAL / HARD HOLD.** Branch
+> `feat/fis37-mobile-app` (9 commits off main `10666b2`, clean tree, UNMERGED/UNPUSHED). New `apps/mobile/`
+> Expo SDK 57 app: scaffold + tRPC bearer client (type-only `AppRouter`, Rule 13) + SecureStore auth + login;
+> QR scan (`expo-camera` → `fisherfolk.verifyByQr`) + debounced `fisherfolk.list` search + read-only status;
+> `(tabs)` shell (Scan|Search|Profile) + Ionicons + `useCan()` RBAC gating on `fisherfolk:view` (cosmetic —
+> server authoritative). Self-hosted sideload via the `android-apk` EAS profile (owner: NO app store).
+> - **Verified:** mobile `tsc` clean · **expo-doctor 21/21** · **`expo export` bundles** (3.2MB hbc, 1395 modules).
+> - **⚠ 2 MONOREPO-WIDE install changes** (root `.npmrc` `node-linker=hoisted`; `pnpm.overrides`
+>   react/react-dom=19.2.3 for RN's single-React requirement). Both re-validated: **`apps/web` typecheck +
+>   build + 428 tests GREEN**. Merging them to `main` is an owner call (touches web's install topology).
+> - **NOT device-verified** — no device/emulator on this seat. Bring-up: `apps/mobile/README.md`.
+>
+> **⏳ NEXT / OWED — nothing un-gated for the agent:** merge/ship the mobile branch (owner) · FIS-37 device
+> bring-up + EAS `android-apk` (needs hardware) · Phase M2 violation entry (⚠ `[WHAT]`: `violation.create` is
+> `adminProcedure`, so non-admin field staff can't create violations — widen or add a matrix variant; also needs
+> `vessel.verifyByQr`) · PRODUCT.md back-port of FIS-35 + FIS-36 (Rule 1, human-owned). Still GATED (FIS-10
+> ordinance; demo refresh + FIS-34 on EC2 access) or CROSS-SEAT (AIEF, per-app site-access).
 
 ---
 

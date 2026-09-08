@@ -14,9 +14,27 @@ Owner answered the 3 build-gating decisions earlier (Expo · online-first · rea
 - [x] ✅ **App identity / branding** — placeholders fine; bundle id `ph.gov.calapan.frms` acceptable for a
   self-hosted build (no store review to satisfy). Refine at Expo-scaffold time; not a blocker.
 - [x] ✅ **Push notifications** — **deferred (post-MVP)** per owner. Not in the mobile MVP scope.
-Status: FIS-37 server auth foundation SHIPPED to prod in v0.28.0 (2026-09-05). The **Expo app scaffold + screens
-+ device QA remain a dedicated follow-on workstream** (a native app can't be browser-verified from this seat) —
-awaiting owner go-ahead to start.
+Status: FIS-37 server auth foundation SHIPPED to prod in v0.28.0 (2026-09-05). **Expo app kicked off:** Phase M1
+Module A (scaffold + tRPC/SecureStore auth spine + login/home screens, wired to `mobileAuth.login`) authored on
+branch `feat/fis37-mobile-app` (`c52b6c5`, 17 files, LOCAL/HARD HOLD). ⚠ **NOT yet installed / typechecked /
+device-verified** — see the install gate below.
+
+- [x] ✅ **RESOLVED (2026-09-05, owner "do option A") — install gate cleared + M1 A+B built & verified.** Added
+  repo-root `.npmrc` `node-linker=hoisted` + `pnpm.overrides` react/react-dom=19.2.3; **`apps/web` re-verified GREEN**
+  (typecheck+lint+build — no regression). Mobile Modules A (auth spine) + B (QR scan + search + read-only status)
+  built on `feat/fis37-mobile-app`. Verified: mobile `tsc` clean, **expo-doctor 21/21**, **`expo export` bundles**.
+  LOCAL/HARD HOLD.
+- [x] ✅ **Phase M1 COMPLETE (Modules A + B + C)** — auth spine, QR scan + search + read-only status, tab shell +
+  RBAC gating. Verified: mobile typecheck · expo-doctor 21/21 · `expo export` bundles; `apps/web` re-verified
+  GREEN (typecheck + build + 428 tests) after every install. 8 commits on `feat/fis37-mobile-app`, LOCAL/HARD HOLD.
+- [ ] **FIS-37 mobile — device bring-up (needs a physical device — cannot be done from this WSL seat):**
+  device/emulator QA (login round-trip against the dev API, camera QR scan, confirm single-React at runtime),
+  then an EAS `android-apk` build → sideload for field testing (`eas.json` profile already present). Owner: run
+  the `apps/mobile/README.md` bring-up when ready to field-test.
+- [ ] **FIS-37 Phase M2+ (not started):** violation entry (camera evidence + GPS) — ⚠ carries a real [WHAT]:
+  `violation.create` is `adminProcedure` today, so non-admin field staff cannot create violations without either
+  widening it or adding a `matrixProcedure("violations","create")` variant. Also M2 offline write outbox, M3
+  notes (align to the FIS-36 notes router), M4 refresh-token rotation. See `docs/plans/PLAN_mobile_app.md` §7.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)

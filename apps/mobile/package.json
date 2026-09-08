@@ -1,0 +1,43 @@
+{
+  "name": "@frms/mobile",
+  "version": "0.28.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "doctor": "expo-doctor"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@frms/api-client": "workspace:*",
+    "@frms/shared": "workspace:*",
+    "@tanstack/react-query": "^5.62.2",
+    "@trpc/client": "^11.0.0",
+    "expo": "~57.0.9",
+    "expo-camera": "~57.0.4",
+    "expo-constants": "~57.0.8",
+    "expo-linking": "~57.0.4",
+    "expo-location": "~57.0.16",
+    "expo-router": "~57.0.9",
+    "expo-secure-store": "~57.0.3",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.26.0",
+    "superjson": "^2.2.2",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}
