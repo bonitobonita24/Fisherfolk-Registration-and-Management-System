@@ -6,6 +6,17 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ## 🔴 / 🟡 Open
 
+### ⭐ 2026-09-08 — pending-task sweep (authoritative queue = Squirlnote board; STATE.md top block)
+> **⚠ Note:** the older FIS-numbering in the sections below predates the Squirlnote board numbering — the **Squirlnote
+> board is authoritative** for FIS-2x/3x task identity (drift tracked on `docs/reconcile-drift-0908`). This session's outcomes:
+> - ✅ **FIS-37a** — Expo mobile app Phase M1 MERGED to `main` (`a4a9055`); gate green on merged tree. LOCAL/HARD HOLD. → For Review.
+> - ✅ **FIS-37c** — bantay_dagat + admins may file violations (`violation.create` → matrix); live-DB proven 4/4.
+>   Branch `feat/fis37c-violation-create-authz` (`51bfd83`), LOCAL/HARD HOLD. → For Review.
+> - ✅ **FIS-32** — PRODUCT.md back-port candidates O/P drafted (`docs/BACKPORT_CANDIDATES.md`, branch `docs/fis32-backport-candidates`). Owner pastes (Rule 1). → For Review.
+> - ⏳ **FIS-23** (AWS deploy retarget) — awaiting owner's box/EIP value, then I retarget config.
+> - ⛔ Blocked: FIS-10 (ordinance) · FIS-34 (GPU browser + demo access) · FIS-37b (device).
+> - ⚖️ Owner integration call: merge the FIS-37c + back-port branches into `main`; push `main` (11 ahead).
+
 ### ⭐ 2026-09-04 (owner batch: 3 plans + 2 fixes) — FIS-8 Phase D + 2 fixes SHIPPED v0.27.0; 3 feature PLANS drafted
 > Authority: `docs/STATE.md` (top block). Squirlnote board FIS-35..39.
 > **✅ SHIPPED to prod v0.27.0 (`sha-289086d`), no migrations:**

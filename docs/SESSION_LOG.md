@@ -3,6 +3,24 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-08 — FIS-37 M1 merged + FIS-37c violation authz + FIS-32 back-port drafted (pending-task sweep)
+
+**In your words:** "merge FIS-37 M1" → "do all pending tasks in squirlnote, but analyze + plan first and use the
+right skills" → FIS-37c = Bantay Dagat + admins; FIS-23 = confirm box then retarget → "save session."
+
+✅ Done (all LOCAL / HARD HOLD — nothing pushed or deployed)
+- **FIS-37a** — Expo mobile app Phase M1 merged into `main` (`a4a9055`). Re-verified the 2 monorepo-wide install
+  changes (hoisted node-linker + react pin) don't break the web app: fresh install → typecheck 8/8 · 428 tests · build 1/1.
+- **FIS-37c** — field enforcement staff (Bantay Dagat) + admins can now FILE violations. `violation.create` moved onto
+  the existing RBAC permission matrix; encoder/viewer stay blocked. Proven against the live dev DB (4/4). On its own branch.
+- **FIS-32** — drafted paste-ready PRODUCT.md back-port text for the Calendar + Field Diary features (you paste it; Rule 1).
+
+💬 Decisions / notes
+- All 7 Squirlnote Pending tasks triaged: 3 advanced to For Review (above), 1 needs your input, 3 hard-blocked.
+- **Needs you:** FIS-23 — tell me the correct demo/staging box/EIP and I'll retarget the deploy config.
+- **Blocked (not code):** FIS-10 (ordinance), FIS-34 (GPU browser + demo access), FIS-37b (physical device).
+- **Your call:** merging the FIS-37c + back-port branches into `main`, and whether to push `main` (11 ahead), stay HARD HOLD.
+
 ## 2026-09-05 (later) — FIS-37 mobile app kicked off: Phase M1 complete (Expo, self-hosted)
 
 **In your words:** kick off FIS-37 → then "do the recommended option A" (root node-linker change, re-verify web, install, continue Modules B/C) → then "yes do it" for Module C polish.

@@ -1,6 +1,49 @@
 # FRMS — Project State
 
-## Current State (2026-09-05, LATEST) — 🚀 FIS-35 + FIS-36 + FIS-37 MERGED + SHIPPED to PROD as v0.28.0, verified live
+## Current State (2026-09-08, LATEST) — FIS-37 M1 MERGED to main (verified) + FIS-37c violation authz built (branch) + FIS-32 back-port candidates drafted — all LOCAL/HARD HOLD
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+Cold-start authority: memory `project_fis37_m1_merge_fis37c_0908.md` (+ this block).
+
+> **Owner:** "FIS-37 mobile — merge M1" (AskUserQuestion) → then "do all pending tasks in squirlnote, analyze + plan
+> first, use appropriate skills" → then decisions: **FIS-37c = Bantay Dagat + admins**; **FIS-23 = confirm box then
+> retarget** → then **"save session."** Ran the Squirlnote board (7 Pending) through the analyze-confirm gate.
+>
+> **✅ DONE THIS SESSION (all LOCAL / HARD HOLD — nothing pushed/deployed):**
+> - **FIS-37a — Expo mobile app Phase M1 MERGED into `main`** (`a4a9055`, `--no-ff` off `feat/fis37-mobile-app`).
+>   Carries 2 monorepo-wide install changes (`.npmrc` node-linker=hoisted + react/react-dom pin 19.2.3). Re-verified
+>   on merged `main` after fresh `pnpm install`: **typecheck 8/8 · 428 tests · build 1/1** — apps/web unaffected by the
+>   hoisted layout. `main` now **11 ahead of origin** (HARD HOLD). Feature branch retained. Squirlnote → For Review.
+> - **FIS-37c — bantay_dagat + admins may FILE violations** on branch `feat/fis37c-violation-create-authz` (`51bfd83`).
+>   `violation.create` migrated `adminProcedure` → `matrixProcedure("violations","write")` (the RBAC matrix already
+>   grants the 3 fixed admin tiers + bantay_dagat write on violations; encoder/viewer deny-by-default). Scope = CREATE
+>   only; update/lift stay adminProcedure. New DB-gated `violation.test.ts` **proven against live dev DB: 4/4**
+>   (bantay_dagat + superadmin file; viewer + encoder FORBIDDEN). typecheck + lint + 428 tests green. Squirlnote → For Review.
+> - **FIS-32 — PRODUCT.md back-port candidates O (FIS-35 Calendar) + P (FIS-36 Field Diary)** drafted paste-ready in
+>   `docs/BACKPORT_CANDIDATES.md` on `docs/fis32-backport-candidates` (`0b43bac`). Rule 1 — owner pastes into PRODUCT.md.
+>   Squirlnote → For Review.
+>
+> **⏳ NEEDS OWNER (1, quick):** **FIS-23** — owner chose "confirm box, I'll retarget," but the actual demo/staging box/EIP
+> value is still needed (`13.213.232.194` vs `18.138.220.90` vs other) before I touch deploy config. Actual deploy stays access-gated.
+>
+> **⛔ HARD-BLOCKED (left Pending):** FIS-10 (ordinance-gated, Jan) · FIS-34 (real GPU browser + demo/EC2 access) ·
+> FIS-37b (device/APK — no physical device this seat).
+>
+> **⚖️ OPEN INTEGRATION DECISIONS (owner's call — HARD HOLD):** merge `feat/fis37c-violation-create-authz` +
+> `docs/fis32-backport-candidates` into `main`? Push `main` (11 ahead)? All await explicit owner word.
+> **Minor follow-up:** matrix also intends bantay_dagat `update` on violations — kept update/lift admin-only (owner decided create only).
+>
+> **Env note:** started dev DB container `frms_dev_postgres` (:44377) to run the authz test live; left running (useful for dev).
+
+### Git / branches (this session)
+`main` = **11 ahead of origin** (FIS-37 M1 merge `a4a9055`), HARD HOLD. Branches off `main`, all LOCAL/HARD HOLD:
+`feat/fis37c-violation-create-authz` (`51bfd83`), `docs/fis32-backport-candidates` (`0b43bac`). `feat/fis37-mobile-app`
+retained. Prod `frms.powerbyte.app` unchanged on v0.28.0 (`sha-ab4abd4`), healthy. Nothing pushed/merged-to-origin/deployed.
+
+---
+
+## Current State (2026-09-05) — 🚀 FIS-35 + FIS-36 + FIS-37 MERGED + SHIPPED to PROD as v0.28.0, verified live
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
