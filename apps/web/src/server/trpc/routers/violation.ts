@@ -5,6 +5,7 @@ import { omitUndefined } from "../../lib/prisma-input";
 import {
   adminProcedure,
   createTRPCRouter,
+  matrixProcedure,
   protectedProcedure,
 } from "../trpc";
 
@@ -97,7 +98,14 @@ export const violationRouter = createTRPCRouter({
       return record;
     }),
 
-  create: adminProcedure
+  // FIS-37c (owner decision 2026-09-08): field enforcement staff may FILE
+  // violations. Migrated off the fixed `adminProcedure` allow-list onto the
+  // data-driven matrix — `violations`/`write` (create-only) grants the 3 fixed
+  // admin tiers (unconditional) + `bantay_dagat` (enforcement preset), and any
+  // custom role holding the grant; encoder/viewer remain denied by-default.
+  // Scope: CREATE only — `update` and `lift` stay `adminProcedure` (that was
+  // the owner's decision surface). See packages/shared/src/rbac/permissions.ts.
+  create: matrixProcedure("violations", "write")
     .input(
       z
         .object({
@@ -133,7 +141,7 @@ export const violationRouter = createTRPCRouter({
         data: {
           ...omitUndefined(rest),
           tenantId: ctx.tenantId,
-          filedById: ctx.userId!,
+          filedById: ctx.userId,
           ...(attachments.length > 0 && {
             attachments: {
               create: attachments.map((a) => ({
@@ -141,7 +149,7 @@ export const violationRouter = createTRPCRouter({
                 originalFilename: a.originalFilename,
                 mimeType: a.mimeType,
                 fileSize: a.fileSize,
-                uploadedById: ctx.userId!,
+                uploadedById: ctx.userId,
               })),
             },
           }),
@@ -151,7 +159,7 @@ export const violationRouter = createTRPCRouter({
       await ctx.db.auditLog.create({
         data: {
           tenantId: ctx.tenantId,
-          userId: ctx.userId!,
+          userId: ctx.userId,
           action: "CREATE",
           entityType: "Violation",
           entityId: record.id,
