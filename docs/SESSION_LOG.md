@@ -3,6 +3,30 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-09 (later) — Cleared both CI dependency-audit criticals (next RCE + maplibre XSS), local branches
+
+**In your words:** "continue full auto mode."
+
+✅ Done — verified (LOCAL / HARD HOLD, each on its own branch; nothing pushed)
+- **`next` RCE patched** — `fix/next-security-patch-15-5-24` (`f030a9b`). pnpm override → `next@15.5.25`
+  (bounded `<16` after catching an unbounded floor pull `next@16.3.4`). typecheck 8/8 · build ✓ · 428 tests ·
+  next advisory cleared from `pnpm audit`.
+- **`maplibre-gl` XSS patched** — `fix/maplibre-gl-v6-xss` (`19aaf77`). Bumped 5.24.0 → 6.8.0. The 5→6 major
+  was flagged [WHAT]; I did the breakage review and **resolved it to [HOW]**: our entire maplibre API surface
+  is unaffected by every v6 breaking change (setData single-arg + return ignored; no `map.transform`; WebGL2
+  universal). typecheck 8/8 · build ✓ · 428 web + 21 db tests · maplibre advisory cleared.
+
+💬 Decisions / notes
+- Both fixes together green the CI dependency-audit job. **Held from merge/push (HARD HOLD)** — a dep bump
+  reaching CI/prod is your call. Both are safe, verified, reversible.
+- Residual (device-gated, non-blocking): real-browser visual confirmation of the 4 map surfaces after the
+  maplibre bump — can't be done headless on this seat (software WebGL composites the map canvas black).
+- Logged reusable lesson `pnpm.overrides.unbounded-floor-pulls-major`.
+
+⏳ Not yet / Next — un-gated [HOW] queue is now EMPTY. Remaining work is all owner-gated/blocked (merge the 2
+security branches · FIS-10 ordinance Jan · FIS-34/23/demo access · FIS-37b device · FIS-37 M2 & FIS-33#3
+[WHAT]s · FIS-32/back-port Rule-1 human-only).
+
 ## 2026-09-09 — Fixed mobile-lint CI + surfaced a pre-existing dependency-audit failure
 
 **In your words:** "fix the mobile-lint CI issue then save session, stop reboot loop."

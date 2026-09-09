@@ -40,13 +40,21 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   resolved a hoisted eslint@8.57 (legacy mode) → "all files ignored". Fix: added eslint@^9 (matches web) +
   eslint-config-expo@~57.0.2; converted 2 manual fetch effects to react-query; cleared stale disables.
   **CI `Turbo lint` task now GREEN.** Lesson `expo.eslint.flat-config-missing-deps-legacy-fallback`.
-- 🔴🔒 **CI `Dependency vulnerability audit` job fails on 2 CRITICAL advisories (PRE-EXISTING — not from the
-  lint fix).** `pnpm audit --audit-level=high` flags: (1) **`next@15.5.23`** critical RCE GHSA-p293-qw3h-jr36
-  — **Windows-hosted only** (prod is Linux Docker → not exploitable in prod), patched `>=15.5.24` (safe patch
-  bump from `^15.5.21`); (2) **`maplibre-gl@5.24.0`** critical XSS GHSA (DOM.sanitize bypass), patched
-  `>=6.4.1` — a **MAJOR 5→6 bump** (breaking-change review needed on the maps). Was already red on the
-  v0.29.0 push (independent of the mobile lint). ⚠ Own security-bump task w/ full verify pass — next patch is
-  [HOW]; maplibre major is a [WHAT] (review map breakage). `agent-found 2026-09-09` `security` `bug` `db`
+- 🟡🔒 **CI `Dependency vulnerability audit` — BOTH criticals FIXED on branches (LOCAL/HARD HOLD, awaiting
+  owner merge; 2026-09-09).** Each on its own branch off `main`; merging both greens the CI audit job.
+  (1) ✅ **`next` RCE GHSA-p293-qw3h-jr36** → branch `fix/next-security-patch-15-5-24` (`f030a9b`). pnpm
+  override `next@<15.5.24`: `>=15.5.24 <16.0.0` → `next@15.5.25` (bounded below 16 — an unbounded floor
+  wrongly pulled `next@16.3.4`; lesson `pnpm.overrides.unbounded-floor-pulls-major`). Windows-only RCE, so
+  prod Linux was never exploitable. Gate: typecheck 8/8 · build ✓ · 428 tests.
+  (2) ✅ **`maplibre-gl@5.24.0` critical XSS** → branch `fix/maplibre-gl-v6-xss` (`19aaf77`). Bumped to
+  `^6.8.0` (patched `>=6.4.1`). The 5→6 major was flagged [WHAT]; **investigation resolved it to [HOW]** —
+  our API surface (Map/Marker/NavigationControl/GeoJSONSource/AttributionControl/MapMouseEvent across 4
+  components) is unaffected by every v6 breaking change (setData called single-arg w/ ignored return; no
+  `map.transform`; WebGL2 universal). Gate: typecheck 8/8 · build ✓ · 428 web + 21 db tests · maplibre
+  advisory cleared. ⚠ Residual (device-gated): real-browser visual render of the 4 maps — not verifiable
+  headless on this seat (software WebGL composites black). `agent-found 2026-09-09` `security` `bug`
+  ⏳ **Owner: merge both branches → main → push** to green CI (HARD HOLD; a dep bump reaching CI/prod needs
+  your word). Both are safe, verified, reversible.
 
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 
