@@ -12,7 +12,6 @@ function resolveApiUrl(): string {
     return envApiUrl;
   }
   if (__DEV__) {
-    // eslint-disable-next-line no-console
     console.warn(
       "[api-url] EXPO_PUBLIC_API_URL is not set — set it to your dev machine's LAN IP " +
         "(e.g. http://192.168.1.50:44387) or requests will fail on a physical device/emulator.",

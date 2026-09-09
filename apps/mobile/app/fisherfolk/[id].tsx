@@ -1,56 +1,36 @@
+import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useTrpc } from "@/lib/auth";
 import { useCan } from "@/lib/permissions";
 
-// Inferred from `fisherfolk.verifyByQr` — the `valid: true` branch's payload.
-// This screen is READ-ONLY (M1 field staff view); no mutations here.
-type VerifiedFisherfolk = Extract<
-  Awaited<ReturnType<ReturnType<typeof useTrpc>["fisherfolk"]["verifyByQr"]["query"]>>,
-  { valid: true }
->["fisherfolk"];
-
+// This screen is READ-ONLY (M1 field staff view); no mutations here. Data fetch
+// runs through react-query (QueryClientProvider is set up in app/_layout.tsx).
 export default function FisherfolkDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const trpc = useTrpc();
   const { can } = useCan();
   const canView = can("fisherfolk", "view");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
-  const [record, setRecord] = useState<VerifiedFisherfolk | null>(null);
 
-  useEffect(() => {
-    if (!id || !canView) return;
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setNotFound(false);
-    trpc.fisherfolk.verifyByQr
-      .query({ raw: id })
-      .then((res) => {
-        if (cancelled) return;
-        if (res.valid) {
-          setRecord(res.fisherfolk);
-        } else {
-          setNotFound(true);
-        }
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Could not load this record.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+  const {
+    data: res,
+    isLoading: loading,
+    isError,
+    error: queryError,
+  } = useQuery({
+    queryKey: ["fisherfolk", "verifyByQr", id],
+    enabled: Boolean(id) && canView,
+    queryFn: () => trpc.fisherfolk.verifyByQr.query({ raw: id }),
+  });
 
-    return () => {
-      cancelled = true;
-    };
-  }, [id, trpc]);
+  const error = isError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Could not load this record."
+    : null;
+  const notFound = res ? !res.valid : false;
+  const record = res && res.valid ? res.fisherfolk : null;
 
   // Cosmetic-only gate (server remains authoritative) — never query this
   // record if the role can't view fisherfolk records.

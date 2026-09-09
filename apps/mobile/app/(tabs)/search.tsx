@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -13,10 +14,6 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useTrpc } from "@/lib/auth";
 import { useCan } from "@/lib/permissions";
 
-// Inferred from `fisherfolk.list` — one entry of the `items` array.
-type ListResult = Awaited<ReturnType<ReturnType<typeof useTrpc>["fisherfolk"]["list"]["query"]>>;
-type FisherfolkRow = ListResult["items"][number];
-
 const DEBOUNCE_MS = 350;
 
 export default function SearchScreen() {
@@ -24,44 +21,29 @@ export default function SearchScreen() {
   const { can } = useCan();
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [results, setResults] = useState<FisherfolkRow[]>([]);
 
   useEffect(() => {
     const handle = setTimeout(() => setDebounced(query.trim()), DEBOUNCE_MS);
     return () => clearTimeout(handle);
   }, [query]);
 
-  useEffect(() => {
-    if (debounced.length === 0) {
-      setResults([]);
-      setError(null);
-      setLoading(false);
-      return;
-    }
+  const {
+    data,
+    isLoading: loading,
+    isError,
+    error: queryError,
+  } = useQuery({
+    queryKey: ["fisherfolk", "list", debounced],
+    enabled: debounced.length > 0,
+    queryFn: () => trpc.fisherfolk.list.query({ search: debounced, limit: 25 }),
+  });
 
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    trpc.fisherfolk.list
-      .query({ search: debounced, limit: 25 })
-      .then((res) => {
-        if (!cancelled) setResults(res.items);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Search failed.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [debounced, trpc]);
+  const results = data?.items ?? [];
+  const error = isError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Search failed."
+    : null;
 
   // Cosmetic-only gate (server remains authoritative) — hide the search UI
   // entirely if this role can't view fisherfolk records.

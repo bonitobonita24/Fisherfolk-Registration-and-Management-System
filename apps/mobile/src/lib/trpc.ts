@@ -1,5 +1,4 @@
 // TYPE-ONLY import — never a runtime import of server/db code (Rule 13).
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import type { AppRouter } from "@frms/web-router";
 import { createApiClient, httpBatchLink } from "@frms/api-client";
 import superjson from "superjson";

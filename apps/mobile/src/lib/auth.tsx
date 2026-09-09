@@ -44,10 +44,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // The trpc client reads the CURRENT token via this ref on every request, so a
   // sign-in/sign-out is reflected on the very next call without recreating the client.
+  // The ref is synced AFTER render (never mutated during render) per react-hooks/refs.
   const tokenRef = useRef<string | null>(null);
-  tokenRef.current = token;
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
 
   const trpc = useMemo(
+    // The token getter is invoked lazily (async, per-request) — never during render —
+    // so reading tokenRef.current inside it is safe.
+    // eslint-disable-next-line react-hooks/refs
     () => makeTrpcClient(async () => tokenRef.current),
     [],
   );
