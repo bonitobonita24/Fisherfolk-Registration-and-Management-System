@@ -3,6 +3,28 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-09 — Fixed mobile-lint CI + surfaced a pre-existing dependency-audit failure
+
+**In your words:** "fix the mobile-lint CI issue then save session, stop reboot loop."
+
+✅ Done — verified on CI
+- **`@frms/mobile` lint CI fixed** (`1722c9f`). apps/mobile had a flat `eslint.config.js` but no
+  `eslint`/`eslint-config-expo` devDeps → resolved hoisted eslint@8.57 (legacy) → "all files ignored".
+  Added eslint@^9 (matches web) + eslint-config-expo@~57.0.2. With the config now loading, resolved its real
+  findings: synced the token ref in a `useEffect` (auth.tsx); converted the fisherfolk-detail + search manual
+  fetch effects to `useQuery` (QueryClientProvider was already set up); dropped 2 stale eslint-disables.
+  **CI `Turbo lint` task now GREEN** (typecheck 8/8 · 428 web tests · build all green; lesson logged).
+
+🔒 Surfaced (pre-existing, NOT introduced this session)
+- **CI `Dependency vulnerability audit` still fails** on 2 critical advisories — `next@15.5.23` RCE
+  (Windows-only; prod is Linux → not exploitable in prod; safe patch to 15.5.24) + `maplibre-gl@5.24.0` XSS
+  (needs a **major 5→6** bump w/ map breakage review). Was already red on the v0.29.0 push. Logged in
+  TASK_QUEUE as an own security-bump task — **so main's CI is still red for this separate reason.**
+
+💬 Notes
+- Owner asked to stop the reboot loop → save-session done, then `close-session --stop --force` (18 open
+  `[WHAT]`s in PENDING_DECISIONS would otherwise refuse `--stop`; this is an owner-initiated stop).
+
 ## 2026-09-08 — v0.29.0 SHIPPED to prod (FIS-37c violation authz + FIS-37 mobile M1 + FIS-32 candidates)
 
 **In your words:** "yes proceed with #1" — merge the held branches into main and push/promote to prod.

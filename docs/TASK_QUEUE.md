@@ -35,12 +35,18 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
 
 ### 🔴 Agent-found — un-gated [HOW] (fix anytime; does NOT block web deploy)
 
-- 🔴 **`@frms/mobile` lint fails in CI (`expo lint` → "all files matching glob are ignored").** Pre-existing,
-  arrived with the FIS-37 M1 mobile merge (prod is web-only, unaffected — `docker-publish.yml` builds
-  `apps/web/Dockerfile` only and is independent of `ci.yml`). Root cause: ESLint 8.57 resolves `expo lint`
-  in legacy mode and ignores the flat `apps/mobile/eslint.config.js`; forcing `ESLINT_USE_FLAT_CONFIG=true`
-  did not help (expo CLI passes its own `src` glob). Fix = align the mobile lint invocation to the flat
-  config (expo SDK 57 lint setup) so `pnpm turbo run lint` is green on main. `agent-found 2026-09-08` `chore` `mobile`
+- ✅ **`@frms/mobile` lint fails in CI — FIXED (2026-09-09, `1722c9f`).** Root cause: apps/mobile was
+  scaffolded with a flat `eslint.config.js` but never got its own `eslint`+`eslint-config-expo` devDeps →
+  resolved a hoisted eslint@8.57 (legacy mode) → "all files ignored". Fix: added eslint@^9 (matches web) +
+  eslint-config-expo@~57.0.2; converted 2 manual fetch effects to react-query; cleared stale disables.
+  **CI `Turbo lint` task now GREEN.** Lesson `expo.eslint.flat-config-missing-deps-legacy-fallback`.
+- 🔴🔒 **CI `Dependency vulnerability audit` job fails on 2 CRITICAL advisories (PRE-EXISTING — not from the
+  lint fix).** `pnpm audit --audit-level=high` flags: (1) **`next@15.5.23`** critical RCE GHSA-p293-qw3h-jr36
+  — **Windows-hosted only** (prod is Linux Docker → not exploitable in prod), patched `>=15.5.24` (safe patch
+  bump from `^15.5.21`); (2) **`maplibre-gl@5.24.0`** critical XSS GHSA (DOM.sanitize bypass), patched
+  `>=6.4.1` — a **MAJOR 5→6 bump** (breaking-change review needed on the maps). Was already red on the
+  v0.29.0 push (independent of the mobile lint). ⚠ Own security-bump task w/ full verify pass — next patch is
+  [HOW]; maplibre major is a [WHAT] (review map breakage). `agent-found 2026-09-09` `security` `bug` `db`
 
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 

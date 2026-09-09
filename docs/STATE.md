@@ -1,6 +1,28 @@
 # FRMS — Project State
 
-## Current State (2026-09-08, LATEST) — v0.29.0 SHIPPED to prod (FIS-37c violation authz live)
+## Current State (2026-09-09, LATEST) — mobile-lint CI fixed; loop STOPPED per owner; CI still red on a pre-existing dep-audit
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Owner: "fix the mobile-lint CI issue then save session, stop reboot loop." Done — loop stopped.**
+>
+> - **Mobile lint CI FIXED** (`origin/main == 1722c9f`). apps/mobile lacked its own eslint deps → hoisted
+>   eslint@8.57 legacy mode → "all files ignored". Added eslint@^9 + eslint-config-expo@~57.0.2; converted
+>   2 manual fetch effects to react-query; cleared stale disables. **CI `Turbo lint` now GREEN** (typecheck
+>   8/8 · 428 web tests · build ✓). Non-deployed/mobile-only → no version bump. Lesson
+>   `expo.eslint.flat-config-missing-deps-legacy-fallback` logged.
+> - **⚠ CI on main is STILL RED** — separate, PRE-EXISTING `Dependency vulnerability audit` failure (2
+>   CRITICAL): `next@15.5.23` RCE (Windows-only; prod Linux → not exploitable; safe patch → 15.5.24) +
+>   `maplibre-gl@5.24.0` XSS (MAJOR 5→6 bump, review map breakage). Already red on the v0.29.0 push; NOT from
+>   the lint fix. Logged in TASK_QUEUE 🔴🔒 as an own security-bump task (next = [HOW] patch; maplibre = [WHAT]).
+> - **Prod** `frms.powerbyte.app` unchanged/healthy on **v0.29.0** (`sha-3feca30`) — FIS-37c violation authz live.
+>
+> **Loop:** owner-initiated STOP (`close-session --stop --force`). 18 open `[WHAT]`s in PENDING_DECISIONS
+> remain (would refuse `--stop` without `--force`) — all gated/owner, nothing un-gated blocked. Top next
+> tasks when resumed: the `next`+`maplibre` security bump (make CI green) · FIS-32 PRODUCT.md paste · FIS-37b
+> device bring-up.
+
+## Current State (2026-09-08, prior) — v0.29.0 SHIPPED to prod (FIS-37c violation authz live)
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
