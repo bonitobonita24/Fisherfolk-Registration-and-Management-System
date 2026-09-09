@@ -40,13 +40,15 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   resolved a hoisted eslint@8.57 (legacy mode) → "all files ignored". Fix: added eslint@^9 (matches web) +
   eslint-config-expo@~57.0.2; converted 2 manual fetch effects to react-query; cleared stale disables.
   **CI `Turbo lint` task now GREEN.** Lesson `expo.eslint.flat-config-missing-deps-legacy-fallback`.
-- 🔴🔒 **CI `Dependency vulnerability audit` job fails on 2 CRITICAL advisories (PRE-EXISTING — not from the
-  lint fix).** `pnpm audit --audit-level=high` flags: (1) **`next@15.5.23`** critical RCE GHSA-p293-qw3h-jr36
-  — **Windows-hosted only** (prod is Linux Docker → not exploitable in prod), patched `>=15.5.24` (safe patch
-  bump from `^15.5.21`); (2) **`maplibre-gl@5.24.0`** critical XSS GHSA (DOM.sanitize bypass), patched
-  `>=6.4.1` — a **MAJOR 5→6 bump** (breaking-change review needed on the maps). Was already red on the
-  v0.29.0 push (independent of the mobile lint). ⚠ Own security-bump task w/ full verify pass — next patch is
-  [HOW]; maplibre major is a [WHAT] (review map breakage). `agent-found 2026-09-09` `security` `bug` `db`
+- 🟡🔒 **CI `Dependency vulnerability audit` — next RCE PATCHED; maplibre XSS still open ([WHAT]).**
+  (1) ✅ **`next` RCE GHSA-p293-qw3h-jr36 — FIXED (2026-09-09, branch `fix/next-security-patch-15-5-24`,
+  `f030a9b`, LOCAL/HARD HOLD).** pnpm override `next@<15.5.24`: `>=15.5.24 <16.0.0` → resolves `next@15.5.25`
+  on the 15.5.x line; `pnpm audit` no longer lists the next advisory. Gate: typecheck 8/8 · build ✓ · 428
+  tests. ⚠ bounded below 16 — an unbounded `>=15.5.24` wrongly pulled `next@16.3.4` (lesson
+  `pnpm.overrides.unbounded-floor-pulls-major`). Not pushed — dep bump reaching CI/prod is owner-gated.
+  (2) 🔴 **`maplibre-gl@5.24.0` critical XSS (DOM.sanitize bypass), patched `>=6.4.1` — a MAJOR 5→6 bump.**
+  ⛔ **[WHAT] — deferred**: breaking-change review needed on the member/network/household maps before bumping.
+  `agent-found 2026-09-09` `security` `bug`
 
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 
