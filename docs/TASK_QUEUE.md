@@ -40,8 +40,16 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   resolved a hoisted eslint@8.57 (legacy mode) → "all files ignored". Fix: added eslint@^9 (matches web) +
   eslint-config-expo@~57.0.2; converted 2 manual fetch effects to react-query; cleared stale disables.
   **CI `Turbo lint` task now GREEN.** Lesson `expo.eslint.flat-config-missing-deps-legacy-fallback`.
-- 🟡🔒 **CI `Dependency vulnerability audit` — BOTH criticals FIXED on branches (LOCAL/HARD HOLD, awaiting
-  owner merge; 2026-09-09).** Each on its own branch off `main`; merging both greens the CI audit job.
+- ✅ **CI `Dependency vulnerability audit` — GREEN (owner authorized merge+push, 2026-09-10).** Merged both
+  critical branches into `fix/ci-dep-audit-criticals` → `main`.
+  ⚠ **Correction to the 2026-09-09 claim below ("merging both greens the CI audit job") — it did NOT.**
+  With both criticals merged, `pnpm audit --audit-level=high` still exited non-zero on **8 pre-existing HIGH**
+  advisories. Cleared in `b2142d6`: `sharp`→0.35.4 (⚠ its existing `<0.35.0` override floor was STALE —
+  lesson `pnpm.overrides.stale-floor-still-vulnerable`), `nodemailer`→9.1.1, `deepmerge-ts`→8.0.2,
+  `browserslist`→4.28.9, `js-yaml`→4.3.2 (existing override covered only the 5.x range). All floors bounded
+  below the next major. `image-size` (2 HIGH) has **no patched version published** — build-time-only DoS
+  parsers via metro/expo, never at runtime in prod → excepted via `pnpm.auditConfig.ignoreGhsas`; revisit
+  when upstream ships a fix. **Gate: audit EXIT 0 · typecheck 8/8 · lint 6/6 · 428 tests · build ✓.**
   (1) ✅ **`next` RCE GHSA-p293-qw3h-jr36** → branch `fix/next-security-patch-15-5-24` (`f030a9b`). pnpm
   override `next@<15.5.24`: `>=15.5.24 <16.0.0` → `next@15.5.25` (bounded below 16 — an unbounded floor
   wrongly pulled `next@16.3.4`; lesson `pnpm.overrides.unbounded-floor-pulls-major`). Windows-only RCE, so
@@ -53,8 +61,8 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   `map.transform`; WebGL2 universal). Gate: typecheck 8/8 · build ✓ · 428 web + 21 db tests · maplibre
   advisory cleared. ⚠ Residual (device-gated): real-browser visual render of the 4 maps — not verifiable
   headless on this seat (software WebGL composites black). `agent-found 2026-09-09` `security` `bug`
-  ⏳ **Owner: merge both branches → main → push** to green CI (HARD HOLD; a dep bump reaching CI/prod needs
-  your word). Both are safe, verified, reversible.
+  ✅ **Merged + pushed to `main` 2026-09-10 on owner's word.** Residual map visual-render check stays
+  device-gated (tracked under FIS-37b).
 
 ### 🟡 Built / drafted — LOCAL / HARD HOLD, awaiting owner integration decision (owner-gated, not un-gated)
 
