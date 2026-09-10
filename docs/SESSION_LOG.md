@@ -3,6 +3,52 @@
 Human-readable per-session accomplishment ledger (newest on top). The dense reload handoff lives in
 `docs/STATE.md`; open owner decisions in `PENDING_DECISIONS.md`.
 
+## 2026-09-10 — CI is GREEN again (merged security fixes, then fixed the 3 breaks that surfaced) + backlog reconciled
+
+**In your words:** "do option 1 then do all this remaining pending tasks" — merge and push the held security
+fixes to green CI, then work whatever is left.
+
+✅ Done — verified (pushed to `origin/main`; **no staging/prod/demo deploy** — prod stays on v0.29.0)
+- **CI fully GREEN** — all 6 jobs pass on `0fdd6aa`, Docker Build & Publish green too. First green CI since
+  2026-09-08.
+- **Merged both held critical fixes** (`next@15.5.25` RCE, `maplibre-gl@6.8.0` XSS) via
+  `fix/ci-dep-audit-criticals`; the only merge conflict was in TASK_QUEUE.md.
+- **⚠ Merging those two did NOT green CI — the queue's claim was wrong.** `pnpm audit --audit-level=high`
+  still failed on **8 pre-existing HIGH** advisories. Cleared all of them (`b2142d6`): `sharp`→0.35.4,
+  `nodemailer`→9.1.1, `deepmerge-ts`→8.0.2, `browserslist`→4.28.9, `js-yaml`→4.3.2. `image-size` (2 HIGH)
+  has **no published patch** — build-time-only DoS parsers via metro/expo, never at runtime in prod →
+  excepted via `pnpm.auditConfig.ignoreGhsas`, to revisit when upstream ships a fix.
+- **Caught a stale override floor:** the existing `sharp@<0.35.0` override no longer covered the advisory it
+  was written for. Same failure mode as the two `pnpm.overrides.*` lessons already in the ledger.
+- **Fixed 2 real breaks the maplibre v6 bump introduced**, both missed by the earlier "v6 doesn't affect our
+  API surface" review: v6 **removed the default export** (TS1192 × 4 files → namespace imports, `95c3bec`),
+  and `GeoJSONSource.setData()` now returns `Promise<void>` (4 floating-promise errors → `void`, `0fdd6aa`).
+- **Backlog reconciled against ground truth: 18 open decisions → 9.** 11 were stale — already decided and
+  shipped, checkbox never flipped. Each closed with a cited path + release tag. Also fixed 2 items whose
+  malformed `- []` marker hid them from every backlog grep.
+- **FIS-12 is not a release blocker.** Its header still said "RELEASE-BLOCKER" while every checkbox under it
+  was `[x]`; verified prod `migrate deploy` is unaffected (applied in v0.22.0).
+
+💬 Decisions / notes
+- **My local gate passed a break that CI caught.** Root cause: `apps/web/tsconfig.tsbuildinfo` persisted, so
+  `tsc --incremental` never re-checked files whose *dependency* changed shape. Verified the fix only after
+  deleting all `*.tsbuildinfo` / `.next` / `.turbo` and re-running from cold. Two lessons logged to
+  `~/.claude/LESSONS_GLOBAL.md` (`typescript.incremental.tsbuildinfo-masks-dependency-break`,
+  `npm.major-bump.module-shape-change-not-just-api-surface`).
+- **Anti-lesson worth keeping:** I first concluded `apps/web` lint was a no-op (eslint 9 + only a legacy root
+  `.eslintrc.js`) and nearly rewrote the config. A 2-minute probe — plant `const x: any = 1` — disproved it.
+  `next lint` does fall back to the legacy root config correctly. Probe before "fixing" a gate you think is dead.
+- A major-version bump review must check **module shape** (default vs named exports, ESM-only, subpaths), not
+  just the API surface we call. That omission is exactly what broke `main` here.
+
+⏳ Next (nothing un-gated left to build)
+- **FIS-37 Phase M2+** is the only remaining buildable item, and it is camera/GPS/offline-sync work in an Expo
+  app that has never run on a device — awaiting your call on whether to build it unverifiable.
+
+⛔ Blocked (unchanged, now tagged in PENDING_DECISIONS.md so they stop being re-litigated)
+- FIS-37b device bring-up (needs a physical device) · FIS-10 (January city ordinance) · FIS-34 / FIS-23 /
+  demo refresh (demo+EC2 access, Server-Setups migration on hold) · 2 cross-seat AIEF items.
+
 ## 2026-09-09 (later) — Cleared both CI dependency-audit criticals (next RCE + maplibre XSS), local branches
 
 **In your words:** "continue full auto mode."
