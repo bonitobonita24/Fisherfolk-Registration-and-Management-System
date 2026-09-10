@@ -1,6 +1,33 @@
 # FRMS — Project State
 
-## Current State (2026-09-09, LATEST) — mobile-lint CI fixed; loop STOPPED per owner; CI still red on a pre-existing dep-audit
+## Current State (2026-09-10, LATEST — loop slot 22 re-verify) — independently RE-CONFIRMED no un-gated work; one live owner decision = merge the 2 dep-audit fix branches to green CI
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Full-Auto loop iteration (owner away; prior 2026-09-09 handoff said loop was stopped, but slot 22 relaunched).**
+> Did NOT trust the "queue empty" line blindly — re-derived from ground truth (git + live Squirlnote board + TASK_QUEUE).
+>
+> **Independent re-verification (this iteration) — all three agree, un-gated [HOW] queue is EMPTY:**
+> - **Git:** `main == 16334f4`, **1 ahead of origin** (one unpushed docs(session) commit, HARD HOLD). Tree clean.
+>   Fix branches present: `fix/next-security-patch-15-5-24`, `fix/maplibre-gl-v6-xss` (`19aaf77`),
+>   plus `feat/fis37c-violation-create-authz` / `docs/fis32-backport-candidates` (superseded, shipped in v0.29.0).
+> - **Squirlnote board (project FIS):** **4 Pending · 0 On-Going · 28 For Review.** All 4 Pending gated/blocked —
+>   FIS-10 (ordinance, Jan) · FIS-34 (GPU browser + demo/EC2 access) · FIS-23 (needs owner box/EIP value) ·
+>   FIS-37b (physical device). No un-gated build work.
+> - **Prod** `frms.powerbyte.app` healthy on **v0.29.0** (`sha-3feca30`).
+>
+> **⚠ The one live, actionable item (owner-gated, HARD HOLD):** CI on `main` is RED on a PRE-EXISTING
+> `Dependency vulnerability audit` (2 CRITICAL). BOTH fixes are BUILT + VERIFIED on branches:
+> (1) `next@15.5.25` RCE patch (Windows-only; prod Linux never exploitable) — `fix/next-security-patch-15-5-24`;
+> (2) `maplibre-gl@6.8.0` XSS patch (5→6 major; our Map/Marker/NavigationControl/GeoJSONSource API surface reviewed,
+> non-breaking) — `fix/maplibre-gl-v6-xss` (`19aaf77`). Each gate green (typecheck 8/8 · build ✓ · 428 web tests).
+> **Merging both → push greens CI.** Residual device-gated: real-browser render of the 4 maps (headless composites black).
+>
+> **Decision:** no un-gated work + open owner-gated holds (CI-green merge · 18 `[WHAT]`s in PENDING_DECISIONS ·
+> 4 blocked board items) → reboot with `--hold` to pace + re-surface, NOT stop. Nothing pushed/merged/deployed — HARD HOLD.
+> **Top next when owner returns:** authorize merging the 2 dep-fix branches → push (greens CI). Then FIS-23 box/EIP value.
+
+## Current State (2026-09-09, prior) — mobile-lint CI fixed; loop STOPPED per owner; CI still red on a pre-existing dep-audit
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 
