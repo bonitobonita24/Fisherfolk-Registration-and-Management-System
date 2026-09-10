@@ -373,7 +373,7 @@ export function BarangayDensityMap() {
     if (source == null) {
       map.addSource(HEAT_SOURCE_ID, { type: "geojson", data: geojson });
     } else {
-      source.setData(geojson);
+      void source.setData(geojson);
     }
 
     if (map.getLayer(HEAT_LAYER_ID) == null) {

@@ -397,7 +397,7 @@ export function MunicipalNetworkMap() {
     if (source == null) {
       map.addSource(LINE_SOURCE_ID, { type: "geojson", data: geojson });
     } else {
-      source.setData(geojson);
+      void source.setData(geojson);
     }
 
     if (map.getLayer(LINE_LAYER_ID) == null) {
@@ -438,7 +438,7 @@ export function MunicipalNetworkMap() {
     if (source == null) {
       map.addSource(MEMBER_SOURCE_ID, { type: "geojson", data: geojson });
     } else {
-      source.setData(geojson);
+      void source.setData(geojson);
     }
 
     if (map.getLayer(MEMBER_LAYER_ID) == null) {
@@ -482,7 +482,7 @@ export function MunicipalNetworkMap() {
     if (source == null) {
       map.addSource(HEAT_SOURCE_ID, { type: "geojson", data: geojson });
     } else {
-      source.setData(geojson);
+      void source.setData(geojson);
     }
 
     if (map.getLayer(HEAT_LAYER_ID) == null) {
