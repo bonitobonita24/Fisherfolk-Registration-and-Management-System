@@ -72,10 +72,12 @@ Not a decisions log — owner-gated `[WHAT]`s live in `PENDING_DECISIONS.md`.
   integrated into the repo (not web-deployed; device bring-up = FIS-37b, blocked). FIS-32 back-port candidates
   landed in `docs/BACKPORT_CANDIDATES.md` (still owner-pastes into PRODUCT.md — Rule 1). Migrate deploy = no
   pending migrations. See CHANGELOG v0.29.0 + `feat/fis37c-violation-create-authz` graft `05f68d4`.
-- 🟡 **FIS-33 #3 — map-marker a11y approach (still open [WHAT]).** Member + network map markers not
-  keyboard-focusable + share generic name "Map marker" (WCAG 2.1.1/4.1.2, moderate). Owner picks: focusable pins
-  with per-pin names OR a keyboard-list alternative. (#1 target-size + #2 focus-restore already shipped; a
-  keyboard-list alternative shipped v0.24.0.) `owner 2026-09-01` `a11y`
+- ✅ **FIS-33 #3 — map-marker a11y.** RESOLVED (verified 2026-09-10) — the **keyboard-accessible list alternative**
+  was chosen and shipped (not focusable pins), alongside #1 target-size + #2 focus-restore. Evidence:
+  `apps/web/src/app/[tenant]/households/[id]/household-member-map.tsx:341-427` and
+  `apps/web/src/app/[tenant]/households/network/municipal-network-map.tsx:591-696`
+  (`role="region"` + `aria-label="Map locations (list view)"` + `<ul>`), tag `v0.24.0`; branch
+  `feat/fis33-map-marker-a11y-list` merged into `main`. `owner 2026-09-01` `a11y`
 
 ## ✅ Shipped (historical — reconciled 2026-09-08; detail in git tags + SESSION_LOG)
 

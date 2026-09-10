@@ -31,10 +31,16 @@ device-verified** — see the install gate below.
   device/emulator QA (login round-trip against the dev API, camera QR scan, confirm single-React at runtime),
   then an EAS `android-apk` build → sideload for field testing (`eas.json` profile already present). Owner: run
   the `apps/mobile/README.md` bring-up when ready to field-test.
+  ⛔ BLOCKED: needs a physical Android device/emulator + an EAS `android-apk` sideload — not doable from this WSL seat.
 - [ ] **FIS-37 Phase M2+ (not started):** violation entry (camera evidence + GPS) — ⚠ carries a real [WHAT]:
   `violation.create` is `adminProcedure` today, so non-admin field staff cannot create violations without either
   widening it or adding a `matrixProcedure("violations","create")` variant. Also M2 offline write outbox, M3
   notes (align to the FIS-36 notes router), M4 refresh-token rotation. See `docs/plans/PLAN_mobile_app.md` §7.
+  — ✅ The embedded [WHAT] is SETTLED (verified 2026-09-10): `violation.create` already moved off `adminProcedure`
+  onto `matrixProcedure("violations","write")` in v0.29.0, so `bantay_dagat` + any custom role holding the grant
+  can file violations (CREATE-only; `update`/`lift` stay `adminProcedure`). Evidence:
+  `apps/web/src/server/trpc/routers/violation.ts:108`, tag `v0.29.0` (`3feca30`). **Item stays OPEN as pure
+  engineering [HOW]** — M2 camera/GPS entry + offline outbox, M3 notes, M4 refresh-token rotation.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
@@ -81,13 +87,17 @@ Owner ran Full Auto Mode ("do all pending tasks, I need to sleep"). The loop is 
 (FIS-8, FIS-9, FIS-11, FIS-31) LOCAL/HARD HOLD. These pending tasks carry a genuine product [WHAT] and were
 DEFERRED — not guessed. Each needs an owner decision before build:
 
-- [ ] **FIS-8 (Phase B follow-up) — Ayuda distribution grain [WHAT]:** with multi-family households now live at
+- [x] **FIS-8 (Phase B follow-up) — Ayuda distribution grain [WHAT]:** with multi-family households now live at
   the data/API layer, should ayuda that distributes per "HOUSEHOLD" instead distribute per **FAMILY** (each family
   head a beneficiary)? Phase B LEFT ayuda unchanged (household-level) — `AyudaBeneficiary` has no `familyId`.
   Flipping to per-family = a small schema migration (`AyudaBeneficiary.familyId`) + `ayuda.ts` enrollment change.
   Product call, not guessed. (Surfaced 2026-09-02 full-auto; FIS-8 Phase B built + verified LOCAL on
   `feat/fis8-phase-b-family-router`.)
-- [ ] **FIS-8 Phase C — multi-family UI direction [WHAT] (surfaced 2026-09-02 full-auto):** the SAFE display slices
+  — ✅ RESOLVED (verified 2026-09-10): ayuda gained an additive, optional per-FAMILY grain (`AyudaBeneficiary.familyId`,
+  nullable — household-level enrollment still works). Evidence:
+  `packages/db/prisma/migrations/20260903120000_add_ayuda_beneficiary_family/migration.sql` +
+  `apps/web/src/server/trpc/routers/ayuda.ts:526,543` (`029fa8a`), shipped in tag `v0.24.0`.
+- [x] **FIS-8 Phase C — multi-family UI direction [WHAT] (surfaced 2026-09-02 full-auto):** the SAFE display slices
   are done (list family count · fisherfolk family-head badge · family-router orphan-guard — `feat/fis8-phase-c-households-ui`,
   595 tests green, LOCAL). The remaining Phase C is the design-bearing interactive rewrite of the app's core household
   screens — deferred for your review rather than built unreviewed overnight. Decide the UX before build: (a) **Wizard
@@ -96,26 +106,59 @@ DEFERRED — not guessed. Each needs an owner decision before build:
   UI (backend already allows it)? All 45 households are single-family today (Phase A backfill), so nothing multi-family
   is visible until this creation UI + Phase D seeds land. Precise decomposition: `docs/FIS8_MULTI_FAMILY_PLAN.md`.
   Say "just build it to the plan" to proceed without further input.
-- [ ] **FIS-6 — Audit-log view [WHAT]:** which events/columns shown, filters, retention, AND who may view it
+  — ✅ RESOLVED (verified 2026-09-10): built to the plan — wizard supporting 1–3 families, per-family detail
+  sections, and an Add-Family **modal** on the household detail page. Evidence:
+  `apps/web/src/app/[tenant]/households/[id]/add-family-dialog.tsx` + `family-section.tsx`, first present in tag `v0.26.0`.
+- [x] **FIS-6 — Audit-log view [WHAT]:** which events/columns shown, filters, retention, AND who may view it
   (audit logs are sensitive — Viewer+ as the task says, or tenant_admin+ only?). Security-relevant → not guessed.
-- [ ] **FIS-7 — User-management [WHAT]:** which actions (invite/deactivate/role-change), the permission gate
+  — ✅ RESOLVED (verified 2026-09-10): shipped UI-only on the existing `adminProcedure` gate (tenant_admin+, NOT
+  Viewer+), with the filter covering all 14 `AuditAction` values; zero RBAC-matrix change. Evidence:
+  `apps/web/src/app/[tenant]/audit-log/{page,columns,audit-log-list-client}.tsx` +
+  `apps/web/src/server/trpc/routers/auditLog.ts`, shipped in `v0.26.0` (`b41a518`; the route files existed as a
+  stub earlier — the FIS-6 delta is the v0.26.0 one).
+- [x] **FIS-7 — User-management [WHAT]:** which actions (invite/deactivate/role-change), the permission gate
   (Rule 34: never expose Billing/User-Mgmt below tenant_admin), columns. RBAC/security-sensitive → not guessed.
+  — ✅ RESOLVED (verified 2026-09-10): reused the existing `userRouter` (`adminProcedure`) + added `setStatus`;
+  owner decided to keep User Management **superadmin/manager-only**, so the page guard was tightened to match the
+  nav. Rule 34 held, zero RBAC-matrix change. Evidence:
+  `apps/web/src/app/[tenant]/user-management/{page,users-client,change-role-dialog,create-user-dialog}.tsx`, shipped in `v0.26.0`.
 - [ ] **FIS-10 — Aquaculture sub-registration [WHAT]:** model vs JSON for the subcategory taxonomy + required
   fields. ⚠ ORDINANCE-GATED — full impl pending the January ordinance amendments; do not build ahead of the law.
-- [ ] **FIS-13 — QR scan/verify [WHAT]:** public vs authed surface; camera-scan page vs deep-link resolver.
-- [ ] **FIS-14 — RSBSA on ID card [WHAT]:** is the meeting's "RSVS" a mishearing of RSBSA (already tokenised),
+  ⛔ BLOCKED: the January city ordinance amendments (external legal artifact) — do not re-litigate or build ahead of the law.
+- [x] **FIS-13 — QR scan/verify [WHAT]:** public vs authed surface; camera-scan page vs deep-link resolver.
+  — ✅ RESOLVED (verified 2026-09-10): built as an **authed, tenant-scoped** verify page + resolver (not a public
+  surface). Evidence: `apps/web/src/app/[tenant]/verify/{page,verify-client}.tsx` + `apps/web/src/lib/qr-code.ts`,
+  first present in tag `v0.25.0`; branch `feat/fis13-qr-verify` merged into `main`.
+- [x] **FIS-14 — RSBSA on ID card [WHAT]:** is the meeting's "RSVS" a mishearing of RSBSA (already tokenised),
   or a separate ID to add? Needs owner clarification.
-- [ ] **FIS-15 — 3-year renewal cycle [WHAT]:** reminder-only vs status enforcement; which anchor year.
-- [ ] **FIS-16 — Mayor read-only access [WHAT]:** existing viewer role acceptable, or build a narrower
+  — ✅ RESOLVED (verified 2026-09-10): owner confirmed "RSVS" = RSBSA (2026-09-03), so **no code** — `{{rsbsa_number}}`
+  is already a supported + resolvable ID-template token the admin places in their card layout. Evidence: the
+  2026-09-03 owner-authorization block above in this file.
+- [x] **FIS-15 — 3-year renewal cycle [WHAT]:** reminder-only vs status enforcement; which anchor year.
+  — ✅ RESOLVED (verified 2026-09-10): shipped **reminder-only** (no status enforcement) — a renewal-due dashboard
+  card plus a list filter. Evidence: `apps/web/src/app/[tenant]/insights/dashboard-client.tsx:174-175,801-806`
+  (`trpc.fisherfolk.renewalDue`) + `apps/web/src/app/[tenant]/fisherfolk/fisherfolk-list-client.tsx:36,55,130`
+  (`dueForRenewal`), shipped in tag `v0.25.0`; branch `feat/fis15-renewal-due-reminder` merged into `main`.
+- [x] **FIS-16 — Mayor read-only access [WHAT]:** existing viewer role acceptable, or build a narrower
   dashboard-only custom role?
-- [ ] **FIS-33 #3 — Map-marker a11y [WHAT]:** focusable pins with per-pin names vs a keyboard-accessible list
+  — ✅ RESOLVED (verified 2026-09-10): closed with **no code** — the existing `viewer` role is already read-only
+  across every feature, so it is assigned to the mayor. Evidence: `packages/db/prisma/schema.prisma:61` (`viewer`
+  enum member) + the 2026-09-03 owner-authorization block above.
+- [x] **FIS-33 #3 — Map-marker a11y [WHAT]:** focusable pins with per-pin names vs a keyboard-accessible list
   alternative. (FIS-33 #1/#2 done+verified, held on `fix/fis33-a11y-mark-received`.)
+  — ✅ RESOLVED (verified 2026-09-10): chose the **keyboard-accessible list alternative** (WCAG 2.1.1 / 4.1.2), not
+  focusable pins. Evidence: `apps/web/src/app/[tenant]/households/[id]/household-member-map.tsx:341-427` and
+  `apps/web/src/app/[tenant]/households/network/municipal-network-map.tsx:591-696`
+  (`role="region"` + `aria-label="Map locations (list view)"` + `<ul>`), shipped in tag `v0.24.0`; branch
+  `feat/fis33-map-marker-a11y-list` merged into `main`.
 - [ ] **FIS-34 / FIS-23 / ② demo refresh — gated on demo access (Server-Setups EC2 migration, on hold).**
   FIS-34 = refresh landing showcase screenshots (real GPU browser — the newest map/location features composite
   black headless) + redeploy demo. Both wait on demo/EC2 access. (Correction 2026-09-03: the earlier note here
   that "FIS-31 landing page is being built locally" was inaccurate — verified no FIS-31 branch/commits exist; see
   the FIS-31 scope decision below.)
-- [ ] **FIS-31 — landing-page overhaul SCOPE [WHAT] (sharpened 2026-09-03 full-auto after scouting the current page):**
+  ⛔ BLOCKED: demo/EC2 box access (Server-Setups mid-migration to AWS `13.213.232.194`; `push-to-demo.sh` still
+  targets the dead Hostinger host). FIS-34 additionally needs a real-GPU browser for the map screenshots.
+- [x] **FIS-31 — landing-page overhaul SCOPE [WHAT] (sharpened 2026-09-03 full-auto after scouting the current page):**
   the task reads "brainstorm + rebuild the public landing page with the latest features, updated screenshots,
   better statements." BUT the current landing (`apps/web/src/app/page.tsx` + `components/landing/*`) was already
   overhauled Sep 1 and is strong: 8 structured sections (Nav→Hero→Stats→Features→Gallery→Process→CTA→Footer),
@@ -131,6 +174,10 @@ DEFERRED — not guessed. Each needs an owner decision before build:
   (c) **Full from-scratch rebuild** vs (b) incremental augment vs (just wait for FIS-34 screenshots then refresh)?
   Say "just augment with the shipped-feature callouts" or "full rebuild, here's the direction" or "wait for
   screenshots" to unblock. Reference map: current page is NOT stale — it is the recent Sep-1 overhaul baseline.
+  — ✅ RESOLVED (verified 2026-09-10): scope taken was option **(b) incremental shipped-feature callouts** — no
+  from-scratch rebuild. Evidence: `apps/web/src/components/landing/landing-features.tsx:69` ("Location Capture"),
+  shipped in tag `v0.24.0`; branch `feat/fis31-landing-shipped-callouts` merged into `main`. Residual = the
+  screenshot refresh only, which is tracked as FIS-34 above (still ⛔ demo/EC2-blocked).
 
 ### 2026-09-02 — FIS-32/FIS-33 verification session outcomes
 
@@ -145,13 +192,25 @@ DEFERRED — not guessed. Each needs an owner decision before build:
   seat and `push-to-demo.sh` still targets the dead Hostinger box. ⚠ Demo now behind prod by v0.22.0 + v0.22.1
   (incl. the geolocation fix). When EC2 is ready, need SSH / Komodo trigger / AWS deploy mechanism. Also gates
   FIS-34 screenshot redeploy. Ref [[project_demo_staging_relocated_to_aws_0901]].
-- [ ] **③ FIS-33 #3 — map-marker a11y approach (still open).** Member + network map markers aren't
+  ⛔ BLOCKED: SSH / deploy access to the new AWS EC2 demo+staging box — owner-held on hold pending the
+  Server-Setups migration. Gates FIS-34 and FIS-23.
+- [x] **③ FIS-33 #3 — map-marker a11y approach (still open).** Member + network map markers aren't
   keyboard-focusable and share the generic name "Map marker" (WCAG 2.1.1/4.1.2, moderate). Pick: focusable pins
   with per-pin names, OR a keyboard-accessible list alternative. The FIS-33 #1 target-size + #2 focus-restore
   *code* fixes are done+verified but held on branch `fix/fis33-a11y-mark-received` (NOT shipped) — bundle all of
   FIS-33 into one release once #3 is decided. That branch also carries the session-handoff docs.
+  — ✅ RESOLVED (verified 2026-09-10) *(duplicate of the FIS-33 #3 entry above)*: chose the **keyboard-accessible
+  list alternative**. Evidence: `apps/web/src/app/[tenant]/households/[id]/household-member-map.tsx:341-427` and
+  `apps/web/src/app/[tenant]/households/network/municipal-network-map.tsx:591-696`, shipped in tag `v0.24.0`.
 
-### 2026-09-01 — ⚠ FIS-12 migration drift — RELEASE-BLOCKER before any prod migrate (surfaced by full audit)
+### 2026-09-01 — ✅ FIS-12 migration drift — RESOLVED; migrations merged + applied to prod in v0.22.0 (no longer a release blocker)
+
+**Status (verified 2026-09-10):** every item in this section is closed. Migration history on `main` is consistent
+and chronological (`git ls-files packages/db/prisma/migrations/` matches disk exactly; `git status --porcelain
+packages/db/prisma/` is empty), the merged enum is live (`packages/db/prisma/schema.prisma:13,15,18`), and all 3
+migrations were applied to production in **v0.22.0** with the 3,181-row backfill verified. A prod `migrate deploy`
+is **not** blocked. The only residual is the documented dev-workflow caveat below — `ALTER TYPE … ADD VALUE` can
+trip Prisma `migrate dev`'s shadow DB — which does **not** affect prod, since `migrate deploy` uses no shadow DB.
 
 - [x] ✅ **RESOLVED (2026-09-01, owner chose "merge/rebase FIS-12 first") — MERGED into the release branch.**
   `git merge --no-ff feat/fis12-registration-status-model` → `feat/presentation-batch-0901` (`4aa229a`).
@@ -350,7 +409,7 @@ DEFERRED — not guessed. Each needs an owner decision before build:
 
 ---
 
-- [] 2026-07-09 — **M4 Universal Report Hub — product-grain defaults (non-blocking).** The Full-Auto
+- [ ] `[WHAT] — non-blocking, built to defaults` · 2026-07-09 — **M4 Universal Report Hub — product-grain defaults (non-blocking).** The Full-Auto
   loop built the Report Hub with sensible technical defaults; each below is a `[WHAT]` the owner may
   flip. None blocked the build.
   1. **Browser-PDF path:** "PDF export" = the existing `window.print()` → "Save as PDF" flow (no new
@@ -365,7 +424,7 @@ DEFERRED — not guessed. Each needs an owner decision before build:
   - Back-port of the whole Report Hub feature to `docs/PRODUCT.md` is a further owner `[WHAT]`
     (Rule 1) — batched with the other M1/M2/M3 back-port candidates.
 
-- [] 2026-07-09 — **Overnight batch M1–M3 — PRODUCT.md back-ports + Fish Catch product follow-ups
+- [ ] `[WHAT] — non-blocking, built to defaults` · 2026-07-09 — **Overnight batch M1–M3 — PRODUCT.md back-ports + Fish Catch product follow-ups
   (non-blocking).** The Full-Auto loop shipped M1–M5 with sensible technical defaults; each below is a
   `[WHAT]` for the owner. None blocked the build; all code is local/UNPUSHED on `feat/household-management`.
   1. **PRODUCT.md back-port (Rule 1) — batch all at once:** M1 Ayuda mass-selection multi-filter (=
@@ -460,9 +519,13 @@ The following require the owner's explicit word — the full-auto loop must DEFE
 
 - [ ] **AIEF framework standard merge** — ⚠ AIEF SEAT. Merge AIEF `feat/v32.50-site-access-standard` → main +
       push. Owner-authorized 2026-08-27. Do this from the Powerbyte-AIEF seat (never from FRMS).
+      ⛔ BLOCKED: belongs to the Powerbyte-AIEF repo/seat. ⚠ cross-seat — cannot be verified or actioned from the
+      FRMS seat (already owner-authorized; it may already be done there).
 - [ ] **Phase 2 — per-app site-access adoption** — ⚠ PER-APP SEAT. Implement the site-access standard in
       Marine-Guardian / Orqafy / FerryBook / CueLane (broadcast notes already in each app's memory).
       Owner-authorized 2026-08-27; owner decides ordering. Done in EACH app's OWN seat, never cross-repo from FRMS.
+      ⛔ BLOCKED: belongs to each target app's own repo/seat. ⚠ cross-seat — cannot be verified or actioned from
+      the FRMS seat (already owner-authorized; ordering is the owner's call).
 - [x] ✅ **RESOLVED (2026-08-17, owner "yes merge & ship") — MERGED + PUSHED + RELEASED v0.15.1 + PROMOTED to
       PROD + DEMO.** Both branches merged `--no-ff` to `main` (`abce6c3` landing+badge, `5cdb90c` seed script),
       re-verified merged (typecheck 7/7 · lint · **572 tests** · build), released **v0.15.1** (`4cd1bfe`, CHANGELOG
