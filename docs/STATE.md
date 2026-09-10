@@ -1,6 +1,48 @@
 # FRMS — Project State
 
-## Current State (2026-09-10, LATEST — loop slot 22 re-verify) — independently RE-CONFIRMED no un-gated work; one live owner decision = merge the 2 dep-audit fix branches to green CI
+## Current State (2026-09-10, LATEST) — ✅ CI FULLY GREEN; security fixes merged + pushed; backlog reconciled 18→9; nothing un-gated left
+
+[FOCUS: Fisherfolk-Registration-and-Management-System]
+
+> **Owner: "do option 1 then do all this remaining pending tasks."** Option 1 = merge + push the held security
+> fixes to green CI. Done, plus the fallout it exposed. **Push authorized by owner this session** — but still
+> **NO staging/prod/demo deploy**: prod remains on **v0.29.0**.
+>
+> **CI is GREEN on `main`** — all 6 jobs + Docker Build & Publish. First green since 2026-09-08.
+> Re-derive sha with `git log -1` (deliberately NOT pinned here — pinning it caused loop churn).
+>
+> **What actually happened (the queue's plan was wrong):**
+> - Merged both critical branches via `fix/ci-dep-audit-criticals`. **That alone did NOT green CI** — the queue
+>   claimed it would. `pnpm audit --audit-level=high` still failed on **8 pre-existing HIGH** advisories.
+> - Cleared all 8 (`b2142d6`): `sharp`→0.35.4, `nodemailer`→9.1.1, `deepmerge-ts`→8.0.2, `browserslist`→4.28.9,
+>   `js-yaml`→4.3.2 (its override covered only the 5.x range). ⚠ the existing `sharp@<0.35.0` override floor was
+>   **stale** and no longer covered its own advisory. `image-size` (2 HIGH) has **no published patch** →
+>   build-time-only, excepted via `pnpm.auditConfig.ignoreGhsas`; revisit when upstream fixes it.
+> - **The maplibre 5→6 review was wrong.** "Our API surface is unaffected" missed the MODULE SHAPE: v6 removed
+>   the **default export** (TS1192 ×4 → namespace imports, `95c3bec`) and `GeoJSONSource.setData()` now returns
+>   `Promise<void>` (4 floating-promise errors → `void`, `0fdd6aa`). Both broke `main` before being fixed.
+>
+> **⚠ VERIFICATION LESSON — my local gate passed a break CI caught.** `apps/web/tsconfig.tsbuildinfo` persisted,
+> so `tsc --incremental` never re-checked files whose *dependency* changed shape (it degrades type-aware ESLint
+> too). **After ANY dependency change, delete `*.tsbuildinfo` + `.next` + `.turbo` and re-run cold before
+> trusting a green local gate.** Logged: `typescript.incremental.tsbuildinfo-masks-dependency-break` +
+> `npm.major-bump.module-shape-change-not-just-api-surface` in `~/.claude/LESSONS_GLOBAL.md`.
+>
+> **Backlog reconciled against ground truth: 18 open decisions → 9.** 11 were stale (decided + shipped, checkbox
+> never flipped) — each closed with a cited path + release tag. FIS-12 is **NOT** a release blocker (applied in
+> v0.22.0). 2 items had a malformed `- []` marker hiding them from every backlog grep — fixed.
+>
+> **Remaining 9 = 6 blocked-external + 1 held + 2 non-blocking [WHAT].** Squirlnote: 4 Pending (all blocked),
+> rest in For Review (Done is owner-only).
+>
+> **⏸ OWNER DECISION 2026-09-10 — FIS-37 Phase M2+ is ON HOLD until a physical device exists.** It was the only
+> buildable item; owner chose not to stack unverified camera/GPS/offline code on an M1 that was itself never
+> device-run. **Sequence: FIS-37b device bring-up → verify M1 on-device → then M2.** Do not start M2 before that.
+>
+> **NEXT SESSION: there is no un-gated build work.** Everything open needs a device, the January city ordinance,
+> demo/EC2 access, or another seat. Do not invent work; re-verify, then ask the owner.
+
+## Current State (2026-09-10, prior — loop slot 22 re-verify) — independently RE-CONFIRMED no un-gated work; one live owner decision = merge the 2 dep-audit fix branches to green CI
 
 [FOCUS: Fisherfolk-Registration-and-Management-System]
 

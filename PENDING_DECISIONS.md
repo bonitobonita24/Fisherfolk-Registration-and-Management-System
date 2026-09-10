@@ -41,6 +41,11 @@ device-verified** — see the install gate below.
   can file violations (CREATE-only; `update`/`lift` stay `adminProcedure`). Evidence:
   `apps/web/src/server/trpc/routers/violation.ts:108`, tag `v0.29.0` (`3feca30`). **Item stays OPEN as pure
   engineering [HOW]** — M2 camera/GPS entry + offline outbox, M3 notes, M4 refresh-token rotation.
+  — ⏸ **OWNER DECISION 2026-09-10: HOLD M2+ until a physical device is available.** Asked explicitly (the work
+  is buildable but NOT verifiable from this WSL seat — no device/emulator, and M1 itself was never device-run).
+  Owner chose to hold rather than stack unverified code on an unproven M1. **Do NOT start M2 in a future
+  session until FIS-37b device bring-up is done** — camera/GPS/offline-sync is precisely the class that only
+  fails on real hardware. Sequence: FIS-37b device bring-up → verify M1 on-device → then M2.
 
 
 ### 2026-09-03 — ⭐ OWNER "yes continue all pending" → SHIP + BEST-JUDGMENT DEFAULTS (authorized this session)
