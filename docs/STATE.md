@@ -8,7 +8,7 @@
 > Did NOT trust the "queue empty" line blindly — re-derived from ground truth (git + live Squirlnote board + TASK_QUEUE).
 >
 > **Independent re-verification (this iteration) — all three agree, un-gated [HOW] queue is EMPTY:**
-> - **Git:** `main == 16334f4`, **1 ahead of origin** (one unpushed docs(session) commit, HARD HOLD). Tree clean.
+> - **Git:** `main` is a few unpushed `docs(session)` commits ahead of `origin` (HARD HOLD — docs only; a `main` push trips CI). Tree clean. (Sha intentionally NOT pinned here — pinning it made each loop tick re-edit this line, a churn trap. Re-derive with `git status` / `git log origin/main..main`.)
 >   Fix branches present: `fix/next-security-patch-15-5-24`, `fix/maplibre-gl-v6-xss` (`19aaf77`),
 >   plus `feat/fis37c-violation-create-authz` / `docs/fis32-backport-candidates` (superseded, shipped in v0.29.0).
 > - **Squirlnote board (project FIS):** **4 Pending · 0 On-Going · 28 For Review.** All 4 Pending gated/blocked —
